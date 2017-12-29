@@ -7,10 +7,7 @@
        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd  
        http://www.springframework.org/schema/context 
        http://www.springframework.org/schema/context/spring-context-3.0.xsd">
- 	
- 	<!-- 导入shiro的相关配置 -->
- 	<import resource="spring\spring-shiro.xml" />
- 	
+ 
     <!-- 启用spring mvc 注解 -->
     <context:annotation-config />
     <!-- 设置使用注解的类所在的jar包 -->
@@ -55,36 +52,4 @@
 
     <!-- 对转向页面的路径解析       prefix：前缀， suffix：后缀 -->
     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:prefix="/jsp/" p:suffix=".jsp" /><!-- 前缀这个不知道怎么写 -->
-    
-    
-    <!-- 开启shiro注解 -->
-    <bean
-        class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
-        depends-on="lifecycleBeanPostProcessor">
-        <property name="proxyTargetClass" value="true" />
-    </bean>
-
-    <bean
-        class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
-        <property name="securityManager" ref="securityManager" />
-    </bean>
-
-    <!-- 未认证或未授权时跳转必须在springmvc里面配，spring-shiro里的shirofilter配不生效 -->
-    <bean
-        class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
-        <property name="exceptionMappings">
-            <props>
-                <!--表示捕获的异常 -->
-                <prop key="org.apache.shiro.authz.UnauthorizedException">
-                    <!--捕获该异常时跳转的路径 -->
-                    /error/unauthorized
-                </prop>
-                <!--表示捕获的异常 -->
-                <prop key="org.apache.shiro.authz.UnauthenticatedException">
-                    <!--捕获该异常时跳转的路径 -->
-                    /error/unauthorized
-                </prop>
-            </props>
-        </property>
-    </bean>
 </beans>
