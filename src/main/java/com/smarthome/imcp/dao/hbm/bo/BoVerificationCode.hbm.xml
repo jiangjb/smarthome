@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jan 18, 2016 2:45:10 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+    <class name="com.smarthome.imcp.dao.model.bo.BoVerificationCode" table="sms_verification">
+        <id name="userPhone" type="java.lang.String">
+            <column name="USER_PHONE" />
+            <generator class="assigned" />
+        </id>
+        <property name="verificationCode" type="java.lang.String">
+            <column name="VERIFICATION_CODE" />
+        </property>
+        <property name="generationTimestamp" type="java.util.Date">
+            <column name="GENERATION_TIMESTAMP" />
+        </property>
+    </class>
+</hibernate-mapping>

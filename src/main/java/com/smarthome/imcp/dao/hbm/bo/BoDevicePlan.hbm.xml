@@ -1,0 +1,71 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+                                   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Dec 18, 2015 1:54:25 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+ <class name="com.smarthome.imcp.dao.model.bo.BoDevicePlan" table="bo_device_plan">
+  <id name="id" type="int">
+   <column name="ID"/>
+   <generator class="assigned"/>
+  </id>
+  <property generated="never" lazy="false" name="startDate" type="java.util.Date">
+   <column name="START_DATE"/>
+  </property>
+  <property generated="never" lazy="false" name="endDate" type="java.util.Date">
+   <column name="END_DATE"/>
+  </property>
+  <property generated="never" lazy="false" name="initPlan" type="boolean">
+   <column name="INIT"/>
+  </property>
+  <property generated="never" lazy="false" name="refillBalance" type="int">
+   <column name="REFILL_BALANCE"/>
+  </property>
+  <many-to-one class="com.smarthome.imcp.dao.model.cy.Plan"
+   column="PLAN_ID" fetch="select" name="plan"/>
+  <many-to-one class="com.smarthome.imcp.dao.model.bo.BoDevice"
+   column="DEVICE_ID" fetch="select" name="device"/>
+   <!--  
+  <component class="com.smarthome.imcp.dao.model.cy.Plan" name="plan">
+   <property name="id" type="int"/>
+   <property name="code" type="string"/>
+   <property name="serviceFee" type="int"/>
+   <property name="duration" type="int"/>
+   <property name="picUrl" type="string"/>
+   <property name="price" type="int"/>
+   <property name="deviceTypeId" type="int"/>
+   <property name="description" type="string"/>
+   <property name="name" type="string"/>
+   <property name="dailyFee" type="int"/>
+   <property name="refillAmount" type="int"/>
+  </component>
+  -->
+ </class>
+ <!--  
+ <sql-query
+   name="getCurrentPlanByDevice">{call sp_getCurrentPlanByDevice(?)}<return
+   alias="devicePlan"
+   class="com.smarthome.imcp.dao.model.bo.BoDevicePlan">
+   <return-property column="ID" name="id"/>
+   <return-property column="START_DATE" name="startDate"/>
+   <return-property column="END_DATE" name="endDate"/>
+   <return-property column="REFILL_BALANCE" name="refillBalance"/>
+   <return-property name="plan">
+    <return-column name="PLAN_ID"/>
+    <return-column name="PLAN_CODE"/>
+    <return-column name="PLAN_SERVICE_FEE"/>
+    <return-column name="PLAN_DURATION"/>
+    <return-column name="PIC_URL"/>
+    <return-column name="PLAN_PRICE"/>
+    <return-column name="DEVICE_TYPE_ID"/>
+    <return-column name="PLAN_DESC"/>
+    <return-column name="PLAN_NAME"/>
+    <return-column name="DAILY_FEE"/>
+    <return-column name="REFILL_BALANCE"/>
+   </return-property>
+   <return-property name="device">
+    <return-column name="DEVICE_ID"/>
+   </return-property>
+  </return>
+ </sql-query>
+ -->
+</hibernate-mapping>

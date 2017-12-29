@@ -1,0 +1,102 @@
+package com.smarthome.imcp.common;
+
+public abstract interface GlobalConst
+{
+  public static final String CONST_STRING_EMPTY = "";
+  public static final String CONST_STRING_SPACE = " ";
+  public static final String CONST_STRING_EQUAL = "=";
+  public static final String CONST_STRING_EQUAL_SPACE = " = ";
+  public static final String CONST_STRING_DOT = ".";
+  public static final String CONST_STRING_UNDERSCORE = "_";
+  public static final String CONST_STRING_HYPHEN = "-";
+  public static final String CONST_STRING_COMMA = ",";
+  public static final String CONST_STRING_SINGLE_QUOTE = "'";
+  public static final String CONST_STRING_ZERO = "0";
+  public static final String CONST_STRING_SLASH = "/";
+  public static final String PHOTO_LIBRARY = "photo_library";
+  public static final String APK = "apk";
+  public static final String CONST_STRING_STROKE = "\\";
+  public static final String CONST_STRING_COLON = ":";
+  public static final String CONST_STRING_AT = "@";
+  public static final String CONST_STRING_CHENG = "#";
+  public static final String CONST_STRING_QUESTION_MARK = "?";
+  public static final String CONST_STRING_PERCENT_MARK = "%";
+  public static final String CONST_STRING_AMPERSEND = "&";
+  public static final String CONST_STRING_BROKEN_BAR = "|";
+  public static final String CONST_STRING_true = "true";
+  public static final String CONST_STRING_false = "false";
+  public static final String CONST_STRING_NOT_EQUAL = "<>";
+  public static final String CONST_STRING_GREAT = ">";
+  public static final String CONST_STRING_GREAT_EQUAL = ">=";
+  public static final String CONST_STRING_LESS = "<";
+  public static final String CONST_STRING_LESS_EQUAL = "<=";
+  public static final String CONST_STRING_SQL_SELECT = "SELECT";
+  public static final String CONST_STRING_SQL_INSERT = "INSERT INTO";
+  public static final String CONST_STRING_SQL_UPDATE = "UPDATE";
+  public static final String CONST_STRING_SQL_DELETE = "DELETE";
+  public static final String CONST_STRING_SQL_WHERE = "WHERE";
+  public static final String CONST_STRING_SQL_AND = "AND";
+  public static final String CONST_STRING_SQL_AND_SAPCE = " AND ";
+  public static final String CONST_STRING_SQL_OR = "OR";
+  public static final String CONST_STRING_SQL_OR_SAPCE = " OR ";
+  public static final String CONST_STRING_SQL_LIKE = "LIKE";
+  public static final String CONST_STRING_SQL_LIKE_SAPCE = " LIKE ";
+  public static final String CHARSET_UTF8 = "UTF-8";
+  public static final String TYPE_NUMBER = "NUMBER";
+  public static final String TYPE_CHAR = "CHAR";
+  public static final String TYPE_VARCHAR = "VARCHAR";
+  public static final String TYPE_VARCHAR2 = "VARCHAR2";
+  public static final String TYPE_DATE = "DATE";
+  public static final String TYPE_DATETIME = "DATETIME";
+  public static final String TYPE_TIMESTAMP = "TIMESTAMP";
+  public static final String TYPE_DECIMAL = "DECIMAL";
+  public static final String TYPE_DOUBLE = "DOUBLE";
+  public static final String TYPE_INTEGER = "INTEGER";
+  public static final String TYPE_FLOAT = "FLOAT";
+  public static final String TYPE_BIGINT = "BIGINT";
+  public static final String TYPE_SMALLINT = "SMALLINT";
+  public static final String TYPE_NUMERIC = "NUMERIC";
+  public static final String FORMAT_DATE = "yyyy-MM-dd";
+  public static final String FORMAT_DATETIME = "yyyy-MM-dd HH:mm:ss";
+  public static final String FORMAT_YEAR = "yyyy";
+  public static final String FORMAT_MONTH = "MM";
+  public static final String FORMAT_DAY = "dd";
+  public static final String FORMAT_TIME = "HH:mm:ss";
+  public static final String FORMAT_TIMESTAMP_DATE = "yyyyMMdd";
+  public static final String FORMAT_TIMESTAMP_TIME = "HHmmss";
+  public static final String FORMAT_TIMESTAMP = "yyyyMMddHHmmss";
+  public static final String FORMAT_DECIMAL = "#,###.##########";
+  public static final String FORMAT_DECIMAL_1_2 = "#0.##";
+  public static final int DATE_FIELD_YEAR = 1;
+  public static final int DATE_FIELD_MONTH = 2;
+  public static final int DATE_FIELD_DATE = 5;
+  public static final String FLAG_YES = "Y";
+  public static final String FLAG_NO = "N";
+  public static final String FLAG_ON = "ON";
+  public static final String FLAG_OFF = "OFF";
+  public static final String FLAG_TRUE = "T";
+  public static final String FLAG_FALSE = "F";
+  public static final String STTS_INSERT = "I";
+  public static final String STTS_DELETE = "D";
+  public static final String STTS_UPDATE = "E";
+  public static final String STTS_LOAD = "L";
+  public static final String AUTSTTS_INSERT = "I";
+  public static final String AUTSTTS_IRJCT = "T";
+  public static final String AUTSTTS_UNEDIT = "E";
+  public static final String AUTSTTS_UNAUTHORIZE = "U";
+  public static final String AUTSTTS_AUTHORIZE = "A";
+  public static final String AUTSTTS_UNDEPLOY = "Y";
+  public static final String AUTSTTS_REJECT = "R";
+  public static final String AUTSTTS_BACK = "B";
+  public static final String AUTSTTS_DEPLOY = "D";
+  public static final String AUTSTTS_NODEPLOY = "N";
+  public static final String DOCUMENT_KEYWORD = "DOCUMENT_KEYWORD";
+  public static final String DOCUMENT_DATE = "DOCUMENT_DATE";
+  public static final String MEMBER_STATUS_ZC = "1";
+  public static final String MEMBER_STATUS_SD = "2";
+}
+
+/* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\
+ * Qualified Name:     com.smarthome.imcp.common.GlobalConst
+ * JD-Core Version:    0.6.2
+ */

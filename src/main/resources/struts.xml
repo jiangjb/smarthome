@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+    <!-- 静态资源免拦截 -->
+    <constant name="struts.action.excludePattern" value="/static/.*?" /><!-- default locale -->
+	<!-- 是否显示详细错误信息 -->
+	<!-- <constant name="struts.devMode" value="false" /> -->
+	<!-- <constant name="struts.configuration.xml.reload" value="true" /> -->
+	<!-- 国际化资源文件名称 -->
+	<constant name="struts.custom.i18n.resources" value="LabelResource" />
+	<!-- 是否自动加载国际化资源文件 -->
+	<constant name="struts.i18n.reload" value="true" />
+	<!-- convention类重新加载 -->
+	<!-- <constant name="struts.convention.classes.reload" value="false" /> -->
+	<!-- 浏览器是否缓存静态内容 -->
+	<!-- <constant name="struts.serve.static.browserCache" value="false" /> -->
+	<!-- 把struts的请求委托给spring管理, 作用:创建Action实例的过程由spring处理,其他的还是由struts2自己处理 -->
+	<constant name="struts.objectFactory" value="spring" />
+	 <!-- 是否开启动态方法调用--> 
+    <constant name="struts.enable.DynamicMethodInvocation" value="false"/> 
+	<!-- 上传文件大小限制设置 -->
+	<constant name="struts.multipart.maxSize" value="1073741824" />
+
+	<!-- 主题 -->
+	<constant name="struts.ui.theme" value="simple" />
+	<!-- 编码 -->
+	<constant name="struts.i18n.encoding" value="UTF-8" />
+	<!-- 后缀 -->
+	<constant name="struts.action.extension" value="action" />
+
+	<!-- 结果资源的路径 -->
+	<!-- <constant name="struts.convention.result.path" value="/web/" /> -->
+	<!-- URL资源分隔符 -->
+	<constant name="struts.convention.action.name.separator"
+		value="" />
+	<!-- spring 缓存机制 -->
+	<constant name="struts.objectFactory.spring.useClassCache"
+		value="false" />
+		
+	<!-- 开发模式下的配置 -->
+	<!-- 开发模式 配置文件改了,不用重新启动-->
+	<constant name="struts.devMode" value="true" />
+	<!-- 设置浏览器是否缓存静态内容，默认值为true（生产环境下使用），开发阶段最好 关闭 -->   
+    <constant name="struts.serve.static.browserCache" value="false" />
+	<!-- 当 struts的配置文件修改后，系统是否自动重新加载该文件，默认值为false（生 产环境下使用），开发阶段最好打开 --> 
+	<constant name="struts.configuration.xml.reload" value="true"/>
+	
+
+	<package name="auth-check-package" extends="json-default">
+		<interceptors>
+			<!-- 定义"权限检查拦截器" -->
+			<interceptor name="authCheck"
+				class="com.smarthome.imcp.interceptor.AuthCheckInterceptor"></interceptor>
+
+			<!--定义异常处理的拦截器 -->
+			<interceptor name="exceptionInterceptor"
+				class="com.smarthome.imcp.interceptor.ExceptionInterceptor">
+			</interceptor>
+			<interceptor-stack name="baseStack">
+				<interceptor-ref name="exception" />
+				<interceptor-ref name="alias" />
+				<interceptor-ref name="servletConfig" />
+				<interceptor-ref name="i18n" />
+				<interceptor-ref name="prepare" />
+				<interceptor-ref name="chain" />
+				<interceptor-ref name="debugging" />
+				<interceptor-ref name="scopedModelDriven" />
+				<interceptor-ref name="modelDriven" />
+				<interceptor-ref name="fileUpload" />
+				<interceptor-ref name="checkbox" />
+				<interceptor-ref name="multiselect" />
+				<interceptor-ref name="staticParams" />
+				<interceptor-ref name="actionMappingParams" />
+				<interceptor-ref name="params">
+					<param name="excludeParams">dojo\..*,^struts\..*</param>
+				</interceptor-ref>
+				<interceptor-ref name="conversionError" />
+				<!-- 配置方法级别的校验 -->
+				<interceptor-ref name="validation">
+					<param name="excludeMethods">input,back,cancel,browse</param>
+					<param name="validateAnnotatedMethodOnly">true</param>
+				</interceptor-ref>
+				<interceptor-ref name="workflow">
+					<param name="excludeMethods">input,back,cancel,browse</param>
+				</interceptor-ref>
+
+				<interceptor-ref name="authCheck" />
+				<interceptor-ref name="exceptionInterceptor" />
+			</interceptor-stack>
+		</interceptors>
+
+		<!-- 配置默认拦截器栈 -->
+		<default-interceptor-ref name="baseStack" />
+
+		<!-- 未到找Action指向页面 -->
+		<default-action-ref name="errorPage" />
+
+		<global-results>
+			<result name="error">/error.jsp</result>
+			<result name="globalLogin" type="redirect">/login.jsp</result>
+			<result name="success">/ajaxDone.jsp</result>
+		</global-results>
+
+		<action name="errorPage">
+			<result type="redirect">/error.jsp</result>
+		</action>
+	</package>
+</struts>

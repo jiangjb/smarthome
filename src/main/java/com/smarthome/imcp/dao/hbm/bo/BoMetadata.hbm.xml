@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+                                   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jan 14, 2016 3:14:01 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+ <class name="com.smarthome.imcp.dao.model.bo.BoMetadata" table="METADATA">
+  <id name="id" type="int">
+   <column name="ID"/>
+   <generator class="identity"/>
+  </id>
+  <property generated="never" lazy="false" name="keyName" type="java.lang.String">
+   <column name="KEY_NAME"/>
+  </property>
+  <property generated="never" lazy="false" name="description" type="java.lang.String">
+   <column name="DESCRIPTION"/>
+  </property>
+  <property generated="never" lazy="false" name="value" type="java.lang.String">
+   <column name="VALUE"/>
+  </property>
+  <property generated="never" lazy="false" name="deleted" type="char">
+   <column name="DELETED"/>
+  </property>
+ </class>
+</hibernate-mapping>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="com.smarthome.imcp.dao.model.system.SysMenu" table="sys_menu"> 
+        <id name="menuId" type="java.lang.String">
+            <column name="MENU_ID" length="11" />
+            <generator class="identity" />
+        </id>
+        <property name="menuCode" type="java.lang.String">
+			<column name="MENU_NAME" length="255"/>
+		</property>
+		<property name="menuPcode" type="java.lang.String">
+            <column name="MENU_URL" length="255" />
+        </property>
+        <property name="menuName" type="java.lang.String">
+            <column name="MENU_ICON" length="30" />
+        </property>
+    </class>
+</hibernate-mapping>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+	<!-- 操作日志-->
+	<aop:aspectj-autoproxy />
+	<bean id="logAspect" class="com.smarthome.imcp.aspect.LogAspect">
+	</bean>
+	<aop:config proxy-target-class="true">
+		<aop:aspect ref="logAspect">
+			<aop:pointcut id="logPointCut"
+				expression="execution(* com.smarthome.imcp.dao.*.*DaoIface.save*(..))
+				|| execution(* com.smarthome.imcp.dao.*.*DaoIface.update*(..))
+				|| execution(* com.smarthome.imcp.dao.*.*DaoIface.saveOrUpdate*(..))
+				|| execution(* com.smarthome.imcp.dao.*.*DaoIface.delete(..))
+				|| execution(* com.smarthome.imcp.dao.CommonsDaoIface.save(..))
+				|| execution(* com.smarthome.imcp.dao.CommonsDaoIface.saveOrUpate(..))
+				|| execution(* com.smarthome.imcp.dao.CommonsDaoIface.update(..))
+				|| execution(* com.smarthome.imcp.dao.CommonsDaoIface.delete(..))" 
+				/>
+			<aop:after-returning pointcut-ref="logPointCut"
+				method="doSystemSuccessLog" />
+			<aop:after-throwing pointcut-ref="logPointCut"
+				method="doSystemErrorLog" throwing="exception" />
+		</aop:aspect>
+	</aop:config>
+
+	<!-- DataControl-->
+	<bean id="dataControlAspect" class="com.smarthome.imcp.aspect.DataControlAspect"></bean>
+	<aop:config proxy-target-class="true">
+		<aop:aspect ref="dataControlAspect">
+			<aop:pointcut id="dataControlPointCut"
+				expression="execution(* com.smarthome.imcp.dao.*.*DaoIface.save*(..))
+			||execution(* com.smarthome.imcp.dao.*.*DaoIface.saveOrUpate*(..))
+			||execution(* com.smarthome.imcp.dao.*.*DaoIface.update*(..))
+			||execution(* com.smarthome.imcp.dao.CommonsDaoIface.save(..))
+			||execution(* com.smarthome.imcp.dao.CommonsDaoIface.saveOrUpate(..))
+			||execution(* com.smarthome.imcp.dao.CommonsDaoIface.update(..))" 
+			/>
+			<aop:around pointcut-ref="dataControlPointCut" method="doDataControl" />
+		</aop:aspect>
+	</aop:config>
+
+	<tx:advice id="txAdviceZX" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="save*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="approve*" propagation="REQUIRED" />
+			<tx:method name="deploy*" propagation="REQUIRED" />
+			<tx:method name="delete*" propagation="REQUIRED" />
+			<tx:method name="do*" propagation="REQUIRED" />
+			<tx:method name="bind*" propagation="REQUIRED" />
+			<tx:method name="transfer*" propagation="REQUIRED" />
+			<tx:method name="charge*" propagation="REQUIRED" />
+			<tx:method name="execute*" propagation="REQUIRED" />
+			<tx:method name="*" propagation="REQUIRED" read-only="true" /><!-- 这里面没有虽然程序可以运行，但是有报错，总之，这里最好必须有 -->
+		</tx:attributes>
+	</tx:advice>
+	
+	<!-- 下面的意思是只有service层的方法必须以以上开头才能进行读取之外的操作，不然只能对数据库进行读操作 -->
+	<aop:config proxy-target-class="true">
+		<aop:pointcut id="fooServiceMethodsZX"
+			expression="execution(* com.smarthome.imcp.service.impl.*.*ServiceImpl.*(..))" />
+		<aop:advisor advice-ref="txAdviceZX" pointcut-ref="fooServiceMethodsZX" />
+	</aop:config>
+</beans>

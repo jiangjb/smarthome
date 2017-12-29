@@ -1,0 +1,67 @@
+
+	<!--
+		${userID} 用户名ID ${userName} 用户名 ${action} 操作名，默认为：保存、修改、删除 ${N}
+		对应key的参数值， 从class中取值 visiable Y:则记录， N:则不记录
+	-->
+
+<LogConfig>
+	
+	<Log class="com.smarthome.imcp.dao.model.bo.BoDevice" model="设备管理"
+		content="用户:${userName}${action}设备信息;ID:${0},设备名称:${1},设备序列号${2}" visiable="Y">
+		<key>deviceId</key>
+		<key>deviceName</key>
+		<key>deviceCode</key>
+	</Log>
+	<Log class="com.smarthome.imcp.dao.model.bo.BoAdvice" model="意见反馈"
+		content="用户:${userName}${action}意见反馈;ID:${0},内容:${1}" visiable="Y">
+		<key>adviceId</key>
+		<key>adviceTxt</key>
+	</Log>
+	<Log class="com.smarthome.imcp.dao.model.bo.BoAlarm" model="设备报警"
+		content="用户:${userName}${action}设备报警;ID:${0},设备序列号:${1}" visiable="Y">
+		<key>id</key>
+		<key>deviceCode</key>
+	</Log>
+	<Log class="com.smarthome.imcp.dao.model.bo.BoDeviceType" model="设备类型"
+		content="用户:${userName}${action}设备类型;ID:${0},名称:${1}" visiable="Y">
+		<key>typeId</key>
+		<key>typeName</key>
+	</Log>
+	<Log class="com.smarthome.imcp.dao.model.bo.BoFactory" model="厂家管理"
+		content="用户:${userName}${action}厂家信息;ID:${0},名称:${1}" visiable="Y">
+		<key>userId</key>
+		<key>userName</key>
+	</Log>
+	<Log class="com.smarthome.imcp.dao.model.bo.BoLaunch" model="图片管理"
+		content="用户:${userName}${action}图片信息;ID:${0},姓名:${1}" visiable="Y">
+		<key>factoryId</key>
+		<key>factoryName</key>
+	</Log>
+	<Log class="com.smarthome.imcp.dao.model.bo.BoRepair" model="设备报修"
+		content="用户:${userName}${action}设备报修;ID:${0},设备序列号:${1}" visiable="Y">
+		<key>repairId</key>
+		<key>boDevice.deviceCode</key>
+	</Log>
+	<Log class="com.smarthome.imcp.dao.model.bo.BoReport" model="设备上报"
+		content="用户:${userName}${action}设备上报;ID:${0},设备序列号:${1}" visiable="Y">
+		<key>id</key>
+		<key>deviceCode</key>
+	</Log>
+	<Log class="com.smarthome.imcp.dao.model.bo.BoUser" model="用户管理"
+		content="用户:${userName}${action}用户信息;ID:${0},姓名:${1},编码:${2}" visiable="Y">
+		<key>userId</key>
+		<key>userName</key>
+		<key>userCode</key>
+	</Log>
+	<Log class="com.smarthome.imcp.dao.model.bo.BoUserDevice" model="用户设备"
+		content="用户:${userName}${action}用户设备;ID:${0},姓名:${1},设备序列号${2}" visiable="Y">
+		<key>userDeviceId</key>
+		<key>boUser.userName</key>
+		<key>boDevice.deviceCode</key>
+	</Log>
+	<Log class="com.smarthome.imcp.dao.model.bo.BoUserGroup" model="用户组"
+		content="用户:${userName}${action}用户组;ID:${0},组名:${1}" visiable="Y">
+		<key>groupId</key>
+		<key>groupName</key>
+	</Log>
+</LogConfig>

@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+                                   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Jan 6, 2016 9:48:35 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+ <class name="com.smarthome.imcp.dao.model.cy.PurchaseRequest" table="PURCHASE_REQUEST">
+  <id name="id" type="int">
+   <column name="ID"/>
+   <generator class="assigned"/>
+  </id>
+  <many-to-one class="com.smarthome.imcp.dao.model.bo.BoUser"
+   fetch="select" insert="false" name="boUser" update="false">
+   <column name="USER_ID"/>
+  </many-to-one>
+  <many-to-one class="com.smarthome.imcp.dao.model.cy.Plan"
+   fetch="select" insert="false" name="plan" update="false">
+   <column name="PLAN_ID"/>
+  </many-to-one>
+  <property generated="never" lazy="false" name="contactName" type="java.lang.String">
+   <column name="CONTACT_NAME"/>
+  </property>
+  <property generated="never" lazy="false" name="contactPhone" type="java.lang.String">
+   <column name="CONTACT_PHONE"/>
+  </property>
+  <property generated="never" lazy="false" name="installAddress" type="java.lang.String">
+   <column name="INSTALL_ADDRESS"/>
+  </property>
+  <property generated="never" lazy="false" name="completed" type="boolean">
+   <column name="COMPLETED"/>
+  </property>
+  <property generated="never" lazy="false" name="requestDate" type="date">
+   <column name="REQUEST_DATE"/>
+  </property>
+  <property generated="never" lazy="false" name="completionDate" type="date">
+   <column name="COMPLETION_DATE"/>
+  </property>
+  <property generated="never" lazy="false" name="operator" type="java.lang.String">
+   <column name="OPERATOR"/>
+  </property>
+  <property generated="never" lazy="false" name="remark" type="java.lang.String">
+   <column name="REMARK"/>
+  </property>
+ </class>
+</hibernate-mapping>

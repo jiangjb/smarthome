@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+                                   "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated Dec 14, 2015 1:45:07 PM by Hibernate Tools 3.4.0.CR1 -->
+<hibernate-mapping>
+ <class name="com.smarthome.imcp.dao.model.cy.Plan" table="PLAN">
+  <id name="id" type="int">
+   <column name="PLAN_ID"/>
+   <generator class="identity"/>
+  </id>
+  <property generated="never" lazy="false" name="serviceFee" type="int">
+   <column name="PLAN_SERVICE_FEE"/>
+  </property>
+  <property generated="never" lazy="false" name="duration" type="int">
+   <column name="PLAN_DURATION"/>
+  </property>
+  <property generated="never" lazy="false" name="picUrl" type="java.lang.String">
+   <column name="PIC_URL"/>
+  </property>
+  <property generated="never" lazy="false" name="price" type="int">
+   <column name="PLAN_PRICE"/>
+  </property>
+  <property generated="never" lazy="false" name="deviceTypeId" type="int">
+   <column name="DEVICE_TYPE_ID"/>
+  </property>
+  <property generated="never" lazy="false" name="description" type="java.lang.String">
+   <column name="PLAN_DESC"/>
+  </property>
+  <property generated="never" lazy="false" name="name" type="java.lang.String">
+   <column name="PLAN_NAME"/>
+  </property>
+  <property generated="never" lazy="false" name="dailyFee" type="int">
+   <column name="DAILY_FEE"/>
+  </property>
+  <property generated="never" lazy="false" name="refillAmount" type="int">
+   <column name="REFILL_AMT"/>
+  </property>
+  <property generated="never" lazy="false" name="refillDuration" type="int">
+   <column name="REFILL_DURATION"/>
+  </property>
+  <property generated="never" lazy="false" name="code" type="string">
+   <column name="PLAN_CODE"/>
+  </property>
+  <property generated="never" lazy="false" name="deleted" type="character">
+   <column name="DELETED"/>
+  </property>
+  <property generated="never" lazy="false" name="deletable" type="boolean">
+   <column name="DELETABLE"/>
+  </property>
+  <property generated="never" lazy="false" name="init" type="boolean">
+   <column name="INIT"/>
+  </property>
+ </class>
+ <sql-query name="bindPlan">{call sp_bindDevicePlan (?, ?, ?)}</sql-query>
+</hibernate-mapping>
