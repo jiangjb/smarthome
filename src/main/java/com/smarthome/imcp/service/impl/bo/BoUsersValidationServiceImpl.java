@@ -29,15 +29,15 @@ import java.util.Map;
 /* 156 */     BoUsersValidation model = (BoUsersValidation)this.boUsersValidationDao.findById(id);
 /* 157 */     return model;
 /*     */   }
-/*    */   public List<BoUsersValidation> findByUserPhone(String userPhone)
+/*    */   public BoUsersValidation findByUserPhone(String userPhone)
 /*    */   {
 /* 37 */     DetachedCriteria criteria = DetachedCriteria.forClass(BoUsersValidation.class);
 /* 38 */     criteria.add(Restrictions.eq("userPhone", userPhone));
-/* 39 */     List list = this.boUsersValidationDao.findByCriteria(criteria);
+/* 39 */     List<BoUsersValidation> list = this.boUsersValidationDao.findByCriteria(criteria);
 /* 40 */     if ((list == null) || (list.isEmpty())) {
 /* 41 */       return null;
 /*    */     }
-/* 43 */     return list;
+/* 43 */     return list.get(0);
 /*    */   }
 /*    */
 			@Override

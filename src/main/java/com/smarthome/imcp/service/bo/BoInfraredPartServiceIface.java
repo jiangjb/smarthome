@@ -7,7 +7,7 @@ import java.util.List;
 
 public abstract interface BoInfraredPartServiceIface<T, PK extends Serializable> extends BasicServiceIface<T, PK>
 {
-  public abstract List<BoInfraredPart> find(String paramString);
+  public abstract BoInfraredPart find(String paramString);
 
   public abstract boolean chkDeleteValid(T paramT);
 

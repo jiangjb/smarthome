@@ -379,20 +379,20 @@
 /*   245 */     str = str + "access_token=";
 /*   246 */     str = str + access_Token;
 /*   247 */     logger.info(access_Token);
-/*   248 */     System.err.println("access_Token " + access_Token);
+/*   248 */     System.err.println("access_Token：" + access_Token);
 /*   249 */     str = str + "&nonce=";
 /*   250 */     str = str + nonce;
-/*   251 */     System.err.println("nonce " + nonce);
+/*   251 */     System.err.println("nonce：" + nonce);
 /*   252 */     str = str + "&timestamp=";
 /*   253 */     str = str + timestamp;
-/*   254 */     System.err.println("timestamp " + timestamp);
+/*   254 */     System.err.println("timestamp：" + timestamp);
 /*   255 */     str = str + "&userCode=";
 /*   256 */     str = str + userCode;
-/*   257 */     System.err.println("userCode " + userCode);
+/*   257 */     System.err.println("userCode：" + userCode);
 /*   258 */     str = str + "12345";
 /*   259 */     String service_sign = md5.getMD5ofStr(str).toLowerCase();
-/*   260 */     System.err.println("客户端" + sign);
-/*   261 */     System.err.println("服务器" + service_sign);
+/*   260 */     System.err.println("客户端：" + sign);
+/*   261 */     System.err.println("服务器：" + service_sign);
 /*   262 */     System.err.println(userCode + " " + interfaceName);
 /*   263 */     if (service_sign.equals(sign)) {
 /*   264 */       return Boolean.valueOf(isRel);
@@ -10764,7 +10764,8 @@
 /*       */     }
 /* 11084 */     return "success";
 /*       */   }
-/*       */ 
+
+/*       */   //删除房间接口
 /*       */   @Action(value="deleteroom", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String deleteRooms()
 /*       */   {

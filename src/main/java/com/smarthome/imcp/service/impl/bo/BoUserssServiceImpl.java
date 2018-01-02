@@ -42,16 +42,16 @@
 /*  60 */     return null;
 /*     */   }
 /*     */ 
-/*     */   public List<BoUsers> findByUserPhone(String userPhone) {
+/*     */   public BoUsers findByUserPhone(String userPhone) {
 /*  64 */     DetachedCriteria criteria = DetachedCriteria.forClass(BoUsers.class);
 /*  65 */     criteria.add(Restrictions.eq("userPhone", userPhone));
 /*     */ 
-/*  68 */     List list = this.boUserDao.findByCriteria(criteria);
+/*  68 */     List<BoUsers> list = this.boUserDao.findByCriteria(criteria);
 /*  69 */     System.out.println(list);
 /*  70 */     if ((list == null) || (list.isEmpty())) {
 /*  71 */       return null;
 /*     */     }
-/*  73 */     return list;
+/*  73 */     return list.get(0);
 /*     */   }
 /*     */ 
 /*     */   public BoUsers findByUserPhonePwd(String userPhone, String pwd)

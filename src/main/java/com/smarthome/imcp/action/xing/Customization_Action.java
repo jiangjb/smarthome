@@ -106,7 +106,7 @@
 /*      */   }
 /*      */ 
 /*      */   @SuppressWarnings("unused")
-@Action(value="panelCancelBinding", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			 @Action(value="panelCancelBinding", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*      */   public String panelCancelBinding()
 /*      */   {
 /*  120 */     this.requestJson = new RequestJson();
@@ -236,7 +236,7 @@
 /*      */   }
 /*      */ 
 /*      */   @SuppressWarnings("unused")
-@Action(value="panelBinding", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+		 	 @Action(value="panelBinding", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*      */   public String panelBinding()
 /*      */   {
 /*  249 */     this.requestJson = new RequestJson();

@@ -77,7 +77,7 @@
 /*     */     }
 /*     */   }
 /*     */ 
-/*     */   public List<BoInfraredPart> find(String deviceAddress)
+/*     */   public BoInfraredPart find(String deviceAddress)
 /*     */   {
 /* 105 */     DetachedCriteria criteria = DetachedCriteria.forClass(BoInfraredPart.class);
 /* 106 */     criteria.add(Restrictions.eq("deviceAddress", deviceAddress));
@@ -85,7 +85,7 @@
 /* 108 */     if ((list == null) || (list.isEmpty())) {
 /* 109 */       return null;
 /*     */     }
-/* 111 */     return list;
+/* 111 */     return list.get(0);
 /*     */   }
 /*     */
 			@Override

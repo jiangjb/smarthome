@@ -418,21 +418,21 @@ import java.io.IOException;
 		   @ResponseBody
 		   public List<BoUsers> findByTel(@RequestParam("userPhone") String userPhone) {
 			   List<BoUsers> varList=new ArrayList<BoUsers>();
-			   List<BoUsers> bousers = this.boUserssService.findByUserPhone(userPhone);
+			   BoUsers bousers = this.boUserssService.findByUserPhone(userPhone);
 //			   System.out.println("bousers:"+bousers);
-			   for(BoUsers bouser:bousers) {
-				   BoUsers user=new BoUsers();
-				   user.setUserId(bouser.getUserId());
-				   System.out.println(bouser.getUserId());
-				   user.setUserName(bouser.getUserName());
-				   user.setUserSex(bouser.getUserSex());
-				   user.setUserPhone(bouser.getUserPhone());
-				   user.setPhoneType(bouser.getPhoneType());
-				   user.setVersionType(bouser.getVersionType());
-				   user.setSignature(bouser.getSignature());
-				   user.setCity(bouser.getCity());
-				   varList.add(user);
-			   }
+			   
+			   BoUsers user=new BoUsers();
+			   user.setUserId(bousers.getUserId());
+			   System.out.println(bousers.getUserId());
+			   user.setUserName(bousers.getUserName());
+			   user.setUserSex(bousers.getUserSex());
+			   user.setUserPhone(bousers.getUserPhone());
+			   user.setPhoneType(bousers.getPhoneType());
+			   user.setVersionType(bousers.getVersionType());
+			   user.setSignature(bousers.getSignature());
+			   user.setCity(bousers.getCity());
+			   varList.add(user);
+			   
 		       return varList;
 //		                    下面只能取一个
 //			   List<BoUsers> varList=new ArrayList<BoUsers>();
@@ -643,17 +643,16 @@ import java.io.IOException;
 		   @ResponseBody
 		   public List<BoUsersValidation> findValidationByTel(@RequestParam("userPhone") String userPhone) {
 			   List<BoUsersValidation> list=new ArrayList<BoUsersValidation>();
-		        List<BoUsersValidation> validations = this.boUsersValidationService.findByUserPhone(userPhone); 
-		        System.out.println("validations:"+validations);
-		        for(BoUsersValidation validation:validations) {
-			        BoUsersValidation user=new BoUsersValidation();
-				    user.setId(validation.getId());
+		        BoUsersValidation validation = this.boUsersValidationService.findByUserPhone(userPhone); 
+//		        System.out.println("validations:"+validations);
+		        BoUsersValidation user=new BoUsersValidation();
+			    user.setId(validation.getId());
 //				    System.out.println(validation.getId());
-				    user.setUserPhone(validation.getUserPhone());
+			    user.setUserPhone(validation.getUserPhone());
 //				    System.out.println(validation.getUserPhone());
-				    user.setVerificationCode(validation.getVerificationCode());
-				    list.add(user);
-				   }
+			    user.setVerificationCode(validation.getVerificationCode());
+			    list.add(user);
+			    
 		        return list;
 //			   BoUsersValidation varList = this.boUsersValidationService.findByUserPhone(userPhone); 
 //		       return varList;
@@ -1234,18 +1233,17 @@ import java.io.IOException;
 		   public List<BoInfraredPart> findRedByAddr(@RequestParam("deviceAddress") String deviceAddress) {
 			   System.out.println("findRedByAddr method");
 			   List<BoInfraredPart> list=new ArrayList<BoInfraredPart>();
-		       List<BoInfraredPart> boHosts = this.boInfraredPartService.find(deviceAddress);
-		       System.out.println("boHosts:"+boHosts);
-		       if(boHosts !=null) {
-		    	   for(BoInfraredPart bohost:boHosts) {//
-		    		   BoInfraredPart user=new BoInfraredPart();
-					    user.setId(bohost.getId());
-//					    System.out.println(bohost.getId());
-					    user.setDeviceAddress(bohost.getDeviceAddress());
-//					    System.out.println(bohost.getDeviceAddress());
-					    user.setValidationCode(bohost.getValidationCode());
-					    list.add(user);
-					   }
+		       BoInfraredPart boHost = this.boInfraredPartService.find(deviceAddress);
+//		       System.out.println("boHosts:"+boHosts);
+		       if(boHost !=null) {
+	    		   BoInfraredPart user=new BoInfraredPart();
+				    user.setId(boHost.getId());
+//					    System.out.println(boHost.getId());
+				    user.setDeviceAddress(boHost.getDeviceAddress());
+//					    System.out.println(boHost.getDeviceAddress());
+				    user.setValidationCode(boHost.getValidationCode());
+				    list.add(user);
+
 		       }
 		        return list;
 		    }
@@ -1255,8 +1253,7 @@ import java.io.IOException;
 		   public String modifyDeviceRed(@RequestParam("id") int id,@RequestParam("deviceAddress") String deviceAddress,@RequestParam("validationCode") String validationCode) {
 //			   System.out.println("come in");
 			   String result="fail";
-			   List<BoInfraredPart> bohosts=this.boInfraredPartService.find(deviceAddress);
-			   for(BoInfraredPart bohost:bohosts) {
+			   BoInfraredPart bohost=this.boInfraredPartService.find(deviceAddress);
 //				   System.out.println("come in  in");
 				   bohost.setDeviceAddress(deviceAddress);
 				   bohost.setValidationCode(validationCode);
@@ -1265,7 +1262,6 @@ import java.io.IOException;
 				   if(bohost1 != null) {
 					   result="success";
 				   }
-			   }
 		        return result;
 		    }
 		   

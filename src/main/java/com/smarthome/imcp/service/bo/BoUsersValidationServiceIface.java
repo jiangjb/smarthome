@@ -7,7 +7,7 @@ import java.util.List;
 
 public abstract interface BoUsersValidationServiceIface<T, PK extends Serializable> extends BasicServiceIface<T, PK>
 {
-  public abstract List<BoUsersValidation> findByUserPhone(String paramString);
+  public abstract BoUsersValidation findByUserPhone(String paramString);
 
   public abstract List<BoUsersValidation> findPhoneValidations();
 

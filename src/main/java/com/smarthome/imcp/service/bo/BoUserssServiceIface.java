@@ -11,7 +11,7 @@ public abstract interface BoUserssServiceIface<T, PK extends Serializable> exten
 
   public abstract List<BoUsers> getByAuthorizeUserCode(String paramString);
 
-  public abstract List<BoUsers> findByUserPhone(String paramString);
+  public abstract BoUsers findByUserPhone(String paramString);
 
   public abstract BoUsers findByUserEmail(String paramString);
 

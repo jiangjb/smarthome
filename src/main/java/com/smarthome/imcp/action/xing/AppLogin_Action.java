@@ -407,7 +407,7 @@
 /* 481 */           userInfoMap.put("whetherSetPwd", users.getWhetherSetPwd());
 /* 482 */           String fluoriteAccessToken = users.getFluoriteAccessToken();
 /*     */           String EZTOKEN;
-				    System.out.println("我在这里。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。。");
+				    System.out.println("我在这里。。。。。。。。。。。。。。。。。。。。。。。。。。。。。");
 ///*     */           String EZTOKEN;
 /* 484 */           if (fluoriteAccessToken.equals(""))
 /* 485 */             EZTOKEN = "NO_BUNDING";

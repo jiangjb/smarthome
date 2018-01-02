@@ -133,12 +133,12 @@
 				success: function(data){
 					/* alert(data) */
 					if("success" == data){
-						alert("修改成功...")
+						alert("添加成功...")
 						//调到手机验证码页面
 						window.history.back();
 						<%-- $("#mainFrame").attr("src","<%=WEBPATH %>/static/jsp/system/users_validation/users_validation_list.jsp") --%>
 					}else{
-						alert("修改失败！");
+						alert("添加失败！");
 						//回到初始值
 						$('#deviceCode').val("");
 				    	$('#type').val("");

@@ -152,11 +152,11 @@
 					success: function(data){
 						/* alert(data) */
 						if("success" == data){
-							alert("保存成功...")
+							alert("添加成功...")
 							//调到手机验证码页面  (未完成)
 							window.history.back();
 						}else{
-							alert("修改失败！");
+							alert("添加失败！");
 							//回到初始值
 							$("#userPhone").val("");
 							$("#verificationCode").val("");
