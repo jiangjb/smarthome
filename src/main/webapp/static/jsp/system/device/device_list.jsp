@@ -224,7 +224,7 @@
         					if(item.deviceCode == null){
         						var currentPage=item.currentPage;
         						var totalPages=item.totalPages;
-        						alert(totalPages)
+        						/* alert(totalPages) */
         						if(totalPages>=1 && totalPages<=5){
         							var table="";
         							if(totalPages ==1){
@@ -363,7 +363,7 @@
 		
 		//分页
 		function find(index){
-				alert(index);
+				/* alert(index); */
 				$.ajax({
 					url:"findDevicesByIndex.do",
 			    	data: {"index":index }, 
@@ -520,7 +520,7 @@
 									
 								}else if((currentPage == (totalPages-1))){
 									if(totalPages == 2){
-										alert("totalPages != 2")
+										/* alert("totalPages != 2") */
 										$("#devicelist01").append('<ul>'+
 												'<li><a><font color="#808080">首页</font></a></li>'+
 												'<li><a><font color="#808080">上页</font></a></li>'+
@@ -599,7 +599,7 @@
 						})								    					
 				}, 
 				error: function(e){
-               	    alert(e)
+               	    /* alert(e) */
 				}
 			});
 		}

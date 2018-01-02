@@ -145,7 +145,7 @@
 		    						/* alert(item) */
 		    						$("#UserID").val(item);
 		    					}else if("mobile_code" == i){
-		    						alert(item)
+		    						/* alert(item) */
 		    						$("#VCodeFromBack").val(item);
 		    					}else{
 		    						alert("error")
@@ -257,8 +257,8 @@
 		}
 		//服务器校验
 		function findPwd(){
-			alert("后台传过来的验证码："+$("#VCodeFromBack").val())
-			alert($("#VCodeFromBack").val()==$("#VerificationCode").val() );
+			/* alert("后台传过来的验证码："+$("#VCodeFromBack").val()) */
+			/* alert($("#VCodeFromBack").val()==$("#VerificationCode").val() ); */
 			if(check()  && ($("#VCodeFromBack").val()==$("#VerificationCode").val()) ){//并且验证码输入相同
 			/* debugger */
 				/* alert("被点击。。。") */
@@ -293,7 +293,7 @@
 	                	alert(XMLHttpRequest.readyState);//4       － （完成）响应内容解析完成，可以在客户端调用了
 	               	    alert(textStatus);//parsererror */
 	               	    /* debugger */
-	               	    alert(e)
+	               	    /* alert(e) */
 					}
 				});
 			}

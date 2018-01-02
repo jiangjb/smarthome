@@ -128,7 +128,7 @@
 					async: false,					
 					/* cache: false, */
 					success: function(data){
-						alert(data)
+						/* alert(data) */
 						if(data ==null){
 							$("#email").tips({
 								side : 1,
@@ -145,7 +145,7 @@
 		    						/* alert(item) */
 		    						$("#UserID").val(item);
 		    					}else if("email_code" == i){
-		    						alert(item)
+		    						/* alert(item) */
 		    						$("#VCodeFromBack").val(item);
 		    					}else{
 		    						alert("error")

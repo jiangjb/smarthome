@@ -176,7 +176,7 @@
 	                	alert(XMLHttpRequest.readyState);//4       － （完成）响应内容解析完成，可以在客户端调用了
 	               	    alert(textStatus);//parsererror */
 	               	    /* debugger */
-	               	    alert(e)
+	               	    /* alert(e) */
 					}
 				});
 			}

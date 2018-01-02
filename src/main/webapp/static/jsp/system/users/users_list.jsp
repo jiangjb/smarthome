@@ -364,7 +364,7 @@
 			
 				}, 
 				error: function(e){
-               	    alert(e)
+               	    /* alert(e) */
 				}
 			});
 			}else{
@@ -375,7 +375,7 @@
 		
 		//分页
 		function find(index){
-				alert(index);
+				/* alert(index); */
 				$.ajax({
 					url:"findByIndex.do",
 			    	data: {"index":index }, 
@@ -532,7 +532,7 @@
 									
 								}else if((currentPage == (totalPages-1))){
 									if(totalPages == 2){
-										alert("totalPages != 2")
+										/* alert("totalPages != 2") */
 										$("#userlist01").append('<ul>'+
 												'<li><a><font color="#808080">首页</font></a></li>'+
 												'<li><a><font color="#808080">上页</font></a></li>'+
@@ -620,7 +620,7 @@
 						})								    					
 				}, 
 				error: function(e){
-               	    alert(e)
+               	    /* alert(e) */
 				}
 			});
 		}
