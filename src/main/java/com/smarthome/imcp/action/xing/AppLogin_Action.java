@@ -4,27 +4,26 @@
 /*     */ import com.smarthome.imcp.action.AbstractAction;
 /*     */ import com.smarthome.imcp.common.Md5;
 /*     */ import com.smarthome.imcp.controller.RequestJson;
-import com.smarthome.imcp.dao.model.bo.BoFloor;
-import com.smarthome.imcp.dao.model.bo.BoRoom;
+		  import com.smarthome.imcp.dao.model.bo.BoFloor;
+		  import com.smarthome.imcp.dao.model.bo.BoRoom;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoUsers;
-import com.smarthome.imcp.service.bo.BoFloorServiceIface;
-import com.smarthome.imcp.service.bo.BoRoomServiceIface;
+		  import com.smarthome.imcp.service.bo.BoFloorServiceIface;
+		  import com.smarthome.imcp.service.bo.BoRoomServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoUserssServiceIface;
 /*     */ import com.smarthome.imcp.util.ClearIpUtil;
 /*     */ import com.smarthome.imcp.util.EmailUtils;
-import com.smarthome.imcp.util.FloorUtil;
-import com.smarthome.imcp.util.RoomUtil;
+		  import com.smarthome.imcp.util.FloorUtil;
+		  import com.smarthome.imcp.util.RoomUtil;
 /*     */ import com.smarthome.imcp.util.SendMsgUtil;
 /*     */ import com.smarthome.imcp.util.TokeUtil;
 /*     */ import com.smarthome.imcp.util.UserUtil;
 /*     */ import com.smarthome.imcp.util.ValidatorUtil;
 /*     */ import java.io.InputStream;
-/*     */ import java.io.PrintStream;
 /*     */ import java.io.Serializable;
-import java.util.ArrayList;
+		  import java.util.ArrayList;
 /*     */ import java.util.Date;
 /*     */ import java.util.HashMap;
-import java.util.List;
+		  import java.util.List;
 /*     */ import java.util.Map;
 /*     */ import java.util.Properties;
 /*     */ import java.util.Timer;
@@ -435,12 +434,11 @@ import java.util.List;
 		              list_room.add(map);
 					}
 					userInfoMap.put("roomInfo", list_room);
-					////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					//////////////////////////////////////////////////楼层、房间添加默认值END////////////////////////////////////////////////////////
 					
 /* 482 */           String fluoriteAccessToken = users.getFluoriteAccessToken();
 /*     */           String EZTOKEN;
 				    System.out.println("我在这里。。。。。。。。。。。。。。。。。。。。。。。。。。。。。");
-///*     */           String EZTOKEN;
 /* 484 */           if (fluoriteAccessToken.equals(""))
 /* 485 */             EZTOKEN = "NO_BUNDING";
 /*     */           else {

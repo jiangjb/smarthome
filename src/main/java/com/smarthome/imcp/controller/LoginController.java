@@ -389,7 +389,12 @@ import java.io.IOException;
 			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
 			   int totalCount=bousers.size();
 			   int pageSize=page.getPageSize();
-			   int totalPages=(int) Math.ceil(totalCount/pageSize);	//只要有小数都+1					
+			   int totalPages=1;
+			   if(totalCount%pageSize !=0){
+				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = totalCount/pageSize;
+			   }					
 			   
 			   for(int i=0;i<bousers.size();i++) {
 				   if(i>=0 && i<=9) {
@@ -461,7 +466,12 @@ import java.io.IOException;
 			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
 			   int totalCount=bousers.size();
 			   int pageSize=page.getPageSize();
-			   int totalPages=(int) Math.ceil(totalCount/pageSize);	//只要有小数都+1					
+			   int totalPages=1;
+			   if(totalCount%pageSize !=0){
+				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = totalCount/pageSize;
+			   }					
 			   int startRow=(index-1)*pageSize;//数据库表中的行数 （从0开始）
 			   int endRow;
 			   if(index == totalPages) {

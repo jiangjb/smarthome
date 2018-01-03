@@ -11981,7 +11981,7 @@
 /*       */ 
 /*       */   @Action(value="setDeviceInfo", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String setDeviceInfo()
-/*       */   {
+/*       */   {//deviceCode==100出错
 /* 12347 */     this.requestJson = new RequestJson();
 /* 12348 */     System.err.println("setDeviceInfo");
 /* 12349 */     HttpServletRequest request = ServletActionContext.getRequest();
@@ -12041,10 +12041,10 @@
 /*       */                   }
 /* 12404 */                   hostDevice.setBoDevice(findByCode);
 /* 12405 */                   hostDevice.setNickName(this.nickName);
-/* 12406 */                   hostDevice.setValidationCode("");
+/* 12406 */                   hostDevice.setValidationCode(this.validationCode);//摄像头不能设置为空？
 /* 12407 */                   hostDevice.setBoRoom(boRoom);
 /* 12408 */                   hostDevice.setBoUsers(boUsers);
-/* 12409 */                   hostDevice.setValidationCode("");
+///* 12409 */                   hostDevice.setValidationCode("");
 /* 12410 */                   hostDevice.setIco(this.ico);
 /* 12411 */                   hostDevice.setDeviceClassify(this.fid1);
 /* 12412 */                   BoHostDevice update = (BoHostDevice)this.boHostDeviceService.update(hostDevice);
