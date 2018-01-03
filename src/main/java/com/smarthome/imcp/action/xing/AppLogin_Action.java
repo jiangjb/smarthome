@@ -4,10 +4,16 @@
 /*     */ import com.smarthome.imcp.action.AbstractAction;
 /*     */ import com.smarthome.imcp.common.Md5;
 /*     */ import com.smarthome.imcp.controller.RequestJson;
+import com.smarthome.imcp.dao.model.bo.BoFloor;
+import com.smarthome.imcp.dao.model.bo.BoRoom;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoUsers;
+import com.smarthome.imcp.service.bo.BoFloorServiceIface;
+import com.smarthome.imcp.service.bo.BoRoomServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoUserssServiceIface;
 /*     */ import com.smarthome.imcp.util.ClearIpUtil;
 /*     */ import com.smarthome.imcp.util.EmailUtils;
+import com.smarthome.imcp.util.FloorUtil;
+import com.smarthome.imcp.util.RoomUtil;
 /*     */ import com.smarthome.imcp.util.SendMsgUtil;
 /*     */ import com.smarthome.imcp.util.TokeUtil;
 /*     */ import com.smarthome.imcp.util.UserUtil;
@@ -15,8 +21,10 @@
 /*     */ import java.io.InputStream;
 /*     */ import java.io.PrintStream;
 /*     */ import java.io.Serializable;
+import java.util.ArrayList;
 /*     */ import java.util.Date;
 /*     */ import java.util.HashMap;
+import java.util.List;
 /*     */ import java.util.Map;
 /*     */ import java.util.Properties;
 /*     */ import java.util.Timer;
@@ -53,6 +61,10 @@
 /*     */ 
 /*     */   @Autowired
 /*     */   private BoUserssServiceIface<BoUsers, Serializable> boUserService;
+			@Autowired
+			private BoFloorServiceIface<BoFloor, Serializable> boFloorService;
+			@Autowired
+			private BoRoomServiceIface<BoRoom, Serializable> boRoomService;
 /* 778 */   private RequestJson requestJson = new RequestJson();
 /*     */ 
 /*     */   public Boolean isRal(String timestamp, String nonce, String sign, String access_Token, String userCode, String interfaceName)
@@ -405,6 +417,26 @@
 /* 479 */           userInfoMap.put("userPhone", users.getUserPhone());
 /* 480 */           userInfoMap.put("isFirst", users.getIsFirst());
 /* 481 */           userInfoMap.put("whetherSetPwd", users.getWhetherSetPwd());
+					//添加初始的楼层、房间信息  2018/1/3
+					BoFloor floor=this.boFloorService.findByUserCode(users.getUserCode());
+					String floorName=floor.getFloorName();
+					userInfoMap.put("floorName", floorName);
+					List<BoRoom> rooms=this.boRoomService.getAllListByUserCode(users.getUserCode());
+					List list_room = new ArrayList();
+					for (BoRoom boRoom : rooms) {
+		               Map map = new HashMap();
+		               BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode()); 
+		               map.put("roomCode", boRoom.getRoomCode().toString());
+		//												  System.out.println("Room roomCode:"+boRoom.getRoomCode().toString());
+		               map.put("roomName", boRoom.getRoomName().toString());
+		//												  System.out.println("roomName:"+boRoom.getRoomName().toString());
+		               map.put("floorCode", boRoom.getFloorCode().toString());
+		//												  System.out.println("floorCode:"+boRoom.getFloorCode().toString());
+		              list_room.add(map);
+					}
+					userInfoMap.put("roomInfo", list_room);
+					////////////////////////////////////////////////////////////////////////////////////////////////////////////
+					
 /* 482 */           String fluoriteAccessToken = users.getFluoriteAccessToken();
 /*     */           String EZTOKEN;
 				    System.out.println("我在这里。。。。。。。。。。。。。。。。。。。。。。。。。。。。。");
@@ -489,6 +521,22 @@
 /* 563 */                   this.requestJson.setData(map);
 /* 564 */                   this.requestJson.setMessage("注册成功");
 /* 565 */                   this.requestJson.setSuccess(true);
+							//注册成功时 默认添加一个楼层和四个房间
+							BoFloor floor=FloorUtil.save(save.getUserCode());
+							BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
+							//String userCode,String floorName,String floorCode,String roomName	
+							System.out.println("楼层名称："+saveF.getFloorName());
+							String userCode=saveF.getUserCode();
+							String floorName=saveF.getFloorName();
+							String floorCode=saveF.getFloorCode();
+							BoRoom room1=RoomUtil.save(userCode,floorName,floorCode,"客厅");
+							BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
+							BoRoom room2=RoomUtil.save(userCode,floorName,floorCode,"卧室");
+							BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
+							BoRoom room3=RoomUtil.save(userCode,floorName,floorCode,"厨房");
+							BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
+							BoRoom room4=RoomUtil.save(userCode,floorName,floorCode,"卫生间");
+							BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
 /*     */                 }
 /*     */ 
 /*     */               }

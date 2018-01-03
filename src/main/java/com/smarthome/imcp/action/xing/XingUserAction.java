@@ -14350,7 +14350,9 @@
 /* 14789 */               Map map = new HashMap();
 /*       */ 
 /* 14791 */               map.put("floorCode", boFloor.getFloorCode().toString());
+//						  System.out.println("floor floorCode:"+boFloor.getFloorCode().toString());
 /* 14792 */               map.put("floorName", boFloor.getFloorName().toString());
+//						  System.out.println("floorName:"+boFloor.getFloorName().toString());
 /* 14793 */               list_floor.add(map);
 /*       */             }
 /* 14795 */             map_room.put("floorInfo", list_floor);
@@ -14360,8 +14362,11 @@
 /* 14799 */               BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
 /*       */ 
 /* 14801 */               map.put("roomCode", boRoom.getRoomCode().toString());
+//						  System.out.println("Room roomCode:"+boRoom.getRoomCode().toString());
 /* 14802 */               map.put("roomName", boRoom.getRoomName().toString());
+//						  System.out.println("roomName:"+boRoom.getRoomName().toString());
 /* 14803 */               map.put("floorCode", boRoom.getFloorCode().toString());
+//						  System.out.println("floorCode:"+boRoom.getFloorCode().toString());
 /* 14804 */               list_room.add(map);
 /*       */             }
 /*       */ 
