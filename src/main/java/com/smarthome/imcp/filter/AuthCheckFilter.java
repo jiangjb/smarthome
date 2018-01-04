@@ -48,8 +48,11 @@
 /* 53 */       req.getContextPath().length() + 1);
 /*    */ 
 /* 55 */     Object account = session.getAttribute("USER_INFO");
-/*    */ 
-/* 57 */     if ((!uri.startsWith("public/")) && (!uri.equals("login.action")) && (!this.strcLogin.equals(uri)) && 
+//			 System.out.println("uri:"+uri);
+			//这个if判断用于 让这四个页面免于过滤
+/*    */ 	if((uri.equals("register.jsp")) || (uri.equals("TelOrEmail.jsp")) || (uri.equals("findPwdByEmail.jsp")) || (uri.equals("findPwdByTel.jsp"))) {
+				System.out.println(uri+" pass!");
+			}else if ((!uri.startsWith("public/")) && (!uri.equals("login.action")) && (!this.strcLogin.equals(uri)) && 
 /* 58 */       (account == null)) {
 /* 59 */       res.sendRedirect(req.getContextPath() + 
 /* 60 */         "/" + this.strcLogin);
