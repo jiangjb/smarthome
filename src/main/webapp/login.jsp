@@ -32,7 +32,7 @@
 				id="loginForm">
 				<div class="control-group normal_text">
 					<h3>
-						<img src="" alt="Logo" />
+						<!-- <img src="" alt="Logo" /> -->Logo
 					</h3>
 				</div>
 				<div class="control-group">
@@ -107,9 +107,6 @@
 	</div>
 
 	<script type="text/javascript">
-	
-		
-	
 		$(document).ready(function() {
 			changeCode();
 			$("#codeImg").bind("click", changeCode);
@@ -139,7 +136,6 @@
 						/* alert("success:"+data) */
 						if(data !=0){
 							/* alert("success") */
-							/* saveCookie(); */
 							<%-- window.location.href="<%=WEBPATH %>/static/jsp/index.jsp"+"?loginName="+loginname+"&loginPwd="+password; //js中路径 --%>
 							window.location.href="<%=WEBPATH %>/static/jsp/index.jsp?UserID="+data;
 						}else if(data == 0){
@@ -161,14 +157,6 @@
 							});
 							$("#loginname").focus();
 						}  
-					},
-					/* error: function(XMLHttpRequest, textStatus, errorThrown){  */ 	 
-					error: function(e){
-	                	/* alert(XMLHttpRequest.status);//200
-	                	alert(XMLHttpRequest.readyState);//4       － （完成）响应内容解析完成，可以在客户端调用了
-	               	    alert(textStatus);//parsererror  */
-	               	    /* debugger */
-	               	    /* alert(e) */
 					}
 				});
 			}
