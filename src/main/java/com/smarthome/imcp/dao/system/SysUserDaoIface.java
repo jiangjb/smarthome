@@ -9,6 +9,7 @@ import com.smarthome.imcp.dao.model.system.SysUser;
 import java.io.Serializable;
 import java.util.List;
 
+
 public abstract interface SysUserDaoIface<T, PK extends Serializable> extends CommonsDaoIface<T, PK>
 {
   public abstract List<SysUser> getList(SearchCriteriaUser paramSearchCriteriaUser, Page paramPage);

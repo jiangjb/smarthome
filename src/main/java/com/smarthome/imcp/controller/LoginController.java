@@ -19,9 +19,8 @@ import com.smarthome.imcp.dao.model.bo.BoDevice;
 		 import com.smarthome.imcp.service.bo.BoUserssServiceIface;
 /*    */ import com.smarthome.imcp.service.secur.SecurServiceIface;
 /*    */ import com.smarthome.imcp.service.system.SysUserServiceIface;
-import com.sun.star.sync.SyncAction;
-
-import java.io.IOException;
+		 import com.sun.star.sync.SyncAction;
+		 import java.io.IOException;
 /*    */ import java.io.Serializable;
 		 import java.util.ArrayList;
 		 import java.util.HashMap;
@@ -41,8 +40,14 @@ import java.io.IOException;
 		 import org.apache.commons.httpclient.HttpClient;
 		 import org.apache.commons.httpclient.HttpException;
 		 import org.apache.commons.httpclient.NameValuePair;  
-		 import org.apache.commons.httpclient.methods.PostMethod;  
-		 import org.dom4j.Document;  
+		 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.AuthenticationException;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.crypto.hash.SimpleHash;
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ByteSource;
+import org.dom4j.Document;  
 		 import org.dom4j.DocumentException;  
 		 import org.dom4j.DocumentHelper;  
 		 import org.dom4j.Element; 
@@ -80,50 +85,109 @@ import java.io.IOException;
 /*    */   @RequestMapping({"login.do"})
 //           @RequestMapping(value={"login.do"},produces="application/json;charset=UTF-8")
 		   @ResponseBody
-/*    */   public int login(@RequestParam("loginName") String loginName, @RequestParam("loginPwd") String loginPwd, HttpServletRequest request)
-/*    */   { 
+		   public int login(@RequestParam("loginName") String loginName, @RequestParam("loginPwd") String loginPwd, HttpServletRequest request)
+   		{   
+		    int UserID=0;
 			 System.out.println("loginName="+loginName+",loginPwd="+loginPwd);
-/* 34 */     Md5 md5 = new Md5();
-			 System.out.println("loginPwd=== 63A9F0EA7BB98050796B649E85481845="+md5.getMD5ofStr(loginPwd));
-/* 35 */     SysUser sysUser = (SysUser)this.sysUserService.checkUser(loginName, md5.getMD5ofStr(loginPwd));//加密方式-32位大  
-             System.out.println("sysUser:"+sysUser);
-             //获得UserID
-             int UserID=0;
-             try {
+//			 Md5 md5 = new Md5();
+//			 System.out.println("loginPwd=== 63A9F0EA7BB98050796B649E85481845="+md5.getMD5ofStr(loginPwd));
+//			 SysUser sysUser = (SysUser)this.sysUserService.checkUser(loginName, md5.getMD5ofStr(loginPwd));//加密方式-32位大  
+			//先给输入的明文密码加密，然后再与数据库表取出来的数据比较
+		    String hashAlgorithmName = "MD5";
+			Object credentials = loginPwd;
+			Object salt = ByteSource.Util.bytes(loginName);;
+			int hashIterations = 1024;
+			Object result = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
+			String userPwd=result.toString();
+			////////////////////////////////shiro加密结束/////////////////////////////////////////////////
+			//认证
+			Subject currentUser = SecurityUtils.getSubject();
+			System.out.println("currentUser:"+currentUser);
+			if (!currentUser.isAuthenticated()) {//判断是不是已经认证的
+		    	// 把用户名和密码封装为 UsernamePasswordToken 对象
+//				System.out.println("userPwd:"+userPwd);
+		        UsernamePasswordToken token = new UsernamePasswordToken(loginName, loginPwd);//明文密码
+		        System.out.println("token:"+token);
+		        // rememberme
+		        token.setRememberMe(true);
+		        try {
+		        	System.out.println("1. " + token.hashCode());
+		        	// 执行登录. 
+		            currentUser.login(token);
+//		            return 1;
+		        } 
+		        // ... catch more exceptions here (maybe custom ones specific to your application?
+		        // 所有认证时异常的父类. 
+		        catch (AuthenticationException ae) {
+		            //unexpected condition?  error?
+		        	System.out.println("登录失败: " + ae.getMessage());
+		        	return -1;
+		        }
+		    }
+			//授权  1)设计用户表、角色表、用户角色中间表、权限表和角色权限中间表； 2）实体类的映射表 ； 3）修改注册密码的加密方式（shiro加密）
+			//say who they are:
+	        //print their identifying principal (in this case, a username):
+			System.out.println("----> User [" + currentUser.getPrincipal() + "] logged in successfully.");//null
+
+	        //test a role:
+	        // 测试是否有某一个角色. 调用 Subject 的 hasRole 方法. 
+	        if (currentUser.hasRole("admin")) {
+	        	System.out.println("----> You have the admin role !");
+	        } else {
+	        	System.out.println("----> You just have user role.");//here
+	        }
+
+	        // 测试用户是否具备某一个行为. 
+	        if (currentUser.isPermitted("Create")) {
+	        	System.out.println("----> You are permitted to delete. " +"Here are the keys - have fun!");
+	        } else {
+	        	System.out.println("Sorry, you aren't allowed to delete");//here
+	        }
+
+	        //all done - log out!
+	        // 执行登出. 调用 Subject 的 Logout() 方法. 
+	        System.out.println("---->" + currentUser.isAuthenticated());	//true        
+//	        currentUser.logout();	        
+//	        System.out.println("---->" + currentUser.isAuthenticated());    //false
+//	        System.exit(0);
+
+			SysUser sysUser = (SysUser)this.sysUserService.checkUser(loginName, userPwd);//shiro加密方式 
+            try {
             	 UserID=sysUser.getUserId();
-			} catch (Exception e) {
+//            	 System.out.println("UserID:"+UserID);
+			 } catch (Exception e) {
 			    System.out.println("用户不存在！");
-			}
-/* 36 */     if (GlobalMethod.isNullorEmpty(sysUser)) {
+			 }
+             if (GlobalMethod.isNullorEmpty(sysUser)) {
 	           System.out.println("登录名或密码不正确......");
-///* 37 */       return new ResultJson("登陆名或密码不对！", "300");
+//       	   return new ResultJson("登陆名或密码不对！", "300");
 	           return 0;
-/*    */     }
-/* 39 */     String errorCode = this.securService.doCheckUser(sysUser);
+             }
+             String errorCode = this.securService.doCheckUser(sysUser);
              System.out.println("errorCode:"+errorCode);
-/* 40 */     if (errorCode != null) {
-/* 41 */       if ("NO_POLIT".equals(errorCode))
-	             System.out.println("未配置栏目权限......");
-///* 42 */         return new ResultJson("未配置栏目权限，请与管理员联系！", "300");
+             if (errorCode != null) {
+            	 if ("NO_POLIT".equals(errorCode))
+            		 System.out.println("未配置栏目权限......");
+//         		return new ResultJson("未配置栏目权限，请与管理员联系！", "300");
 				return -1;
-/*    */     	}
-			else {
-/* 45 */       	CurrentUser currentUser = this.securService.createCurrentUser(sysUser);
-/*    */ 
-/* 50 */       	request.getSession().setAttribute("USER_INFO", currentUser);
+             }else {
+            	 System.out.println("sysUser:"+sysUser);
+            	 CurrentUser currentUser01 = this.securService.createCurrentUser(sysUser);
+ 
+            	 request.getSession().setAttribute("USER_INFO", currentUser01);
 //              System.out.println(new ResultJson("登陆成功！"));//com.smarthome.imcp.controller.ResultJson@3893a0e7
-///* 52 */      return new ResultJson("登陆成功！");
+//      		return new ResultJson("登陆成功！");
                	return UserID;
-/*    */     }
-/*    */   }
-///*    */ 
-/*    */   @RequestMapping({"logout.do"})
-/*    */   public String logout(HttpServletRequest request) {
+             }
+   		 }
+
+           @RequestMapping({"logout.do"})
+           public String logout(HttpServletRequest request) {
 	         System.out.println("行，我退出！");
-/* 60 */     request.getSession().removeAttribute("USER_INFO");
-/* 61 */     request.getSession().removeAttribute("SESSION_ID");
-/* 62 */     return "../login";          //==login.do
-/*    */   }
+	         request.getSession().removeAttribute("USER_INFO");
+	         request.getSession().removeAttribute("SESSION_ID");
+	         return "../login";          //==login.do
+           }
 
 		   @RequestMapping({"register.do"})
 		   @ResponseBody
@@ -132,23 +196,33 @@ import java.io.IOException;
 //			   Md5 md5 = new Md5();
 			   SysUser sysuser=new SysUser();
 			   sysuser.setLoginName(userName);
-//			   sysuser.setLoginPwd(md5.getMD5ofStr(userPwd));//这里不能再加密了，不然就二次加密了
-			   sysuser.setLoginPwd(userPwd);
-			   sysuser.setUserPhone(userPhone);
-			   sysuser.setEmail(email);
-//			   System.out.println(md5.getMD5ofStr(userPwd));
-			   SysUser sysuser01=this.sysUserService.save(sysuser);//哪个是保存操作:CommonsDaoImpl.java文件中的save（）方法
+			   System.out.println("shiro加密方式...");
+			   //shiro加密部分
+			    String hashAlgorithmName = "MD5";
+				Object credentials = userPwd;
+				Object salt = ByteSource.Util.bytes(userName);;
+				int hashIterations = 1024;
+				Object result = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
+				String userPwd1=result.toString();
+				System.out.println("shiro加密后 password:"+userPwd1);
+				/////////////////////////////////////////////加密结束/////////////////////////////////////
 			   
-//			   System.out.println("sysuser01=="+sysuser01);
-			   if(sysuser01 !=null) {
+			    sysuser.setLoginPwd(userPwd1);
+			    sysuser.setUserPhone(userPhone);
+			    sysuser.setEmail(email);
+//			    System.out.println(md5.getMD5ofStr(userPwd));
+			    SysUser sysuser01=this.sysUserService.save(sysuser);//哪个是保存操作:CommonsDaoImpl.java文件中的save（）方法
+			   
+//			    System.out.println("sysuser01=="+sysuser01);
+			    if(sysuser01 !=null) {
 				   System.out.println("注册成功，即将跳转到登录页面...");
 				   return "success";
-			   }else {
+			    }else {
 				   System.out.println("注册失败，请重新操作");
 				   return "fail";
-			   }
+			    }
 			   
-			}
+			 }
 		   
 		   @RequestMapping({"phoneCode.do"})
 		   @ResponseBody

@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+  
 <%
 	String WEBPATH11 = request.getContextPath();
 	String basePath = request.getScheme() + "://"
@@ -23,7 +24,6 @@
   <div class="row-fluid">
 
 	<div class="row-fluid">
-	
 			<!-- 检索  -->
 			<!-- <form action="findByTel.do" method="post" name="Form" id="Form"> -->
 			<form action="findByTel.do" method="post" name="Form" id="Form">

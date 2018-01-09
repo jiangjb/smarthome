@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
 <%
 	String WEBPATH31 = request.getContextPath();
 	String basePath = request.getScheme() + "://"
@@ -127,6 +128,7 @@
 			
 		<div class="page-header position-relative">
 		<table style="width:100%;">
+		<shiro:hasRole name="admin">
 			<tr>
 				<td style="vertical-align:top;">
 					<%-- <c:if test="${QX.add == 1 }">
@@ -143,6 +145,8 @@
 					</div>
 				</td>
 			</tr>
+		</shiro:hasRole>
+			
 		</table>
 		</div>
 		</form>

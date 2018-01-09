@@ -17,6 +17,13 @@
   </properties>
   
   <dependencies>
+  
+  	<dependency>
+	    <groupId>org.apache.shiro</groupId>
+	    <artifactId>shiro-all</artifactId>
+	    <version>1.4.0</version>
+	    <type>pom</type>
+	</dependency>
   	<dependency>
   		<groupId>org.springframework</groupId>
   		<artifactId>spring-aop</artifactId>

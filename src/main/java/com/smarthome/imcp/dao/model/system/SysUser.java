@@ -5,7 +5,8 @@
 /*     */ import java.util.Date;
 /*     */ import org.apache.struts2.json.annotations.JSON;
 /*     */ 
-/*     */ public class SysUser extends AbstractData
+/*     */ @SuppressWarnings("serial")
+			public class SysUser extends AbstractData
 /*     */ {
 /*     */   private SysMenuRole sysMenuRole;
 /*     */   private Integer userId;

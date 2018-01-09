@@ -8,6 +8,28 @@
     <param-name>webAppRootKey</param-name>
     <param-value>webapp.root</param-value>
   </context-param>
+  
+  <!-- Shiro Filter is defined in the spring application context: -->
+	<!-- 
+	1. 配置  Shiro 的 shiroFilter.  
+	2. DelegatingFilterProxy 实际上是 Filter 的一个代理对象. 默认情况下, Spring 会到 IOC 容器中查找和 
+	<filter-name> 对应的 filter bean. 也可以通过 targetBeanName 的初始化参数来配置 filter bean 的 id. 
+	-->
+    <filter>
+        <filter-name>shiroFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <init-param>
+            <param-name>targetFilterLifecycle</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>shiroFilter</filter-name>
+        <url-pattern>/*</url-pattern> <!-- 这里过滤了所有 -->
+    </filter-mapping>
+    <!--                  shiro在web环境下的配置结束                                                                                                                 -->
+  
   <filter>
     <filter-name>hibernateFilter</filter-name>
     <filter-class> 
@@ -18,7 +40,7 @@
     <filter-name>hibernateFilter</filter-name>
     <url-pattern>*.do</url-pattern>
   </filter-mapping>
-  <filter>
+  <!-- <filter>
     <filter-name>authCheck</filter-name>
     <filter-class>com.smarthome.imcp.filter.AuthCheckFilter</filter-class>
     <init-param>
@@ -30,10 +52,10 @@
       <param-value>UTF-8</param-value>
     </init-param>
   </filter>
-  <!-- <filter-mapping>
+  <filter-mapping>
     <filter-name>authCheck</filter-name>
     <url-pattern>*.do</url-pattern>
-  </filter-mapping> -->
+  </filter-mapping>
   <filter-mapping>
     <filter-name>authCheck</filter-name>
     <url-pattern>*.jsp</url-pattern>
@@ -45,7 +67,7 @@
   <filter-mapping>
     <filter-name>authCheck</filter-name>
     <url-pattern>*.htm</url-pattern>
-  </filter-mapping>
+  </filter-mapping> -->
   <context-param>
     <param-name>proxoolConfigLocation</param-name>
     <param-value>proxool.xml</param-value>

@@ -3,11 +3,8 @@
 /*     */ import com.smarthome.imcp.common.ContextUtil;
 /*     */ import com.smarthome.imcp.common.Md5;
 /*     */ import com.smarthome.imcp.common.Page;
-import com.smarthome.imcp.dao.CommonsDaoIface;
 /*     */ import com.smarthome.imcp.dao.criteria.SearchCriteria;
 /*     */ import com.smarthome.imcp.dao.criteria.system.SearchCriteriaUser;
-import com.smarthome.imcp.dao.model.bo.BoUser;
-import com.smarthome.imcp.dao.model.bo.BoUsersValidation;
 /*     */ import com.smarthome.imcp.dao.model.system.SysUser;
 /*     */ import com.smarthome.imcp.dao.system.SysUserDaoIface;
 /*     */ import com.smarthome.imcp.dao.vo.system.UserChangePassword;
@@ -19,6 +16,8 @@ import com.smarthome.imcp.dao.model.bo.BoUsersValidation;
 /*     */ import java.io.Serializable;
 /*     */ import java.util.List;
 /*     */ import java.util.StringTokenizer;
+		  import org.hibernate.criterion.DetachedCriteria;
+		  import org.hibernate.criterion.Restrictions;
 /*     */ import org.springframework.beans.factory.annotation.Autowired;
 /*     */ import org.springframework.stereotype.Service;
 /*     */ 
@@ -80,15 +79,12 @@ import com.smarthome.imcp.dao.model.bo.BoUsersValidation;
 ////			if (1>0) {
 ///*  82 */       return null;
 ///*     */     }else {
-				Md5 md5 = new Md5();
-	/*  86 */   String loginPwd = md5.getMD5ofStr(sysUser.getLoginPwd());
-//	              System.out.println("loginPwd="+loginPwd);
-	/*  87 */   sysUser.setLoginPwd(loginPwd);
+//				Md5 md5 = new Md5();
+//	/*  86 */   String loginPwd = md5.getMD5ofStr(sysUser.getLoginPwd());
+////	              System.out.println("loginPwd="+loginPwd);
+//	/*  87 */   sysUser.setLoginPwd(loginPwd);
 	/*  88 */   this.sysUserDao.save(sysUser);//save
-	/*  89 */   return sysUser;
-//			  }
-/*     */     
-/*  85 */     
+	/*  89 */   return sysUser;    
 /*     */   }
 /*     */ 
 /*     */   public SysUser findByKey(Serializable id)
@@ -174,9 +170,35 @@ import com.smarthome.imcp.dao.model.bo.BoUsersValidation;
 /* 150 */     this.sysUserDao.changePassword(userChangePassword.getUserId(), 
 /* 151 */       md5.getMD5ofStr(userChangePassword.getNewPassword()));
 /*     */   }
-          
 
+			@Override
+			public SysUser getSysUsersByName(String userName) {
+				DetachedCriteria criteria = DetachedCriteria.forClass(SysUser.class);
+		        criteria.add(Restrictions.eq("loginName", userName));
+				 
+				List<SysUser> list = this.sysUserDao.findByCriteria(criteria);
+			    System.out.println(list);
+			    if ((list == null) || (list.isEmpty())) {
+			       return null;
+			    }
+				return list.get(0);
+			}
 
+//			@Override
+//			public Set<String> getRoles(String userName) {
+//				//userName > userID > Role
+//				DetachedCriteria criteria = DetachedCriteria.forClass(SysUser.class);
+//				criteria.add(Restrictions.eq("userName", userName));
+//				return this.sysUserDao.findByCriteria(criteria);
+//			}
+//			
+//			@Override
+//			public Set<String> getPermissions(String userName) {
+//				//userName > userID > roleID > Permission
+//				DetachedCriteria criteria = DetachedCriteria.forClass(SysUser.class);
+//				criteria.add(Restrictions.eq("userName", userName));
+//				return this.sysUserDao.findByCriteria(criteria);
+//			}
 		}
 
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\

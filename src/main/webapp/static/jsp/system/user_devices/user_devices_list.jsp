@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
 <%
 	String WEBPATH22 = request.getContextPath();
 	String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+WEBPATH22+"/";
@@ -51,7 +52,7 @@
 						<th class="center">USER_PHONE</th>
 						<th class="center">DEVICE_CODE</th>
 						<th class="center">NICK_NAME</th>
-						<th class="center">操作</th>
+						<shiro:hasRole name="admin"><th class="center">操作</th></shiro:hasRole>
 					</tr>
 				</thead>
 										
@@ -239,9 +240,11 @@
             	    					'<td class="center">'+item.userPhone+'</td>'+
             	    					'<td class="center">'+item.deviceCode+'</td>'+
             	    					'<td class="center">'+item.nick_name+'</td>'+
+            	    					'<shiro:hasRole name="admin">'+
             	    					'<td style="width: 30px;" class="center">'+
             	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
             	    					'</td>'+
+            	    					'</shiro:hasRole>'+
             	    					'</tr>');
         					}
     					})
@@ -454,7 +457,7 @@
 							}
 						}else{
 							$("#userDevicelist").append('<tr>'+
-        	    					'<td class="center" style="width: 30px;">'+
+									'<td class="center" style="width: 30px;">'+
         	    					'<label>'+
         	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
         	    					'<span class="lbl">'+
@@ -465,10 +468,12 @@
         	    					'<td class="center">'+item.userPhone+'</td>'+
         	    					'<td class="center">'+item.deviceCode+'</td>'+
         	    					'<td class="center">'+item.nick_name+'</td>'+
+        	    					'<shiro:hasRole name="admin">'+
         	    					'<td style="width: 30px;" class="center">'+
         	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
         	    					'</td>'+
-        	    					'</tr>'); 
+        	    					'</shiro:hasRole>'+
+        	    					'</tr>');
 	    				}
 					})								    					
 			}, 
@@ -500,21 +505,23 @@
     					$.each(data,function(i,item){//i是key,item是value
     						$("#userDevicelist").empty();
       						 $("#userDevicelist").append('<tr>'+
-    	    					'<td class="center" style="width: 30px;">'+
-    	    					'<label>'+
-    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
-    	    					'<span class="lbl">'+
-    	    					'</span>'+
-    	    					'</label>'+
-    	    					'</td>'+
-    	    					'<td class="center">'+(i+1)+'</td>'+
-    	    					'<td class="center">'+item.userPhone+'</td>'+
-    	    					'<td class="center">'+item.deviceCode+'</td>'+
-    	    					'<td class="center">'+item.nick_name+'</td>'+
-    	    					'<td style="width: 30px;" class="center">'+
-    	    					'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
-	    						'</td>'+
-    	    					'</tr>');  
+      								'<td class="center" style="width: 30px;">'+
+        	    					'<label>'+
+        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+        	    					'<span class="lbl">'+
+        	    					'</span>'+
+        	    					'</label>'+
+        	    					'</td>'+
+        	    					'<td class="center">'+(i+1)+'</td>'+
+        	    					'<td class="center">'+item.userPhone+'</td>'+
+        	    					'<td class="center">'+item.deviceCode+'</td>'+
+        	    					'<td class="center">'+item.nick_name+'</td>'+
+        	    					'<shiro:hasRole name="admin">'+
+        	    					'<td style="width: 30px;" class="center">'+
+        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+        	    					'</td>'+
+        	    					'</shiro:hasRole>'+
+        	    					'</tr>');
         				}) 
         				
     				}

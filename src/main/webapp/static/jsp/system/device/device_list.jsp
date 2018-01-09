@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
 <%
 	String WEBPATH21 = request.getContextPath();
 	String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+WEBPATH21+"/";
@@ -53,14 +54,10 @@
 						</span>
 					</td>
 					
-					<!-- <td style="vertical-align:top;"><button class="btn btn-mini btn-light" onclick="search();"  title="检索"><i id="nav-search-icon" class="icon-search"></i></button></td> -->
 					<td style="vertical-align:top;"><input type="button" style="border:none;" value="搜索"  onclick="search();"  title="检索"></input></td>
-					<%-- <c:if test="${QX.cha == 1 }"> --%>
-					<%-- <c:if test="${QX.edit == 1 }"> --%>
-						<!-- <td style="vertical-align:top;"><a class="btn btn-mini btn-light" onclick="fromExcel();" title="从EXCEL导入"><i id="nav-search-icon" class="icon-cloud-upload"></i></a></td> -->
-						<td style="vertical-align:top;"><input id="filepath" type="file" class="btn btn-mini btn-light " ></input><button id="nav-search-icon" vallue="导入" class="icon-cloud-upload" style="border:none;" onclick="fromExcel();"></button></td>
-						<%-- </c:if> --%>
-					<%-- </c:if> --%>
+						<shiro:hasRole name="admin">
+							<td style="vertical-align:top;"><input id="filepath" type="file" class="btn btn-mini btn-light " ></input><button id="nav-search-icon" vallue="导入" class="icon-cloud-upload" style="border:none;" onclick="fromExcel();"></button></td>	
+						</shiro:hasRole>
 					<h3 style="display:inline;color: green;" >总个数：</h3><h3 id="total" style="display:inline;color: purple;">${pds.countNum} 台&nbsp</h3>
 					<h3 style="display:inline;color: maroon;" >▎总在线：</h3><h3 id="online" style="display:inline;color: teal;">${pds.statuNum}</h3>
 				</tr>
@@ -81,7 +78,7 @@
 						<th class="center">DEVICE_NAME</th> -->
 						<th class="center" style="width: 20%;">状态</th>
 						<th class="center" style="width: 20%;">类型</th>
-						<th class="center">操作</th>
+						<shiro:hasRole name="admin"><th class="center">操作</th></shiro:hasRole>
 					</tr>
 				</thead>
 										
@@ -152,9 +149,11 @@
 		<div class="page-header position-relative">
 		<table style="width:100%;" >
 		    <tr>
-		    	<td style="vertical-align:top;">
-		    		<a class="btn btn-small btn-success" href="<%=WEBPATH21 %>/static/jsp/system/device/add.jsp">新增</a>
-		    	</td>
+		    	<shiro:hasRole name="admin">
+		    		<td style="vertical-align:top;">
+		    			<a class="btn btn-small btn-success" href="<%=WEBPATH21 %>/static/jsp/system/device/add.jsp">新增</a>
+		    		</td>
+		    	</shiro:hasRole>
 		    	<td style="vertical-align:top;">
 		    		<div class="pagination" style="float: right;padding-top: 0px;margin-top: 0px;" id="devicelist01">
 		    	</td>
@@ -324,7 +323,9 @@
 	       	    					col+
 	       	    					status+
 	       	    					type+
+	       	    					'<shiro:hasRole name="admin">'+
 	       	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+	       	    					'</shiro:hasRole>'+
 	       	    					'</tr>');  
 	        					}
     				})
@@ -589,12 +590,15 @@
 	           				     }else{
 	           				    	 alert("error");
 	           				     }
-	         					$("#devicelist").append('<tr>'+
-	       	    					col+
-	       	    					status+
-	       	    					type+
-	       	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
-	       	    					'</tr>');   
+		           				  $("#devicelist").append('<tr>'+
+			       	    					col+
+			       	    					status+
+			       	    					type+
+			       	    					'<shiro:hasRole name="admin">'+
+			       	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+			       	    					'</shiro:hasRole>'+
+			       	    					'</tr>');  
+			        		
 		    				}
 						})								    					
 				}, 
@@ -669,12 +673,14 @@
 	        				     }else{
 	        				    	 alert("error");
 	        				     }
-	      						 $("#devicelist").append('<tr>'+
-	    	    					col+
-	    	    					status+
-	    	    					type+
-	    	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
-	    	    					'</tr>');  
+	        				     $("#devicelist").append('<tr>'+
+	 	       	    					col+
+	 	       	    					status+
+	 	       	    					type+
+	 	       	    					'<shiro:hasRole name="admin">'+
+	 	       	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+	 	       	    					'</shiro:hasRole>'+
+	 	       	    					'</tr>');  
 	        				}) 
 	    				}
 	    				
@@ -725,12 +731,14 @@
 	        				     }else{
 	        				    	 alert("error");
 	        				     }
-	      						 $("#devicelist").append('<tr>'+
-	    	    					col+
-	    	    					status+
-	    	    					type+
-	    	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
-	    	    					'</tr>');  
+	        				     $("#devicelist").append('<tr>'+
+	 	       	    					col+
+	 	       	    					status+
+	 	       	    					type+
+	 	       	    					'<shiro:hasRole name="admin">'+
+	 	       	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+	 	       	    					'</shiro:hasRole>'+
+	 	       	    					'</tr>');  
 	        				}) 
 	        				
 	    				}
@@ -783,12 +791,14 @@
 	        				     }else{
 	        				    	 alert("error");
 	        				     }
-	      						 $("#devicelist").append('<tr>'+
-	    	    					col+
-	    	    					status+
-	    	    					type+
-	    	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
-	    	    					'</tr>');  
+	        				     $("#devicelist").append('<tr>'+
+	 	       	    					col+
+	 	       	    					status+
+	 	       	    					type+
+	 	       	    					'<shiro:hasRole name="admin">'+
+	 	       	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+	 	       	    					'</shiro:hasRole>'+
+	 	       	    					'</tr>');   
 	        				}) 
 
 	    				}
@@ -798,28 +808,7 @@
 			} 
 		}
 		
-		//新增
-		function add(){
-			 top.jzts();
-			 var diag = new top.Dialog();
-			 diag.Drag=true;
-			 diag.Title ="新增";
-			 diag.URL = '<%=basePath%>device/goAdd.do';
-			 diag.Width = 450;
-			 diag.Height = 200;
-			 diag.CancelEvent = function(){ //关闭事件
-				 if(diag.innerFrame.contentWindow.document.getElementById('zhongxin').style.display == 'none'){
-					 if('${page.currentPage}' == '0'){
-						 top.jzts();
-						 setTimeout("self.location=self.location",100);
-					 }else{
-						 nextPage(${page.currentPage});
-					 }
-				}
-				diag.close();
-			 };
-			 diag.show();
-		}
+
 		
 		//删除
 		function del(Id){
@@ -854,7 +843,6 @@
 		</script>
 		
 		<script type="text/javascript">
-		
 		$(function() {
 			
 			//下拉框

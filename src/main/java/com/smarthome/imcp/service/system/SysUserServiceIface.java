@@ -2,10 +2,12 @@ package com.smarthome.imcp.service.system;
 
 import com.smarthome.imcp.dao.model.bo.BoUser;
 import com.smarthome.imcp.dao.model.bo.BoUsersValidation;
+import com.smarthome.imcp.dao.model.system.SysUser;
 import com.smarthome.imcp.dao.vo.system.UserChangePassword;
 import com.smarthome.imcp.service.BasicServiceIface;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 public abstract interface SysUserServiceIface<T, PK extends Serializable> extends BasicServiceIface<T, PK>
 {
@@ -18,6 +20,12 @@ public abstract interface SysUserServiceIface<T, PK extends Serializable> extend
   public abstract int findByUserPhone(String userPhone);//返回Userid
 
   public abstract int findByUserEmail(String email);
+
+//  public abstract Set<String> getRoles(String userName);
+
+//  public abstract Set<String> getPermissions(String userName);
+//
+  public abstract SysUser getSysUsersByName(String userName);
 
 }
 

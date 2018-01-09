@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="shiro" uri="http://shiro.apache.org/tags" %>
 <%
 	String WEBPATH32 = request.getContextPath();
 	String basePath = request.getScheme()+"://"+request.getServerName()+":"+request.getServerPort()+WEBPATH32+"/";
@@ -45,7 +46,9 @@
 					<!-- <td style="vertical-align:top;"><button class="btn btn-mini btn-light" onclick="search();"  title="检索"><i id="nav-search-icon" class="icon-search"></i></button></td> -->
 					<td style="vertical-align:top;"><input type="button" value="搜索"  onclick="search();"  title="检索"></input></td>
 					<!-- <td style="vertical-align:top;"><a class="btn btn-mini btn-light" onclick="fromExcel();" title="从EXCEL导入"><i id="nav-search-icon" class="icon-cloud-upload"></i></a></td> -->
-					<td style="vertical-align:top;"><input id="filepath" type="file" class="btn btn-mini btn-light " ></input><button id="nav-search-icon" vallue="导入" class="icon-cloud-upload" style="border:none;" onclick="fromExcel();"></button></td>
+					<shiro:hasRole name="admin">
+						<td style="vertical-align:top;"><input id="filepath" type="file" class="btn btn-mini btn-light " ></input><button id="nav-search-icon" vallue="导入" class="icon-cloud-upload" style="border:none;" onclick="fromExcel();"></button></td>
+					</shiro:hasRole>
 				</tr>
 			</table>
 			<!-- 检索  -->
@@ -61,7 +64,7 @@
 						<th class="center">序号</th>
 						<th class="center">红外地址码</th>
 						<th class="center">红外验证码</th>
-						<th class="center">操作</th>
+						<shiro:hasRole name="admin"><th class="center">操作</th></shiro:hasRole>
 					</tr>
 				</thead>
 										
@@ -114,6 +117,8 @@
 			
 		<div class="page-header position-relative">
 		<table style="width:100%;">
+			<shiro:hasRole name="admin">
+			<tr>
 				<td style="vertical-align:top;">
 					<%-- <c:if test="${QX.add == 1 }"> --%>
 					<a class="btn btn-small btn-success" href="<%=WEBPATH32 %>/static/jsp/system/infrared_part/add.jsp">新增</a>
@@ -129,6 +134,7 @@
 					</div>
 				</td>
 			</tr>
+			</shiro:hasRole>
 		</table>
 		</div>
 		</form>
@@ -261,6 +267,7 @@
             	    					'<td class="center">'+(i+1)+'</td>'+
             	    					'<td class="center">'+item.deviceAddress+'</td>'+
             	    					'<td class="center">'+item.validationCode+'</td>'+
+            	    					'<shiro:hasRole name="admin">'+
             	    					'<td style="width: 30px;" class="center">'+
         									'<div class="hidden-phone visible-desktop btn-group">'+
         										'<div class="inline position-relative">'+
@@ -271,6 +278,8 @@
         										'</ul>'+
         									'</div>'+
         								'</div>'+
+        								'</td>'+
+        								'</shiro:hasRole>'+
             	    					'</tr>'); 
         					}					  
         				}) 
@@ -507,7 +516,7 @@
 							}
 						}else{
 							$("#infraredlist").append('<tr>'+
-        	    					'<td class="center" style="width: 30px;">'+
+									'<td class="center" style="width: 30px;">'+
         	    					'<label>'+
         	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
         	    					'<span class="lbl">'+
@@ -517,6 +526,7 @@
         	    					'<td class="center">'+(i+1)+'</td>'+
         	    					'<td class="center">'+item.deviceAddress+'</td>'+
         	    					'<td class="center">'+item.validationCode+'</td>'+
+        	    					'<shiro:hasRole name="admin">'+
         	    					'<td style="width: 30px;" class="center">'+
     									'<div class="hidden-phone visible-desktop btn-group">'+
     										'<div class="inline position-relative">'+
@@ -527,7 +537,9 @@
     										'</ul>'+
     									'</div>'+
     								'</div>'+
-        	    					'</tr>');  
+    								'</td>'+
+    								'</shiro:hasRole>'+
+        	    					'</tr>'); 
 	    				}
 					})								    					
 			}, 
@@ -562,27 +574,30 @@
     					$.each(data,function(i,item){//i是key,item是value
     						$("#infraredlist").empty();
      						 $("#infraredlist").append('<tr>'+
-   	    					'<td class="center" style="width: 30px;">'+
-   	    					'<label>'+
-   	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
-   	    					'<span class="lbl">'+
-   	    					'</span>'+
-   	    					'</label>'+
-   	    					'</td>'+
-   	    					'<td class="center">'+(i+1)+'</td>'+
-   	    					'<td class="center">'+item.deviceAddress+'</td>'+
-   	    					'<td class="center">'+item.validationCode+'</td>'+
-   	    					'<td style="width: 30px;" class="center">'+
-									'<div class="hidden-phone visible-desktop btn-group">'+
-										'<div class="inline position-relative">'+
-										'<button class="btn btn-mini btn-info" data-toggle="dropdown"><i class="icon-cog icon-only"></i></button>'+
-										'<ul class="dropdown-menu dropdown-icon-only dropdown-light pull-right dropdown-caret dropdown-close">'+
-											'<li><a style="cursor:pointer;" title="编辑" href="<%=WEBPATH32 %>/static/jsp/system/infrared_part/edit.jsp?id='+item.id+'&deviceAddress='+item.deviceAddress+'&validationCode='+item.validationCode+'" class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></li>'+
-											'<li><a style="cursor:pointer;" title="删除" onclick="del('+item.id+');" class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></li>'+
-										'</ul>'+
-									'</div>'+
-								'</div>'+
-   	    					'</tr>');  
+     								'<td class="center" style="width: 30px;">'+
+        	    					'<label>'+
+        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+        	    					'<span class="lbl">'+
+        	    					'</span>'+
+        	    					'</label>'+
+        	    					'</td>'+
+        	    					'<td class="center">'+(i+1)+'</td>'+
+        	    					'<td class="center">'+item.deviceAddress+'</td>'+
+        	    					'<td class="center">'+item.validationCode+'</td>'+
+        	    					'<shiro:hasRole name="admin">'+
+        	    					'<td style="width: 30px;" class="center">'+
+    									'<div class="hidden-phone visible-desktop btn-group">'+
+    										'<div class="inline position-relative">'+
+    										'<button class="btn btn-mini btn-info" data-toggle="dropdown"><i class="icon-cog icon-only"></i></button>'+
+    										'<ul class="dropdown-menu dropdown-icon-only dropdown-light pull-right dropdown-caret dropdown-close">'+
+    											'<li><a style="cursor:pointer;" title="编辑" href="<%=WEBPATH32 %>/static/jsp/system/infrared_part/edit.jsp?id='+item.id+'&deviceAddress='+item.deviceAddress+'&validationCode='+item.validationCode+'" class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></li>'+
+    											'<li><a style="cursor:pointer;" title="删除" onclick="del('+item.id+');" class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></li>'+
+    										'</ul>'+
+    									'</div>'+
+    								'</div>'+
+    								'</td>'+
+    								'</shiro:hasRole>'+
+        	    					'</tr>'); 
        					}) 
     				}
 				}

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<!-- 不用这个了，改用SysUser和它的hbm文件 -->
+<hibernate-mapping>
+    <class name="com.smarthome.shiro.entity.User" table="user">
+        <id name="user_id" type="java.lang.Integer">
+            <column name="USER_ID" />
+            <generator class="identity" />
+        </id>
+ 
+        <property name="user_name" type="java.lang.String">
+            <column name="USER_NAME" length="45" />
+        </property>
+        <property name="password" type="java.lang.String">
+            <column name="PASSWORD" length="65" />
+        </property>
+    </class>
+</hibernate-mapping>
