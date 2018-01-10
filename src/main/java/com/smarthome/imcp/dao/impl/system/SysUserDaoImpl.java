@@ -4,18 +4,13 @@
 /*     */ import com.smarthome.imcp.common.Page;
 /*     */ import com.smarthome.imcp.dao.CommonsDaoImpl;
 /*     */ import com.smarthome.imcp.dao.criteria.system.SearchCriteriaUser;
-import com.smarthome.imcp.dao.model.bo.BoUser;
-import com.smarthome.imcp.dao.model.bo.BoUsers;
-import com.smarthome.imcp.dao.model.bo.BoUsersValidation;
+		  import com.smarthome.imcp.dao.model.bo.BoUser;
+		  import com.smarthome.imcp.dao.model.bo.BoUsersValidation;
 /*     */ import com.smarthome.imcp.dao.model.system.SysUser;
 /*     */ import com.smarthome.imcp.dao.system.SysUserDaoIface;
 /*     */ import java.io.Serializable;
 /*     */ import java.util.List;
-import java.util.Set;
-
 /*     */ import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
-import org.hibernate.Session;
 /*     */ import org.hibernate.criterion.DetachedCriteria;
 /*     */ import org.hibernate.criterion.MatchMode;
 /*     */ import org.hibernate.criterion.Order;

@@ -52,7 +52,7 @@ import org.dom4j.Document;
 		 import org.dom4j.DocumentHelper;  
 		 import org.dom4j.Element; 
 /*    */ 
-		 @Controller
+		@Controller
 /*    */ public class LoginController
 /*    */ {
 /*    */ 
@@ -1392,7 +1392,13 @@ import org.dom4j.Document;
 		       } 
 		       return result;			   
 		    } 
-		 }
+		   
+		      
+//       用于Junit测试
+         public void hello(String str) {
+      	   System.out.println("hello"+str);
+         }
+	}
 
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\
  * Qualified Name:     com.smarthome.imcp.controller.LoginController

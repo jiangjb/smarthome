@@ -31,6 +31,10 @@ import com.smarthome.shiro.entity.Role;
 import com.smarthome.shiro.entity.Role_Permission;
 import com.smarthome.shiro.entity.User_Role;
 
+/**
+ * @author Bing
+ *
+ */
 public class ShiroRealm extends AuthorizingRealm {
 	
 	@Autowired
@@ -48,6 +52,11 @@ public class ShiroRealm extends AuthorizingRealm {
 	@Autowired
 	private RolePermissionServiceIface<Role_Permission, Serializable> rolePermissionService;
 	
+	
+	/** 
+	 * @author Bing  
+	 * 重写 认证 方法
+	 */
 	@Override
 	protected AuthenticationInfo doGetAuthenticationInfo(
 			AuthenticationToken token) throws AuthenticationException {
@@ -127,7 +136,11 @@ public class ShiroRealm extends AuthorizingRealm {
 //		System.out.println(pwd);
 	}
 
-	//授权会被 shiro 回调的方法
+	
+	/* 
+	 * @author Bing 
+	 * 重写授权方法     会被 shiro 回调的方法
+	 */
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(
 			PrincipalCollection principals) {
