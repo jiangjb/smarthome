@@ -147,6 +147,7 @@
 /*      */ 
 /*      */   @Autowired
 /*      */   private BoUserDeviceServiceIface boUserDeviceService;
+
 /*      */   private String userCode;
 /*      */   private String deviceCode;
 /*      */ 
@@ -2267,7 +2268,7 @@
 /*      */       }
 /*      */ 
 /*      */     }
-/*      */ 
+
 /* 2487 */     BoDevice boDevice = this.wdDeviceService.findByCode(deviceCode);
 /* 2488 */     if (boDevice != null) {
 /* 2489 */       boDevice.setStatus(Integer.valueOf(1));
@@ -2288,12 +2289,13 @@
 /*      */   public void procesKeepAliveLost(com.smarthome.dock.server.packets.in.KeepAlivePacket packet)
 /*      */   {
 /* 2511 */     logger.info(packet.getDevId() + " 开始处理离线procesKeepAliveLost");
+			   System.out.println(packet.getDevId() + " 开始处理离线procesKeepAliveLost");
 /* 2512 */     String hostName = packet.getHostName();
 /* 2513 */     int port = packet.getPort();
 /*      */ 
 /* 2515 */     this.userManager.logoutUser(packet.getDevId(), new Date(), hostName);
 /*      */ 
-/* 2517 */     this.boProcessService.doKeepAliveLost(packet.getDevId(), hostName);
+/* 2517 */     this.boProcessService.doKeepAliveLost(packet.getDevId(), hostName);//判断离线
 /*      */ 
 /* 2519 */     this.packetProcessor.removeSocketAddress(packet.getDevId());
 /*      */ 

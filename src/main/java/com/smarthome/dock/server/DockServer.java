@@ -18,13 +18,16 @@
 /*     */ import org.slf4j.Logger;
 /*     */ import org.slf4j.LoggerFactory;
 /*     */ import org.springframework.beans.factory.annotation.Autowired;
+		  import com.smarthome.dock.server.packets.in.KeepAlivePacket;
+		  import com.smarthome.dock.server.support.KeepAliveTrigger;
 /*     */ 
 /*     */ public class DockServer
 /*     */ {
 /*  25 */   private static Logger logger = LoggerFactory.getLogger(DockServer.class);
-/*     */ 
-/*     */   @Autowired
-/*     */   private BoDeviceServiceIface<BoDevice, Serializable> boDeviceService;
+
+			@Autowired
+			private BoDeviceServiceIface <BoDevice, Serializable> boDeviceService;
+
 /*     */   private ChannelFactory factory;
 /*     */   private boolean isStarted;
 /*     */   private PacketProcessor packetProcessor;
@@ -67,7 +70,25 @@
 /*     */         public void run() {
 /*     */           try {
 /*  81 */             System.out.println("服务15秒后启动");
-/*  82 */             DockServer.this.boDeviceService.updateStatus(0);
+
+					  //判断离线|在线是否在线
+//					  com.smarthome.dock.server.packets.in.KeepAlivePacket packet = (com.smarthome.dock.server.packets.in.KeepAlivePacket)in;
+//					  String deviceCode = packet.getDevId();
+//					  String hostName = packet.getHostName();
+//					  boolean isUpdate = false;
+//					  BoDevice device = this.boDeviceService.findByCode(deviceCode);
+//					  if ((device.getStatus() == null) || (device.getStatus().intValue() <= 0) || (!ip.equals(device.getDevIp()))) {
+//						  String[] ret = { "0", "0", "", "", "" };
+//						  this.boDeviceService.updateIP(device.getDeviceId(), 1, ip, ret);
+//						  isUpdate = true;
+//					  }else {
+//						  this.boDeviceService.updateStatus(deviceCode, 0);
+//					  }
+//					  if (!isUpdate)
+//						  this.boDeviceService.updateStatus(deviceCode, 1);
+
+					  System.out.println("tomcat服务启动前执行 ");
+//		              DockServer.this.boDeviceService.updateStatus(0);//默认设为0
 /*  83 */             Thread.sleep(15000L);
 /*     */           } catch (InterruptedException e) {
 /*  85 */             e.printStackTrace();

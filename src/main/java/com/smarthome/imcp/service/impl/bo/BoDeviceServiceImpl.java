@@ -48,6 +48,7 @@ import java.io.FileNotFoundException;
 /*     */   }
 /*     */ 
 /*     */   public void updateAllStatus(int status) {
+//	          System.out.println("updateAllStatus...");
 /*  55 */     Object[] values = { Integer.valueOf(status), "离线" };
 /*  56 */     StringBuffer hql = new StringBuffer();
 /*  57 */     hql.append("update BoDevice ");
@@ -58,6 +59,7 @@ import java.io.FileNotFoundException;
 /*     */   }
 /*     */ 
 /*     */   public void updateStatus(String deivceCode, int status) {
+//			  System.out.println("updateStatus...");
 /*  65 */     Object[] values = { Integer.valueOf(status), "离线", deivceCode };
 /*  66 */     StringBuffer hql = new StringBuffer();
 /*  67 */     hql.append("update BoDevice ");
@@ -176,6 +178,7 @@ import java.io.FileNotFoundException;
 /*     */ 
 /*     */   public BoDevice update(BoDevice model)
 /*     */   {
+//	 	      System.out.println("update...");
 /* 189 */     if (chkUpdateValid(model)) {
 /* 190 */       this.boDeviceDao.update(model);
 /*     */     }
@@ -206,7 +209,8 @@ import java.io.FileNotFoundException;
 /*     */ 
 /*     */   public void updateStatus(int status)
 /*     */   {
-/* 221 */     Object[] values = { Integer.valueOf(status), "离线" };
+//			  System.out.println("updateStatus...");
+/* 221 */     Object[] values = { Integer.valueOf(status), "离线" };//这里是向数据库里插入的值
 /* 222 */     StringBuffer hql = new StringBuffer();
 /* 223 */     hql.append("update BoDevice ");
 /* 224 */     hql.append(" set status = ?");

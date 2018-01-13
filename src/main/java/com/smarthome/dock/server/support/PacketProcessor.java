@@ -150,7 +150,7 @@
 /* 238 */     InPacket in = (InPacket)e.getSource();
 /*     */ 
 /* 254 */     logger.info("开始处理" + in.toString() + "　devId:" + in.getDevId() + " commond：" + Util.getCommandString(in.getCommand()));
-/*     */ 
+/*     */     System.out.println(" devId: "+ in.getDevId());
 /* 259 */     switch (in.getCommand()) {
 /*     */     case 'ꀀ':
 /* 261 */       this.packetProcessHelper.processLoginSuccess(in);

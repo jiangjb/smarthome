@@ -196,12 +196,13 @@
 /*     */       }
 /*     */     }
 /*     */   }
-/*     */ 
-/*     */   @Scheduled(cron="0 0/8 * * * ?")
+
+/*     */   @Scheduled(cron="0 0/8 * * * ?")    //每隔8分钟触发
 /*     */   public void deviceC()
 /*     */     throws ParseException
 /*     */   {
-/* 238 */     this.boDeviceService.updateStatus(0);
+	          System.out.println("tomcat加载完后，每隔8分钟触发...");
+///* 238 */     this.boDeviceService.updateStatus(0);
 /*     */   }
 /*     */ 
 /*     */   @Scheduled(cron="0/1 * * * * ?")

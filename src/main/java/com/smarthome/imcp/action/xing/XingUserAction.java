@@ -2158,7 +2158,7 @@
 /*  2160 */             String CID = users.getCid();
 /*       */ 
 /*  2162 */             if ((CID == null) || (CID.equals(""))) {
-/*  2163 */               System.err.println("CID为空推送不到信息");
+/*  2163 */               System.err.println("CID为空推送不到信息");//消息推送
 /*       */             } else {
 /*  2165 */               StringBuffer text = new StringBuffer();
 /*  2166 */               System.err.println("*****<< " + users.getVersionType());
@@ -11073,6 +11073,7 @@
 /*       */   @Action(value="getallhost", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String getAllHost()
 /*       */   {
+	 			System.out.println("11111111111111111111111111111111111111111111");
 /* 11408 */     this.requestJson = new RequestJson();
 /* 11409 */     Map maps = new HashMap();
 /* 11410 */     HttpServletRequest request = ServletActionContext.getRequest();

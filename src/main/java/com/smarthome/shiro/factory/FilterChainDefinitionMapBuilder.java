@@ -24,7 +24,7 @@ public class FilterChainDefinitionMapBuilder {
 //		map.put("/index.jsp", "roles[admin]");
 //		map.put("/list.jsp", "user");
 		
-		map.put("/**", "authc");
+//		map.put("/**", "authc");
 		
 		return map;
 	}

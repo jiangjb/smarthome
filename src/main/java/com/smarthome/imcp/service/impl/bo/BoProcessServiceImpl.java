@@ -127,10 +127,12 @@
 /*     */   }
 /*     */ 
 /*     */   public void doKeepAliveLost(String deviceCode, String ip) {
+			  System.out.println("检查主机是否离线...");
 /* 132 */     this.boDeviceService.updateStatus(deviceCode, 0);
 /*     */   }
 /*     */ 
 /*     */   public void doKeepAlive(String deviceCode, String ip) {
+//				System.out.println("检查主机是否在线...");
 /* 136 */     boolean isUpdate = false;
 /* 137 */     BoDevice device = this.boDeviceService.findByCode(deviceCode);
 /* 138 */     if ((device.getStatus() == null) || (device.getStatus().intValue() <= 0) || (!ip.equals(device.getDevIp()))) {

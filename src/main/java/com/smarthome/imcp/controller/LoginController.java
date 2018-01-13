@@ -887,8 +887,7 @@ import org.dom4j.Document;
 					    System.out.println("type:"+bodevice.getType());
 					    list.add(user);
 					   } 
-		       }
-		        
+		       }   
 		       return list;
 		    }
 		   
