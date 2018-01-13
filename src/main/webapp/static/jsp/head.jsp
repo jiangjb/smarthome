@@ -39,6 +39,7 @@
 						<a class="user-menu dropdown-toggle" href="javascript:;" data-toggle="dropdown">
 							<img alt="FH" src="<%=WEBPATH2 %>/static/images/avatars/user.jpg" class="nav-user-photo" />
 							<span id="user_info">
+								
 							</span>
 							<i class="icon-caret-down"></i>
 						</a>

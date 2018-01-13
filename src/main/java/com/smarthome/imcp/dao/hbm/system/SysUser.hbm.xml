@@ -8,7 +8,7 @@
     <class name="com.smarthome.imcp.dao.model.system.SysUser" table="sys_user1">
         <id name="userId" type="java.lang.Integer">
             <column name="USER_ID"/>
-           	<generator class="identity" />
+           	<generator class="identity"/>
         </id>
         <!-- <many-to-one name="sysMenuRole" class="com.smarthome.imcp.dao.model.system.sysMenuRole" fetch="select">
             <column name="ROLE_ID" length="100"/>
@@ -27,7 +27,7 @@
             <column name="PHONE" length="32" />
         </property>
         <property name="email" type="java.lang.String">
-            <column name="MAIL" length="32" />
+            <column name="EMAIL" length="32" />
         </property>
     </class>
 </hibernate-mapping>

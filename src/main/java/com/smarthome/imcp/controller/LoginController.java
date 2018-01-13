@@ -200,13 +200,13 @@ import org.dom4j.Document;
 			   //shiro加密部分
 			    String hashAlgorithmName = "MD5";
 				Object credentials = userPwd;
-				Object salt = ByteSource.Util.bytes(userName);;
+				Object salt = ByteSource.Util.bytes(userName);
 				int hashIterations = 1024;
 				Object result = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
 				String userPwd1=result.toString();
 				System.out.println("shiro加密后 password:"+userPwd1);
 				/////////////////////////////////////////////加密结束/////////////////////////////////////
-			   
+				
 			    sysuser.setLoginPwd(userPwd1);
 			    sysuser.setUserPhone(userPhone);
 			    sysuser.setEmail(email);
@@ -362,7 +362,7 @@ import org.dom4j.Document;
 		   
 		   @RequestMapping({"findUserInfo.do"})
 		   @ResponseBody
-		   public Map<String, String> findUserInfo(@RequestParam("USER_ID") int USER_ID,HttpServletRequest request) {//这个得怎么返回？？？map  
+		   public Map<String, String> findUserInfo(@RequestParam("USER_ID") int USER_ID,HttpServletRequest request) {
 			   System.out.println("查找个人信息！");
 			   SysUser sysuser=this.sysUserService.findByKey(USER_ID);//找到用户
 //			   System.out.println("sysuser="+sysuser);
