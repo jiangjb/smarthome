@@ -4625,7 +4625,11 @@
 /*  4685 */             System.err.println(this.classesInfo);
 /*  4686 */             System.err.println(this.infraredButtonsInfo);
 /*  4687 */             Map data = new HashMap();
-/*       */ 			List<String> keys=(List<String>) data.keySet();
+///*       */ 			List<String> keys=(List<String>) data.keySet();
+						//Set 转   List
+						Set<String> keys0 = data.keySet();
+						List<String> keys = new ArrayList<>(keys0);
+						
 /*  4689 */             JSONObject jsonObject = JSONObject.fromObject(this.infraredButtonsInfo);
 /*  4690 */             Iterator it = jsonObject.keys();
 /*       */ 
@@ -4699,7 +4703,10 @@
 /*  4761 */           System.err.println(this.classesInfo);
 /*  4762 */           System.err.println(this.infraredButtonsInfo);
 /*  4763 */           Map data = new HashMap();
-					  List<String> keys=(List<String>) data.keySet();
+//					  List<String> keys=(List<String>) data.keySet();
+					  //Set 转   List
+					  Set<String> keys0 = data.keySet();
+					  List<String> keys = new ArrayList<>(keys0);
 /*       */ 
 /*  4765 */           JSONObject jsonObject = JSONObject.fromObject(this.infraredButtonsInfo);
 /*  4766 */           Iterator it = jsonObject.keys();
@@ -11564,7 +11571,11 @@
 /*       */         } else {
 /*       */           try {
 /* 11915 */             Map deviceAddressMap = new HashMap();
-						List<String> keys=(List<String>) deviceAddressMap.keySet();
+//						List<String> keys=(List<String>) deviceAddressMap.keySet();//Set can't cast to List 
+						//Set 转    List
+						Set<String> keys0 = deviceAddressMap.keySet();
+						List<String> keys = new ArrayList<>(keys0);
+						
 /* 11916 */             List getroomCode = this.boHostDeviceService.getroomCode(this.roomCode);
 /*       */             BoHostDevice boHostDevice;
 /* 11917 */             for (int i = 0; i < getroomCode.size(); i++) {
@@ -11642,7 +11653,11 @@
 /*       */         } else {
 /*       */           try {
 /* 11991 */             Map deviceAddressMap = new HashMap();
-						List<String> keys=(List<String>) deviceAddressMap.keySet();
+//						List<String> keys=(List<String>) deviceAddressMap.keySet();
+						//Set 转    List
+						Set<String> keys0 = deviceAddressMap.keySet();
+						List<String> keys = new ArrayList<>(keys0);
+						
 /* 11992 */             List getroomCode = this.boHostDeviceService.getroomCode(this.roomCode);
 /*       */             BoHostDevice boHostDevice;
 /* 11993 */             for (int i = 0; i < getroomCode.size(); i++) {
