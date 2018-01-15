@@ -69,10 +69,14 @@
 /*     */     throws Exception
 /*     */   {
 /*  99 */     long t = getTimeoutLeft();
+//			  System.out.println("t:"+t);//60000
 /* 100 */     while (t <= 0L) {
+				System.out.println("t <= 0L");
 /* 101 */       KeepAlivePacket packet = remove();
+				System.out.println("packet:"+packet);//null
 /*     */ 
 /* 103 */       if (packet != null) {
+	              System.out.println("packet != null");
 /* 104 */         this.packetProcessor.getPacketProcessHelper().procesKeepAliveLost(packet);
 /*     */       }
 /*     */ 

@@ -2242,9 +2242,12 @@
 /* 2456 */     logger.info("开始处理procesKeepAliveSuccess");
 /* 2457 */     com.smarthome.dock.server.packets.in.KeepAlivePacket packet = (com.smarthome.dock.server.packets.in.KeepAlivePacket)in;
 /* 2458 */     String deviceCode = packet.getDevId();
+			   System.out.println("deviceCode:"+deviceCode);
 /*      */ 
 /* 2460 */     String hostName = packet.getHostName();
+			   System.out.println("hostName:"+hostName);
 /* 2461 */     int port = packet.getPort();
+			   System.out.println("port:"+port);
 /*      */ 
 /* 2463 */     int ret = 1;
 /* 2464 */     DockUser dockUser = this.userManager.getUser(deviceCode);
@@ -2261,6 +2264,7 @@
 /* 2475 */         BoDevice boDevice = this.wdDeviceService.findByCode(deviceCode);
 /* 2476 */         if (boDevice != null) {
 /* 2477 */           boDevice.setStatus(Integer.valueOf(1));
+					 boDevice.setHostStatus("在线");
 /* 2478 */           BoDevice update = (BoDevice)this.wdDeviceService.update(boDevice);
 /* 2479 */           System.err.println(deviceCode + " ---- " + update.getStatus());
 /*      */         }

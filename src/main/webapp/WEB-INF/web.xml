@@ -84,6 +84,11 @@
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
+  <!-- 额外添加一个监听器 -->
+  <!-- <listener>
+    <listener-class>com.smarthome.dock.server.support.PacketProcessor</listener-class>
+  </listener> -->
+  
   <filter>
     <filter-name>OpenSessionInViewFilter</filter-name>
     <filter-class>

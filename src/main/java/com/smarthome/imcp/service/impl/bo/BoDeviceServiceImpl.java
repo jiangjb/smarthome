@@ -47,9 +47,13 @@ import java.io.FileNotFoundException;
 /*  51 */     this.boDeviceDao.bulkUpdate(hql.toString(), values);
 /*     */   }
 /*     */ 
-/*     */   public void updateAllStatus(int status) {
+/*     */   public void updateAllStatus(int status) {//改：把hostStatus加了一个判断
 //	          System.out.println("updateAllStatus...");
-/*  55 */     Object[] values = { Integer.valueOf(status), "离线" };
+			  String hostStatus="离线";
+		      if(status != 0) {
+		  	      hostStatus="在线";
+		      }
+/*  55 */     Object[] values = { Integer.valueOf(status), hostStatus };
 /*  56 */     StringBuffer hql = new StringBuffer();
 /*  57 */     hql.append("update BoDevice ");
 /*  58 */     hql.append(" set status = ?");
@@ -58,9 +62,13 @@ import java.io.FileNotFoundException;
 /*  61 */     this.boDeviceDao.bulkUpdate(hql.toString(), values);
 /*     */   }
 /*     */ 
-/*     */   public void updateStatus(String deivceCode, int status) {
+/*     */   public void updateStatus(String deivceCode, int status) {//改：把hostStatus加了一个判断
 //			  System.out.println("updateStatus...");
-/*  65 */     Object[] values = { Integer.valueOf(status), "离线", deivceCode };
+			  String hostStatus="离线";
+	          if(status != 0) {
+	        	  hostStatus="在线";
+	          }
+/*  65 */     Object[] values = { Integer.valueOf(status), hostStatus, deivceCode };
 /*  66 */     StringBuffer hql = new StringBuffer();
 /*  67 */     hql.append("update BoDevice ");
 /*  68 */     hql.append(" set status = ?");
@@ -208,9 +216,13 @@ import java.io.FileNotFoundException;
 /*     */   }
 /*     */ 
 /*     */   public void updateStatus(int status)
-/*     */   {
-//			  System.out.println("updateStatus...");
-/* 221 */     Object[] values = { Integer.valueOf(status), "离线" };//这里是向数据库里插入的值
+/*     */   {//改：
+			  System.out.println("updateStatus...");
+			  String hostStatus="离线";
+		      if(status != 0) {
+		  	      hostStatus="在线";
+		      }
+/* 221 */     Object[] values = { Integer.valueOf(status), hostStatus };//这里是向数据库里插入的值
 /* 222 */     StringBuffer hql = new StringBuffer();
 /* 223 */     hql.append("update BoDevice ");
 /* 224 */     hql.append(" set status = ?");

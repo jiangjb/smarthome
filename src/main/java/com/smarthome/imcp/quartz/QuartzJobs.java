@@ -1,6 +1,8 @@
 /*     */ package com.smarthome.imcp.quartz;
 /*     */ 
 /*     */ import com.smarthome.dock.server.helper.PacketProcessHelper;
+import com.smarthome.dock.server.packets.in.KeepAlivePacket;
+import com.smarthome.dock.server.support.PacketProcessor;
 /*     */ import com.smarthome.dock.server.util.SensorUtil;
 /*     */ import com.smarthome.dock.server.util.StaticUtil;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoDevice;
@@ -55,6 +57,8 @@
 /*     */ 
 /*     */   @Autowired
 /*     */   private PacketProcessHelper packetProcessHelper;
+			private PacketProcessor packetProcessor;//new
+
 /*  84 */   private static Map<String, Integer> user_num = new HashMap();
 /*     */ 
 /*     */   public PacketProcessHelper getPacketProcessHelper()
@@ -197,12 +201,20 @@
 /*     */     }
 /*     */   }
 
-/*     */   @Scheduled(cron="0 0/8 * * * ?")    //每隔8分钟触发
+/*     */   @Scheduled(cron="0 0/4 * * * ?")    //每隔8分钟触发
 /*     */   public void deviceC()
 /*     */     throws ParseException
 /*     */   {
-	          System.out.println("tomcat加载完后，每隔8分钟触发...");
-///* 238 */     this.boDeviceService.updateStatus(0);
+				System.out.println("tomcat加载完后，每隔8分钟触发更新设备hostStatus状态");
+				//new add 更新设备的hostStatus状态
+				List<BoDevice> devicesList = this.boDeviceService.getAllHostDevices();
+//				this.boDeviceService.updateStatus(0);
+				for(BoDevice boDevice:devicesList) {
+					if(boDevice.getStatus() == 1) {
+						String deviceCode=boDevice.getDeviceCode();
+						this.boDeviceService.updateStatus(deviceCode,1);
+					}
+				}
 /*     */   }
 /*     */ 
 /*     */   @Scheduled(cron="0/1 * * * * ?")
