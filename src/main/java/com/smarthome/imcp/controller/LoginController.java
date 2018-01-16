@@ -759,7 +759,7 @@ import org.dom4j.Document;
 			   }else {
 				   totalPages = totalCount/pageSize;
 			   }	
-//			   System.out.println("totalPages:"+totalPages);
+			   System.out.println("totalPages:"+totalPages);
 			   
 			   for(int i=0;i<bodevices.size();i++) {
 				   if(i>=0 && i<=9) {
@@ -819,10 +819,19 @@ import org.dom4j.Document;
 			   }else {
 				   totalPages = totalCount/pageSize;
 			   }	
-//			   System.out.println("totalPages:"+totalPages);
-			   
+			   int startRow=(index-1)*pageSize;//数据库表中的行数 （从0开始）
+			   int endRow;
+			   if(index == totalPages) {
+				   endRow=totalCount-1;
+			   }else {
+				   endRow=index*pageSize - 1;
+			   }
+			   System.out.println("totalCount:"+totalCount);
+			   System.out.println("totalPages:"+totalPages);
+//			   System.out.println("startRow:"+startRow);
+//			   System.out.println("endRow:"+endRow);
 			   for(int i=0;i<bodevices.size();i++) {
-				   if(i>=0 && i<=9) {
+				   if(i>=startRow && i<=endRow) {
 					   BoDevice user=new BoDevice();
 			        	user.setDeviceId(bodevices.get(i).getDeviceId());
 					    user.setDeviceCode(bodevices.get(i).getDeviceCode());
@@ -835,7 +844,7 @@ import org.dom4j.Document;
 				   }
 			   }
 			   //用于向前台传递的数据  for分页
-			   page.setCurrentPage(1);
+			   page.setCurrentPage(index);
 			   page.setTotalPages(totalPages);
 			   list.add(page);
 		       return list;

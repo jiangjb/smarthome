@@ -316,12 +316,11 @@
 	       	    					'</shiro:hasRole>'+
 	       	    					'</tr>');  
 	        					}
-    				})
-    				
+    					})	
+    				}
     			}
-    		}
-		})
-		})
+			})
+		});
 		//打开上传excel页面
 		function fromExcel(){
 			/* alert("被点击") */
@@ -686,6 +685,7 @@
 	    				}else{
 	    					/* alert("success") */
 	    					$("#devicelist").empty();
+	    					$("#devicelist01").empty();
 	        				$.each(data,function(i,item){//i是key,item是value
 	        					 var col="";
 	        					 var status="";
@@ -721,11 +721,10 @@
 	 	       	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
 	 	       	    					'</shiro:hasRole>'+
 	 	       	    					'</tr>');  
-	        				}) 
-	    				}
-	    				
+	        				})
+	        			}
 	    			}
-	    		});
+				})
 			}else if(DEVICE_CODE =="" && (STATUS ==0 || STATUS ==1)){
 				/* alert('hhe') */
 				$.ajax({
@@ -745,7 +744,6 @@
 	    					/* alert("success") */
 	    					$("#devicelist").empty();
 	        				$.each(data,function(i,item){//i是key,item是value
-	        					
 	        					
 	        					var currentPage=item.currentPage;
 								var totalPages=item.totalPages;
@@ -1021,15 +1019,10 @@
 				       	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
 				       	    					'</shiro:hasRole>'+
 				       	    					'</tr>');  
-				        		
 			    				}
 	        				
-	        				
 	        				}) 
-	        				
-	        				
-	        				
-	        				
+	
 	    				}
 	    				
 	    			}
@@ -1053,44 +1046,104 @@
 	    					/* alert("success") */
 	    					$("#total").text("2077台 ");
 	    					$("#devicelist").empty();
+	    					$("#devicelist01").empty();
 	        				$.each(data,function(i,item){//i是key,item是value
-	        					if(item.deviceId != null){	//当传入的数据不属于BoDevice时，做另外的处理
-		        					 var col="";
-		        					 var status="";
-		        				     var type="";
-		        				     /* alert(item.deviceCode); */
-									 if(item.status ==0){
-										 col='<td class="center"><span style="color: black;">'+item.deviceCode+'</span></td>';
-									 }else{
-										 col='<td class="center"><span style="color: blue;">'+item.deviceCode+'</span></td>';
-									 }
-		        				     if(item.status ==0){
-		        				    	 status='<td class="center">离线</td>';
-		        				     }else{
-		        				    	 status='<td class="center">在线</td>';
-		        				     }
-		        				     
-		        				     if(item.type == ""){
-		        				    	 type='<td class="center">F板</td>';
-		        				     }else if(item.type == "G"){
-		        				    	 type='<td class="center">G板</td>';
-		        				     }else if(item.type == "8"){
-		        				    	 type='<td class="center">8路控制盒</td>';
-		        				     }else if(item.type == "32"){
-		        				    	 type='<td class="center">32路控制盒</td>';
-		        				     }else{
-		        				    	 alert(item.type)
-		        				    	 alert("error");
-		        				     }
-		        				     $("#devicelist").append('<tr>'+
-		 	       	    					col+
-		 	       	    					status+
-		 	       	    					type+
-		 	       	    					'<shiro:hasRole name="admin">'+
-		 	       	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
-		 	       	    					'</shiro:hasRole>'+
-		 	       	    					'</tr>');   
-	        					}
+	        					if(item.deviceCode == null){
+	        						var currentPage=item.currentPage;
+	        						var totalPages=item.totalPages;
+	        						
+	        						/* alert(totalPages)  */
+	        						var table="";
+	        						if(totalPages ==1){
+	       								table='<ul>'+
+	               									'<li><a><font color="#808080">首页</font></a></li>'+
+	               									'<li><a><font color="#808080">上页</font></a></li>'+
+	               									'<li><a><font color="#808080">1</font></a></li>'+
+	               									'<li><a><font color="#808080">下页</font></a></li>'+
+	               									'<li><a><font color="#808080">尾页</font></a></li>'+
+	               								'</ul>';
+	       							}else if(totalPages ==2){
+	       								/* alert("2"); */
+	       								table='<ul>'+
+	                								'<li><a><font color="#808080">首页</font></a></li>'+
+	            									'<li><a><font color="#808080">上页</font></a></li>'+
+	            									'<li><a><font color="#808080">1</font></a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2)">尾页</a></li>'+
+	               								'</ul>';
+	       							}else if(totalPages ==3){
+	       								table='<ul>'+
+	               								'<li><a><font color="#808080">首页</font></a></li>'+
+	           									'<li><a><font color="#808080">上页</font></a></li>'+
+	           									'<li><a><font color="#808080">1</font></a></li>'+
+	           									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
+	           									'<li style="cursor:pointer;"><a onclick="find(3)">3</a></li>'+
+	           									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
+	           									'<li style="cursor:pointer;"><a onclick="find(3)">尾页</a></li>'+
+	               								'</ul>';
+	       							}else if(totalPages ==4){
+	       								table='<ul>'+
+	                								'<li><a><font color="#808080">首页</font></a></li>'+
+	            									'<li><a><font color="#808080">上页</font></a></li>'+
+	            									'<li><a><font color="#808080">1</font></a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(3)">3</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(4)">4</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(4)">尾页</a></li>'+
+	               								'</ul>';
+	       							}else{//totalPages >= 5 时
+	       								table='<ul>'+
+	                								'<li><a><font color="#808080">首页</font></a></li>'+
+	            									'<li><a><font color="#808080">上页</font></a></li>'+
+	            									'<li><a><font color="#808080">1</font></a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(3)">3</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(4)">4</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(5)">5</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>'+
+	               								'</ul>';
+	       							}
+	        						
+	        						$("#devicelist01").append(table);
+	        					}else{
+	        						 var col="";
+		           					 var status="";
+		           				     var type="";
+		           				     /* alert(item.deviceCode); */
+		   							 if(item.status ==0){
+		   								 col='<td class="center"><span style="color: black;">'+item.deviceCode+'</span></td>';
+		   							 }else{
+		   								 col='<td class="center"><span style="color: blue;">'+item.deviceCode+'</span></td>';
+		   							 }
+		           				     if(item.status ==0){
+		           				    	 status='<td class="center">离线</td>';
+		           				     }else{
+		           				    	 status='<td class="center">在线</td>';
+		           				     }
+		           				     
+		           				     if(item.type == ""){
+		           				    	 type='<td class="center">F板</td>';
+		           				     }else if(item.type == "G"){
+		           				    	 type='<td class="center">G板</td>';
+		           				     }else if(item.type == "8"){
+		           				    	 type='<td class="center">8路控制盒</td>';
+		           				     }else if(item.type == "32"){
+		           				    	 type='<td class="center">32路控制盒</td>';
+		           				     }else{
+		           				    	 alert("error");
+		           				     }
+		         					$("#devicelist").append('<tr>'+
+		       	    					col+
+		       	    					status+
+		       	    					type+
+		       	    					'<shiro:hasRole name="admin">'+
+		       	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+		       	    					'</shiro:hasRole>'+
+		       	    					'</tr>');  
+		        					}
 	        				}) 
 
 	    				}
@@ -1099,39 +1152,6 @@
 	    		});
 			} 
 		}
-		
-
-		
-		//删除
-		function del(Id){
-			bootbox.confirm("确定要删除吗?", function(result) {
-				if(result) {
-					top.jzts();
-					var url = "<%=basePath%>device/delete.do?DEVICE_ID="+Id+"&tm="+new Date().getTime();
-					$.get(url,function(data){
-						nextPage(${page.currentPage});
-					});
-				}
-			});
-		}
-		
-		//修改
-		<%-- function edit(Id){
-			 top.jzts();
-			 var diag = new top.Dialog();
-			 diag.Drag=true;
-			 diag.Title ="编辑";
-			 diag.URL = '<%=basePath%>device/goEdit.do?DEVICE_ID='+Id;
-			 diag.Width = 450;
-			 diag.Height = 200;
-			 diag.CancelEvent = function(){ //关闭事件
-				 if(diag.innerFrame.contentWindow.document.getElementById('zhongxin').style.display == 'none'){
-					 nextPage(${page.currentPage});
-				}
-				diag.close();
-			 };
-			 diag.show();
-		} --%>
 		</script>
 		
 		<script type="text/javascript">
@@ -1157,61 +1177,7 @@
 			
 		});
 		
-		
-		//批量操作
-		function makeAll(msg){
-			bootbox.confirm(msg, function(result) {
-				if(result) {
-					var str = '';
-					for(var i=0;i < document.getElementsByName('ids').length;i++)
-					{
-						  if(document.getElementsByName('ids')[i].checked){
-						  	if(str=='') str += document.getElementsByName('ids')[i].value;
-						  	else str += ',' + document.getElementsByName('ids')[i].value;
-						  }
-					}
-					if(str==''){
-						bootbox.dialog("您没有选择任何内容!", 
-							[
-							  {
-								"label" : "关闭",
-								"class" : "btn-small btn-success",
-								"callback": function() {
-									//Example.show("great success");
-									}
-								}
-							 ]
-						);
-						
-						$("#zcheckbox").tips({
-							side:3,
-				            msg:'点这里全选',
-				            bg:'#AE81FF',
-				            time:8
-				        });
-						
-						return;
-					}else{
-						if(msg == '确定要删除选中的数据吗?'){
-							top.jzts();
-							$.ajax({
-								type: "POST",
-								url: '<%=basePath%>device/deleteAll.do?tm='+new Date().getTime(),
-						    	data: {DATA_IDS:str},
-								dataType:'json',
-								//beforeSend: validateData,
-								cache: false,
-								success: function(data){
-									 $.each(data.list, function(i, list){
-											nextPage(${page.currentPage});
-									 });
-								}
-							});
-						}
-					}
-				}
-			});
-		}
+
 		</script>
 		
 	</body>
