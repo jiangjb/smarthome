@@ -785,8 +785,8 @@
 	    				
 	    			}
 	    		});
-			}else if(DEVICE_CODE =="" && (STATUS !=0 || STATUS !=1)){
-				/* alert('hhe') */
+			}else if(DEVICE_CODE =="" &&   STATUS ==2 ){
+				alert('hhe') 
 				$.ajax({
 	    			url: "showHostDevices.do",
 	    	    	data: { },
@@ -805,40 +805,43 @@
 	    					$("#total").text("2077台 ");
 	    					$("#devicelist").empty();
 	        				$.each(data,function(i,item){//i是key,item是value
-	        					 var col="";
-	        					 var status="";
-	        				     var type="";
-	        				     /* alert(item.deviceCode); */
-								 if(item.status ==0){
-									 col='<td class="center"><span style="color: black;">'+item.deviceCode+'</span></td>';
-								 }else{
-									 col='<td class="center"><span style="color: blue;">'+item.deviceCode+'</span></td>';
-								 }
-	        				     if(item.status ==0){
-	        				    	 status='<td class="center">离线</td>';
-	        				     }else{
-	        				    	 status='<td class="center">在线</td>';
-	        				     }
-	        				     
-	        				     if(item.type == ""){
-	        				    	 type='<td class="center">F板</td>';
-	        				     }else if(item.type == "G"){
-	        				    	 type='<td class="center">G板</td>';
-	        				     }else if(item.type == "8"){
-	        				    	 type='<td class="center">8路控制盒</td>';
-	        				     }else if(item.type == "32"){
-	        				    	 type='<td class="center">32路控制盒</td>';
-	        				     }else{
-	        				    	 alert("error");
-	        				     }
-	        				     $("#devicelist").append('<tr>'+
-	 	       	    					col+
-	 	       	    					status+
-	 	       	    					type+
-	 	       	    					'<shiro:hasRole name="admin">'+
-	 	       	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
-	 	       	    					'</shiro:hasRole>'+
-	 	       	    					'</tr>');   
+	        					if(item.deviceId != null){	//当传入的数据不属于BoDevice时，做另外的处理
+		        					 var col="";
+		        					 var status="";
+		        				     var type="";
+		        				     /* alert(item.deviceCode); */
+									 if(item.status ==0){
+										 col='<td class="center"><span style="color: black;">'+item.deviceCode+'</span></td>';
+									 }else{
+										 col='<td class="center"><span style="color: blue;">'+item.deviceCode+'</span></td>';
+									 }
+		        				     if(item.status ==0){
+		        				    	 status='<td class="center">离线</td>';
+		        				     }else{
+		        				    	 status='<td class="center">在线</td>';
+		        				     }
+		        				     
+		        				     if(item.type == ""){
+		        				    	 type='<td class="center">F板</td>';
+		        				     }else if(item.type == "G"){
+		        				    	 type='<td class="center">G板</td>';
+		        				     }else if(item.type == "8"){
+		        				    	 type='<td class="center">8路控制盒</td>';
+		        				     }else if(item.type == "32"){
+		        				    	 type='<td class="center">32路控制盒</td>';
+		        				     }else{
+		        				    	 alert(item.type)
+		        				    	 alert("error");
+		        				     }
+		        				     $("#devicelist").append('<tr>'+
+		 	       	    					col+
+		 	       	    					status+
+		 	       	    					type+
+		 	       	    					'<shiro:hasRole name="admin">'+
+		 	       	    					'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+		 	       	    					'</shiro:hasRole>'+
+		 	       	    					'</tr>');   
+	        					}
 	        				}) 
 
 	    				}
