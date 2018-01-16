@@ -805,10 +805,15 @@ import org.dom4j.Document;
 		   
 		   @RequestMapping({"findDevicesByIndex.do"})
 		   @ResponseBody
-		   public List<BoDevice> findDevicesByIndex(@RequestParam("index") int index) {//deviceCode,status,type
-			   System.out.println("分页操作 ");
+		   public List<BoDevice> findDevicesByIndex(@RequestParam("index") int index,@RequestParam("status") int status) {//deviceCode,status,type
+			   System.out.println("分页操作 应和status有关 ");
 			   List list=new ArrayList<BoDevice>();
-		       List<BoDevice> bodevices = this.boDeviceService.getAllHostDevices();
+			   List<BoDevice> bodevices=null;
+			   if(status == 2) {
+				   bodevices = this.boDeviceService.getAllHostDevices();  
+			   }else {
+				   bodevices = this.boDeviceService.findByStatus(status); 
+			   }
 			   //Page类
 			   Page page=new Page();
 			   int totalCount=bodevices.size();

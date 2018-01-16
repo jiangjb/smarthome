@@ -351,10 +351,20 @@
 		
 		//分页
 		function find(index){
+			var status;
+			var status0=$("#STATUS").val();
+			if(status0 ==''){
+				status=2;
+			}else if(status0 =='0'){
+				status=0;
+			}else{
+				status=1;
+			}
+			/* alert(status) */
 				/* alert(index); */
 				$.ajax({
 					url:"findDevicesByIndex.do",
-			    	data: {"index":index }, 
+			    	data: {"index":index,"status":status }, 
 			    	type: "POST",
 					dataType:"json",
 					async: true,
