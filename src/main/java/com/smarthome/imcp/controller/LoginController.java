@@ -810,7 +810,7 @@ import org.dom4j.Document;
 			   List list=new ArrayList<BoDevice>();
 		       List<BoDevice> bodevices = this.boDeviceService.getAllHostDevices();
 			   //Page类
-			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+			   Page page=new Page();
 			   int totalCount=bodevices.size();
 			   int pageSize=page.getPageSize();
 			   int totalPages=1;
@@ -819,19 +819,10 @@ import org.dom4j.Document;
 			   }else {
 				   totalPages = totalCount/pageSize;
 			   }	
-			   int startRow=(index-1)*pageSize;//数据库表中的行数 （从0开始）
-			   int endRow;
-			   if(index == totalPages) {
-				   endRow=totalCount-1;
-			   }else {
-				   endRow=index*pageSize - 1;
-			   }
-			   System.out.println("totalCount:"+totalCount);
-			   System.out.println("totalPages:"+totalPages);
-//			   System.out.println("startRow:"+startRow);
-//			   System.out.println("endRow:"+endRow);
+//			   System.out.println("totalPages:"+totalPages);
+			   
 			   for(int i=0;i<bodevices.size();i++) {
-				   if(i>=startRow && i<=endRow) {
+				   if(i>=0 && i<=9) {
 					   BoDevice user=new BoDevice();
 			        	user.setDeviceId(bodevices.get(i).getDeviceId());
 					    user.setDeviceCode(bodevices.get(i).getDeviceCode());
@@ -844,7 +835,7 @@ import org.dom4j.Document;
 				   }
 			   }
 			   //用于向前台传递的数据  for分页
-			   page.setCurrentPage(index);
+			   page.setCurrentPage(1);
 			   page.setTotalPages(totalPages);
 			   list.add(page);
 		       return list;
@@ -870,24 +861,41 @@ import org.dom4j.Document;
 		    }
 		   @RequestMapping({"findByStatus.do"})
 		   @ResponseBody
-		   public List<BoDevice> findByStatus(@RequestParam("status") int status) {
+		   public List<BoDevice> findByStatus(@RequestParam("status") int status) {//加 分页处理 2018/1/16
 			   /*System.out.println("hhe");*/
 //			   System.out.println("status:"+status);
-			   List<BoDevice> list=new ArrayList<BoDevice>();
+			   System.out.println("分页操作 -ByStatus");
+			   List list=new ArrayList();
 		       List<BoDevice> bodevices = this.boDeviceService.findByStatus(status); 
-		       if(bodevices !=null) {
-		    	   for(BoDevice bodevice:bodevices) {//
-			        	BoDevice user=new BoDevice();
-			        	user.setDeviceId(bodevice.getDeviceId());
-					    user.setDeviceCode(bodevice.getDeviceCode());
-					    System.out.println("deviceCode:"+bodevice.getDeviceCode());
-					    user.setStatus(bodevice.getStatus());
-					    System.out.println("status:"+bodevice.getStatus());
-					    user.setType(bodevice.getType());
-					    System.out.println("type:"+bodevice.getType());
-					    list.add(user);
-					   } 
-		       }   
+			   //Page类
+			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+			   int totalCount=bodevices.size();
+			   int pageSize=page.getPageSize();
+			   int totalPages=1;
+			   if(totalCount%pageSize !=0){
+				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = totalCount/pageSize;
+			   }	
+			   System.out.println("totalPages:"+totalPages);
+			   if(bodevices !=null) {
+				   for(int i=0;i<bodevices.size();i++) {
+					   if(i>=0 && i<=9) {
+						   BoDevice user=new BoDevice();
+						   user.setDeviceId(bodevices.get(i).getDeviceId());
+						   user.setDeviceCode(bodevices.get(i).getDeviceCode());
+//					    System.out.println("deviceCode:"+bodevices.get(i).getDeviceCode());
+						   user.setStatus(bodevices.get(i).getStatus());
+//					    System.out.println("status:"+bodevices.get(i).getStatus());
+						   user.setType(bodevices.get(i).getType());
+//					    System.out.println("type:"+bodevice.getType());
+						   list.add(user);
+					   }
+				   }	   
+			   }
+			   page.setCurrentPage(1);
+			   page.setTotalPages(totalPages);
+			   list.add(page);
 		       return list;
 		    }
 		   
