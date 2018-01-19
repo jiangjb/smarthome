@@ -805,7 +805,7 @@ import org.dom4j.Document;
 		   
 		   @RequestMapping({"findDevicesByIndex.do"})
 		   @ResponseBody
-		   public List<BoDevice> findDevicesByIndex(@RequestParam("index") int index,@RequestParam("status") int status) {//deviceCode,status,type
+		   public List<BoDevice> findDevicesByIndex(@RequestParam("index") int index,@RequestParam("status") int status) {//index+status
 			   System.out.println("分页操作 应和status有关 ");
 			   List list=new ArrayList<BoDevice>();
 			   List<BoDevice> bodevices=null;

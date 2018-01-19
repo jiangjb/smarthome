@@ -45,7 +45,7 @@
 /*    */   {
 /* 50 */     boolean inDate = isInDate(new Date(), "10", "4", "1");
 /* 51 */     String weekOfDate = getWeekOfDate(new Date());
-/* 52 */     if (weekOfDate.equals("星期三")) {
+/* 52 */     if (weekOfDate.equals("星期二")) {
 /* 53 */       if (inDate)
 /* 54 */         System.err.println("1");
 /*    */       else

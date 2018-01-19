@@ -40,11 +40,9 @@
  
 /*  47 */     if (this.packetProcessor == null) {
 /*  48 */       this.packetProcessor = new PacketProcessor();
-                 System.out.println("this.packetProcessor ="+this.packetProcessor);
+                 System.out.println("null this.packetProcessor ="+this.packetProcessor);
      			}
-//              System.out.println("AllChannels:"+this.packetProcessor.getAllChannels());//0
-//              System.out.println("Channel:"+this.packetProcessor.getChannel());//null
-           
+//			  System.out.println("this.packetProcessor ="+this.packetProcessor);//com.smarthome.dock.server.support.PacketProcessor@5e9a1d8d
 /*  50 */     Timer timer = new HashedWheelTimer();
  
 /*  52 */     this.factory = new NioDatagramChannelFactory(Executors.newCachedThreadPool());
@@ -58,9 +56,11 @@
 /*  63 */     bootstrap.setOption("keepAlive", Boolean.valueOf(true));
  
 /*  66 */     DatagramChannel channel = (DatagramChannel)bootstrap
-/*  67 */       .bind(new InetSocketAddress(5556));//这里有问题了
+/*  67 */       .bind(new InetSocketAddress(5555));
+//              System.out.println("channel :"+channel);//[id: 0xd3583bb4]
 /*  68 */     this.packetProcessor.setChannel(channel);
 /*  69 */     this.packetProcessor.getAllChannels().add(channel);
+
 /*  70 */     this.isStarted = true;
  
 /*  72 */     logger.debug("服务器启动成功！");
@@ -72,21 +72,8 @@
        {
          public void run() {
            try {
-        	   System.out.println("服务15秒后启动");
-				      
-			  //判断离线|在线是否在线
-			  try {
-//				System.out.println("in...");
-				KeepAlivePacket packet=packetProcessor.getKeepAliveTrigger().get();
-//				System.out.println("packet:"+packet);//null
-				if(packet != null) {
-					packetProcessor.getPacketProcessHelper().procesKeepAliveLost(packet);
-					packetProcessor.getPacketProcessHelper().procesKeepAliveSuccess(packet);	
-				}			
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			  System.out.println("tomcat服务启动前执行 ");
+        	   System.out.println("服务15秒后启动");      
+
 //		              DockServer.this.boDeviceService.updateStatus(0);//默认设为0
 			  Thread.sleep(15000L);
            } catch (InterruptedException e) {

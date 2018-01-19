@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 
 public class Map2List {
 
-	//map转换成lisy
+	//map转换成list
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static List  mapTransitionList(Map map) {
 		List list = new ArrayList();

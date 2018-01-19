@@ -9,6 +9,7 @@
 /*     */ import com.smarthome.dock.server.packets.OutPacket;
 /*     */ import com.smarthome.dock.server.packets.PacketHelper;
 /*     */ import com.smarthome.dock.server.packets.PacketHistory;
+		  import com.smarthome.dock.server.packets.in.KeepAlivePacket;//离线  的类
 /*     */ import com.smarthome.dock.server.util.Util;
 /*     */ import java.io.PrintStream;
 /*     */ import java.net.InetSocketAddress;
@@ -81,6 +82,8 @@
 /*     */ 
 /*     */   public void processPacket(InPacket packet)
 /*     */   {
+	          System.out.println("processPacket...");
+	          logger.info("进入processPacket方法");
 /* 115 */     PacketEvent e = new PacketEvent(packet);
 /* 116 */     e.type = packet.getCommand();
 /* 117 */     packetArrived(e);
@@ -142,13 +145,18 @@
 /*     */ 
 /*     */   public void firePacketArrivedEvent(PacketEvent e)
 /*     */   {
+			  System.out.println("PacketProcessor.java firePacketArrivedEvent");
 /* 233 */     this.router.packetArrived(e);
 /*     */   }
 /*     */ 
 /*     */   public void packetArrived(PacketEvent e)
 /*     */   {
+	          System.out.println("packetArrived...");
 /* 238 */     InPacket in = (InPacket)e.getSource();
 /*     */ 	  System.out.println("InPacket"+in);
+              //new 离线
+//			  KeepAlivePacket out=(KeepAlivePacket) e.getSource();
+//			  System.out.println("KeepAlivePacket"+out);
 /* 254 */     logger.info("开始处理" + in.toString() + "　devId:" + in.getDevId() + " commond：" + Util.getCommandString(in.getCommand()));
 /*     */     System.out.println(" devId: "+ in.getDevId());
 /* 259 */     switch (in.getCommand()) {
@@ -157,6 +165,8 @@
 /* 262 */       break;
 /*     */     case 'ꀂ':
 /* 264 */       this.packetProcessHelper.procesKeepAliveSuccess(in);
+//				System.out.println("======================  in out ===========================");
+//				this.packetProcessHelper.procesKeepAliveLost(out);
 /* 265 */       break;
 /*     */     case '뀀':
 /* 267 */       this.packetProcessHelper.processQuerySuccess(in);
@@ -169,6 +179,7 @@
 /* 275 */       this.packetProcessHelper.processCDataSuccess(in);
 /*     */     }
 /* 277 */     if ((in.getCommand() >= 53248) && (in.getCommand() <= 57343)) {
+	            System.out.println("Command between 53248 and 57343");
 /* 278 */       this.packetProcessHelper.processDDataSuccess(in);
 /*     */     }
 /* 280 */     if ((in.getCommand() >= 57344) && (in.getCommand() <= 61439)) {

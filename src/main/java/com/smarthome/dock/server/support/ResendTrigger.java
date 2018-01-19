@@ -20,6 +20,7 @@
 /*     */ 
 /*     */   public ResendTrigger(PacketProcessor packetProcessor)
 /*     */   {
+			  //System.out.println("ResendTrigger 构造器");//有经过
 /*  27 */     this.packetProcessor = packetProcessor;
 /*  28 */     this.history = packetProcessor.getHistory();
 /*  29 */     this.timeoutQueue = new LinkedList();

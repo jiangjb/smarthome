@@ -5,9 +5,11 @@
 /*    */ import java.io.PrintStream;
 /*    */ import java.net.URL;
 /*    */ import java.net.URLConnection;
+import java.util.ArrayList;
 /*    */ import java.util.Date;
-import java.util.List;
+		 import java.util.List;
 /*    */ import java.util.Map;
+
 /*    */ 
 /*    */ public class SimulateHTTPRequestUtil
 /*    */ {
@@ -25,11 +27,12 @@ import java.util.List;
 /* 23 */       connection.setRequestProperty("timestamp", new Date().getTime()+"");
 /*    */ 
 /* 25 */       connection.connect();
-/*    */ 
+
 /* 27 */       Map map = connection.getHeaderFields();
+			   List<String> keys = new ArrayList<String>(map.keySet());
 ///*    */       List<String> keys=(List<String>) map.keySet();
 ///* 29 */       for (String key : keys) {
-			   List<String> keys=(List<String>)map.keySet();
+//			   List<String> keys=(List<String>)map.keySet();
 			   for (String key : keys) {
 /* 30 */         System.out.println(key + "--->" + map.get(key));
 /*    */       }

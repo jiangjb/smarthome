@@ -17,6 +17,7 @@
 /*     */ 
 /*     */   public KeepAliveTrigger(PacketProcessor packetProcessor)
 /*     */   {
+	          //System.out.println("KeepAliveTrigger 构造器");//有经过
 /*  19 */     this.packetProcessor = packetProcessor;
 /*  20 */     this.aliveQueue = new LinkedList();
 /*  21 */     PacketProcessor.executorScheduled.schedule(this, 60000L, TimeUnit.MILLISECONDS);

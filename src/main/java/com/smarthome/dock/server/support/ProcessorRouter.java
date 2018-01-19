@@ -54,6 +54,7 @@
 /*    */ 
 /*    */   public void packetArrived(PacketEvent e)
 /*    */   {
+	         System.out.println("ProcessorRouter 58lines packetArrived...");
 /* 75 */     checkListenerChange();
 /* 76 */     int size = this.listenersBackup.size();
 /* 77 */     for (int i = 0; i < size; i++)

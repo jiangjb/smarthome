@@ -5,6 +5,7 @@ import com.smarthome.dock.server.packets.in.KeepAlivePacket;
 import com.smarthome.dock.server.support.PacketProcessor;
 /*     */ import com.smarthome.dock.server.util.SensorUtil;
 /*     */ import com.smarthome.dock.server.util.StaticUtil;
+import com.smarthome.imcp.action.xing.XingUserAction;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoDevice;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoHostDevice;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoLockPasswordManage;
@@ -29,7 +30,11 @@ import com.smarthome.dock.server.support.PacketProcessor;
 /*     */ import java.util.List;
 /*     */ import java.util.Map;
 /*     */ import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
 /*     */ import org.apache.commons.lang3.StringUtils;
+import org.apache.struts2.ServletActionContext;
 /*     */ import org.springframework.beans.factory.annotation.Autowired;
 /*     */ import org.springframework.context.annotation.Lazy;
 /*     */ import org.springframework.scheduling.annotation.Scheduled;
@@ -57,7 +62,10 @@ import com.smarthome.dock.server.support.PacketProcessor;
 /*     */ 
 /*     */   @Autowired
 /*     */   private PacketProcessHelper packetProcessHelper;
+
+			@Autowired
 			private PacketProcessor packetProcessor;//new
+//			private XingUserAction xingUserAction;
 
 /*  84 */   private static Map<String, Integer> user_num = new HashMap();
 /*     */ 
@@ -68,7 +76,7 @@ import com.smarthome.dock.server.support.PacketProcessor;
 /*     */   public void setPacketProcessHelper(PacketProcessHelper packetProcessHelper) {
 /*  80 */     this.packetProcessHelper = packetProcessHelper;
 /*     */   }
-/*     */ 
+
 /*     */   public void packNum(String userCode)
 /*     */   {
 /*  90 */     if (user_num.get(userCode) == null)
@@ -76,11 +84,12 @@ import com.smarthome.dock.server.support.PacketProcessor;
 /*     */     else
 /*  93 */       user_num.put(userCode, Integer.valueOf(((Integer)user_num.get(userCode)).intValue() == 255 ? 0 : ((Integer)user_num.get(userCode)).intValue() + 1));
 /*     */   }
-/*     */ 
+
 /*     */   @Scheduled(cron="0 0/1 * * * ?")
 /*     */   public void setUserMode()
 /*     */   {
 /* 101 */     List by = this.boModelService.getBy();
+			  System.out.println("QuartJobs   setUserMode by:"+by);
 /* 102 */     for (int i = 0; i < by.size(); i++) {
 /* 103 */       BoModel boModel = (BoModel)by.get(i);
 /*     */ 
@@ -98,15 +107,18 @@ import com.smarthome.dock.server.support.PacketProcessor;
 /* 115 */         String format = dateFormater.format(new Date());
 /* 116 */         System.err.println(format);
 /* 117 */         List bys = this.boModelService.getBys(boModel.getWeek(), format);
+//				  System.out.println("QuartzJobs bys===="+bys);//[]
 /* 118 */         if (bys.size() <= 0)
 /* 119 */           System.err.println("没有");
 /*     */         else
 /* 121 */           for (int j = 0; j < bys.size(); j++) {
 /* 122 */             BoModel boModel2 = (BoModel)bys.get(j);
+					  System.out.println("QuartzJobs boModel2.getModelId()==="+boModel2.getModelId());
 /* 123 */             System.err.println(boModel2.getModelId());
 /* 124 */             System.err.println(boModel2.getBoUsers().getUserCode());
 /* 125 */             SimulateHTTPRequestUtil s = new SimulateHTTPRequestUtil();
-/* 126 */             s.sendGet("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + boModel2.getModelId(), boModel2.getBoUsers().getUserCode());
+///* 126 */             s.sendGet("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + boModel2.getModelId(), boModel2.getBoUsers().getUserCode());
+					  s.sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + boModel2.getModelId(), boModel2.getBoUsers().getUserCode());
 /*     */           }
 /*     */       }
 /*     */     }
@@ -117,6 +129,7 @@ import com.smarthome.dock.server.support.PacketProcessor;
 /*     */     throws ParseException
 /*     */   {
 /* 140 */     List lock = this.boLockPasswordManageService.getLock(Integer.valueOf(65535));
+			  System.out.println("lock.size() :"+lock.size());
 /* 141 */     Date currentTime = new Date();
 /* 142 */     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 /* 143 */     String dateString = formatter.format(currentTime);
@@ -130,8 +143,9 @@ import com.smarthome.dock.server.support.PacketProcessor;
 /* 151 */         long interval = (appEndTime - currentTime.getTime()) / 1000L;
 /* 152 */         String SetString = "ZIGBEE_LOCK-SET-" + user_num.get(lockPassManage.getBoUsers().getUserCode()) + "," + lockPassManage.getLockAddress() + "," + lockPassManage.getLockType() + "," + lockPassManage.getLockOfTimes() + "," + AES.decrypt(lockPassManage.getAdminPwd()) + "," + AES.decrypt(lockPassManage.getLockPwd()) + "," + interval;
 /* 153 */         byte[] Set = SetString.getBytes();
-/* 154 */         System.err.println(new String(Set));
+/* 154 */         System.err.println("Set :"+new String(Set));
 /* 155 */         this.packetProcessHelper.processSendDData(lockPassManage.getBoDevice().getDeviceCode(), Set);
+					
 /*     */       } else {
 /* 157 */         System.err.println("设置不是当前");
 /*     */       }
@@ -201,11 +215,11 @@ import com.smarthome.dock.server.support.PacketProcessor;
 /*     */     }
 /*     */   }
 
-/*     */   @Scheduled(cron="0 0/4 * * * ?")    //每隔8分钟触发
-/*     */   public void deviceC()
+/*     */   @Scheduled(cron="0/4 * * * * ?")    //每隔4秒钟触发
+/*     */   public void deviceS()
 /*     */     throws ParseException
 /*     */   {
-				System.out.println("tomcat加载完后，每隔8分钟触发更新设备hostStatus状态");
+//				System.out.println("tomcat加载完后，每隔4秒钟触发更新设备hostStatus状态");
 				//new add 更新设备的hostStatus状态
 				List<BoDevice> devicesList = this.boDeviceService.getAllHostDevices();
 //				this.boDeviceService.updateStatus(0);
@@ -215,6 +229,22 @@ import com.smarthome.dock.server.support.PacketProcessor;
 						this.boDeviceService.updateStatus(deviceCode,1);
 					}
 				}
+/*     */   }
+
+
+			@Scheduled(cron="0/1 * * * * ?")    //每隔1秒钟触发
+/*     */   public void deviceStatus() throws ParseException
+/*     */   {
+//				System.out.println("tomcat加载完后，每隔1秒钟触发更新主机设备的在线离线状态");
+//				XingUserAction xA=new XingUserAction();
+//				try {	
+//					HttpServletRequest request = ServletActionContext.getRequest();
+//					if(request != null) {
+//						xA.getAllHost();	
+//					}
+//				} catch (Exception e) {
+//					
+//				}	
 /*     */   }
 /*     */ 
 /*     */   @Scheduled(cron="0/1 * * * * ?")

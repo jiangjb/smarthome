@@ -7,7 +7,7 @@
 /*    */   public static void main(String[] args)
 /*    */   {
 /* 11 */     String binaryString = Integer.toBinaryString(4);
-/* 12 */     System.err.println(binaryString);
+/* 12 */     System.err.println(binaryString);//100
 /*    */   }
 /*    */ }
 

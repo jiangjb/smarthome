@@ -14,6 +14,7 @@
 /*    */   }
 /*    */ 
 /*    */   public synchronized void addUser(String userId, Date registerDate, String ip, int port) {
+	         System.out.println("UserManage.java method:addUser");
 /* 23 */     DockUser user = new DockUser();
 /* 24 */     user.setUserId(userId);
 /* 25 */     user.setRegisterTime(registerDate);
@@ -26,6 +27,7 @@
 /*    */   }
 /*    */ 
 /*    */   public synchronized void logoutUser(String userId, Date logoutTime, String logoutIp) {
+			 System.out.println("UserManage.java method:logoutUser");
 /* 35 */     DockUser user = (DockUser)this.userMap.get(userId);
 /* 36 */     if (user != null) {
 /* 37 */       user.setIp(logoutIp);

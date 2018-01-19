@@ -68,10 +68,13 @@
 /*      */ import java.net.URL;
 /*      */ import java.net.URLConnection;
 /*      */ import java.text.SimpleDateFormat;
+		   import java.util.ArrayList;
 /*      */ import java.util.Date;
 /*      */ import java.util.HashMap;
 /*      */ import java.util.List;
 /*      */ import java.util.Map;
+		   import java.util.Set;
+
 /*      */ import org.jboss.netty.channel.Channel;
 /*      */ import org.slf4j.Logger;
 /*      */ import org.slf4j.LoggerFactory;
@@ -238,7 +241,7 @@
 /*      */   public void processLoginSuccess(InPacket in)
 /*      */   {
 /*  269 */     logger.info("开始处理设备登录");
-/*      */ 
+/*      */     System.out.println("开始处理设备登录 processLoginSuccess");
 /*  271 */     LoginPacket packet = (LoginPacket)in;
 /*  272 */     packet.getDevData();
 /*      */ 
@@ -291,6 +294,7 @@
 /*      */ 
 /*      */   public void processQuerySuccess(InPacket in) {
 /*  329 */     logger.info("开始处理设备查询");
+               System.out.println("processQuerySuccess");
 /*  330 */     QueryPacket packet = (QueryPacket)in;
 /*      */ 
 /*  332 */     String deviceCode = packet.getDevId();
@@ -369,13 +373,15 @@
 /*      */   }
 /*      */ 
 /*      */   public void processSendDData(String devId, byte[] frameBody)
-/*      */   {
+/*      */   {//设备对码的时候进入的方法
 /*  452 */     logger.info("发送 " + devId + " processSendDData");
 /*  453 */     SendDDataPacket packet = new SendDDataPacket(devId);
+			   System.out.println("processSendDData packet:"+packet);
 /*      */ 
 /*  458 */     packet.setFrameBody(frameBody);
 /*  459 */     packet.setFrameLen(frameBody.length);
 /*      */ 
+			   System.out.println("devId:"+devId);
 /*  461 */     String[] address = this.packetProcessor.getSocketAddress(devId);
 /*      */ 
 /*  463 */     if (address == null) {
@@ -496,9 +502,13 @@
 /*  629 */       connection.setRequestProperty("timestamp", new Date().getTime()+"");
 /*      */ 
 /*  631 */       connection.connect();
-/*      */ 
+
 /*  633 */       Map map = connection.getHeaderFields();
-/*      */ 		 List<String> keys=(List<String>) map.keySet();
+				 List<String> keys = new ArrayList<String>(map.keySet());
+///*      */ 		 List<String> keys=(List<String>) map.keySet();
+//				 Set<String> keys0 = map.keySet();
+//				 List<String> keys = new ArrayList<>(keys0);
+//				 System.out.println("PacketProcessHelper line508: map > set  > list");
 /*  635 */       for (String key : keys) {
 /*  636 */         System.out.println(key + "--->" + map.get(key));
 /*      */       }
@@ -548,8 +558,13 @@
 /*      */ 
 /*  674 */       connection.connect();
 /*      */ 
-/*  676 */       Map map = connection.getHeaderFields();
-/*      */       List<String> keys=(List<String>) map.keySet();
+
+/*  633 */       Map map = connection.getHeaderFields();
+				 List<String> keys = new ArrayList<String>(map.keySet());
+///*      */       List<String> keys=(List<String>) map.keySet();
+//				 Set<String> keys0 = map.keySet();
+//				 List<String> keys = new ArrayList<>(keys0);
+//				 System.out.println("PacketProcessHelper line562: map > set  > list");
 /*  678 */       for (String key : keys) {
 /*  679 */         System.out.println(key + "--->" + map.get(key));
 /*      */       }
@@ -1008,14 +1023,14 @@
 /* 1136 */             if (inDateOno) {
 /*      */               try {
 /* 1138 */                 Thread.sleep(600L);
-/* 1139 */                 sendGet2("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + alarmEnclosureSplit2[0].trim().toString());
+/* 1139 */                 sendGet2("http://120.77.250.17/smarthomeMavenWebProject/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + alarmEnclosureSplit2[0].trim().toString());
 /*      */               }
 /*      */               catch (InterruptedException e) {
 /* 1142 */                 e.printStackTrace();
 /*      */               }
 /*      */               try {
 /* 1145 */                 Thread.sleep(500L);
-/* 1146 */                 sendGet("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+/* 1146 */                 sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
 /*      */               }
 /*      */               catch (InterruptedException e) {
 /* 1149 */                 e.printStackTrace();
@@ -1023,14 +1038,14 @@
 /* 1151 */             } else if (inDateTwo) {
 /*      */               try {
 /* 1153 */                 Thread.sleep(600L);
-/* 1154 */                 sendGet2("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + alarmEnclosureSplit2[0].trim().toString());
+/* 1154 */                 sendGet2("http://120.77.250.17/smarthomeMavenWebProject/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + alarmEnclosureSplit2[0].trim().toString());
 /*      */               }
 /*      */               catch (InterruptedException e) {
 /* 1157 */                 e.printStackTrace();
 /*      */               }
 /*      */               try {
 /* 1160 */                 Thread.sleep(500L);
-/* 1161 */                 sendGet("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+/* 1161 */                 sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
 /*      */               }
 /*      */               catch (InterruptedException e) {
 /* 1164 */                 e.printStackTrace();
@@ -1038,14 +1053,14 @@
 /* 1166 */             } else if (inDateThree) {
 /*      */               try {
 /* 1168 */                 Thread.sleep(600L);
-/* 1169 */                 sendGet2("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + alarmEnclosureSplit2[0].trim().toString());
+/* 1169 */                 sendGet2("http://120.77.250.17/smarthomeMavenWebProject/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + alarmEnclosureSplit2[0].trim().toString());
 /*      */               }
 /*      */               catch (InterruptedException e) {
 /* 1172 */                 e.printStackTrace();
 /*      */               }
 /*      */               try {
 /* 1175 */                 Thread.sleep(500L);
-/* 1176 */                 sendGet("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+/* 1176 */                 sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
 /*      */               }
 /*      */               catch (InterruptedException e) {
 /* 1179 */                 e.printStackTrace();
@@ -1561,14 +1576,14 @@
 /* 1725 */           if (inDateOno) {
 /*      */             try {
 /* 1727 */               Thread.sleep(600L);
-/* 1728 */               sendGet2("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
+/* 1728 */               sendGet2("http://120.77.250.17/smarthomeMavenWebProject/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
 /*      */             }
 /*      */             catch (InterruptedException e) {
 /* 1731 */               e.printStackTrace();
 /*      */             }
 /*      */             try {
 /* 1734 */               Thread.sleep(500L);
-/* 1735 */               sendGet("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+/* 1735 */               sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
 /*      */             }
 /*      */             catch (InterruptedException e) {
 /* 1738 */               e.printStackTrace();
@@ -1577,14 +1592,15 @@
 /* 1741 */           else if (inDateTwo) {
 /*      */             try {
 /* 1743 */               Thread.sleep(600L);
-/* 1744 */               sendGet2("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
+/* 1744 */               sendGet2("http://120.77.250.17/smarthomeMavenWebProject/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
 /*      */             }
 /*      */             catch (InterruptedException e) {
 /* 1747 */               e.printStackTrace();
 /*      */             }
 /*      */             try {
 /* 1750 */               Thread.sleep(500L);
-/* 1751 */               sendGet("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+						 System.out.println("sendGet http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId="+ssss.getBoModel().getModelId());
+/* 1751 */               sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
 /*      */             }
 /*      */             catch (InterruptedException e) {
 /* 1754 */               e.printStackTrace();
@@ -1593,14 +1609,16 @@
 /* 1757 */           else if (inDateThree) {
 /*      */             try {
 /* 1759 */               Thread.sleep(600L);
-/* 1760 */               sendGet2("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
+                         System.out.println("sendGet2 http://120.77.250.17/smarthomeMavenWebProject/xingUser/push.action?deviceCode="+devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
+/* 1760 */               sendGet2("http://120.77.250.17/smarthomeMavenWebProject/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
 /*      */             }
 /*      */             catch (InterruptedException e) {
 /* 1763 */               e.printStackTrace();
 /*      */             }
 /*      */             try {
 /* 1766 */               Thread.sleep(500L);
-/* 1767 */               sendGet("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+                         System.out.println("sendGet http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId="+ssss.getBoModel().getModelId());
+/* 1767 */               sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
 /*      */             }
 /*      */             catch (InterruptedException e) {
 /* 1770 */               e.printStackTrace();
@@ -1614,8 +1632,8 @@
 /*      */         }
 /* 1779 */         break;
 /*      */       default:
-/* 1781 */         System.err.println("sda");
-/* 1782 */         sendGet("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+/* 1781 */         System.err.println("sendGet http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId="+ssss.getBoModel().getModelId());
+/* 1782 */         sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
 /*      */       }
 /*      */ 
 /*      */     }
@@ -2242,7 +2260,7 @@
 /* 2456 */     logger.info("开始处理procesKeepAliveSuccess");
 /* 2457 */     com.smarthome.dock.server.packets.in.KeepAlivePacket packet = (com.smarthome.dock.server.packets.in.KeepAlivePacket)in;
 /* 2458 */     String deviceCode = packet.getDevId();
-			   System.out.println("deviceCode:"+deviceCode);
+			   System.out.println("deviceCode:"+deviceCode);//这句输出语句本身存在
 /*      */ 
 /* 2460 */     String hostName = packet.getHostName();
 			   System.out.println("hostName:"+hostName);
@@ -2250,7 +2268,8 @@
 			   System.out.println("port:"+port);
 /*      */ 
 /* 2463 */     int ret = 1;
-/* 2464 */     DockUser dockUser = this.userManager.getUser(deviceCode);
+/* 2464 */     DockUser dockUser = this.userManager.getUser(deviceCode);//这里为空，设备状态为0
+			   System.out.println("dockUser :"+dockUser);
 /* 2465 */     if (dockUser == null) {
 /* 2466 */       ret = 0;
 /*      */     } else {
@@ -2260,6 +2279,7 @@
 /* 2471 */         (!hostName.equals(dockUser.getIp())) || (port != dockUser.getPort()))) {
 /* 2472 */         this.packetProcessor.addSocketAddress(deviceCode, new String[] { hostName, port+"" });
 /* 2473 */         this.userManager.keepAliveUser(deviceCode, new Date(), hostName, port);
+				   //this.userManager.logoutUser(deviceCode,keepAliveTime, hostName);
 /*      */ 
 /* 2475 */         BoDevice boDevice = this.wdDeviceService.findByCode(deviceCode);
 /* 2476 */         if (boDevice != null) {
@@ -2280,14 +2300,14 @@
 /* 2491 */       System.err.println(deviceCode + " ---- " + update.getStatus());
 /*      */     }
 /*      */ 
-/* 2494 */     logger.info(deviceCode + " KeepAlive " + hostName + " " + port + " 状态 " + ret);
+/* 2494 */     logger.info(deviceCode + " KeepAlive " + hostName + " " + port + " 状态 " + ret);//ret 代表设备的状态
 /*      */ 
 /* 2496 */     com.smarthome.dock.server.packets.out.KeepAlivePacket reply = new com.smarthome.dock.server.packets.out.KeepAlivePacket(packet.getDevId(), packet.getSequence(), ret);
 /* 2497 */     reply.setHostName(hostName);
 /* 2498 */     reply.setPort(port);
-/* 2499 */     this.packetProcessor.sendStrategy(reply);
+/* 2499 */     this.packetProcessor.sendStrategy(reply);//发送包
 /*      */ 
-/* 2501 */     this.packetProcessor.getKeepAliveTrigger().add(packet);
+/* 2501 */     this.packetProcessor.getKeepAliveTrigger().add(packet);//通过则新增至KeepAliveTrigger
 /*      */   }
 /*      */ 
 /*      */   public void procesKeepAliveLost(com.smarthome.dock.server.packets.in.KeepAlivePacket packet)

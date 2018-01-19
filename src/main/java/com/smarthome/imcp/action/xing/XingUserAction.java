@@ -136,7 +136,7 @@
 /*       */ import org.slf4j.Logger;
 /*       */ import org.slf4j.LoggerFactory;
 /*       */ import org.springframework.beans.factory.annotation.Autowired;
-/*       */ 
+
 /*       */ @ParentPackage("auth-check-package")
 /*       */ @Namespace("/xingUser")
 /*       */ public class XingUserAction extends AbstractAction
@@ -264,6 +264,9 @@
 /*       */ 
 /*       */   @Autowired
 /*       */   private PacketProcessHelper packetProcessHelper;
+
+
+
 /*       */   private File fileupload;
 /*       */   private String fileuploadFileName;
 /*       */   private String fileuploadContentType;
@@ -4624,11 +4627,15 @@
 /*       */ 
 /*  4685 */             System.err.println(this.classesInfo);
 /*  4686 */             System.err.println(this.infraredButtonsInfo);
-/*  4687 */             Map data = new HashMap();
+
+
+/*  4763 */             Map data = new HashMap();
+						List<String> keys = new ArrayList<String>(data.keySet());
 ///*       */ 			List<String> keys=(List<String>) data.keySet();
 						//Set 转   List
-						Set<String> keys0 = data.keySet();
-						List<String> keys = new ArrayList<>(keys0);
+//						Set<String> keys0 = data.keySet();
+//						List<String> keys = new ArrayList<>(keys0);
+//						System.out.println("keys:"+keys);
 						
 /*  4689 */             JSONObject jsonObject = JSONObject.fromObject(this.infraredButtonsInfo);
 /*  4690 */             Iterator it = jsonObject.keys();
@@ -4702,11 +4709,15 @@
 /*       */ 
 /*  4761 */           System.err.println(this.classesInfo);
 /*  4762 */           System.err.println(this.infraredButtonsInfo);
+					  
+
 /*  4763 */           Map data = new HashMap();
+				      List<String> keys = new ArrayList<String>(data.keySet());//map key 转为  list  List<String> mapKeyList = new ArrayList<String>(map.keySet());
 //					  List<String> keys=(List<String>) data.keySet();
 					  //Set 转   List
-					  Set<String> keys0 = data.keySet();
-					  List<String> keys = new ArrayList<>(keys0);
+//					  Set<String> keys0 = data.keySet();
+//					  List<String> keys = new ArrayList<>(keys0);
+//					  System.out.println("keys:"+keys);
 /*       */ 
 /*  4765 */           JSONObject jsonObject = JSONObject.fromObject(this.infraredButtonsInfo);
 /*  4766 */           Iterator it = jsonObject.keys();
@@ -7067,7 +7078,8 @@
 /*  7209 */     HttpServletRequest request = ServletActionContext.getRequest();
 /*  7210 */     Map map = new HashMap();
 /*  7211 */     String ip = request.getRemoteAddr();
-/*  7212 */     System.out.println(ip);
+/*  7212 */     System.out.println("ip :"+ip);
+                System.out.println("modelId"+this.modelId);//new
 /*  7213 */     String header = request.getHeader("timestamp");
 /*  7214 */     String header2 = request.getHeader("nonce");
 /*  7215 */     String header3 = request.getHeader("sign");
@@ -7077,7 +7089,8 @@
 /*  7219 */       String[] userCode2 = userCode.split(",");
 /*  7220 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
 /*  7221 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
-/*  7222 */       if ((ip.equals("127.0.0.1")) || (ip.equals("0:0:0:0:0:0:0:1")) || (isRal(header, header2, header3, header4, userCode, "").booleanValue())) {
+///*  7222 */       if ((ip.equals("127.0.0.1")) || (ip.equals("0:0:0:0:0:0:0:1")) || (isRal(header, header2, header3, header4, userCode, "").booleanValue())) {
+				 if ((ip.equals("120.77.250.17")) || (ip.equals("0:0:0:0:0:0:0:1")) || (isRal(header, header2, header3, header4, userCode, "").booleanValue())) {
 /*  7223 */         System.err.println("验证通过");
 /*       */ 
 /*  7225 */         Long accessToken = Long.valueOf(header);
@@ -7086,10 +7099,12 @@
 /*  7228 */           this.requestJson.setMessage("Invalid_User");
 /*  7229 */           this.requestJson.setSuccess(true);
 /*       */         }
-/*  7231 */         else if ((ip.equals("127.0.0.1")) || (ip.equals("0:0:0:0:0:0:0:1")) || (header4.equals(phone.getAccessToken())) || (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue())) {
+///*  7231 */         else if ((ip.equals("127.0.0.1")) || (ip.equals("0:0:0:0:0:0:0:1")) || (header4.equals(phone.getAccessToken())) || (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue())) {
+					else if ((ip.equals("120.77.250.17")) || (ip.equals("0:0:0:0:0:0:0:1")) || (header4.equals(phone.getAccessToken())) || (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue())) {
 /*  7232 */           System.err.println(header4);
 /*  7233 */           System.err.println(phone.getAccessToken());
-/*  7234 */           if ((ip.equals("127.0.0.1")) || (ip.equals("0:0:0:0:0:0:0:1"))) {
+///*  7234 */           if ((ip.equals("127.0.0.1")) || (ip.equals("0:0:0:0:0:0:0:1"))) {
+					  if ((ip.equals("120.77.250.17")) || (ip.equals("0:0:0:0:0:0:0:1"))) {
 /*  7235 */             Boolean commandMode = commandMode(userCode2[0].trim().toString(), this.modelId);
 /*  7236 */             if (!commandMode.booleanValue()) {
 /*  7237 */               this.requestJson.setData(map);
@@ -7141,17 +7156,20 @@
 /*  7286 */       System.err.println(userCode2[0].trim().toString());
 /*  7287 */       System.err.println(this.modelId);
 /*       */     } else {
-/*  7289 */       if ((ip.equals("127.0.0.1")) || (ip.equals("0:0:0:0:0:0:0:1")) || (isRal(header, header2, header3, header4, userCode, "").booleanValue())) {
+///*  7289 */       if ((ip.equals("127.0.0.1")) || (ip.equals("0:0:0:0:0:0:0:1")) || (isRal(header, header2, header3, header4, userCode, "").booleanValue())) {
+				if ((ip.equals("120.77.250.17")) || (ip.equals("0:0:0:0:0:0:0:1")) || (isRal(header, header2, header3, header4, userCode, "").booleanValue())) {
 /*  7290 */         System.err.println("验证通过");
 /*       */ 
 /*  7292 */         Long accessToken = Long.valueOf(header);
 /*  7293 */         BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode);
-/*  7294 */         if ((ip.equals("127.0.0.1")) || (ip.equals("0:0:0:0:0:0:0:1")) || (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue())) {
+///*  7294 */         if ((ip.equals("127.0.0.1")) || (ip.equals("0:0:0:0:0:0:0:1")) || (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue())) {
+					if ((ip.equals("120.77.250.17")) || (ip.equals("0:0:0:0:0:0:0:1")) || (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue())) {
 /*  7295 */           if (boUsers == null) {
 /*  7296 */             this.requestJson.setMessage("Invalid_User");
 /*  7297 */             this.requestJson.setSuccess(true);
 /*       */           }
-/*  7299 */           else if ((ip.equals("127.0.0.1")) || (ip.equals("0:0:0:0:0:0:0:1"))) {
+///*  7299 */           else if ((ip.equals("127.0.0.1")) || (ip.equals("0:0:0:0:0:0:0:1"))) {
+					 else if ((ip.equals("120.77.250.17")) || (ip.equals("0:0:0:0:0:0:0:1"))) {
 /*  7300 */             Boolean commandMode = commandMode(userCode, this.modelId);
 /*  7301 */             if (!commandMode.booleanValue()) {
 /*  7302 */               this.requestJson.setData(map);
@@ -9582,7 +9600,7 @@
 /*  9833 */             chargeParams.put("app", app);
 /*  9834 */             chargeParams.put("channel", channel);
 /*  9835 */             chargeParams.put("currency", "cny");
-/*  9836 */             chargeParams.put("client_ip", "127.0.0.1");
+/*  9836 */             chargeParams.put("client_ip", "120.77.250.17");
 /*  9837 */             String s = " 掌上智家商品付款";
 /*  9838 */             s = new String(s.getBytes("UTF-8"));
 /*       */ 
@@ -9661,7 +9679,7 @@
 /*  9924 */             chargeParams.put("app", app);
 /*  9925 */             chargeParams.put("channel", channel);
 /*  9926 */             chargeParams.put("currency", "cny");
-/*  9927 */             chargeParams.put("client_ip", "127.0.0.1");
+/*  9927 */             chargeParams.put("client_ip", "120.77.250.17");
 /*  9928 */             String s = " 掌上智家商品付款";
 /*  9929 */             s = new String(s.getBytes("UTF-8"));
 /*       */ 
@@ -11080,7 +11098,7 @@
 /*       */   @Action(value="getallhost", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String getAllHost()
 /*       */   {
-	 			System.out.println("11111111111111111111111111111111111111111111");
+	 			System.out.println("这个方法和主机的在线、离线判断有关");
 /* 11408 */     this.requestJson = new RequestJson();
 /* 11409 */     Map maps = new HashMap();
 /* 11410 */     HttpServletRequest request = ServletActionContext.getRequest();
@@ -11570,11 +11588,14 @@
 /* 11912 */           this.requestJson.setSuccess(true);
 /*       */         } else {
 /*       */           try {
+
 /* 11915 */             Map deviceAddressMap = new HashMap();
 //						List<String> keys=(List<String>) deviceAddressMap.keySet();//Set can't cast to List 
+					    List<String> keys = new ArrayList<String>(deviceAddressMap.keySet());
 						//Set 转    List
-						Set<String> keys0 = deviceAddressMap.keySet();
-						List<String> keys = new ArrayList<>(keys0);
+//						Set<String> keys0 = deviceAddressMap.keySet();
+//						List<String> keys = new ArrayList<>(keys0);
+//						System.out.println("keys11580:"+keys);   //报错：java.util.HashMap$KeySet cannot be cast to java.util.List
 						
 /* 11916 */             List getroomCode = this.boHostDeviceService.getroomCode(this.roomCode);
 /*       */             BoHostDevice boHostDevice;
@@ -11652,11 +11673,13 @@
 /* 11988 */           this.requestJson.setSuccess(true);
 /*       */         } else {
 /*       */           try {
-/* 11991 */             Map deviceAddressMap = new HashMap();
-//						List<String> keys=(List<String>) deviceAddressMap.keySet();
+
+/* 11915 */             Map deviceAddressMap = new HashMap();
+						//List<String> keys=(List<String>) deviceAddressMap.keySet();//Set can't cast to List 
+						List<String> keys = new ArrayList<String>(deviceAddressMap.keySet());
 						//Set 转    List
-						Set<String> keys0 = deviceAddressMap.keySet();
-						List<String> keys = new ArrayList<>(keys0);
+//						Set<String> keys0 = deviceAddressMap.keySet();
+//						List<String> keys = new ArrayList<>(keys0);
 						
 /* 11992 */             List getroomCode = this.boHostDeviceService.getroomCode(this.roomCode);
 /*       */             BoHostDevice boHostDevice;

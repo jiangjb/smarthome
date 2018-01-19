@@ -132,7 +132,7 @@
 /*     */   }
 /*     */ 
 /*     */   public void doKeepAlive(String deviceCode, String ip) {
-//				System.out.println("检查主机是否在线...");
+			  System.out.println("主机在线时的操作...");
 /* 136 */     boolean isUpdate = false;
 /* 137 */     BoDevice device = this.boDeviceService.findByCode(deviceCode);
 /* 138 */     if ((device.getStatus() == null) || (device.getStatus().intValue() <= 0) || (!ip.equals(device.getDevIp()))) {

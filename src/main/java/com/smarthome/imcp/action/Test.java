@@ -1,12 +1,13 @@
 /*    */ package com.smarthome.imcp.action;
-/*    */ 
+
+         import com.smarthome.imcp.common.Map2List;
 /*    */ import com.smarthome.imcp.common.Md5;
 /*    */ import java.io.BufferedReader;
 /*    */ import java.io.InputStreamReader;
 /*    */ import java.io.PrintStream;
 /*    */ import java.net.URL;
 /*    */ import java.net.URLConnection;
-import java.util.List;
+         import java.util.List;
 /*    */ import java.util.Map;
 /*    */ 
 /*    */ public class Test
@@ -50,8 +51,10 @@ import java.util.List;
 /*    */ 
 /* 52 */       connection.connect();
 /*    */ 
-/* 54 */       Map map = connection.getHeaderFields();
-			   List<String> keys=(List<String>) map.keySet();
+
+			   Map2List map2List=new Map2List();
+			   Map map = connection.getHeaderFields();
+			   List<String> keys=map2List.mapTransitionList(map);
 /*    */ 
 /* 56 */       for (String key : keys) {
 /* 57 */         System.out.println(key + "--->" + map.get(key));
