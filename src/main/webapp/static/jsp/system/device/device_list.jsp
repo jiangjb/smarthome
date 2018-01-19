@@ -360,6 +360,19 @@
 			}else{
 				status=1;
 			}
+			/* 该ajax用于实时更新设备的在线、离线以及全部的数量 */
+			$.ajax({
+    			url: "showNum.do",
+    	    	data: { },
+    			type: "POST",
+    			dataType:"json",
+    			async: true,
+    			success: function(data){
+    				/* alert("1"); */
+    				$("#total").text(data.total+" 台 ");
+    				$("#online").text(data.online+" 台 ");
+    			}
+    		});
 			/* alert(status) */
 				/* alert(index); */
 				$.ajax({
