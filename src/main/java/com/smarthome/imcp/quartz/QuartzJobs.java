@@ -63,7 +63,7 @@
 
 			@Autowired
 			private PacketProcessor packetProcessor;//new
-//			private XingUserAction xingUserAction;
+
 
 /*  84 */   private static Map<String, Integer> user_num = new HashMap();
 /*     */ 
@@ -76,7 +76,7 @@
 /*     */   }
 
 /*     */   public void packNum(String userCode)
-/*     */   {
+/*     */   {//important
 /*  90 */     if (user_num.get(userCode) == null)
 /*  91 */       user_num.put(userCode, Integer.valueOf(0));
 /*     */     else
@@ -93,7 +93,7 @@
 /*     */ 
 /* 105 */       String weekOfDate = SensorUtil.getWeekOfDate(new Date());
 /*     */       String week;
-///*     */       String week;
+
 /* 107 */       if ((boModel.getWeek() == null) || (boModel.getWeek().equals("")))
 /* 108 */         week = "星期日,";
 /*     */       else {
@@ -127,7 +127,7 @@
 /*     */     throws ParseException
 /*     */   {
 /* 140 */     List lock = this.boLockPasswordManageService.getLock(Integer.valueOf(65535));
-			  System.out.println("lock.size() :"+lock.size());
+			  System.out.println("lock.size() :"+lock.size()+"如果不是0则后面会有相应的操作");
 /* 141 */     Date currentTime = new Date();
 /* 142 */     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 /* 143 */     String dateString = formatter.format(currentTime);
@@ -258,4 +258,5 @@
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\
  * Qualified Name:     com.smarthome.imcp.quartz.QuartzJobs
  * JD-Core Version:    0.6.2
+ * new smarthomeMavenWebProject
  */

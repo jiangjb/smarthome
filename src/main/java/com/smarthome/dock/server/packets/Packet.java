@@ -16,7 +16,7 @@
 /*     */   protected boolean duplicated;
 /*     */   protected String hostName;
 /*     */   protected int port;
-/*     */ 
+
 /*     */   protected Packet()
 /*     */   {
 /*     */   }

@@ -2,6 +2,8 @@
 /*    */ 
 /*    */ import com.smarthome.dock.server.event.PacketEvent;
 /*    */ import com.smarthome.dock.server.packets.InPacket;
+import com.smarthome.dock.server.util.Util;
+
 /*    */ import java.util.concurrent.Callable;
 /*    */ 
 /*    */ public class PacketEventTrigger<T>
@@ -21,9 +23,10 @@
 /*    */     {
 /* 27 */       PacketEvent e = new PacketEvent(packet);
 /* 28 */       e.type = packet.getCommand();
+               System.out.println("PacketEventTrigger call method --command:"+Util.getCommandString(packet.getCommand()));
 /* 29 */       this.packetProcessor.firePacketArrivedEvent(e);
-/*    */ 
-/* 31 */       packet = this.packetProcessor.removeIncomingPacket();
+
+/* 31 */       packet = this.packetProcessor.removeIncomingPacket();//这句很重要，去掉会一直加载数据包
 /*    */     }
 /* 33 */     return null;
 /*    */   }

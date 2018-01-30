@@ -84,7 +84,7 @@
 /* 107 */     criteria.add(Restrictions.eq("boDevice.deviceCode", deviceCode));
 /* 108 */     criteria.add(Restrictions.eq("deviceAddress", deviceAddress));
 /* 109 */     criteria.add(Restrictions.eq("command", command));
-/* 110 */     this.boResendVerificationDao.flush();
+///* 110 */     this.boResendVerificationDao.flush();1-26
 /*     */ 
 /* 112 */     List list = this.boResendVerificationDao.findByCriteria(criteria);
 /* 113 */     if ((list == null) || (list.isEmpty())) {

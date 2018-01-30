@@ -17,7 +17,7 @@
 /*     */ 
 /*     */   public SendDDataPacket(String devId)
 /*     */   {
-/*  29 */     super((char) 49152, devId);
+/*  29 */     super((char) 49152, devId);//初始化
 /*     */   }
 /*     */ 
 /*     */   protected void putBody(ChannelBuffer buf)

@@ -22,6 +22,7 @@
 /*      */ import com.smarthome.dock.server.support.KeepAliveTrigger;
 /*      */ import com.smarthome.dock.server.support.PacketProcessor;
 /*      */ import com.smarthome.dock.server.util.StaticUtil;
+import com.smarthome.dock.server.util.Util;
 /*      */ import com.smarthome.imcp.common.GlobalMethod;
 /*      */ import com.smarthome.imcp.controller.RequestJson;
 /*      */ import com.smarthome.imcp.dao.model.bo.BoAirBindingPanel;
@@ -43,6 +44,7 @@
 /*      */ import com.smarthome.imcp.dao.model.bo.BoUserDevice;
 /*      */ import com.smarthome.imcp.dao.model.bo.BoUserDevices;
 /*      */ import com.smarthome.imcp.dao.model.bo.BoUsers;
+import com.smarthome.imcp.dao.model.system.SysOperate;
 /*      */ import com.smarthome.imcp.service.bo.BoAirBindingPanelServiceIface;
 /*      */ import com.smarthome.imcp.service.bo.BoChannelServiceIface;
 /*      */ import com.smarthome.imcp.service.bo.BoControlEnclosureServiceIface;
@@ -253,9 +255,8 @@
 /*  279 */     String deviceCode = in.getDevId();
 /*      */ 
 /*  283 */     DockUser user = this.userManager.getUser(deviceCode);
-///*  284 */     logger.info(user == null);
 /*  285 */     if (user == null) {
-				logger.info("user == null");
+				 logger.info("user == null");//常出现
 /*  286 */       boolean isExist = this.boProcessService.doLogin(deviceCode, hostName);
 /*      */ 
 /*  288 */       if (isExist)
@@ -375,8 +376,9 @@
 /*      */   public void processSendDData(String devId, byte[] frameBody)
 /*      */   {//设备对码的时候进入的方法
 /*  452 */     logger.info("发送 " + devId + " processSendDData");
-/*  453 */     SendDDataPacket packet = new SendDDataPacket(devId);
+/*  453 */     SendDDataPacket packet = new SendDDataPacket(devId);//门锁的command有问题啊
 			   System.out.println("processSendDData packet:"+packet);
+			   System.out.println("processSendDData command:"+Util.getCommandString(packet.getCommand()));//门锁--MSG_C2D_DATA
 /*      */ 
 /*  458 */     packet.setFrameBody(frameBody);
 /*  459 */     packet.setFrameLen(frameBody.length);
@@ -389,11 +391,11 @@
 /*  465 */       this.message = (devId + " 设备不在线");
 /*  466 */       return;
 /*      */     }
-/*      */ 
+/*      */     System.out.println("address[0]="+address[0]);
 /*  469 */     packet.setHostName(address[0]);
 /*  470 */     packet.setPort(Integer.valueOf(address[1]).intValue());
 /*      */ 
-/*  472 */     this.packetProcessor.send(packet);
+/*  472 */     this.packetProcessor.send(packet);//发送包  commandMode>>processSendDData
 /*      */   }
 /*      */ 
 /*      */   public void processSend0Packet(String devId, char devType, byte frameType)
@@ -458,7 +460,7 @@
 /*  550 */       return;
 /*      */     }
 /*      */ 
-/*  553 */     DataReplyPacket reply = new DataReplyPacket(packet.getCommand(), packet.getDevId());
+/*  553 */     DataReplyPacket reply = new DataReplyPacket(packet.getCommand(), packet.getDevId());//这里又有和command相关的实体类
 /*  554 */     reply.setDevData(data);
 /*  555 */     reply.setHostName(address[0]);
 /*  556 */     reply.setPort(Integer.valueOf(address[1]).intValue());
@@ -609,6 +611,7 @@
 /*  712 */     DDataPacket packet = (DDataPacket)in;
 /*  713 */     String devId = packet.getDevId();
 /*  714 */     String clientId = packet.getClientId();
+			   System.out.println("processDDataSuccess clientId:"+clientId);
 /*      */ 
 /*  716 */     this.data = packet.getDevData();
 /*      */ 
@@ -618,7 +621,7 @@
 /*  721 */     String as = new String(this.dataClone);
 /*      */ 
 /*  723 */     setS(as);
-/*  724 */     System.err.println(new String(this.dataClone));
+/*  724 */     System.err.println("this.dataClone:"+new String(this.dataClone));
 /*  725 */     System.out.println("**************************");
 /*      */ 
 /*  727 */     if (this.user_num.get(getUserCode()) == null)
@@ -1017,6 +1020,7 @@
 /*      */         try {
 /* 1131 */           Thread.sleep(500L);
 /* 1132 */           if (ssss.getSecurityType().equals("1")) {
+	                   logger.info("getSecurityType===1");
 /* 1133 */             boolean inDateOno = isInDate(new Date(), ssss.getStartTimeOne(), ssss.getEndTimeOne(), ssss.getSecurityOneType());
 /* 1134 */             boolean inDateTwo = isInDate(new Date(), ssss.getStartTimeTwo(), ssss.getEndTimeTwo(), ssss.getSecurityTwoType());
 /* 1135 */             boolean inDateThree = isInDate(new Date(), ssss.getStartTimeThree(), ssss.getEndTimeThree(), ssss.getSecurityThreeType());
@@ -1261,7 +1265,7 @@
 /*      */ 
 /* 1384 */                   this.boAirBindingPanelService.save(s);
 /*      */                 }
-/* 1386 */               } else if (split[2].trim().toString().equals("2")) {
+/* 1386 */               } else if (split[2].trim().toString().equals("2")) {//空调  --DeviceType:501
 /* 1387 */                 BoHostDevice boHostDevice = this.boHostDeviceService.findBydeviceAddress(userCode, split[1].trim().toString());
 /* 1388 */                 if (boHostDevice == null) {
 /* 1389 */                   System.err.println("LKSALDKAS");
@@ -1412,21 +1416,28 @@
 /* 1534 */                 this.boHostDeviceService.save(s);
 /*      */               }
 /*      */             }
-/* 1537 */             else if (split[0].trim().toString().equals("5")) {
+/* 1537 */             else if (split[0].trim().toString().equals("5")) {//智能门锁
+	                     logger.info("split[1].trim().toString() ="+split[1].trim().toString());
+	                     System.out.println("split[1] 1419L:"+split[1]);
 /* 1538 */               BoHostDevice boHostDevice = this.boHostDeviceService.findBydeviceAddress(userCode, split[1].trim().toString());
+                         System.out.println("boHostDevice 1422L:"+boHostDevice);
 /* 1539 */               BoLockVerdict boLockVerdict = this.boLockVerdictService.findLock(split[1].trim().toString());
+						 System.out.println("boLockVerdict 1423L:"+boHostDevice);
 /* 1540 */               if (boHostDevice == null) {
-/* 1541 */                 System.err.println("进了");
+/* 1541 */                 System.err.println("智能门锁 --进了");
 /* 1542 */                 BoHostDevice s = new BoHostDevice();
 /* 1543 */                 s.setDeviceAddress(split[1]);
 /* 1544 */                 s.setBoDevice(boDevice);
 /* 1545 */                 s.setDeviceNum(Integer.valueOf(split[2]));
-/* 1546 */                 s.setDeviceType("5");
+/* 1546 */                 s.setDeviceType("5");//5？ 5314？
 /* 1547 */                 s.setPushSet("0");
+//						   s.setPushSet("");
 /* 1548 */                 s.setDeviceNum(Integer.valueOf(1));
 /* 1549 */                 s.setWhetherQueryStateSign("");
+//						   s.setWhetherQueryStateSign("Y");
 /* 1550 */                 s.setBoUsers(boUsers);
 /* 1551 */                 s.setState("");
+//						   s.setState("0");
 /* 1552 */                 s.setValidationCode("");
 /* 1553 */                 s.setDeviceClassify(Boolean.valueOf(false));
 /* 1554 */                 s.setNickName("");
@@ -1632,8 +1643,9 @@
 /*      */         }
 /* 1779 */         break;
 /*      */       default:
-/* 1781 */         System.err.println("sendGet http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId="+ssss.getBoModel().getModelId());
+///* 1781 */         System.err.println("sendGet http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId="+ssss.getBoModel().getModelId());
 /* 1782 */         sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+				   break;
 /*      */       }
 /*      */ 
 /*      */     }
@@ -1661,12 +1673,14 @@
 /*      */     }
 /*      */ 
 /* 1820 */     String radioCommand = new String(this.dataClone);
-/* 1821 */     String[] radioCommandSplit = radioCommand.split("-");
+               logger.info("············radioCommand:"+radioCommand);//PT1527_315M-SEND-0,33,788925101,OK
+/* 1821 */     String[] radioCommandSplit = radioCommand.split("-");//PT1527_315M SEND 0,33,788925101,OK 
+ 
 /*      */ 
 /* 1823 */     if ("PT2262_315M".equals(radioCommandSplit[0])) {
 /* 1824 */       if ("SEND".equals(radioCommandSplit[1])) {
 /* 1825 */         String radioCommand2 = radioCommandSplit[2];
-/* 1826 */         String[] radioCommandSplit2 = radioCommand2.split(",");
+/* 1826 */         String[] radioCommandSplit2 = radioCommand2.split(",");//0 33 788925101 OK
 /* 1827 */         for (int i = 0; i < radioCommandSplit2.length; i++) {
 /* 1828 */           System.err.println("截取" + radioCommandSplit2[i]);
 /*      */         }
@@ -1700,17 +1714,22 @@
 /*      */           }
 /*      */         }
 /*      */       }
-/* 1860 */     } else if ("PT1527_315M".equals(radioCommandSplit[0])) {
+/* 1860 */     } else if ("PT1527_315M".equals(radioCommandSplit[0])) {//门锁 进入了这里  有没有可能是#造成的    ??PTZNMS_315M
 /* 1861 */       if ("SEND".equals(radioCommandSplit[1])) {
 /* 1862 */         String radioCommand2 = radioCommandSplit[2];
-/* 1863 */         String[] radioCommandSplit2 = radioCommand2.split(",");
+/* 1863 */         String[] radioCommandSplit2 = radioCommand2.split(",");//0 33 788925101 OK
 /* 1864 */         for (int i = 0; i < radioCommandSplit2.length; i++) {
 /* 1865 */           System.err.println("截取" + radioCommandSplit2[i]);
 /*      */         }
 /* 1867 */         if ("OK".equals(radioCommandSplit2[3].trim().toString()))
 /*      */         {
-/* 1869 */           this.resendVerification = this.boResendVerificationService.find(devId, radioCommandSplit2[2].trim(), "0");
+	System.err.println("·······devId:"+devId);
+	System.err.println("·······radioCommandSplit2[2]:"+radioCommandSplit2[2]);
+	logger.info("·······radioCommandSplit2[0]:"+radioCommandSplit2[0]);//暂时将下面的"0"替换掉
+/* 1869 */           this.resendVerification = this.boResendVerificationService.find(devId, radioCommandSplit2[2].trim(), "0");//deviceAddress=radioCommandSplit2[2].trim();command="0"  radioCommandSplit2[0].trim()
+                     System.err.println("·······this.resendVerification:"+this.resendVerification);//null
 /* 1870 */           if (this.resendVerification != null) {
+	System.err.println("resendVerification is not null.");
 /* 1871 */             this.resendVerification.setAcceptState("OK");
 /* 1872 */             this.boResendVerificationService.update(this.resendVerification);
 /*      */           }
@@ -1733,6 +1752,7 @@
 /*      */       }
 /*      */ 
 /*      */     }
+
 /*      */ 
 /* 1894 */     String infraredCommand = new String(this.dataClone);
 /* 1895 */     String[] infraredCommandSplit = infraredCommand.split("-");

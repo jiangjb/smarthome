@@ -12,6 +12,7 @@
 		  import com.smarthome.dock.server.packets.in.KeepAlivePacket;//离线  的类
 /*     */ import com.smarthome.dock.server.util.Util;
 /*     */ import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 /*     */ import java.net.InetSocketAddress;
 /*     */ import java.util.LinkedList;
 /*     */ import java.util.Queue;
@@ -53,7 +54,7 @@
 /*     */   public PacketProcessor() {
 /*  77 */     this.executor = Executors.newCachedThreadPool();
 /*     */ 
-/*  79 */     this.router = new ProcessorRouter(3);
+/*  79 */     this.router = new ProcessorRouter(3);//??应该很重要
 /*     */ 
 /*  81 */     this.packetEventTrigger = new PacketEventTrigger(this);
 /*     */ 
@@ -82,17 +83,18 @@
 /*     */ 
 /*     */   public void processPacket(InPacket packet)
 /*     */   {
-	          System.out.println("processPacket...");
-	          logger.info("进入processPacket方法");
+	          logger.info("进入PacketProcessor类的 processPacket方法，这里面的packetArrived方法在下面 -判断command");
 /* 115 */     PacketEvent e = new PacketEvent(packet);
 /* 116 */     e.type = packet.getCommand();
 /* 117 */     packetArrived(e);
 /*     */   }
-/*     */ 
+         
+            //this.channel.write是 发送数据包到服务器吗？如果是的话    参照知识点--使用SocketChannel的NIO客户机服务器通信
 /*     */   public void send(OutPacket packet)
 /*     */   {
 /* 131 */     if (this.channel != null)
 /*     */     {
+				System.err.println("进了send方法");
 /* 133 */       this.channel.write(packet, new InetSocketAddress(packet.getHostName(), packet.getPort()));
 /* 134 */       logger.debug("发送包" + Util.getCommandString(packet.getCommand()) + "　devId：" + packet.getDevId() + " ip:" + packet.getHostName());
 /*     */     }
@@ -101,7 +103,7 @@
 /*     */   public void sendStrategy(OutPacket packet)
 /*     */   {
 /* 154 */     if (this.channel != null) {
-/* 155 */       System.err.println("进了");
+/* 155 */       System.err.println("进了sendStrategy方法");
 /* 156 */       this.channel.write(packet, new InetSocketAddress(packet.getHostName(), packet.getPort()));
 /* 157 */       logger.info("发送包" + Util.getCommandString(packet.getCommand()) + "　devId：" + packet.getDevId() + " ip:" + packet.getHostName() + " port:" + packet.getPort());
 /*     */     }
@@ -110,6 +112,7 @@
 /*     */   public void sends(OutPacket packet)
 /*     */   {
 /* 172 */     if (this.channel != null) {
+				System.err.println("进了sends方法");
 /* 173 */       this.channel.write(packet, new InetSocketAddress(packet.getHostName(), packet.getPort()));
 /* 174 */       logger.info("发送包" + Util.getCommandString(packet.getCommand()) + "　devId：" + packet.getDevId() + " ip:" + packet.getHostName() + " port:" + packet.getPort());
 /*     */     }
@@ -145,48 +148,48 @@
 /*     */ 
 /*     */   public void firePacketArrivedEvent(PacketEvent e)
 /*     */   {
-			  System.out.println("PacketProcessor.java firePacketArrivedEvent");
-/* 233 */     this.router.packetArrived(e);
+			  System.out.println("firePacketArrivedEvent(PacketProcessor.java)");
+/* 233 */     this.router.packetArrived(e);//调用ProcessRouter的packetArrived方法
 /*     */   }
 /*     */ 
 /*     */   public void packetArrived(PacketEvent e)
-/*     */   {
-	          System.out.println("packetArrived...");
+/*     */   {//与Util类结合使用  Util.getCommandString()
 /* 238 */     InPacket in = (InPacket)e.getSource();
-/*     */ 	  System.out.println("InPacket"+in);
-              //new 离线
-//			  KeepAlivePacket out=(KeepAlivePacket) e.getSource();
-//			  System.out.println("KeepAlivePacket"+out);
 /* 254 */     logger.info("开始处理" + in.toString() + "　devId:" + in.getDevId() + " commond：" + Util.getCommandString(in.getCommand()));
-/*     */     System.out.println(" devId: "+ in.getDevId());
 /* 259 */     switch (in.getCommand()) {
-/*     */     case 'ꀀ':
-/* 261 */       this.packetProcessHelper.processLoginSuccess(in);
-/* 262 */       break;
-/*     */     case 'ꀂ':
-/* 264 */       this.packetProcessHelper.procesKeepAliveSuccess(in);
-//				System.out.println("======================  in out ===========================");
-//				this.packetProcessHelper.procesKeepAliveLost(out);
-/* 265 */       break;
-/*     */     case '뀀':
-/* 267 */       this.packetProcessHelper.processQuerySuccess(in);
-/* 268 */       break;
-/*     */     case '\000':
-/* 270 */       this.packetProcessHelper.processUnknown(in);
+	/*     */     case 'ꀀ':
+	/* 261 */       this.packetProcessHelper.processLoginSuccess(in);//command=MSG_DEV_REG
+	/* 262 */       break;
+	/*     */     case 'ꀂ':
+	/* 264 */       this.packetProcessHelper.procesKeepAliveSuccess(in);//commad=MSG_DEV_HEART_BEAT
+	/* 265 */       break;
+	/*     */     case '뀀':
+	/* 267 */       this.packetProcessHelper.processQuerySuccess(in);//command=MSG_CLI_QUERY
+	/* 268 */       break;
+	/*     */     case '\000':
+	/* 270 */       this.packetProcessHelper.processUnknown(in);//command=Unknown
+					break;
+				  default:
+					System.out.println("switch语句 default输出");
+					break;
 /*     */     }
 /*     */ 
-/* 274 */     if ((in.getCommand() >= 49152) && (in.getCommand() <= 53247)) {
+/* 274 */     if ((in.getCommand() >= 49152) && (in.getCommand() <= 53247)) {//command=MSG_C2D_DATA
+				System.out.println("Command between 49152 and 53247");
 /* 275 */       this.packetProcessHelper.processCDataSuccess(in);
 /*     */     }
-/* 277 */     if ((in.getCommand() >= 53248) && (in.getCommand() <= 57343)) {
+/* 277 */     if ((in.getCommand() >= 53248) && (in.getCommand() <= 57343)) {//command=MSG_D2C_DATA
 	            System.out.println("Command between 53248 and 57343");
 /* 278 */       this.packetProcessHelper.processDDataSuccess(in);
 /*     */     }
-/* 280 */     if ((in.getCommand() >= 57344) && (in.getCommand() <= 61439)) {
+/* 280 */     if ((in.getCommand() >= 57344) && (in.getCommand() <= 61439)) {//command=MSG_D2S_DATA
+				System.out.println("Command between 57344 and 61439");
 /* 281 */       this.packetProcessHelper.processReportSuccess(in);
 /*     */     }
-/* 283 */     if ((in.getCommand() >= 61440) && (in.getCommand() <= 65535))
-/* 284 */       this.packetProcessHelper.processAlarmSuccess(in);
+/* 283 */     if ((in.getCommand() >= 61440) && (in.getCommand() <= 65535)) {//command=MSG_D2S_ALARM
+				System.out.println("Command between 61440 and 65535");
+				this.packetProcessHelper.processAlarmSuccess(in);
+			  }
 /*     */   }
 /*     */ 
 /*     */   public PacketHistory getHistory()

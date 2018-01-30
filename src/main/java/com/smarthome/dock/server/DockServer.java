@@ -56,7 +56,7 @@
 /*  63 */     bootstrap.setOption("keepAlive", Boolean.valueOf(true));
  
 /*  66 */     DatagramChannel channel = (DatagramChannel)bootstrap
-/*  67 */       .bind(new InetSocketAddress(5555));
+/*  67 */       .bind(new InetSocketAddress(5555));//可以在UDP端口5555 上接收数据包
 //              System.out.println("channel :"+channel);//[id: 0xd3583bb4]
 /*  68 */     this.packetProcessor.setChannel(channel);
 /*  69 */     this.packetProcessor.getAllChannels().add(channel);

@@ -1,7 +1,7 @@
 /*       */ package com.smarthome.imcp.action.xing;
 /*       */ 
 /*       */ import com.alibaba.fastjson.JSON;
-/*       */ import com.pingplusplus.exception.APIConnectionException;
+/*       */ import com.pingplusplus.exception.APIConnectionException;//pingplusplus 支付模块  （Ping++）
 /*       */ import com.pingplusplus.exception.APIException;
 /*       */ import com.pingplusplus.exception.AuthenticationException;
 /*       */ import com.pingplusplus.exception.ChannelException;
@@ -96,7 +96,6 @@
 /*       */ import java.io.File;
 /*       */ import java.io.IOException;
 /*       */ import java.io.InputStream;
-/*       */ import java.io.PrintStream;
 /*       */ import java.io.Serializable;
 /*       */ import java.io.UnsupportedEncodingException;
 /*       */ import java.math.BigDecimal;
@@ -145,8 +144,8 @@
 /*   189 */   private static Map<String, Integer> user_num = new HashMap();
 /*       */ 
 /*   204 */   public static String apiKey = "sk_live_KirHuHS8KKiL484Ke1Kq5uL8";
-/*       */ 
 /*   208 */   public static String appId = "app_DOGKG8mDG0OSSyrz";
+
 /*       */   public static final String CURRENCY_FEN_REGEX = "\\-?[0-9]+";
 /*   212 */   SendMsgUtil s = new SendMsgUtil();
 /*       */   public static final String content1 = "尊敬的用户，您的验证码为 : ";
@@ -265,8 +264,6 @@
 /*       */   @Autowired
 /*       */   private PacketProcessHelper packetProcessHelper;
 
-
-
 /*       */   private File fileupload;
 /*       */   private String fileuploadFileName;
 /*       */   private String fileuploadContentType;
@@ -341,7 +338,7 @@
 /*       */   private String code;
 /* 16517 */   private Integer type = Integer.valueOf(0);
 /* 16518 */   private String patternType = "";
-/*       */   private Integer command;
+/*       */   private Integer command;//a key variable
 /* 16520 */   private String CID = "";
 /*       */   private Integer keyvalue;
 /*       */   private Integer value;
@@ -362,9 +359,11 @@
 /* 17057 */   private Integer pageNum = Integer.valueOf(1); private Integer pageSize = Integer.valueOf(50);
 /*       */   private String orderField;
 /*       */   private String orderDirection;
-/*       */ 
+
 /*       */   public void packNum(String userCode)
 /*       */   {
+	            //1-29 map的put,get操作
+//	            logger.info("packNum userCode:"+((Integer)user_num.get(userCode)).intValue());
 /*   195 */     if (user_num.get(userCode) == null)
 /*   196 */       user_num.put(userCode, Integer.valueOf(0));
 /*       */     else
@@ -405,7 +404,7 @@
 /*       */   }
 /*       */ 
 /*       */   public Boolean commandMode(String usereCode, String modelId)
-/*       */   {
+/*       */   {//这里面的怎么都不打印
 /*   276 */     System.err.println(usereCode + modelId);
 /*   277 */     Map map = new HashMap();
 /*       */ 
@@ -421,13 +420,13 @@
 /*       */       else
 /*       */       {
 /*   295 */         for (int indexs = 0; indexs < list.size(); indexs++)
-/*       */         {
+/*       */         {//下面的代码 差不多都在循环里
 /*   297 */           if (user_num.get(usereCode) == null)
 /*   298 */             user_num.put(usereCode, Integer.valueOf(0));
 /*       */           else {
 /*   300 */             user_num.put(usereCode, Integer.valueOf(((Integer)user_num.get(usereCode)).intValue() == 255 ? 0 : ((Integer)user_num.get(usereCode)).intValue() + 1));
 /*       */           }
-/*   302 */           final BoModelInfo obj = (BoModelInfo)list.get(indexs);
+/*   302 */           final BoModelInfo obj = (BoModelInfo)list.get(indexs);//to  split
 /*       */ 
 /*   304 */           Integer delayValues = obj.getDelayValues();
 /*   305 */           Integer sss = delayValues;
@@ -441,8 +440,10 @@
 /*   313 */             Thread.sleep(sss.intValue());
 /*       */           }
 /*       */ 
-/*   317 */           String controlCommand2 = obj.getControlCommand();
-/*   318 */           String[] split = controlCommand2.split(",");
+/*   317 */           String controlCommand2 = obj.getControlCommand();//决定command的值？
+                      logger.info("······controlCommand2:"+controlCommand2);
+/*   318 */           String[] split = controlCommand2.split(",");//a key variable
+					  logger.info("······split[0]:"+split[0]);//
 /*   319 */           System.err.println("时间 " + sss);
 /*       */ 
 /*   321 */           System.err.println("device.getDeviceType() " + obj.getDeviceType());
@@ -451,7 +452,7 @@
 /*   324 */             String deviceAddress2 = obj.getDeviceAddress();
 /*   325 */             String substring = deviceAddress2.substring(0, deviceAddress2.length() - 1);
 /*   326 */             String substring2 = deviceAddress2.substring(deviceAddress2.length() - 1, deviceAddress2.length());
-///*       */             String s;
+
 /*       */             final String s;
 /*   328 */             if (split[0].equals("100")) {
 /*   329 */               s = "1";
@@ -569,7 +570,7 @@
 /*       */             else
 /*   442 */               commands = Integer.valueOf(20);
 /*       */             int commandss;
-///*       */             int commandss;
+
 /*   445 */             if (Integer.valueOf(split[0]).intValue() >= 95)
 /*   446 */               commandss = 95;
 /*       */             else
@@ -766,12 +767,12 @@
 /*   640 */                 BoInfraredLearnControlMap controlMap = this.boInfraredLearnControlMapService.findBy(usereCode, obj.getDeviceAddress(), split[0]);
 /*   641 */                 if (controlMap == null)
 /*       */                 {
-/*   643 */                   System.err.println("您还没学习过改按键");
+/*   643 */                   System.err.println("您还没学习过该按键");
 /*       */                 } else {
 /*   645 */                   String zgbzf = split[0];
 /*   646 */                   BoInfraredPart findss = this.boInfraredPartService.find(obj.getDeviceAddress());
 /*       */                   String s;
-///*       */                   String s;
+
 /*   648 */                   if (findss == null)
 /*   649 */                     s = "0000000000";
 /*       */                   else {
@@ -794,14 +795,14 @@
 /*       */                 else {
 /*   668 */                   BoInfraredPart findss = this.boInfraredPartService.find(obj.getDeviceAddress());
 /*       */                   String s;
-///*       */                   String s;
+
 /*   670 */                   if (findss == null)
 /*   671 */                     s = "0000000000";
 /*       */                   else {
 /*   673 */                     s = findss.getValidationCode();
 /*       */                   }
 /*   675 */                   String str = "ZIGBEE_INFRARED-SEND-" + user_num.get(usereCode) + "," + 
-/*   676 */                     obj.getDeviceAddress() + "," + controlMap.getChangeValue() + "," + s;
+/*   676 */                     obj.getDeviceAddress() + "," + controlMap.getChangeValue() + "," + s;//INFRARED 红外
 /*   677 */                   byte[] bs = str.getBytes();
 /*   678 */                   System.err.println(new String(bs));
 /*       */ 
@@ -813,12 +814,12 @@
 /*   685 */               BoInfraredLearnControlMap controlMap = this.boInfraredLearnControlMapService.findBy(usereCode, obj.getDeviceAddress(), split[0]);
 /*   686 */               if (controlMap == null)
 /*       */               {
-/*   688 */                 System.err.println("您还没学习过改按键");
+/*   688 */                 System.err.println("您还没学习过该按键");
 /*       */               }
 /*       */               else {
 /*   691 */                 BoInfraredPart findss = this.boInfraredPartService.find(obj.getDeviceAddress());
 /*       */                 String s;
-///*       */                 String s;
+
 /*   693 */                 if (findss == null)
 /*   694 */                   s = "0000000000";
 /*       */                 else {
@@ -840,12 +841,12 @@
 /*   711 */                 BoInfraredLearnControlMap controlMap = this.boInfraredLearnControlMapService.findBy(usereCode, obj.getDeviceAddress(), split[0]);
 /*   712 */                 if (controlMap == null)
 /*       */                 {
-/*   714 */                   System.err.println("您还没学习过改按键");
+/*   714 */                   System.err.println("您还没学习过该按键");
 /*       */                 } else {
 /*   716 */                   String zgbzf = split[0];
 /*   717 */                   BoInfraredPart findss = this.boInfraredPartService.find(obj.getDeviceAddress());
 /*       */                   String s;
-///*       */                   String s;
+
 /*   719 */                   if (findss == null)
 /*   720 */                     s = "0000000000";
 /*       */                   else {
@@ -865,11 +866,11 @@
 /*   735 */                 BoInfraredLearnControlMap controlMap = this.boInfraredLearnControlMapService.findBy(usereCode, obj.getDeviceAddress(), split[0]);
 /*   736 */                 if (controlMap == null)
 /*       */                 {
-/*   738 */                   System.err.println("您还没学习过改按键");
+/*   738 */                   System.err.println("您还没学习过该按键");
 /*       */                 } else {
 /*   740 */                   BoInfraredPart findss = this.boInfraredPartService.find(obj.getDeviceAddress());
 /*       */                   String s;
-///*       */                   String s;
+
 /*   742 */                   if (findss == null)
 /*   743 */                     s = "0000000000";
 /*       */                   else {
@@ -889,11 +890,11 @@
 /*   758 */               BoInfraredLearnControlMap controlMap = this.boInfraredLearnControlMapService.findBy(usereCode, obj.getDeviceAddress(), split[0]);
 /*   759 */               if (controlMap == null)
 /*       */               {
-/*   761 */                 System.err.println("您还没学习过改按键");
+/*   761 */                 System.err.println("您还没学习过该按键");
 /*       */               } else {
 /*   763 */                 BoInfraredPart findss = this.boInfraredPartService.find(obj.getDeviceAddress());
 /*       */                 String s;
-///*       */                 String s;
+
 /*   765 */                 if (findss == null)
 /*   766 */                   s = "0000000000";
 /*       */                 else {
@@ -911,22 +912,21 @@
 /*       */             }
 /*       */ 
 /*       */           }
-/*   783 */           else if (obj.getDeviceAddress().toString().length() == 8) {
-/*   784 */             String deviceType = obj.getDeviceType().toString();
-/*   785 */             String substring = deviceType.substring(1, 2);
+/*   783 */           else if (obj.getDeviceAddress().toString().length() == 8) {//门锁的地址长度为8位                         门锁相关  设置command?
+/*   784 */             String deviceType = obj.getDeviceType().toString();//门锁 deviceType-5314;	
+/*   785 */             String substring = deviceType.substring(1, 2);//3
 /*   786 */             Integer valueOf = Integer.valueOf(substring);
 /*   787 */             Integer s = null;
 /*   788 */             if (valueOf.intValue() == 1)
 /*   789 */               s = Integer.valueOf(2262);
 /*       */             else {
-/*   791 */               s = Integer.valueOf(1527);
+/*   791 */               s = Integer.valueOf(1527);//门锁
 /*       */             }
-/*       */ 
-/*   794 */             String substring2 = deviceType.substring(2, 3);
+/*   794 */             String substring2 = deviceType.substring(2, 3);//1
 /*   795 */             Integer valueOf2 = Integer.valueOf(substring2);
 /*   796 */             Integer b = null;
 /*   797 */             if (valueOf2.intValue() == 1)
-/*   798 */               b = Integer.valueOf(315);
+/*   798 */               b = Integer.valueOf(315);//门锁315
 /*       */             else {
 /*   800 */               b = Integer.valueOf(433);
 /*       */             }
@@ -944,31 +944,76 @@
 /*   813 */               c = Integer.valueOf(22);
 /*       */             }
 /*       */ 
-/*   816 */             if (valueOf3.intValue() == 4) {
+/*   816 */             if (valueOf3.intValue() == 4) {//门锁531"4"
 /*   817 */               c = Integer.valueOf(33);
 /*       */             }
 /*   819 */             if (valueOf3.intValue() == 5) {
 /*   820 */               c = Integer.valueOf(47);
 /*       */             }
-/*       */ 
+/*       */             System.out.println("~~~~~~~~~~~~~split[0]:"+split[0]);
 /*   823 */             if (split[0].equals("0"))
 /*       */             {
 /*   884 */               String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(usereCode) + "," + c + 
 /*   885 */                 "," + obj.getDeviceAddress() + 2;
 /*   886 */               byte[] bs = str.getBytes();
-/*   887 */               System.err.println(new String(bs));
-/*       */ 
+                          //1-29
+//						  System.err.println("····960····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
+//						  ///////设置command的值//////
+//						  Integer commands = null;
+//						  commands = Integer.valueOf(0);
+//						  final String string00 = commands.toString();
+//						  /////////////////////////
+//						
+//						  this.resendVerification = this.boResendVerificationService.find(obj.getBoDevice().getDeviceCode(), 
+//								 this.ln+2, string00);//device.getDeviceAddress()
+//						  System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(obj.getBoDevice().getDeviceCode(), 
+//								 this.ln+2, string00));
+//						  System.err.println("····971····this.resendVerification:"+this.resendVerification);
+//						  if (this.resendVerification == null)
+//						  {
+//							  BoResendVerification resend = new BoResendVerification();
+//							  resend.setBoDevice(obj.getBoDevice());
+//							  resend.setDeviceAddress(this.ln+2);
+//							  resend.setDeviceType(obj.getDeviceType());
+//							  resend.setCommand(string00);
+//							  resend.setAcceptState("wait");
+//							  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
+//						  }
+						  //END   
 /*   889 */               this.packetProcessHelper.processSendDData(obj.getBoDevice().getDeviceCode(), bs);
 /*       */             }
 /*       */ 
 /*   892 */             if (split[0].equals("100"))
-/*       */             {
+/*       */             {//obj
+						  System.out.println("split[0]==100)");
 /*   951 */               String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(usereCode) + "," + c + 
 /*   952 */                 "," + obj.getDeviceAddress() + 1;
 /*   953 */               byte[] bs = str.getBytes();
-/*   954 */               System.err.println(new String(bs));
-/*       */ 
+						  //NEW 1-26
+//						  System.err.println("····993····new String(bs):"+new String(bs));//PT1527_315M SEND 0,33,788925101,OK
+//						  ////////设置command的值////////
+//						  Integer commands = null;
+//						  commands = Integer.valueOf(1);
+//						  final String string00 = commands.toString();
+//						  ////////////END//////////////
+//						  this.resendVerification = this.boResendVerificationService.find(obj.getBoDevice().getDeviceCode(), 
+//								 this.ln+1, string00);//device.getDeviceAddress()
+//						  System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(obj.getBoDevice().getDeviceCode(), 
+//								 this.ln+1, string00));
+//						  System.err.println("····1003····this.resendVerification:"+this.resendVerification);
+//						  if (this.resendVerification == null)
+//						  {
+//							  BoResendVerification resend = new BoResendVerification();
+//							  resend.setBoDevice(obj.getBoDevice());
+//							  resend.setDeviceAddress(this.ln+1);
+//							  resend.setDeviceType(obj.getDeviceType());
+//							  resend.setCommand(string00);
+//							  resend.setAcceptState("wait");
+//							  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
+//						  }
+						  //END
 /*   956 */               this.packetProcessHelper.processSendDData(obj.getBoDevice().getDeviceCode(), bs);
+
 /*       */             }
 /*   958 */           } else if (obj.getDeviceType().equals("8")) {
 /*       */             try {
@@ -5971,7 +6016,7 @@
 /*  6071 */                 boSensorMap.put("whetherControlEnclosure", boSensor.getIco().toString());
 /*  6072 */                 String nickName2 = boSensor.getNickName();
 /*       */                 String nickNames;
-///*       */                 String nickNames;
+
 /*  6074 */                 if (nickName2 == null)
 /*  6075 */                   nickNames = "";
 /*       */                 else {
@@ -6075,7 +6120,7 @@
 /*  6174 */               boSensorMap.put("whetherControlEnclosure", boSensor.getIco().toString());
 /*  6175 */               String nickName2 = boSensor.getNickName();
 /*       */               String nickNames;
-///*       */               String nickNames;
+
 /*  6177 */               if (nickName2 == null)
 /*  6178 */                 nickNames = "";
 /*       */               else {
@@ -6427,7 +6472,7 @@
 /*       */ 
 /*  6536 */               String substring1 = this.endTime.substring(0, 1);
 /*       */               String time2;
-///*       */               String time2;
+
 /*  6538 */               if (substring1.equals("0"))
 /*  6539 */                 time2 = this.endTime.substring(1, 2);
 /*       */               else {
@@ -6503,7 +6548,7 @@
 /*       */ 
 /*  6610 */             String substring1 = this.endTime.substring(0, 1);
 /*       */             String time2;
-///*       */             String time2;
+
 /*  6612 */             if (substring1.equals("0"))
 /*  6613 */               time2 = this.endTime.substring(1, 2);
 /*       */             else {
@@ -6593,7 +6638,7 @@
 /*  6703 */             List list = this.boSensorService.get(this.deviceCode);
 /*  6704 */             List nums = new ArrayList();
 /*       */             Integer valueOfs;
-///*       */             Integer valueOfs;
+
 /*  6708 */             if (list.size() <= 0) {
 /*  6709 */               valueOfs = Integer.valueOf(1);
 /*       */             }
@@ -6948,7 +6993,7 @@
 /*  7071 */           boAlarmRecord.setSebsorName(ssss.getNickName());
 /*  7072 */           Integer phoneType = ssss.getBoUsers().getPhoneType();
 /*       */           String alarmPhoneType;
-///*       */           String alarmPhoneType;
+
 /*  7074 */           if (phoneType.intValue() == 0)
 /*  7075 */             alarmPhoneType = "安卓";
 /*       */           else {
@@ -8410,13 +8455,13 @@
 /*  8583 */                 System.err.println("是学习");
 /*  8584 */                 BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                 String s;
-///*       */                 String s;
+
 /*  8587 */                 if (find == null)
 /*  8588 */                   s = "0000000000";
 /*       */                 else
 /*  8590 */                   s = find.getValidationCode();
 /*       */                 String ad;
-///*       */                 String ad;
+
 /*  8594 */                 if (device.getDeviceAddress().equals("65535"))
 /*  8595 */                   ad = "65535";
 /*       */                 else {
@@ -8438,13 +8483,13 @@
 /*  8612 */                 if (infraredButtonsValuessSplit[0].trim().toString().equals("0")) {
 /*  8613 */                   BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                   String s;
-///*       */                   String s;
+
 /*  8615 */                   if (find == null)
 /*  8616 */                     s = "0000000000";
 /*       */                   else
 /*  8618 */                     s = find.getValidationCode();
 /*       */                   String ad;
-///*       */                   String ad;
+
 /*  8622 */                   if (device.getDeviceAddress().equals("65535"))
 /*  8623 */                     ad = "65535";
 /*       */                   else {
@@ -8468,13 +8513,13 @@
 /*       */                     } else {
 /*  8643 */                       BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                       String s;
-///*       */                       String s;
+
 /*  8645 */                       if (find == null)
 /*  8646 */                         s = "0000000000";
 /*       */                       else
 /*  8648 */                         s = find.getValidationCode();
 /*       */                       String ad;
-///*       */                       String ad;
+
 /*  8652 */                       if (device.getDeviceAddress().equals("65535"))
 /*  8653 */                         ad = "65535";
 /*       */                       else {
@@ -8491,19 +8536,19 @@
 /*  8665 */                     BoInfraredLearnControlMap controlMap = this.boInfraredLearnControlMapService.findBy(userCode2[0].trim().toString(), this.deviceAddress, Valuess);
 /*  8666 */                     if (controlMap == null) {
 /*  8667 */                       this.requestJson.setData(is);
-/*  8668 */                       this.requestJson.setMessage("您还没学习过改按键");
+/*  8668 */                       this.requestJson.setMessage("您还没学习过该按键");
 /*  8669 */                       this.requestJson.setSuccess(true);
 /*  8670 */                       System.err.println("您还没学习过改按键");
 /*       */                     } else {
 /*  8672 */                       BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                       String s;
-///*       */                       String s;
+
 /*  8674 */                       if (find == null)
 /*  8675 */                         s = "0000000000";
 /*       */                       else
 /*  8677 */                         s = find.getValidationCode();
 /*       */                       String ad;
-///*       */                       String ad;
+
 /*  8681 */                       if (device.getDeviceAddress().equals("65535"))
 /*  8682 */                         ad = "65535";
 /*       */                       else {
@@ -8548,13 +8593,13 @@
 /*  8722 */                 System.err.println("是学习");
 /*  8723 */                 BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                 String s;
-///*       */                 String s;
+
 /*  8726 */                 if (find == null)
 /*  8727 */                   s = "0000000000";
 /*       */                 else
 /*  8729 */                   s = find.getValidationCode();
 /*       */                 String ad;
-///*       */                 String ad;
+
 /*  8733 */                 if (split[0].equals("65535"))
 /*  8734 */                   ad = "65535";
 /*       */                 else {
@@ -8577,7 +8622,7 @@
 /*  8752 */                 if (infraredButtonsValuessSplit[0].trim().toString().equals("0")) {
 /*  8753 */                   BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                   String s;
-///*       */                   String s;
+
 /*  8755 */                   if (find == null)
 /*  8756 */                     s = "0000000000";
 /*       */                   else {
@@ -8601,7 +8646,7 @@
 /*       */                     } else {
 /*  8776 */                       BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                       String s;
-///*       */                       String s;
+
 /*  8778 */                       if (find == null)
 /*  8779 */                         s = "0000000000";
 /*       */                       else {
@@ -8624,7 +8669,7 @@
 /*       */                     } else {
 /*  8798 */                       BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                       String s;
-///*       */                       String s;
+
 /*  8800 */                       if (find == null)
 /*  8801 */                         s = "0000000000";
 /*       */                       else {
@@ -8712,13 +8757,13 @@
 /*  8884 */               System.err.println("是学习");
 /*  8885 */               BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */               String s;
-///*       */               String s;
+
 /*  8888 */               if (find == null)
 /*  8889 */                 s = "0000000000";
 /*       */               else
 /*  8891 */                 s = find.getValidationCode();
 /*       */               String ad;
-///*       */               String ad;
+
 /*  8895 */               if (device.getDeviceAddress().equals("65535"))
 /*  8896 */                 ad = "65535";
 /*       */               else {
@@ -8742,13 +8787,13 @@
 /*  8915 */               if (infraredButtonsValuessSplit[0].trim().toString().equals("0")) {
 /*  8916 */                 BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                 String s;
-///*       */                 String s;
+
 /*  8918 */                 if (find == null)
 /*  8919 */                   s = "0000000000";
 /*       */                 else
 /*  8921 */                   s = find.getValidationCode();
 /*       */                 String ad;
-///*       */                 String ad;
+
 /*  8925 */                 if (device.getDeviceAddress().equals("65535"))
 /*  8926 */                   ad = "65535";
 /*       */                 else {
@@ -8769,17 +8814,17 @@
 /*  8942 */                     this.requestJson.setData(is);
 /*  8943 */                     this.requestJson.setMessage("您还没学习过改按键");
 /*  8944 */                     this.requestJson.setSuccess(true);
-/*  8945 */                     System.err.println("您还没学习过改按键");
+/*  8945 */                     System.err.println("您还没学习过该按键");
 /*       */                   } else {
 /*  8947 */                     BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                     String s;
-///*       */                     String s;
+
 /*  8949 */                     if (find == null)
 /*  8950 */                       s = "0000000000";
 /*       */                     else
 /*  8952 */                       s = find.getValidationCode();
 /*       */                     String ad;
-///*       */                     String ad;
+
 /*  8956 */                     if (device.getDeviceAddress().equals("65535"))
 /*  8957 */                       ad = "65535";
 /*       */                     else {
@@ -8797,19 +8842,19 @@
 /*  8970 */                   BoInfraredLearnControlMap controlMap = this.boInfraredLearnControlMapService.findBy(userCode, this.deviceAddress, Valuess);
 /*  8971 */                   if (controlMap == null) {
 /*  8972 */                     this.requestJson.setData(is);
-/*  8973 */                     this.requestJson.setMessage("您还没学习过改按键");
+/*  8973 */                     this.requestJson.setMessage("您还没学习过该按键");
 /*  8974 */                     this.requestJson.setSuccess(true);
-/*  8975 */                     System.err.println("您还没学习过改按键");
+/*  8975 */                     System.err.println("您还没学习过该按键");
 /*       */                   } else {
 /*  8977 */                     BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                     String s;
-///*       */                     String s;
+
 /*  8979 */                     if (find == null)
 /*  8980 */                       s = "0000000000";
 /*       */                     else
 /*  8982 */                       s = find.getValidationCode();
 /*       */                     String ad;
-///*       */                     String ad;
+
 /*  8986 */                     if (device.getDeviceAddress().equals("65535"))
 /*  8987 */                       ad = "65535";
 /*       */                     else {
@@ -8855,13 +8900,13 @@
 /*  9028 */               System.err.println("是学习");
 /*  9029 */               BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */               String s;
-///*       */               String s;
+
 /*  9032 */               if (find == null)
 /*  9033 */                 s = "0000000000";
 /*       */               else
 /*  9035 */                 s = find.getValidationCode();
 /*       */               String ad;
-///*       */               String ad;
+
 /*  9039 */               if (split[0].equals("65535"))
 /*  9040 */                 ad = "65535";
 /*       */               else {
@@ -8885,7 +8930,7 @@
 /*  9059 */               if (infraredButtonsValuessSplit[0].trim().toString().equals("0")) {
 /*  9060 */                 BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                 String s;
-///*       */                 String s;
+
 /*  9062 */                 if (find == null)
 /*  9063 */                   s = "0000000000";
 /*       */                 else {
@@ -8904,13 +8949,13 @@
 /*  9077 */                   BoInfraredLearnControlMap controlMap = this.boInfraredLearnControlMapService.findBy(userCode, this.deviceAddress, Valuess);
 /*  9078 */                   if (controlMap == null) {
 /*  9079 */                     this.requestJson.setData(is);
-/*  9080 */                     this.requestJson.setMessage("您还没学习过改按键");
+/*  9080 */                     this.requestJson.setMessage("您还没学习过该按键");
 /*  9081 */                     this.requestJson.setSuccess(true);
-/*  9082 */                     System.err.println("您还没学习过改按键");
+/*  9082 */                     System.err.println("您还没学习过该按键");
 /*       */                   } else {
 /*  9084 */                     BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                     String s;
-///*       */                     String s;
+
 /*  9086 */                     if (find == null)
 /*  9087 */                       s = "0000000000";
 /*       */                     else {
@@ -8928,13 +8973,13 @@
 /*  9100 */                   BoInfraredLearnControlMap controlMap = this.boInfraredLearnControlMapService.findBy(userCode, this.deviceAddress, Valuess);
 /*  9101 */                   if (controlMap == null) {
 /*  9102 */                     this.requestJson.setData(is);
-/*  9103 */                     this.requestJson.setMessage("您还没学习过改按键");
+/*  9103 */                     this.requestJson.setMessage("您还没学习过该按键");
 /*  9104 */                     this.requestJson.setSuccess(true);
-/*  9105 */                     System.err.println("您还没学习过改按键");
+/*  9105 */                     System.err.println("您还没学习过该按键");
 /*       */                   } else {
 /*  9107 */                     BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                     String s;
-///*       */                     String s;
+
 /*  9109 */                     if (find == null)
 /*  9110 */                       s = "0000000000";
 /*       */                     else {
@@ -9001,7 +9046,7 @@
 /*  9175 */             BoInfraredButtons boInfraredButtons = this.boInfraredButtonsService.findBydeviceAddress(userCode2[0].trim().toString(), this.deviceCode, this.deviceAddress, Integer.valueOf(this.infraredButtonsValuess));
 /*  9176 */             if (boInfraredButtons == null) {
 /*  9177 */               this.requestJson.setData(map);
-/*  9178 */               this.requestJson.setMessage("没有找到改按键");
+/*  9178 */               this.requestJson.setMessage("没有找到该按键");
 /*  9179 */               this.requestJson.setSuccess(true);
 /*       */             } else {
 /*  9181 */               boInfraredButtons.setInfraredButtonsName(this.infraredButtonsName);
@@ -9050,7 +9095,7 @@
 /*  9224 */           BoInfraredButtons boInfraredButtons = this.boInfraredButtonsService.findBydeviceAddress(userCode, this.deviceCode, this.deviceAddress, Integer.valueOf(this.infraredButtonsValuess));
 /*  9225 */           if (boInfraredButtons == null) {
 /*  9226 */             this.requestJson.setData(map);
-/*  9227 */             this.requestJson.setMessage("没有找到改按键");
+/*  9227 */             this.requestJson.setMessage("没有找到该按键");
 /*  9228 */             this.requestJson.setSuccess(true);
 /*       */           } else {
 /*  9230 */             boInfraredButtons.setInfraredButtonsName(this.infraredButtonsName);
@@ -11098,7 +11143,7 @@
 /*       */   @Action(value="getallhost", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String getAllHost()
 /*       */   {
-	 			System.out.println("这个方法和主机的在线、离线判断有关");
+	 			
 /* 11408 */     this.requestJson = new RequestJson();
 /* 11409 */     Map maps = new HashMap();
 /* 11410 */     HttpServletRequest request = ServletActionContext.getRequest();
@@ -11333,7 +11378,7 @@
 /* 11646 */     str = str + "&userCode=";
 /* 11647 */     str = str + userCode;
 /*       */ 
-/* 11649 */     str = str + "12345";
+/* 11649 */     str = str + "12345";//有问题吗？
 /* 11650 */     String sign = md5.getMD5ofStr(str).toLowerCase();
 /* 11651 */     System.err.println("sign>-- " + sign);
 /*       */     List<BoGoods> list;
@@ -11615,7 +11660,7 @@
 /*       */ 
 /* 11931 */               String[] split = ((String)deviceAddressMap.get(key)).split(",");
 /* 11932 */               if (split[1].equals("1")) {
-/* 11933 */                 System.err.println("双向灯");
+/* 11933 */                 System.err.println("双向灯");//门锁 有经过？
 /* 11934 */                 String str = "ZIGBEE_LIGHT-READ-" + user_num.get(userCode2[0].trim().toString()) + "," + split[0];
 /* 11935 */                 byte[] bs = str.getBytes();
 /* 11936 */                 System.err.println(new String(bs));
@@ -12020,7 +12065,7 @@
 /*       */ 
 /*       */   @Action(value="setDeviceInfo", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String setDeviceInfo()
-/*       */   {//deviceCode==100出错
+/*       */   {//deviceCode==100（摄像头）出错  已改
 /* 12347 */     this.requestJson = new RequestJson();
 /* 12348 */     System.err.println("setDeviceInfo");
 /* 12349 */     HttpServletRequest request = ServletActionContext.getRequest();
@@ -12050,8 +12095,11 @@
 /* 12373 */             System.err.println("roomCode> " + this.roomCode);
 /* 12374 */             System.err.println("deviceAddress> " + this.deviceAddress);
 /* 12375 */             System.err.println("userCode >" + userCode2[0].trim().toString());
-/*       */ 
 /* 12377 */             System.err.println("ico >" + this.ico);
+                        //输出到日志
+                        logger.info("userCode2[0] >" + userCode2[0].trim().toString());//一串字符串
+						//测试门锁 打印ico
+//						System.out.println("测试打印ico >" + this.ico);//是门锁
 /* 12378 */             BoDevice findByCode = this.boDeviceService.findByCode(this.deviceCode);
 /* 12379 */             if (StringUtils.isEmpty(this.deviceCode)) {
 /* 12380 */               System.err.println("主机地址不能为空,请选择主机");
@@ -12061,9 +12109,10 @@
 /*       */             } else {
 /* 12385 */               BoRoom boRoom = this.boRoomService.findByCode(this.roomCode);
 /* 12386 */               System.err.println(boRoom);
-/* 12387 */               BoUserDevices userDevices = this.boUserDevicesServicess.findBy(userCode2[0].trim().toString());
+/* 12387 */               BoUserDevices userDevices = this.boUserDevicesServicess.findBy(userCode2[0].trim().toString());//null
 /* 12388 */               if (boRoom != null) {
 /* 12389 */                 BoHostDevice hostDevice = this.boHostDeviceService.findBydeviceAddress(userCode2[0].trim().toString(), this.deviceAddress);
+							logger.info("hostDevice >" + hostDevice);
 /* 12390 */                 if (hostDevice != null) {
 /* 12391 */                   if ((hostDevice.getDeviceType().equals("1")) || (hostDevice.getDeviceType().equals("2")) || (hostDevice.getDeviceType().equals("4"))) {
 /* 12392 */                     hostDevice.setWhetherQueryStateSign("Y");
@@ -12073,6 +12122,9 @@
 /* 12396 */                     hostDevice.setWhetherQueryStateSign("");
 /* 12397 */                     hostDevice.setPushSet("0");
 /* 12398 */                     hostDevice.setState("");
+//								hostDevice.setWhetherQueryStateSign("Y");
+//								hostDevice.setPushSet("");
+//								hostDevice.setState("0");
 /*       */                   } else {
 /* 12400 */                     hostDevice.setWhetherQueryStateSign("");
 /* 12401 */                     hostDevice.setPushSet("");
@@ -12096,13 +12148,15 @@
 /* 12419 */                     this.requestJson.setMessage("");
 /* 12420 */                     this.requestJson.setSuccess(false);
 /*       */                   }
-/*       */                 } else {
+/*       */                 } else {//门锁 有关
 /* 12423 */                   BoDevice findByCodes = this.boDeviceService.findByCode(this.deviceCode);
 /* 12424 */                   BoHostDevice b = new BoHostDevice();
-/* 12425 */                   System.err.println("deviceCode" + this.deviceCode);
-/* 12426 */                   System.err.println("deviceAddress" + this.deviceAddress);
-/* 12427 */                   System.err.println("deviceType" + this.deviceType);
-/* 12428 */                   System.err.println("validationCode" + this.validationCode);
+/* 12425 */                   System.err.println("deviceCode：" + this.deviceCode);
+/* 12426 */                   System.err.println("deviceAddress：" + this.deviceAddress);
+/* 12427 */                   System.err.println("*deviceType：" + this.deviceType);//门锁 -5314
+/* 12428 */                   System.err.println("validationCode：" + this.validationCode);
+							  //测试门锁   打印deviceType
+//							  System.out.println("测试打印deviceType " + this.deviceType);//是 5314
 /* 12429 */                   b.setDeviceAddress(this.deviceAddress);
 /*       */ 
 /* 12431 */                   b.setDeviceType(this.deviceType);
@@ -12145,7 +12199,7 @@
 /* 12468 */                   b.setBoUsers(boUsers);
 /* 12469 */                   b.setBoDevice(findByCodes);
 /* 12470 */                   b.setDeviceClassify(this.fid1);
-/* 12471 */                   System.err.println(this.deviceType);
+/* 12471 */                   System.err.println("deviceType >>"+this.deviceType);//门锁-5314
 /* 12472 */                   if (this.deviceType.equals("100"))
 /* 12473 */                     b.setMntDelete("Y");
 /* 12474 */                   else if (this.deviceType.equals("101"))
@@ -12194,12 +12248,18 @@
 /*       */         }
 /* 12518 */         else if (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue())
 /*       */         {
+	                  //here
 /* 12520 */           System.err.println("deviceCode> " + this.deviceCode);
 /* 12521 */           System.err.println("roomCode> " + this.roomCode);
 /* 12522 */           System.err.println("deviceAddress> " + this.deviceAddress);
-/* 12523 */           System.err.println("userCode >" + userCode);
-/*       */ 
+/* 12523 */           System.err.println("userCode >" + userCode);//
 /* 12525 */           System.err.println("ico >" + this.ico);
+                      //new 1-29
+					  logger.error("deviceCode> " + this.deviceCode);
+					  logger.error("deviceAddress> " + this.deviceAddress);
+					  logger.info("userCode >" + userCode);
+					  
+
 /* 12526 */           BoDevice findByCode = this.boDeviceService.findByCode(this.deviceCode);
 /* 12527 */           if (StringUtils.isEmpty(this.deviceCode)) {
 /* 12528 */             System.err.println("主机地址不能为空,请选择主机");
@@ -12234,10 +12294,11 @@
 /*       */               } else {
 /* 12558 */                 BoDevice findByCodes = this.boDeviceService.findByCode(this.deviceCode);
 /* 12559 */                 BoHostDevice b = new BoHostDevice();
-/* 12560 */                 System.err.println("deviceCode" + this.deviceCode);
-/* 12561 */                 System.err.println("deviceAddress" + this.deviceAddress);
-/* 12562 */                 System.err.println("deviceType" + this.deviceType);
-/* 12563 */                 System.err.println("validationCode" + this.validationCode);
+							//here
+/* 12560 */                 System.err.println("deviceCode " + this.deviceCode);
+/* 12561 */                 System.err.println("deviceAddress " + this.deviceAddress);
+/* 12562 */                 System.err.println("deviceType " + this.deviceType);//门锁-5314
+/* 12563 */                 System.err.println("validationCode " + this.validationCode);
 /* 12564 */                 b.setDeviceAddress(this.deviceAddress);
 /*       */ 
 /* 12566 */                 b.setDeviceType(this.deviceType);
@@ -12245,7 +12306,7 @@
 /* 12568 */                   b.setWhetherQueryStateSign("Y");
 /* 12569 */                   b.setPushSet("");
 /* 12570 */                   b.setState("0");
-/* 12571 */                 } else if (this.deviceType.equals("5")) {
+/* 12571 */                 } else if (this.deviceType.equals("5")) {//门锁
 /* 12572 */                   b.setWhetherQueryStateSign("");
 /* 12573 */                   b.setPushSet("0");
 /* 12574 */                   b.setState("");
@@ -12280,7 +12341,7 @@
 /* 12603 */                 b.setBoUsers(boUsers);
 /* 12604 */                 b.setBoDevice(findByCodes);
 /* 12605 */                 b.setDeviceClassify(this.fid1);
-/* 12606 */                 System.err.println(this.deviceType);
+/* 12606 */                 System.err.println("deviceType 12291L:"+this.deviceType);//门锁-5314
 /* 12607 */                 if (this.deviceType.equals("100"))
 /* 12608 */                   b.setMntDelete("Y");
 /* 12609 */                 else if (this.deviceType.equals("101"))
@@ -12460,7 +12521,7 @@
 /* 12784 */               map.put("deviceNum", boHostDevice.getDeviceNum().toString());
 /* 12785 */               String validationCodes = boHostDevice.getValidationCode().toString();
 /*       */               String validationCodess;
-///*       */               String validationCodess;
+
 /* 12787 */               if (validationCodes == null)
 /* 12788 */                 validationCodess = "";
 /*       */               else {
@@ -12471,7 +12532,7 @@
 /* 12794 */               map.put("userCode", boHostDevice.getBoUsers().getUserCode());
 /* 12795 */               String nickName2 = boHostDevice.getNickName();
 /*       */               String nickNames;
-///*       */               String nickNames;
+
 /* 12797 */               if (nickName2 == null)
 /* 12798 */                 nickNames = "";
 /*       */               else {
@@ -12502,7 +12563,7 @@
 /* 12824 */                 ((Map)map).put("userCode", boHostDevice.getBoUsers().getUserCode());
 /* 12825 */                 String nickName2 = boHostDevice.getNickName();
 /*       */                 String nickNames;
-///*       */                 String nickNames;
+
 /* 12827 */                 if (nickName2 == null)
 /* 12828 */                   nickNames = "";
 /*       */                 else {
@@ -12856,10 +12917,11 @@
 /*       */ 
 /* 13208 */     return "success";
 /*       */   }
-/*       */ 
+/*       */
 /*       */   @Action(value="commad", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String commad()
 /*       */   {
+	            System.out.println("····进入commad方法····");
 /* 13223 */     this.requestJson = new RequestJson();
 /* 13224 */     HttpServletRequest request = ServletActionContext.getRequest();
 /* 13225 */     Map map = new HashMap();
@@ -12870,6 +12932,7 @@
 /* 13230 */     String header3 = request.getHeader("sign");
 /* 13231 */     String header4 = request.getHeader("access_token");
 /* 13232 */     String userCode = request.getHeader("userCode");
+			    System.err.println("userCode>--> " + userCode);
 /*       */ 
 /* 13234 */     System.err.println(">-- " + header2);
 /*       */ 
@@ -12885,7 +12948,7 @@
 /* 13246 */     strs = strs + "&userCode=";
 /* 13247 */     strs = strs + userCode;
 /*       */ 
-/* 13249 */     if (userCode.contains(",")) {
+/* 13249 */     if (userCode.contains(",")) {//userCode有逗号的情况 >-- c24ef3aebb0c49f99642e62eb029a412,18038035290
 /* 13250 */       String[] userCode2 = userCode.split(",");
 /* 13251 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
 /* 13252 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
@@ -12893,6 +12956,8 @@
 /* 13254 */       strs = strs + "12345";
 /* 13255 */       String sign = md5.getMD5ofStr(strs).toLowerCase();
 /* 13256 */       System.err.println("sign>--> " + sign);
+//				  System.err.println("userCode2[0]>--> " + userCode2[0]);
+//				  System.err.println("this.command " + this.command);//100
 /* 13257 */       if (header3.equals(sign)) {
 /* 13258 */         if (header4.equals(phone.getAccessToken()))
 /*       */         {
@@ -13023,7 +13088,7 @@
 /* 13385 */                   commands = Integer.valueOf(17);
 /*       */                 else
 /* 13387 */                   commands = Integer.valueOf(20);
-///*       */                 int commandss;
+
 /*       */                 final int commandss;
 /* 13390 */                 if (this.command.intValue() >= 95)
 /* 13391 */                   commandss = 95;
@@ -13132,7 +13197,7 @@
 /* 13495 */                 this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 /*       */               }
 /*       */ 
-/* 13498 */               if (device.getDeviceAddress().toString().length() == 8) {
+/* 13498 */               if (device.getDeviceAddress().toString().length() == 8) {//设备地址长度为8  门锁的地址长度也为8
 /* 13499 */                 String deviceType = device.getDeviceType().toString();
 /* 13500 */                 String substring = deviceType.substring(1, 2);
 /* 13501 */                 Integer valueOf = Integer.valueOf(substring);
@@ -13185,35 +13250,106 @@
 /*       */                   }
 /*       */ 
 /* 13552 */                   String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(userCode2[0].trim().toString()) + "," + c + "," + 
-/* 13553 */                     this.ln + 2;
+/* 13553 */                     this.ln+2;//门锁地址+'2'
 /* 13554 */                   byte[] bs = str.getBytes();
 /* 13555 */                   System.err.println("<?> " + new String(bs));
+                              //1-29
+//							  System.err.println("····13256····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
+//							  ///////设置command的值//////
+//							  Integer commands = null;
+//							  commands = Integer.valueOf(user_num.get(userCode2[0].trim().toString()));
+//							  final String string00 = commands.toString();
+//							  /////////////////////////
+//							
+//							  this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+//									 this.ln+2, string00);//device.getDeviceAddress()
+//							  System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+//									 this.ln+2, string00));
+//							  System.err.println("····13267····this.resendVerification:"+this.resendVerification);
+//							  if (this.resendVerification == null)
+//							  {
+//								  BoResendVerification resend = new BoResendVerification();
+//								  resend.setBoDevice(device.getBoDevice());
+//								  resend.setDeviceAddress(this.ln+2);
+//								  resend.setDeviceType(device.getDeviceType());
+//								  resend.setCommand(string00);
+//								  resend.setAcceptState("wait");
+//								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
+//							  }
+							  //END
 /* 13556 */                   this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 /*       */                 }
 /*       */ 
 /* 13560 */                 if (this.command.intValue() == 50)
 /*       */                 {
 /* 13562 */                   String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(userCode2[0].trim().toString()) + "," + c + "," + 
-/* 13563 */                     device.getDeviceAddress() + 3;
+/* 13563 */                     device.getDeviceAddress() + 3;//门锁？？
 /* 13564 */                   byte[] bs = str.getBytes();
-/* 13565 */                   System.err.println(new String(bs));
+                              //1-29
+//							  System.err.println("····13289····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
+//							  ///////设置command的值//////
+//							  Integer commands = null;
+//							  commands = Integer.valueOf(user_num.get(userCode2[0].trim().toString()));
+//							  final String string00 = commands.toString();
+//							  /////////////////////////
+//							
+//							  this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+//									 this.ln+3, string00);//device.getDeviceAddress()
+//							  System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+//									 this.ln+3, string00));
+//							  System.err.println("····13300····this.resendVerification:"+this.resendVerification);
+//							  if (this.resendVerification == null)
+//							  {
+//								  BoResendVerification resend = new BoResendVerification();
+//								  resend.setBoDevice(device.getBoDevice());
+//								  resend.setDeviceAddress(this.ln+3);
+//								  resend.setDeviceType(device.getDeviceType());
+//								  resend.setCommand(string00);
+//								  resend.setAcceptState("wait");
+//								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
+//							  }
+							  //END
 /* 13566 */                   this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 /*       */                 }
 /*       */ 
-/* 13570 */                 if (this.command.intValue() == 100) {
+/* 13570 */                 if (this.command.intValue() == 100) {//这里很关键
 /* 13571 */                   String string = device.getDeviceAddress().substring(0, 1);
 /* 13572 */                   String string2 = device.getDeviceAddress().substring(1, 8);
-/*       */ 
+/*       */                   //设置deviceAddress
 /* 13574 */                   if (string.equals("0"))
 /* 13575 */                     this.ln = string2;
 /*       */                   else {
 /* 13577 */                     this.ln = device.getDeviceAddress();
 /*       */                   }
-/*       */ 
+/*       */ 				  //////////////////
 /* 13580 */                   String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(userCode2[0].trim().toString()) + "," + c + "," + 
-/* 13581 */                     this.ln + 1;
+/* 13581 */                     this.ln+1;//门锁
 /* 13582 */                   byte[] bs = str.getBytes();
-/* 13583 */                   System.err.println(new String(bs));
+
+							 //new 1-26
+//							 System.err.println("····13331····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
+//							 ///////设置command的值//////
+//							 Integer commands = null;
+//							 commands = Integer.valueOf(user_num.get(userCode2[0].trim().toString()));//1
+//							 final String string00 = commands.toString();
+//							 /////////////////////////
+//							
+//							 this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+//									 this.ln+1, string00);//device.getDeviceAddress()
+//							 System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+//									 this.ln+1, string00));
+//							 System.err.println("····13348····this.resendVerification:"+this.resendVerification);
+//							 if (this.resendVerification == null)
+//							 {
+//								  BoResendVerification resend = new BoResendVerification();
+//								  resend.setBoDevice(device.getBoDevice());
+//								  resend.setDeviceAddress(this.ln+1);
+//								  resend.setDeviceType(device.getDeviceType());
+//								  resend.setCommand(string00);
+//								  resend.setAcceptState("wait");
+//								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
+//							 }
+							  //end
 /* 13584 */                   this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 /*       */                 }
 /*       */               }
@@ -13383,7 +13519,7 @@
 /* 13752 */                 commands = Integer.valueOf(17);
 /*       */               else
 /* 13754 */                 commands = Integer.valueOf(20);
-///*       */               int commandss;
+
 /*       */               final int commandss;
 /* 13757 */               if (this.command.intValue() >= 95)
 /* 13758 */                 commandss = 95;
@@ -13489,7 +13625,7 @@
 /* 13859 */                 commands = Integer.valueOf(20);
 /*       */               }
 /* 13861 */               String str = "ZIGBEE_DIMMER-SEND-" + user_num.get(userCode) + "," + device.getDeviceAddress() + 
-/* 13862 */                 "," + this.command;
+/* 13862 */                 "," + this.command;//DIMMER 调光开关
 /* 13863 */               System.err.println(commands + ">-- " + this.command);
 /* 13864 */               byte[] bs = str.getBytes();
 /* 13865 */               System.err.println(new String(bs));
@@ -13497,7 +13633,7 @@
 /* 13867 */               this.packetProcessHelper.setUserCode(userCode);
 /*       */             }
 /*       */ 
-/* 13870 */             if (device.getDeviceAddress().toString().length() == 8) {
+/* 13870 */             if (device.getDeviceAddress().toString().length() == 8) {//门锁相关
 /* 13871 */               String deviceType = device.getDeviceType().toString();
 /* 13872 */               String substring = deviceType.substring(1, 2);
 /* 13873 */               Integer valueOf = Integer.valueOf(substring);
@@ -13537,7 +13673,7 @@
 /* 13907 */               else if (valueOf3.intValue() == 8) {
 /* 13908 */                 c = Integer.valueOf(200);
 /*       */               }
-/*       */ 
+/*       */               logger.info("~~~~~13684~~~~~this.command:"+this.command);//100
 /* 13912 */               if (this.command.intValue() == 0) {
 /* 13913 */                 System.err.println(device.getDeviceAddress());
 /* 13914 */                 String string = device.getDeviceAddress().substring(0, 1);
@@ -13550,19 +13686,66 @@
 /*       */                 }
 /*       */ 
 /* 13925 */                 String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(userCode) + "," + c + "," + 
-/* 13926 */                   this.ln + 2;
+/* 13926 */                   this.ln+2;//门锁地址+'2'
 /* 13927 */                 byte[] bs = str.getBytes();
 /* 13928 */                 System.err.println("<?> " + new String(bs));
+                            //1-29
+//							System.err.println("····13695····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
+//							///////设置command的值//////
+//							Integer commands = null;
+//							commands = Integer.valueOf(user_num.get(userCode.trim().toString()));
+//							final String string00 = commands.toString();
+//							/////////////////////////
+//							
+//							this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+//									 this.ln+2, string00);//device.getDeviceAddress()
+//							System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+//									 this.ln+2, string00));
+//							System.err.println("····13706····this.resendVerification:"+this.resendVerification);
+//							if (this.resendVerification == null)
+//							{
+//								  BoResendVerification resend = new BoResendVerification();
+//								  resend.setBoDevice(device.getBoDevice());
+//								  resend.setDeviceAddress(this.ln+2);
+//								  resend.setDeviceType(device.getDeviceType());
+//								  resend.setCommand(string00);
+//								  resend.setAcceptState("wait");
+//								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
+//							}
+						    //END
 /* 13929 */                 this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 /* 13930 */                 this.packetProcessHelper.setUserCode(userCode);
 /*       */               }
 /*       */ 
 /* 13934 */               if (this.command.intValue() == 50)
 /*       */               {
-/* 13938 */                 String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(userCode) + "," + c + "," + 
-/* 13939 */                   device.getDeviceAddress() + 3;
+/* 13938 */                 String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(userCode.trim().toString()) + "," + c + "," + 
+/* 13939 */                   device.getDeviceAddress() + 3;//门锁？？
 /* 13940 */                 byte[] bs = str.getBytes();
-/* 13941 */                 System.err.println(new String(bs));
+							//1-29
+//							System.err.println("····13728····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
+//							///////设置command的值//////
+//							Integer commands = null;
+//							commands = Integer.valueOf(user_num.get(userCode.trim().toString()));
+//							final String string00 = commands.toString();
+//							/////////////////////////
+//							
+//							this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+//									 this.ln+3, string00);//device.getDeviceAddress()
+//							System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+//									 this.ln+3, string00));
+//							System.err.println("····13745····this.resendVerification:"+this.resendVerification);
+//							if (this.resendVerification == null)
+//							{
+//								  BoResendVerification resend = new BoResendVerification();
+//								  resend.setBoDevice(device.getBoDevice());
+//								  resend.setDeviceAddress(this.ln+3);
+//								  resend.setDeviceType(device.getDeviceType());
+//								  resend.setCommand(string00);
+//								  resend.setAcceptState("wait");
+//								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
+//							}
+							//END
 /* 13942 */                 this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 /* 13943 */                 this.packetProcessHelper.setUserCode(userCode);
 /*       */               }
@@ -13578,9 +13761,33 @@
 /*       */                 }
 /*       */ 
 /* 13957 */                 String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(userCode) + "," + c + "," + 
-/* 13958 */                   this.ln + 1;
+/* 13958 */                   this.ln+1;//门锁 新地址  this.ln+'1'
 /* 13959 */                 byte[] bs = str.getBytes();
-/* 13960 */                 System.err.println(new String(bs));
+							//NEW 1-26
+//							System.err.println("····13769····new String(bs):"+new String(bs));//PT1527_315M SEND 0,33,788925101,OK
+//							///////设置command的值////////
+//							Integer commands = null;
+//							commands = Integer.valueOf(user_num.get(userCode));//userCode没有逗号的情况 >ff5f3341cf4c4c2abfe2a51ef965a742     上面的有逗号String[] userCode2 = userCode.split(",");
+//							final String string00 = commands.toString();
+//							///////////////////////////
+//							
+//							this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+//									 this.ln+1, string00);//device.getDeviceAddress()
+//							System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+//									 this.ln+1, string00));
+//							System.err.println("····13781····this.resendVerification:"+this.resendVerification);
+//							if (this.resendVerification == null)
+//							{
+//								  BoResendVerification resend = new BoResendVerification();
+//								  resend.setBoDevice(device.getBoDevice());
+//								  resend.setDeviceAddress(this.ln+1);
+//								  resend.setDeviceType(device.getDeviceType());
+//								  resend.setCommand(string00);
+//								  resend.setAcceptState("wait");
+//								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
+//							}
+							//END
+
 /* 13961 */                 this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 /* 13962 */                 this.packetProcessHelper.setUserCode(userCode);
 /*       */               }
@@ -13866,7 +14073,7 @@
 /* 14250 */                     this.boHostDeviceService.save(boHostDevice);
 /*       */                   }
 /*       */ 
-/* 14253 */                   String str = "ZIGBEE_SCAN-DEVEICE-NOW";
+/* 14253 */                   String str = "ZIGBEE_SCAN-DEVEICE-NOW";//门锁 有经过？
 /* 14254 */                   byte[] bs = str.getBytes();
 /* 14255 */                   System.err.println(new String(bs));
 /* 14256 */                   this.packetProcessHelper.processSendDDatas(this.deviceCode, bs);
@@ -15219,7 +15426,7 @@
 /* 15662 */     System.err.println("refreshToken >-- " + this.refreshToken);
 /* 15663 */     str = str + "&userCode=";
 /* 15664 */     str = str + this.userCode;
-/* 15665 */     System.err.println("userCode >-- " + this.userCode);
+/* 15665 */     System.err.println("userCode >-- " + this.userCode);//c24ef3aebb0c49f99642e62eb029a412,18038035290
 /* 15666 */     str = str + "12345";
 /* 15667 */     System.err.println("str " + str);
 /*       */ 

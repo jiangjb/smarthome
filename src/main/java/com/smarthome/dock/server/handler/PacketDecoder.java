@@ -4,6 +4,8 @@
 /*     */ import com.smarthome.dock.server.packets.PacketHelper;
 /*     */ import com.smarthome.dock.server.packets.PacketParseException;
 /*     */ import com.smarthome.dock.server.support.PacketProcessor;
+import com.smarthome.dock.server.util.Util;
+
 /*     */ import java.io.PrintStream;
 /*     */ import java.util.ArrayList;
 /*     */ import java.util.List;
@@ -28,22 +30,28 @@
 /*     */   protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf)
 /*     */     throws Exception
 /*     */   {
+//	          logger.info("decode方法 buf:"+buf);
 /*  33 */     int length = buf.readableBytes();
+//			  logger.error("decode方法  length0：" + length);
 /*  34 */     int packetLength = ',' + buf.getChar(4);
 /*  35 */     ChannelBuffer frame = buf.factory().getBuffer(packetLength);
 /*  36 */     InPacket packets = this.packetProcessor.getPacketHelper().processIn(frame);
 /*  37 */     if (length > 4) {
+//				logger.error("decode方法  length大于4" );
 /*     */       try {
 /*  39 */         List ret = new ArrayList();
 /*  40 */         char command = buf.getChar(2);
 /*     */ 
-/*  42 */         while ((length > 4) && (accept(command))) {
+/*  42 */         while ((length > 4) && (accept(command))) {//accept(command)--根据command的值 返回相应的Boolean值
 /*  43 */           InPacket packet = decodePacket(buf);
 /*  44 */           if (packet != null) {
 /*  45 */             ret.add(packet);
 /*     */           }
 /*  47 */           length = buf.readableBytes();
-/*  48 */           command = length > 4 ? buf.getChar(2) : 65535;
+//					logger.error("decode方法  length1：" + length);
+//					logger.error("decode方法  buf.getChar(2)：" + buf.getChar(2));
+/*  48 */           command = length > 4 ? buf.getChar(2) : 65535;//决定command的值？？？
+					logger.error("decode方法  command：" + Util.getCommandString(command));
 /*     */         }
 /*  50 */         int alen = buf.readableBytes();
 /*  51 */         if (alen > 0) {

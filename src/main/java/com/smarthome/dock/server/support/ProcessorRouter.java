@@ -54,11 +54,11 @@
 /*    */ 
 /*    */   public void packetArrived(PacketEvent e)
 /*    */   {
-	         System.out.println("ProcessorRouter 58lines packetArrived...");
+	         System.out.println("ProcessorRouter 58 line： packetArrived");
 /* 75 */     checkListenerChange();
 /* 76 */     int size = this.listenersBackup.size();
 /* 77 */     for (int i = 0; i < size; i++)
-/* 78 */       ((IPacketListener)this.listenersBackup.get(i)).packetArrived(e);
+/* 78 */       ((IPacketListener)this.listenersBackup.get(i)).packetArrived(e);//调用PacketProcessor类中的packetArrived方法
 /*    */   }
 /*    */ }
 
