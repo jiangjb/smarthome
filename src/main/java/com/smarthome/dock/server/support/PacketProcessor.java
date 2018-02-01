@@ -148,10 +148,11 @@ import java.io.UnsupportedEncodingException;
 /*     */ 
 /*     */   public void firePacketArrivedEvent(PacketEvent e)
 /*     */   {
-			  System.out.println("firePacketArrivedEvent(PacketProcessor.java)");
+			  InPacket in = (InPacket)e.getSource();//1-31test
+			  logger.info("firePacketArrivedEvent method(异常路径)  command="+Util.getCommandString(in.getCommand()));//1-31test  这句和上句不能合成Util.getCommandString((InPacket)e.getSource().getCommand())  原因不明？？？
 /* 233 */     this.router.packetArrived(e);//调用ProcessRouter的packetArrived方法
 /*     */   }
-/*     */ 
+/*     */   ////正确的流程：解析包-》 packetArrived -》 procesKeepAliveSuccess
 /*     */   public void packetArrived(PacketEvent e)
 /*     */   {//与Util类结合使用  Util.getCommandString()
 /* 238 */     InPacket in = (InPacket)e.getSource();
@@ -179,11 +180,11 @@ import java.io.UnsupportedEncodingException;
 /* 275 */       this.packetProcessHelper.processCDataSuccess(in);
 /*     */     }
 /* 277 */     if ((in.getCommand() >= 53248) && (in.getCommand() <= 57343)) {//command=MSG_D2C_DATA
-	            System.out.println("Command between 53248 and 57343");
+//	            System.out.println("Command between 53248 and 57343");
 /* 278 */       this.packetProcessHelper.processDDataSuccess(in);
 /*     */     }
 /* 280 */     if ((in.getCommand() >= 57344) && (in.getCommand() <= 61439)) {//command=MSG_D2S_DATA
-				System.out.println("Command between 57344 and 61439");
+//				System.out.println("Command between 57344 and 61439");
 /* 281 */       this.packetProcessHelper.processReportSuccess(in);
 /*     */     }
 /* 283 */     if ((in.getCommand() >= 61440) && (in.getCommand() <= 65535)) {//command=MSG_D2S_ALARM

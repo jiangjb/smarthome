@@ -26,33 +26,35 @@ import com.smarthome.dock.server.util.Util;
 /*     */   {
 /*  27 */     this.packetProcessor = packetProcessor;
 /*     */   }
-/*     */ 
+/*     */   //netty自带的解码器   用最小的网络代价完成数据传送
 /*     */   protected Object decode(ChannelHandlerContext ctx, Channel channel, ChannelBuffer buf)
 /*     */     throws Exception
 /*     */   {
-//	          logger.info("decode方法 buf:"+buf);
-/*  33 */     int length = buf.readableBytes();
-//			  logger.error("decode方法  length0：" + length);
+//	          打印出ChannelBuffer中的内容
+/*  33 */     int length = buf.readableBytes();//返回可读的字节数目
+			  logger.info("返回可读的字节数目>"+length);
+
 /*  34 */     int packetLength = ',' + buf.getChar(4);
+			  logger.info("packetLength>"+packetLength);
 /*  35 */     ChannelBuffer frame = buf.factory().getBuffer(packetLength);
 /*  36 */     InPacket packets = this.packetProcessor.getPacketHelper().processIn(frame);
 /*  37 */     if (length > 4) {
-//				logger.error("decode方法  length大于4" );
+
 /*     */       try {
 /*  39 */         List ret = new ArrayList();
 /*  40 */         char command = buf.getChar(2);
+				  logger.error("decode方法  buf.getChar(2)：" + new String(String.valueOf(buf.getChar(2)).getBytes("UTF-8"),"iso-8859-1"));//读出buf中的第二个字符
 /*     */ 
 /*  42 */         while ((length > 4) && (accept(command))) {//accept(command)--根据command的值 返回相应的Boolean值
 /*  43 */           InPacket packet = decodePacket(buf);
 /*  44 */           if (packet != null) {
 /*  45 */             ret.add(packet);
 /*     */           }
-/*  47 */           length = buf.readableBytes();
-//					logger.error("decode方法  length1：" + length);
-//					logger.error("decode方法  buf.getChar(2)：" + buf.getChar(2));
-/*  48 */           command = length > 4 ? buf.getChar(2) : 65535;//决定command的值？？？
-					logger.error("decode方法  command：" + Util.getCommandString(command));
+/*  47 */           length = buf.readableBytes();//这句没有 会出现 "异常数据 0 字节, 数据长度不对"
+
+/*  48 */           command = length > 4 ? buf.getChar(2) : 65535;//决定command的值？？？   buf.getChar(2)
 /*     */         }
+				  logger.error("decode方法  command：" + Util.getCommandString(command));//65535 对应 MSG_D2S_ALARM
 /*  50 */         int alen = buf.readableBytes();
 /*  51 */         if (alen > 0) {
 /*  52 */           int readerIndex = buf.readerIndex();
@@ -92,7 +94,7 @@ import com.smarthome.dock.server.util.Util;
 /*  86 */     if (length < packetLength) {
 /*  87 */       buf.skipBytes(length);
 /*  88 */       buf.readerIndex(length);
-/*  89 */       logger.error("异常数据 " + length + "字节, 数据长度不对");
+/*  89 */       logger.error("异常数据 " + length + "字节, 数据长度不对");//
 /*     */ 
 /*  91 */       return null;
 /*     */     }

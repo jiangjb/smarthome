@@ -256,7 +256,7 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /*      */ 
 /*  283 */     DockUser user = this.userManager.getUser(deviceCode);
 /*  285 */     if (user == null) {
-				 logger.info("user == null");//常出现
+				 logger.info("user == null");//常出现？？？
 /*  286 */       boolean isExist = this.boProcessService.doLogin(deviceCode, hostName);
 /*      */ 
 /*  288 */       if (isExist)
@@ -1688,18 +1688,21 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /*      */         {
 /* 1832 */           this.resendVerification = this.boResendVerificationService.find(devId, radioCommandSplit2[2].trim(), "0");
 /* 1833 */           if (this.resendVerification != null) {
-/* 1834 */             System.err.println("2121212");
+///* 1834 */             System.err.println("2121212");
+					   logger.info("PT2262_315");
 /* 1835 */             this.resendVerification.setAcceptState("OK");
 /* 1836 */             this.boResendVerificationService.update(this.resendVerification);
 /*      */           } else {
 /* 1838 */             System.err.println(devId);
 /* 1839 */             System.err.println(radioCommandSplit2[2].trim());
-/* 1840 */             System.err.println("meij");
+///* 1840 */             System.err.println("meij2262");
+						 logger.info("meiJ2262-315");
 /*      */           }
 /*      */         }
 /*      */       }
 /* 1844 */     } else if ("PT2262_433M".equals(radioCommandSplit[0])) {
 /* 1845 */       if ("SEND".equals(radioCommandSplit[1])) {
+				   logger.info("PT2262_433");
 /* 1846 */         String radioCommand2 = radioCommandSplit[2];
 /* 1847 */         String[] radioCommandSplit2 = radioCommand2.split(",");
 /* 1848 */         for (int i = 0; i < radioCommandSplit2.length; i++) {
@@ -1709,6 +1712,7 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /*      */         {
 /* 1853 */           this.resendVerification = this.boResendVerificationService.find(devId, radioCommandSplit2[2].trim(), "0");
 /* 1854 */           if (this.resendVerification != null) {
+					   logger.info("meiJ2262-433");
 /* 1855 */             this.resendVerification.setAcceptState("OK");
 /* 1856 */             this.boResendVerificationService.update(this.resendVerification);
 /*      */           }
@@ -1723,16 +1727,22 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /*      */         }
 /* 1867 */         if ("OK".equals(radioCommandSplit2[3].trim().toString()))
 /*      */         {
-	System.err.println("·······devId:"+devId);
-	System.err.println("·······radioCommandSplit2[2]:"+radioCommandSplit2[2]);
-	logger.info("·······radioCommandSplit2[0]:"+radioCommandSplit2[0]);//暂时将下面的"0"替换掉
-/* 1869 */           this.resendVerification = this.boResendVerificationService.find(devId, radioCommandSplit2[2].trim(), "0");//deviceAddress=radioCommandSplit2[2].trim();command="0"  radioCommandSplit2[0].trim()
-                     System.err.println("·······this.resendVerification:"+this.resendVerification);//null
+					 logger.info("·······devId:"+devId);
+					 logger.info("·······radioCommandSplit2[2]:"+radioCommandSplit2[2]);
+					 logger.info("·······radioCommandSplit2[0]:"+radioCommandSplit2[0]);//暂时将下面的"0"替换掉
+/* 1869 */           this.resendVerification = this.boResendVerificationService.find(devId, radioCommandSplit2[2].trim(), "0");//deviceAddress=radioCommandSplit2[2].trim();radioCommandSplit2[2].trim().toString()代替devId;   command="0"  radioCommandSplit2[0].trim()
+                     logger.info("···PacketProcessHelper this.resendVerification:"+this.resendVerification);//null
 /* 1870 */           if (this.resendVerification != null) {
-	System.err.println("resendVerification is not null.");
+					   logger.info("1527_315");
+//					   System.err.println("*resendVerification is not null.");
 /* 1871 */             this.resendVerification.setAcceptState("OK");
-/* 1872 */             this.boResendVerificationService.update(this.resendVerification);
-/*      */           }
+/* 1872 */             this.boResendVerificationService.update(this.resendVerification);//这之后无法跳入commad方法
+/*      */           }else {
+	/* 1838 */             System.err.println(devId);
+	/* 1839 */             System.err.println(radioCommandSplit2[2].trim());
+//	/* 1840 */             System.err.println("meij1527");
+						   logger.info("meij1527_315");
+	/*      */        }
 /*      */         }
 /*      */       }
 /* 1876 */     } else if (("PT1527_433M".equals(radioCommandSplit[0])) && 
@@ -1746,6 +1756,7 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /*      */       {
 /* 1885 */         this.resendVerification = this.boResendVerificationService.find(devId, radioCommandSplit2[2].trim(), "0");
 /* 1886 */         if (this.resendVerification != null) {
+					 logger.info("1527_433");
 /* 1887 */           this.resendVerification.setAcceptState("OK");
 /* 1888 */           this.boResendVerificationService.update(this.resendVerification);
 /*      */         }
@@ -2234,6 +2245,7 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /* 2405 */     BoAlarm alarm = new BoAlarm();
 /*      */ 
 /* 2407 */     if ((in instanceof Alarm0140Packet)) {
+	logger.info("Alarm0140Packet");
 /* 2408 */       Alarm0140Packet packet = (Alarm0140Packet)in;
 /*      */ 
 /* 2410 */       alarm.setDeviceCode(packet.getDevId());
@@ -2246,6 +2258,7 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /* 2417 */       alarm.setPort(Integer.valueOf(packet.getPort()));
 /*      */     }
 /* 2419 */     else if ((in instanceof Alarm0150Packet)) {
+	logger.info("Alarm0150Packet");
 /* 2420 */       Alarm0150Packet packet = (Alarm0150Packet)in;
 /*      */ 
 /* 2422 */       alarm.setDeviceCode(packet.getDevId());
@@ -2260,6 +2273,7 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /* 2431 */       alarm.setUrl("");
 /*      */     }
 /* 2433 */     else if ((in instanceof Alarm0240Packet)) {
+	logger.info("Alarm0240Packet");
 /* 2434 */       Alarm0240Packet packet = (Alarm0240Packet)in;
 /*      */ 
 /* 2436 */       alarm.setDeviceCode(packet.getDevId());
@@ -2272,7 +2286,7 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /* 2443 */       alarm.setPort(Integer.valueOf(packet.getPort()));
 /*      */     }
 /*      */ 
-/* 2447 */     this.boProcessService.doSaveAlarm(alarm);
+/* 2447 */     this.boProcessService.doSaveAlarm(alarm);//？
 /*      */   }
 /*      */ 
 /*      */   public void procesKeepAliveSuccess(InPacket in)
@@ -2333,7 +2347,6 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /*      */   public void procesKeepAliveLost(com.smarthome.dock.server.packets.in.KeepAlivePacket packet)
 /*      */   {
 /* 2511 */     logger.info(packet.getDevId() + " 开始处理离线procesKeepAliveLost");
-			   System.out.println(packet.getDevId() + " 开始处理离线procesKeepAliveLost");
 /* 2512 */     String hostName = packet.getHostName();
 /* 2513 */     int port = packet.getPort();
 /*      */ 

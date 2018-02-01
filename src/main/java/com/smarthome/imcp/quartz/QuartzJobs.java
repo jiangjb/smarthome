@@ -33,6 +33,8 @@
 		  import javax.servlet.http.HttpServletRequest;
 /*     */ import org.apache.commons.lang3.StringUtils;
 		  import org.apache.struts2.ServletActionContext;
+		  import org.slf4j.Logger;
+		  import org.slf4j.LoggerFactory;
 /*     */ import org.springframework.beans.factory.annotation.Autowired;
 /*     */ import org.springframework.context.annotation.Lazy;
 /*     */ import org.springframework.scheduling.annotation.Scheduled;
@@ -64,7 +66,7 @@
 			@Autowired
 			private PacketProcessor packetProcessor;//new
 
-
+			private static Logger logger = LoggerFactory.getLogger(QuartzJobs.class);
 /*  84 */   private static Map<String, Integer> user_num = new HashMap();
 /*     */ 
 /*     */   public PacketProcessHelper getPacketProcessHelper()
@@ -77,6 +79,7 @@
 
 /*     */   public void packNum(String userCode)
 /*     */   {//important
+	          logger.info("定时器 packNum 方法");
 /*  90 */     if (user_num.get(userCode) == null)
 /*  91 */       user_num.put(userCode, Integer.valueOf(0));
 /*     */     else
@@ -86,8 +89,10 @@
 /*     */   @Scheduled(cron="0 0/1 * * * ?")
 /*     */   public void setUserMode()
 /*     */   {
+			  logger.debug("定时器 setUserMode 方法");
 /* 101 */     List by = this.boModelService.getBy();
-			  System.out.println("QuartJobs   setUserMode by:"+by);
+//			  System.out.println("QuartJobs   setUserMode by:"+by);
+			  logger.info("QuartJobs   setUserMode by:"+by);
 /* 102 */     for (int i = 0; i < by.size(); i++) {
 /* 103 */       BoModel boModel = (BoModel)by.get(i);
 /*     */ 
@@ -126,8 +131,9 @@
 /*     */   public void LockPassword()
 /*     */     throws ParseException
 /*     */   {
+			  logger.debug("定时器 LockPassword 方法");
 /* 140 */     List lock = this.boLockPasswordManageService.getLock(Integer.valueOf(65535));
-			  System.out.println("lock.size() :"+lock.size()+"如果不是0则后面会有相应的操作");
+			  logger.info("lock.size() :"+lock.size()+" 如果不是0则不执行processSendDData方法");
 /* 141 */     Date currentTime = new Date();
 /* 142 */     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 /* 143 */     String dateString = formatter.format(currentTime);
@@ -141,7 +147,8 @@
 /* 151 */         long interval = (appEndTime - currentTime.getTime()) / 1000L;
 /* 152 */         String SetString = "ZIGBEE_LOCK-SET-" + user_num.get(lockPassManage.getBoUsers().getUserCode()) + "," + lockPassManage.getLockAddress() + "," + lockPassManage.getLockType() + "," + lockPassManage.getLockOfTimes() + "," + AES.decrypt(lockPassManage.getAdminPwd()) + "," + AES.decrypt(lockPassManage.getLockPwd()) + "," + interval;
 /* 153 */         byte[] Set = SetString.getBytes();
-/* 154 */         System.err.println("Set :"+new String(Set));
+///* 154 */         System.err.println("Set :"+new String(Set));
+				  logger.info("Set :"+new String(Set));
 /* 155 */         this.packetProcessHelper.processSendDData(lockPassManage.getBoDevice().getDeviceCode(), Set);
 					
 /*     */       } else {
@@ -167,6 +174,7 @@
 /*     */ 
 /*     */   @Scheduled(cron="0/1 * * * * ?")
 /*     */   public void lock() {
+			  logger.debug("定时器 lock 方法");
 /* 179 */     List<BoLockVerdict> all = this.boLockVerdictService.getAll();
 /* 180 */     Long lockTime = Long.valueOf((int)(System.currentTimeMillis() / 1000L));
 /* 181 */     for (BoLockVerdict boLockVerdict : all)
@@ -182,6 +190,7 @@
 /*     */   @Scheduled(cron="0/1 * * * * ?")
 /*     */   public void mobileCode()
 /*     */   {
+//			  logger.debug("定时器 mobileCode 方法");
 /* 200 */     Iterator iterator = StaticUtil.msg_code.keySet().iterator();
 /* 201 */     long timeout = 60000L;
 /* 202 */     while (iterator.hasNext()) {
@@ -199,6 +208,7 @@
 /*     */   @Scheduled(cron="0/1 * * * * ?")
 /*     */   public void emailCode()
 /*     */   {
+//			  logger.debug("定时器 emailCode 方法");
 /* 220 */     Iterator iterator = StaticUtil.msg_email_code.keySet().iterator();
 /* 221 */     long timeout = 600000L;
 /* 222 */     while (iterator.hasNext()) {

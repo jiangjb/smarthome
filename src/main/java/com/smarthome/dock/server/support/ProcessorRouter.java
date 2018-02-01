@@ -4,9 +4,12 @@
 /*    */ import com.smarthome.dock.server.event.PacketEvent;
 /*    */ import java.util.List;
 /*    */ import java.util.Vector;
+//		 import org.slf4j.Logger;
+//		 import org.slf4j.LoggerFactory;
 /*    */ 
 /*    */ public class ProcessorRouter
 /*    */ {
+//	       private static Logger logger = LoggerFactory.getLogger(ProcessorRouter.class);//new
 /*    */   private List<IPacketListener> listeners;
 /*    */   private List<IPacketListener> listenersBackup;
 /*    */   private boolean listenerChanged;
@@ -54,7 +57,6 @@
 /*    */ 
 /*    */   public void packetArrived(PacketEvent e)
 /*    */   {
-	         System.out.println("ProcessorRouter 58 line： packetArrived");
 /* 75 */     checkListenerChange();
 /* 76 */     int size = this.listenersBackup.size();
 /* 77 */     for (int i = 0; i < size; i++)

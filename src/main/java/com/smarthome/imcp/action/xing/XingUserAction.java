@@ -338,7 +338,7 @@
 /*       */   private String code;
 /* 16517 */   private Integer type = Integer.valueOf(0);
 /* 16518 */   private String patternType = "";
-/*       */   private Integer command;//a key variable
+/*       */   private Integer command;//a key variable 这个是怎么给定的？
 /* 16520 */   private String CID = "";
 /*       */   private Integer keyvalue;
 /*       */   private Integer value;
@@ -405,6 +405,7 @@
 /*       */ 
 /*       */   public Boolean commandMode(String usereCode, String modelId)
 /*       */   {//这里面的怎么都不打印
+	            logger.info("in commandMode Method");
 /*   276 */     System.err.println(usereCode + modelId);
 /*   277 */     Map map = new HashMap();
 /*       */ 
@@ -7119,6 +7120,7 @@
 /*       */   @Action(value="commandmodel", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String commandModel()
 /*       */   {
+	            logger.info("in commandmodel Method");
 /*  7208 */     this.requestJson = new RequestJson();
 /*  7209 */     HttpServletRequest request = ServletActionContext.getRequest();
 /*  7210 */     Map map = new HashMap();
@@ -13196,163 +13198,126 @@
 /* 13494 */                 System.err.println(new String(bs));
 /* 13495 */                 this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 /*       */               }
-/*       */ 
-/* 13498 */               if (device.getDeviceAddress().toString().length() == 8) {//设备地址长度为8  门锁的地址长度也为8
-/* 13499 */                 String deviceType = device.getDeviceType().toString();
-/* 13500 */                 String substring = deviceType.substring(1, 2);
-/* 13501 */                 Integer valueOf = Integer.valueOf(substring);
-/* 13502 */                 Integer s = null;
-/* 13503 */                 if (valueOf.intValue() == 1)
-/* 13504 */                   s = Integer.valueOf(2262);
-/*       */                 else {
-/* 13506 */                   s = Integer.valueOf(1527);
-/*       */                 }
-/*       */ 
-/* 13509 */                 String substring2 = deviceType.substring(2, 3);
-/* 13510 */                 Integer valueOf2 = Integer.valueOf(substring2);
-/* 13511 */                 Integer b = null;
-/* 13512 */                 if (valueOf2.intValue() == 1)
-/* 13513 */                   b = Integer.valueOf(315);
-/*       */                 else {
-/* 13515 */                   b = Integer.valueOf(433);
-/*       */                 }
-/*       */ 
-/* 13518 */                 String substring3 = deviceType.substring(3, 4);
-/* 13519 */                 Integer valueOf3 = Integer.valueOf(substring3);
-/* 13520 */                 Integer c = null;
-/* 13521 */                 if (valueOf3.intValue() == 1)
-/* 13522 */                   c = Integer.valueOf(12);
-/* 13523 */                 else if (valueOf3.intValue() == 2)
-/* 13524 */                   c = Integer.valueOf(15);
-/* 13525 */                 else if (valueOf3.intValue() == 3)
-/* 13526 */                   c = Integer.valueOf(22);
-/* 13527 */                 else if (valueOf3.intValue() == 4)
-/* 13528 */                   c = Integer.valueOf(33);
-/* 13529 */                 else if (valueOf3.intValue() == 5)
-/* 13530 */                   c = Integer.valueOf(47);
-/* 13531 */                 else if (valueOf3.intValue() == 6)
-/* 13532 */                   c = Integer.valueOf(330);
-/* 13533 */                 else if (valueOf3.intValue() == 7)
-/* 13534 */                   c = Integer.valueOf(390);
-/* 13535 */                 else if (valueOf3.intValue() == 8) {
-/* 13536 */                   c = Integer.valueOf(200);
-/*       */                 }
-/*       */ 
-/* 13540 */                 if (this.command.intValue() == 0) {
-/* 13541 */                   System.err.println(device.getDeviceAddress());
-/* 13542 */                   String string = device.getDeviceAddress().substring(0, 1);
-/* 13543 */                   String string2 = device.getDeviceAddress().substring(1, 8);
-/*       */ 
-/* 13545 */                   if (string.equals("0"))
-/* 13546 */                     this.ln = string2;
-/*       */                   else {
-/* 13548 */                     this.ln = device.getDeviceAddress();
-/*       */                   }
-/*       */ 
-/* 13552 */                   String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(userCode2[0].trim().toString()) + "," + c + "," + 
-/* 13553 */                     this.ln+2;//门锁地址+'2'
-/* 13554 */                   byte[] bs = str.getBytes();
-/* 13555 */                   System.err.println("<?> " + new String(bs));
-                              //1-29
-//							  System.err.println("····13256····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
-//							  ///////设置command的值//////
-//							  Integer commands = null;
-//							  commands = Integer.valueOf(user_num.get(userCode2[0].trim().toString()));
-//							  final String string00 = commands.toString();
-//							  /////////////////////////
-//							
-//							  this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-//									 this.ln+2, string00);//device.getDeviceAddress()
-//							  System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-//									 this.ln+2, string00));
-//							  System.err.println("····13267····this.resendVerification:"+this.resendVerification);
-//							  if (this.resendVerification == null)
-//							  {
-//								  BoResendVerification resend = new BoResendVerification();
-//								  resend.setBoDevice(device.getBoDevice());
-//								  resend.setDeviceAddress(this.ln+2);
-//								  resend.setDeviceType(device.getDeviceType());
-//								  resend.setCommand(string00);
-//								  resend.setAcceptState("wait");
-//								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
-//							  }
-							  //END
-/* 13556 */                   this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
-/*       */                 }
-/*       */ 
-/* 13560 */                 if (this.command.intValue() == 50)
-/*       */                 {
-/* 13562 */                   String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(userCode2[0].trim().toString()) + "," + c + "," + 
-/* 13563 */                     device.getDeviceAddress() + 3;//门锁？？
-/* 13564 */                   byte[] bs = str.getBytes();
-                              //1-29
-//							  System.err.println("····13289····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
-//							  ///////设置command的值//////
-//							  Integer commands = null;
-//							  commands = Integer.valueOf(user_num.get(userCode2[0].trim().toString()));
-//							  final String string00 = commands.toString();
-//							  /////////////////////////
-//							
-//							  this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-//									 this.ln+3, string00);//device.getDeviceAddress()
-//							  System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-//									 this.ln+3, string00));
-//							  System.err.println("····13300····this.resendVerification:"+this.resendVerification);
-//							  if (this.resendVerification == null)
-//							  {
-//								  BoResendVerification resend = new BoResendVerification();
-//								  resend.setBoDevice(device.getBoDevice());
-//								  resend.setDeviceAddress(this.ln+3);
-//								  resend.setDeviceType(device.getDeviceType());
-//								  resend.setCommand(string00);
-//								  resend.setAcceptState("wait");
-//								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
-//							  }
-							  //END
-/* 13566 */                   this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
-/*       */                 }
-/*       */ 
-/* 13570 */                 if (this.command.intValue() == 100) {//这里很关键
-/* 13571 */                   String string = device.getDeviceAddress().substring(0, 1);
-/* 13572 */                   String string2 = device.getDeviceAddress().substring(1, 8);
-/*       */                   //设置deviceAddress
-/* 13574 */                   if (string.equals("0"))
-/* 13575 */                     this.ln = string2;
-/*       */                   else {
-/* 13577 */                     this.ln = device.getDeviceAddress();
-/*       */                   }
-/*       */ 				  //////////////////
-/* 13580 */                   String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(userCode2[0].trim().toString()) + "," + c + "," + 
-/* 13581 */                     this.ln+1;//门锁
-/* 13582 */                   byte[] bs = str.getBytes();
+/*       */ 				
 
-							 //new 1-26
-//							 System.err.println("····13331····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
-//							 ///////设置command的值//////
-//							 Integer commands = null;
-//							 commands = Integer.valueOf(user_num.get(userCode2[0].trim().toString()));//1
-//							 final String string00 = commands.toString();
-//							 /////////////////////////
-//							
-//							 this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-//									 this.ln+1, string00);//device.getDeviceAddress()
-//							 System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-//									 this.ln+1, string00));
-//							 System.err.println("····13348····this.resendVerification:"+this.resendVerification);
-//							 if (this.resendVerification == null)
-//							 {
-//								  BoResendVerification resend = new BoResendVerification();
-//								  resend.setBoDevice(device.getBoDevice());
-//								  resend.setDeviceAddress(this.ln+1);
-//								  resend.setDeviceType(device.getDeviceType());
-//								  resend.setCommand(string00);
-//								  resend.setAcceptState("wait");
-//								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
-//							 }
-							  //end
-/* 13584 */                   this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
-/*       */                 }
-/*       */               }
+						//2-1
+						if (device.getDeviceAddress().toString().length() == 8) {
+						    String deviceType = device.getDeviceType().toString();
+						    String substring = deviceType.substring(1, 2);
+						    Integer valueOf = Integer.valueOf(substring);
+						    String s_code = null;
+						    if (valueOf.intValue() == 1) {
+						      s_code = "2262";
+						    } else if (valueOf.intValue() == 3) {
+						      int i_deviceType = 0;
+						      try { 
+						    	  i_deviceType = Integer.valueOf(deviceType).intValue(); 
+						      } catch (Exception localException) 
+						      		{
+						      		}
+						      if ((i_deviceType >= 4000) && (i_deviceType <= 4999))
+						      {
+						        s_code = "DYDJ";
+						      } else if ((i_deviceType >= 5000) && (i_deviceType <= 5999))
+						      {
+						        s_code = "ZNMS";
+						      }
+//						      System.out.println("------i_deviceType:" + i_deviceType + " s_code:" + s_code);
+						      logger.info("------i_deviceType:" + i_deviceType + " s_code:" + s_code);
+						    } else {
+						      s_code = "1527";
+						    }
+						
+						    String substring2 = deviceType.substring(2, 3);
+						    Integer valueOf2 = Integer.valueOf(substring2);
+						    Integer b = null;
+						    if (valueOf2.intValue() == 1)
+						      b = Integer.valueOf(315);
+						    else {
+						      b = Integer.valueOf(433);
+						    }
+						
+						    String substring3 = deviceType.substring(3, 4);
+						    Integer valueOf3 = Integer.valueOf(substring3);
+						    Integer c = null;
+						    if (valueOf3.intValue() == 1)
+						      c = Integer.valueOf(12);
+						    else if (valueOf3.intValue() == 2)
+						      c = Integer.valueOf(15);
+						    else if (valueOf3.intValue() == 3)
+						      c = Integer.valueOf(22);
+						    else if (valueOf3.intValue() == 4)
+						      c = Integer.valueOf(33);
+						    else if (valueOf3.intValue() == 5)
+						      c = Integer.valueOf(47);
+						    else if (valueOf3.intValue() == 6)
+						      c = Integer.valueOf(330);
+						    else if (valueOf3.intValue() == 7)
+						      c = Integer.valueOf(390);
+						    else if (valueOf3.intValue() == 8) {
+						      c = Integer.valueOf(200);
+						    }
+						
+						    if (this.command.intValue() == 0) {
+						      logger.info("this.command == 0");
+						      System.err.println(device.getDeviceAddress());
+						      String string = device.getDeviceAddress().substring(0, 1);
+						      String string2 = device.getDeviceAddress().substring(1, 8);
+						
+						      if (string.equals("0"))
+						        this.ln = string2;
+						      else {
+						        this.ln = device.getDeviceAddress();
+						      }
+						
+						      String str = "PT" + s_code + "_" + b + "M-SEND-" + user_num.get(userCode2[0].trim().toString()) + "," + c + "," + 
+						        this.ln + 2;
+						      byte[] bs = str.getBytes();
+//						      System.err.println("<?> " + new String(bs));
+						      logger.debug("<?> " + new String(bs));
+						      this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
+						    }
+						
+						    if (this.command.intValue() == 50)
+						    {
+						    	logger.info("this.command == 50");
+						      String str = "PT" + s_code + "_" + b + "M-SEND-" + user_num.get(userCode2[0].trim().toString()) + "," + c + "," + 
+						        device.getDeviceAddress() + 3;
+						      byte[] bs = str.getBytes();
+//						      System.err.println(new String(bs));
+						      logger.debug("<?> " + new String(bs));
+						      this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
+						    }
+						
+						    if (this.command.intValue() == 100) {
+						      logger.info("this.command == 100");
+						      String string = device.getDeviceAddress().substring(0, 1);
+						      String string2 = device.getDeviceAddress().substring(1, 8);
+						
+						      if (string.equals("0"))
+						        this.ln = string2;
+						      else {
+						        this.ln = device.getDeviceAddress();
+						      }
+						
+						      String str = "PT" + s_code + "_" + b + "M-SEND-" + user_num.get(userCode2[0].trim().toString()) + "," + c + "," + 
+						        this.ln + 1;
+						      byte[] bs = str.getBytes();
+//						      System.err.println(new String(bs));
+						      logger.debug("<?> " + new String(bs));
+						      this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
+						    }
+						
+						    if (this.command.intValue() == 150)
+						    {
+						      logger.info("this.command == 150");
+						      String str = "PT" + s_code + "_" + b + "M-SEND-" + user_num.get(userCode2[0].trim().toString()) + "," + c + "," + 
+						        device.getDeviceAddress() + 4;
+						      byte[] bs = str.getBytes();
+						      System.err.println(new String(bs));
+						      this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
+						    }
+						  }
 /*       */             }
 /*       */             else
 /*       */             {
@@ -13690,28 +13655,28 @@
 /* 13927 */                 byte[] bs = str.getBytes();
 /* 13928 */                 System.err.println("<?> " + new String(bs));
                             //1-29
-//							System.err.println("····13695····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
-//							///////设置command的值//////
-//							Integer commands = null;
-//							commands = Integer.valueOf(user_num.get(userCode.trim().toString()));
-//							final String string00 = commands.toString();
-//							/////////////////////////
-//							
-//							this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-//									 this.ln+2, string00);//device.getDeviceAddress()
-//							System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-//									 this.ln+2, string00));
-//							System.err.println("····13706····this.resendVerification:"+this.resendVerification);
-//							if (this.resendVerification == null)
-//							{
-//								  BoResendVerification resend = new BoResendVerification();
-//								  resend.setBoDevice(device.getBoDevice());
-//								  resend.setDeviceAddress(this.ln+2);
-//								  resend.setDeviceType(device.getDeviceType());
-//								  resend.setCommand(string00);
-//								  resend.setAcceptState("wait");
-//								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
-//							}
+							System.err.println("····13695····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
+							///////设置command的值//////
+							Integer commands = null;
+							commands = Integer.valueOf(user_num.get(userCode.trim().toString()));
+							final String string00 = commands.toString();
+							/////////////////////////
+							
+							this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+									 this.ln+2, string00);//device.getDeviceAddress()
+							System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+									 this.ln+2, string00));
+							System.err.println("····13706····this.resendVerification:"+this.resendVerification);
+							if (this.resendVerification == null)
+							{
+								  BoResendVerification resend = new BoResendVerification();
+								  resend.setBoDevice(device.getBoDevice());
+								  resend.setDeviceAddress(this.ln+2);
+								  resend.setDeviceType(device.getDeviceType());
+								  resend.setCommand(string00);
+								  resend.setAcceptState("wait");
+								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
+							}
 						    //END
 /* 13929 */                 this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 /* 13930 */                 this.packetProcessHelper.setUserCode(userCode);
@@ -13723,28 +13688,28 @@
 /* 13939 */                   device.getDeviceAddress() + 3;//门锁？？
 /* 13940 */                 byte[] bs = str.getBytes();
 							//1-29
-//							System.err.println("····13728····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
-//							///////设置command的值//////
-//							Integer commands = null;
-//							commands = Integer.valueOf(user_num.get(userCode.trim().toString()));
-//							final String string00 = commands.toString();
-//							/////////////////////////
-//							
-//							this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-//									 this.ln+3, string00);//device.getDeviceAddress()
-//							System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-//									 this.ln+3, string00));
-//							System.err.println("····13745····this.resendVerification:"+this.resendVerification);
-//							if (this.resendVerification == null)
-//							{
-//								  BoResendVerification resend = new BoResendVerification();
-//								  resend.setBoDevice(device.getBoDevice());
-//								  resend.setDeviceAddress(this.ln+3);
-//								  resend.setDeviceType(device.getDeviceType());
-//								  resend.setCommand(string00);
-//								  resend.setAcceptState("wait");
-//								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
-//							}
+							System.err.println("····13728····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
+							///////设置command的值//////
+							Integer commands = null;
+							commands = Integer.valueOf(user_num.get(userCode.trim().toString()));
+							final String string00 = commands.toString();
+							/////////////////////////
+							
+							this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+									 this.ln+3, string00);//device.getDeviceAddress()
+							System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+									 this.ln+3, string00));
+							System.err.println("····13745····this.resendVerification:"+this.resendVerification);
+							if (this.resendVerification == null)
+							{
+								  BoResendVerification resend = new BoResendVerification();
+								  resend.setBoDevice(device.getBoDevice());
+								  resend.setDeviceAddress(this.ln+3);
+								  resend.setDeviceType(device.getDeviceType());
+								  resend.setCommand(string00);
+								  resend.setAcceptState("wait");
+								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
+							}
 							//END
 /* 13942 */                 this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 /* 13943 */                 this.packetProcessHelper.setUserCode(userCode);
@@ -13764,28 +13729,28 @@
 /* 13958 */                   this.ln+1;//门锁 新地址  this.ln+'1'
 /* 13959 */                 byte[] bs = str.getBytes();
 							//NEW 1-26
-//							System.err.println("····13769····new String(bs):"+new String(bs));//PT1527_315M SEND 0,33,788925101,OK
-//							///////设置command的值////////
-//							Integer commands = null;
-//							commands = Integer.valueOf(user_num.get(userCode));//userCode没有逗号的情况 >ff5f3341cf4c4c2abfe2a51ef965a742     上面的有逗号String[] userCode2 = userCode.split(",");
-//							final String string00 = commands.toString();
-//							///////////////////////////
-//							
-//							this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-//									 this.ln+1, string00);//device.getDeviceAddress()
-//							System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-//									 this.ln+1, string00));
-//							System.err.println("····13781····this.resendVerification:"+this.resendVerification);
-//							if (this.resendVerification == null)
-//							{
-//								  BoResendVerification resend = new BoResendVerification();
-//								  resend.setBoDevice(device.getBoDevice());
-//								  resend.setDeviceAddress(this.ln+1);
-//								  resend.setDeviceType(device.getDeviceType());
-//								  resend.setCommand(string00);
-//								  resend.setAcceptState("wait");
-//								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
-//							}
+							System.err.println("····13769····new String(bs):"+new String(bs));//PT1527_315M SEND 0,33,788925101,OK
+							///////设置command的值////////
+							Integer commands = null;
+							commands = Integer.valueOf(user_num.get(userCode));//userCode没有逗号的情况 >ff5f3341cf4c4c2abfe2a51ef965a742     上面的有逗号String[] userCode2 = userCode.split(",");
+							final String string00 = commands.toString();
+							///////////////////////////
+							
+							this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+									 this.ln+1, string00);//device.getDeviceAddress()
+							System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
+									 this.ln+1, string00));
+							System.err.println("····13781····this.resendVerification:"+this.resendVerification);
+							if (this.resendVerification == null)
+							{
+								  BoResendVerification resend = new BoResendVerification();
+								  resend.setBoDevice(device.getBoDevice());
+								  resend.setDeviceAddress(this.ln+1);
+								  resend.setDeviceType(device.getDeviceType());
+								  resend.setCommand(string00);
+								  resend.setAcceptState("wait");
+								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
+							}
 							//END
 
 /* 13961 */                 this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);

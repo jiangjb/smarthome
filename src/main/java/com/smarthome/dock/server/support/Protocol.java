@@ -26,18 +26,13 @@ public abstract interface Protocol
   public static final char MSG_C2D_DATA_START = '쀀';
   public static final char MSG_C2D_DATA_END = '쿿';
   public static final char MSG_D2C_DATA_START = '퀀';
-  public static final char MSG_D2C_DATA_END = '�';
+  public static final char MSG_D2C_DATA_END = '?';
   public static final char MSG_D2S_DATA_START = '';
   public static final char MSG_D2S_DATA_END = '';
   public static final char MSG_D2S_ALARM_START = '';
-  public static final char MSG_D2S_ALARM_END = '쿿';
+  public static final char MSG_D2S_ALARM_END = '￿';
   public static final char CMD_UNKNOWN = '\000';
   public static final char MSG_TYPE_DONGCHE = 'ŀ';
   public static final char MSG_TYPE_HEBEI = 'ɀ';
   public static final char MSG_TYPE_BAOXIAN = 'Ő';
 }
-
-/* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\
- * Qualified Name:     com.smarthome.dock.server.support.Protocol
- * JD-Core Version:    0.6.2
- */
