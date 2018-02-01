@@ -507,10 +507,6 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 
 /*  633 */       Map map = connection.getHeaderFields();
 				 List<String> keys = new ArrayList<String>(map.keySet());
-///*      */ 		 List<String> keys=(List<String>) map.keySet();
-//				 Set<String> keys0 = map.keySet();
-//				 List<String> keys = new ArrayList<>(keys0);
-//				 System.out.println("PacketProcessHelper line508: map > set  > list");
 /*  635 */       for (String key : keys) {
 /*  636 */         System.out.println(key + "--->" + map.get(key));
 /*      */       }
@@ -563,10 +559,6 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 
 /*  633 */       Map map = connection.getHeaderFields();
 				 List<String> keys = new ArrayList<String>(map.keySet());
-///*      */       List<String> keys=(List<String>) map.keySet();
-//				 Set<String> keys0 = map.keySet();
-//				 List<String> keys = new ArrayList<>(keys0);
-//				 System.out.println("PacketProcessHelper line562: map > set  > list");
 /*  678 */       for (String key : keys) {
 /*  679 */         System.out.println(key + "--->" + map.get(key));
 /*      */       }
@@ -575,7 +567,6 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /*      */       String line;
 /*  684 */       while ((line = in.readLine()) != null)
 /*      */       {
-///*      */         String line;
 /*  685 */         result = result + line;
 /*      */       }
 /*  687 */       System.err.println(result);
@@ -703,7 +694,6 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /*  806 */         unlockingPushRecord.setMethodsStatus(hostDevice.getNickName() + " 锁 " + "电量低");
 /*  807 */         phoneType = hostDevice.getBoUsers().getPhoneType();
 /*      */         String alarmPhoneType;
-///*      */         String alarmPhoneType;
 /*  809 */         if (phoneType.intValue() == 0)
 /*  810 */           alarmPhoneType = "安卓";
 /*      */         else {
@@ -1027,14 +1017,14 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /* 1136 */             if (inDateOno) {
 /*      */               try {
 /* 1138 */                 Thread.sleep(600L);
-/* 1139 */                 sendGet2("http://120.77.250.17/smarthomeMavenWebProject/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + alarmEnclosureSplit2[0].trim().toString());
+/* 1139 */                 sendGet2("http://120.77.250.17/smarthome.IMCPlatform/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + alarmEnclosureSplit2[0].trim().toString());
 /*      */               }
 /*      */               catch (InterruptedException e) {
 /* 1142 */                 e.printStackTrace();
 /*      */               }
 /*      */               try {
 /* 1145 */                 Thread.sleep(500L);
-/* 1146 */                 sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+/* 1146 */                 sendGet("http://120.77.250.17/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
 /*      */               }
 /*      */               catch (InterruptedException e) {
 /* 1149 */                 e.printStackTrace();
@@ -1042,14 +1032,14 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /* 1151 */             } else if (inDateTwo) {
 /*      */               try {
 /* 1153 */                 Thread.sleep(600L);
-/* 1154 */                 sendGet2("http://120.77.250.17/smarthomeMavenWebProject/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + alarmEnclosureSplit2[0].trim().toString());
+/* 1154 */                 sendGet2("http://120.77.250.17/smarthome.IMCPlatform/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + alarmEnclosureSplit2[0].trim().toString());
 /*      */               }
 /*      */               catch (InterruptedException e) {
 /* 1157 */                 e.printStackTrace();
 /*      */               }
 /*      */               try {
 /* 1160 */                 Thread.sleep(500L);
-/* 1161 */                 sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+/* 1161 */                 sendGet("http://120.77.250.17/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
 /*      */               }
 /*      */               catch (InterruptedException e) {
 /* 1164 */                 e.printStackTrace();
@@ -1057,14 +1047,14 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /* 1166 */             } else if (inDateThree) {
 /*      */               try {
 /* 1168 */                 Thread.sleep(600L);
-/* 1169 */                 sendGet2("http://120.77.250.17/smarthomeMavenWebProject/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + alarmEnclosureSplit2[0].trim().toString());
+/* 1169 */                 sendGet2("http://120.77.250.17/smarthome.IMCPlatform/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + alarmEnclosureSplit2[0].trim().toString());
 /*      */               }
 /*      */               catch (InterruptedException e) {
 /* 1172 */                 e.printStackTrace();
 /*      */               }
 /*      */               try {
 /* 1175 */                 Thread.sleep(500L);
-/* 1176 */                 sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+/* 1176 */                 sendGet("http://120.77.250.17/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
 /*      */               }
 /*      */               catch (InterruptedException e) {
 /* 1179 */                 e.printStackTrace();
@@ -1587,14 +1577,14 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /* 1725 */           if (inDateOno) {
 /*      */             try {
 /* 1727 */               Thread.sleep(600L);
-/* 1728 */               sendGet2("http://120.77.250.17/smarthomeMavenWebProject/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
+/* 1728 */               sendGet2("http://120.77.250.17/smarthome.IMCPlatform/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
 /*      */             }
 /*      */             catch (InterruptedException e) {
 /* 1731 */               e.printStackTrace();
 /*      */             }
 /*      */             try {
 /* 1734 */               Thread.sleep(500L);
-/* 1735 */               sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+/* 1735 */               sendGet("http://120.77.250.17/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
 /*      */             }
 /*      */             catch (InterruptedException e) {
 /* 1738 */               e.printStackTrace();
@@ -1603,15 +1593,15 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /* 1741 */           else if (inDateTwo) {
 /*      */             try {
 /* 1743 */               Thread.sleep(600L);
-/* 1744 */               sendGet2("http://120.77.250.17/smarthomeMavenWebProject/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
+/* 1744 */               sendGet2("http://120.77.250.17/smarthome.IMCPlatform/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
 /*      */             }
 /*      */             catch (InterruptedException e) {
 /* 1747 */               e.printStackTrace();
 /*      */             }
 /*      */             try {
 /* 1750 */               Thread.sleep(500L);
-						 System.out.println("sendGet http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId="+ssss.getBoModel().getModelId());
-/* 1751 */               sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+						 System.out.println("sendGet http://120.77.250.17/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId="+ssss.getBoModel().getModelId());
+/* 1751 */               sendGet("http://120.77.250.17/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
 /*      */             }
 /*      */             catch (InterruptedException e) {
 /* 1754 */               e.printStackTrace();
@@ -1620,16 +1610,16 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /* 1757 */           else if (inDateThree) {
 /*      */             try {
 /* 1759 */               Thread.sleep(600L);
-                         System.out.println("sendGet2 http://120.77.250.17/smarthomeMavenWebProject/xingUser/push.action?deviceCode="+devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
-/* 1760 */               sendGet2("http://120.77.250.17/smarthomeMavenWebProject/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
+                         System.out.println("sendGet2 http://120.77.250.17/smarthome.IMCPlatform/xingUser/push.action?deviceCode="+devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
+/* 1760 */               sendGet2("http://120.77.250.17/smarthome.IMCPlatform/xingUser/push.action?deviceCode=" + devId + "&" + "deviceAddress=" + sensorAlarmSplit2[0]);
 /*      */             }
 /*      */             catch (InterruptedException e) {
 /* 1763 */               e.printStackTrace();
 /*      */             }
 /*      */             try {
 /* 1766 */               Thread.sleep(500L);
-                         System.out.println("sendGet http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId="+ssss.getBoModel().getModelId());
-/* 1767 */               sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+                         System.out.println("sendGet http://120.77.250.17/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId="+ssss.getBoModel().getModelId());
+/* 1767 */               sendGet("http://120.77.250.17/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
 /*      */             }
 /*      */             catch (InterruptedException e) {
 /* 1770 */               e.printStackTrace();
@@ -1643,8 +1633,8 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /*      */         }
 /* 1779 */         break;
 /*      */       default:
-///* 1781 */         System.err.println("sendGet http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId="+ssss.getBoModel().getModelId());
-/* 1782 */         sendGet("http://120.77.250.17/smarthomeMavenWebProject/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
+///* 1781 */         System.err.println("sendGet http://120.77.250.17/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId="+ssss.getBoModel().getModelId());
+/* 1782 */         sendGet("http://120.77.250.17/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + ssss.getBoModel().getModelId(), ssss.getBoUsers().getUserCode());
 				   break;
 /*      */       }
 /*      */ 
@@ -1733,15 +1723,13 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /* 1869 */           this.resendVerification = this.boResendVerificationService.find(devId, radioCommandSplit2[2].trim(), "0");//deviceAddress=radioCommandSplit2[2].trim();radioCommandSplit2[2].trim().toString()代替devId;   command="0"  radioCommandSplit2[0].trim()
                      logger.info("···PacketProcessHelper this.resendVerification:"+this.resendVerification);//null
 /* 1870 */           if (this.resendVerification != null) {
-					   logger.info("1527_315");
-//					   System.err.println("*resendVerification is not null.");
+//					   logger.info("1527_315");
 /* 1871 */             this.resendVerification.setAcceptState("OK");
 /* 1872 */             this.boResendVerificationService.update(this.resendVerification);//这之后无法跳入commad方法
 /*      */           }else {
 	/* 1838 */             System.err.println(devId);
 	/* 1839 */             System.err.println(radioCommandSplit2[2].trim());
-//	/* 1840 */             System.err.println("meij1527");
-						   logger.info("meij1527_315");
+//						   logger.info("meij1527_315");
 	/*      */        }
 /*      */         }
 /*      */       }
@@ -1756,7 +1744,7 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /*      */       {
 /* 1885 */         this.resendVerification = this.boResendVerificationService.find(devId, radioCommandSplit2[2].trim(), "0");
 /* 1886 */         if (this.resendVerification != null) {
-					 logger.info("1527_433");
+//					 logger.info("1527_433");
 /* 1887 */           this.resendVerification.setAcceptState("OK");
 /* 1888 */           this.boResendVerificationService.update(this.resendVerification);
 /*      */         }
@@ -2245,7 +2233,7 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /* 2405 */     BoAlarm alarm = new BoAlarm();
 /*      */ 
 /* 2407 */     if ((in instanceof Alarm0140Packet)) {
-	logger.info("Alarm0140Packet");
+				 logger.debug("Alarm0140Packet");
 /* 2408 */       Alarm0140Packet packet = (Alarm0140Packet)in;
 /*      */ 
 /* 2410 */       alarm.setDeviceCode(packet.getDevId());
@@ -2258,7 +2246,7 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /* 2417 */       alarm.setPort(Integer.valueOf(packet.getPort()));
 /*      */     }
 /* 2419 */     else if ((in instanceof Alarm0150Packet)) {
-	logger.info("Alarm0150Packet");
+			     logger.debug("Alarm0150Packet");
 /* 2420 */       Alarm0150Packet packet = (Alarm0150Packet)in;
 /*      */ 
 /* 2422 */       alarm.setDeviceCode(packet.getDevId());
@@ -2273,7 +2261,7 @@ import com.smarthome.imcp.dao.model.system.SysOperate;
 /* 2431 */       alarm.setUrl("");
 /*      */     }
 /* 2433 */     else if ((in instanceof Alarm0240Packet)) {
-	logger.info("Alarm0240Packet");
+				 logger.debug("Alarm0240Packet");
 /* 2434 */       Alarm0240Packet packet = (Alarm0240Packet)in;
 /*      */ 
 /* 2436 */       alarm.setDeviceCode(packet.getDevId());

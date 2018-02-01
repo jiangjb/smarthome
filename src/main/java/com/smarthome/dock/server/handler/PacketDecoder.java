@@ -43,7 +43,7 @@ import com.smarthome.dock.server.util.Util;
 /*     */       try {
 /*  39 */         List ret = new ArrayList();
 /*  40 */         char command = buf.getChar(2);
-				  logger.error("decode方法  buf.getChar(2)：" + new String(String.valueOf(buf.getChar(2)).getBytes("UTF-8"),"iso-8859-1"));//读出buf中的第二个字符
+//				  logger.error("decode方法  buf.getChar(2)：" + new String(String.valueOf(buf.getChar(2)).getBytes("UTF-8"),"iso-8859-1"));//读出buf中的第二个字符
 /*     */ 
 /*  42 */         while ((length > 4) && (accept(command))) {//accept(command)--根据command的值 返回相应的Boolean值
 /*  43 */           InPacket packet = decodePacket(buf);

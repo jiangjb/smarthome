@@ -149,7 +149,7 @@ import java.io.UnsupportedEncodingException;
 /*     */   public void firePacketArrivedEvent(PacketEvent e)
 /*     */   {
 			  InPacket in = (InPacket)e.getSource();//1-31test
-			  logger.info("firePacketArrivedEvent method(异常路径)  command="+Util.getCommandString(in.getCommand()));//1-31test  这句和上句不能合成Util.getCommandString((InPacket)e.getSource().getCommand())  原因不明？？？
+			  logger.info("firePacketArrivedEvent method(包先进入这个方法)  command="+Util.getCommandString(in.getCommand()));//1-31test  这句和上句不能合成Util.getCommandString((InPacket)e.getSource().getCommand())  原因不明？？？
 /* 233 */     this.router.packetArrived(e);//调用ProcessRouter的packetArrived方法
 /*     */   }
 /*     */   ////正确的流程：解析包-》 packetArrived -》 procesKeepAliveSuccess

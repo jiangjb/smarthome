@@ -13285,7 +13285,7 @@
 						        device.getDeviceAddress() + 3;
 						      byte[] bs = str.getBytes();
 //						      System.err.println(new String(bs));
-						      logger.debug("<?> " + new String(bs));
+						      logger.info("<?> " + new String(bs));
 						      this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 						    }
 						
@@ -13304,7 +13304,7 @@
 						        this.ln + 1;
 						      byte[] bs = str.getBytes();
 //						      System.err.println(new String(bs));
-						      logger.debug("<?> " + new String(bs));
+						      logger.info("<?> " + new String(bs));
 						      this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 						    }
 						
@@ -13314,7 +13314,8 @@
 						      String str = "PT" + s_code + "_" + b + "M-SEND-" + user_num.get(userCode2[0].trim().toString()) + "," + c + "," + 
 						        device.getDeviceAddress() + 4;
 						      byte[] bs = str.getBytes();
-						      System.err.println(new String(bs));
+//						      System.err.println(new String(bs));
+						      logger.info("<?> " + new String(bs));
 						      this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 						    }
 						  }
@@ -16737,5 +16738,6 @@
 
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\
  * Qualified Name:     com.smarthome.imcp.action.xing.XingUserAction
+ * old name:           smarthomeMavenWebProject
  * JD-Core Version:    0.6.2
  */
