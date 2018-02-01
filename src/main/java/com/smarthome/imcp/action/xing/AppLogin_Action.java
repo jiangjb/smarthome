@@ -438,7 +438,7 @@
 					
 /* 482 */           String fluoriteAccessToken = users.getFluoriteAccessToken();
 /*     */           String EZTOKEN;
-				    System.out.println("我在这里。。。。。。。。。。。。。。。。。。。。。。。。。。。。。");
+				    System.out.println("手机登录成功");
 /* 484 */           if (fluoriteAccessToken.equals(""))
 /* 485 */             EZTOKEN = "NO_BUNDING";
 /*     */           else {
@@ -480,7 +480,7 @@
 			@Action(value="appUserRegister", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*     */   public String appUserRegister()
 /*     */     throws Exception
-/*     */   {
+/*     */   {//2-1把 邮箱 设置为可选字段
 /* 530 */     Md5 md5 = new Md5();
 /* 531 */     this.requestJson = new RequestJson();
 /* 532 */     HttpServletRequest request = ServletActionContext.getRequest();
@@ -491,7 +491,7 @@
 /* 537 */         this.requestJson = new RequestJson(false, "请输入手机号码", map);
 /* 538 */       } else if (StringUtils.isEmpty(this.userPwd)) {
 /* 539 */         this.requestJson = new RequestJson(false, "请输入密码", map);
-/* 540 */       } else if (!StringUtils.isEmpty(this.userEmail)) {
+/* 540 */       } else if (!StringUtils.isEmpty(this.userEmail)) {//邮箱 非空 （若注册页面邮箱设为可选，这是安卓的工作）
 /* 541 */         if (!ValidatorUtil.isEmail(this.userEmail)) {
 /* 542 */           this.requestJson = new RequestJson(false, "邮箱格式不正确", map);
 /*     */         } else {
@@ -499,13 +499,12 @@
 /* 545 */           if (users == null)
 /*     */           {
 /*     */             String emailS;
-///*     */             String emailS;
 /* 547 */             if (StringUtils.isEmpty(this.userEmail))
 /* 548 */               emailS = "空";
 /*     */             else
 /* 550 */               emailS = this.userEmail;
 /* 551 */             BoUsers email = this.boUserService.findByUserEmail(emailS);
-/* 552 */             if (email == null) {
+/* 552 */             if (email == null) {//用户不存在   则创建一个新用户
 /* 553 */               final String remoteAddr = request.getRemoteAddr();
 /* 554 */               long time = new Date().getTime();
 /* 555 */               int count = 0;
@@ -526,6 +525,7 @@
 							System.out.println("楼层名称："+saveF.getFloorName());
 							String userCode=saveF.getUserCode();
 							String floorName=saveF.getFloorName();
+//							String floorName="我的家";
 							String floorCode=saveF.getFloorCode();
 							BoRoom room1=RoomUtil.save(userCode,floorName,floorCode,"客厅");
 							BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
@@ -575,7 +575,7 @@
 /*     */               } else {
 /* 603 */                 BoUsers user = UserUtil.save(this.userPhone, md5.getMD5ofStr(this.userPwd), this.userEmail);
 /* 604 */                 BoUsers save = (BoUsers)this.boUserService.save(user);
-/* 605 */                 if (save != null) {
+/* 605 */                 if (save != null) {	
 /* 606 */                   StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
 /* 607 */                   this.requestJson.setData(map);
 /* 608 */                   this.requestJson.setMessage("注册成功");
@@ -597,12 +597,11 @@
 /* 624 */             this.requestJson.setSuccess(false);
 /*     */           }
 /*     */         }
-/*     */       } else {
+/*     */       } else {//邮箱为空等情况 
 /* 628 */         BoUsers users = this.boUserService.findByUserPhone(this.userPhone);
 /* 629 */         if (users == null)
 /*     */         {
 /*     */           String emailS;
-///*     */           String emailS;
 /* 631 */           if (StringUtils.isEmpty(this.userEmail))
 /* 632 */             emailS = "空";
 /*     */           else
@@ -617,11 +616,34 @@
 /* 642 */               BoUsers user = UserUtil.save(this.userPhone, md5.getMD5ofStr(this.userPwd), this.userEmail);
 /* 643 */               BoUsers save = (BoUsers)this.boUserService.save(user);
 /* 644 */               if (save != null) {
-/* 645 */                 count++;
-/* 646 */                 StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
-/* 647 */                 this.requestJson.setData(map);
-/* 648 */                 this.requestJson.setMessage("注册成功");
-/* 649 */                 this.requestJson.setSuccess(true);
+						//new 2-1
+						count++;
+					    StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
+					    this.requestJson.setData(map);
+					    this.requestJson.setMessage("注册成功");
+					    this.requestJson.setSuccess(true);
+					    //注册成功时 默认添加一个楼层和四个房间
+						BoFloor floor=FloorUtil.save(save.getUserCode());
+						BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
+						//String userCode,String floorName,String floorCode,String roomName	
+						System.out.println("楼层名称："+saveF.getFloorName());
+						String userCode=saveF.getUserCode();
+						String floorName=saveF.getFloorName();
+						String floorCode=saveF.getFloorCode();
+						BoRoom room1=RoomUtil.save(userCode,floorName,floorCode,"客厅");
+						BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
+						BoRoom room2=RoomUtil.save(userCode,floorName,floorCode,"卧室");
+						BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
+						BoRoom room3=RoomUtil.save(userCode,floorName,floorCode,"厨房");
+						BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
+						BoRoom room4=RoomUtil.save(userCode,floorName,floorCode,"卫生间");
+						BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
+						//END
+///* 645 */                 count++;
+///* 646 */                 StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
+///* 647 */                 this.requestJson.setData(map);
+///* 648 */                 this.requestJson.setMessage("注册成功");
+///* 649 */                 this.requestJson.setSuccess(true);
 /*     */               }
 /*     */ 
 /*     */             }

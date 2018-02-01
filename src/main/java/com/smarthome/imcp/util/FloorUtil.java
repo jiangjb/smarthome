@@ -9,7 +9,7 @@
 			 floor.setUserCode(userCode);
 			 floor.setHouseCode(UuidUtil.get32UUID());
 			 floor.setFloorCode(UuidUtil.get32UUID());
-			 floor.setFloorName("楼层1");    
+			 floor.setFloorName("我的家");//默认楼层1
 			 return floor;
 /*    */   }
 /*    */ }
