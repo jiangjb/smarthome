@@ -957,30 +957,7 @@
 /*   884 */               String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(usereCode) + "," + c + 
 /*   885 */                 "," + obj.getDeviceAddress() + 2;
 /*   886 */               byte[] bs = str.getBytes();
-                          //1-29
-//						  System.err.println("····960····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
-//						  ///////设置command的值//////
-//						  Integer commands = null;
-//						  commands = Integer.valueOf(0);
-//						  final String string00 = commands.toString();
-//						  /////////////////////////
-//						
-//						  this.resendVerification = this.boResendVerificationService.find(obj.getBoDevice().getDeviceCode(), 
-//								 this.ln+2, string00);//device.getDeviceAddress()
-//						  System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(obj.getBoDevice().getDeviceCode(), 
-//								 this.ln+2, string00));
-//						  System.err.println("····971····this.resendVerification:"+this.resendVerification);
-//						  if (this.resendVerification == null)
-//						  {
-//							  BoResendVerification resend = new BoResendVerification();
-//							  resend.setBoDevice(obj.getBoDevice());
-//							  resend.setDeviceAddress(this.ln+2);
-//							  resend.setDeviceType(obj.getDeviceType());
-//							  resend.setCommand(string00);
-//							  resend.setAcceptState("wait");
-//							  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
-//						  }
-						  //END   
+						  System.err.println("<?> "+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK 
 /*   889 */               this.packetProcessHelper.processSendDData(obj.getBoDevice().getDeviceCode(), bs);
 /*       */             }
 /*       */ 
@@ -990,29 +967,7 @@
 /*   951 */               String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(usereCode) + "," + c + 
 /*   952 */                 "," + obj.getDeviceAddress() + 1;
 /*   953 */               byte[] bs = str.getBytes();
-						  //NEW 1-26
-//						  System.err.println("····993····new String(bs):"+new String(bs));//PT1527_315M SEND 0,33,788925101,OK
-//						  ////////设置command的值////////
-//						  Integer commands = null;
-//						  commands = Integer.valueOf(1);
-//						  final String string00 = commands.toString();
-//						  ////////////END//////////////
-//						  this.resendVerification = this.boResendVerificationService.find(obj.getBoDevice().getDeviceCode(), 
-//								 this.ln+1, string00);//device.getDeviceAddress()
-//						  System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(obj.getBoDevice().getDeviceCode(), 
-//								 this.ln+1, string00));
-//						  System.err.println("····1003····this.resendVerification:"+this.resendVerification);
-//						  if (this.resendVerification == null)
-//						  {
-//							  BoResendVerification resend = new BoResendVerification();
-//							  resend.setBoDevice(obj.getBoDevice());
-//							  resend.setDeviceAddress(this.ln+1);
-//							  resend.setDeviceType(obj.getDeviceType());
-//							  resend.setCommand(string00);
-//							  resend.setAcceptState("wait");
-//							  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
-//						  }
-						  //END
+						  System.err.println("<?> "+new String(bs));//PT1527_315M SEND 0,33,788925101,OK
 /*   956 */               this.packetProcessHelper.processSendDData(obj.getBoDevice().getDeviceCode(), bs);
 
 /*       */             }
@@ -12256,7 +12211,6 @@
 /* 12522 */           System.err.println("deviceAddress> " + this.deviceAddress);
 /* 12523 */           System.err.println("userCode >" + userCode);//
 /* 12525 */           System.err.println("ico >" + this.ico);
-                      //new 1-29
 					  logger.error("deviceCode> " + this.deviceCode);
 					  logger.error("deviceAddress> " + this.deviceAddress);
 					  logger.info("userCode >" + userCode);
@@ -13655,30 +13609,6 @@
 /* 13926 */                   this.ln+2;//门锁地址+'2'
 /* 13927 */                 byte[] bs = str.getBytes();
 /* 13928 */                 System.err.println("<?> " + new String(bs));
-                            //1-29
-							System.err.println("····13695····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
-							///////设置command的值//////
-							Integer commands = null;
-							commands = Integer.valueOf(user_num.get(userCode.trim().toString()));
-							final String string00 = commands.toString();
-							/////////////////////////
-							
-							this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-									 this.ln+2, string00);//device.getDeviceAddress()
-							System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-									 this.ln+2, string00));
-							System.err.println("····13706····this.resendVerification:"+this.resendVerification);
-							if (this.resendVerification == null)
-							{
-								  BoResendVerification resend = new BoResendVerification();
-								  resend.setBoDevice(device.getBoDevice());
-								  resend.setDeviceAddress(this.ln+2);
-								  resend.setDeviceType(device.getDeviceType());
-								  resend.setCommand(string00);
-								  resend.setAcceptState("wait");
-								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
-							}
-						    //END
 /* 13929 */                 this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 /* 13930 */                 this.packetProcessHelper.setUserCode(userCode);
 /*       */               }
@@ -13688,30 +13618,7 @@
 /* 13938 */                 String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(userCode.trim().toString()) + "," + c + "," + 
 /* 13939 */                   device.getDeviceAddress() + 3;//门锁？？
 /* 13940 */                 byte[] bs = str.getBytes();
-							//1-29
-							System.err.println("····13728····new String(bs):"+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
-							///////设置command的值//////
-							Integer commands = null;
-							commands = Integer.valueOf(user_num.get(userCode.trim().toString()));
-							final String string00 = commands.toString();
-							/////////////////////////
-							
-							this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-									 this.ln+3, string00);//device.getDeviceAddress()
-							System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-									 this.ln+3, string00));
-							System.err.println("····13745····this.resendVerification:"+this.resendVerification);
-							if (this.resendVerification == null)
-							{
-								  BoResendVerification resend = new BoResendVerification();
-								  resend.setBoDevice(device.getBoDevice());
-								  resend.setDeviceAddress(this.ln+3);
-								  resend.setDeviceType(device.getDeviceType());
-								  resend.setCommand(string00);
-								  resend.setAcceptState("wait");
-								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
-							}
-							//END
+							System.err.println("<?> " +new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK
 /* 13942 */                 this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 /* 13943 */                 this.packetProcessHelper.setUserCode(userCode);
 /*       */               }
@@ -13729,35 +13636,13 @@
 /* 13957 */                 String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(userCode) + "," + c + "," + 
 /* 13958 */                   this.ln+1;//门锁 新地址  this.ln+'1'
 /* 13959 */                 byte[] bs = str.getBytes();
-							//NEW 1-26
-							System.err.println("····13769····new String(bs):"+new String(bs));//PT1527_315M SEND 0,33,788925101,OK
-							///////设置command的值////////
-							Integer commands = null;
-							commands = Integer.valueOf(user_num.get(userCode));//userCode没有逗号的情况 >ff5f3341cf4c4c2abfe2a51ef965a742     上面的有逗号String[] userCode2 = userCode.split(",");
-							final String string00 = commands.toString();
-							///////////////////////////
-							
-							this.resendVerification = this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-									 this.ln+1, string00);//device.getDeviceAddress()
-							System.err.println("this.resendVerification(string00):"+this.boResendVerificationService.find(device.getBoDevice().getDeviceCode(), 
-									 this.ln+1, string00));
-							System.err.println("····13781····this.resendVerification:"+this.resendVerification);
-							if (this.resendVerification == null)
-							{
-								  BoResendVerification resend = new BoResendVerification();
-								  resend.setBoDevice(device.getBoDevice());
-								  resend.setDeviceAddress(this.ln+1);
-								  resend.setDeviceType(device.getDeviceType());
-								  resend.setCommand(string00);
-								  resend.setAcceptState("wait");
-								  this.save = ((BoResendVerification)this.boResendVerificationService.save(resend));
-							}
-							//END
-
+							System.err.println("<?> " +new String(bs));//PT1527_315M SEND 0,33,788925101,OK
 /* 13961 */                 this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 /* 13962 */                 this.packetProcessHelper.setUserCode(userCode);
 /*       */               }
 /*       */             }
+
+
 /*       */ 
 /*       */           }
 /*       */           else
