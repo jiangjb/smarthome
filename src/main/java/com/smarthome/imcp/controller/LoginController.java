@@ -89,13 +89,10 @@
    		{   
 		    int UserID=0;
 			 System.out.println("loginName="+loginName+",loginPwd="+loginPwd);
-//			 Md5 md5 = new Md5();
-//			 System.out.println("loginPwd=== 63A9F0EA7BB98050796B649E85481845="+md5.getMD5ofStr(loginPwd));
-//			 SysUser sysUser = (SysUser)this.sysUserService.checkUser(loginName, md5.getMD5ofStr(loginPwd));//加密方式-32位大  
 			//先给输入的明文密码加密，然后再与数据库表取出来的数据比较
 		    String hashAlgorithmName = "MD5";
 			Object credentials = loginPwd;
-			Object salt = ByteSource.Util.bytes(loginName);;
+			Object salt = ByteSource.Util.bytes(loginName);
 			int hashIterations = 1024;
 			Object result = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
 			String userPwd=result.toString();
@@ -154,7 +151,7 @@
 			SysUser sysUser = (SysUser)this.sysUserService.checkUser(loginName, userPwd);//shiro加密方式 
             try {
             	 UserID=sysUser.getUserId();
-//            	 System.out.println("UserID:"+UserID);
+            	 System.out.println("UserID:"+UserID);
 			 } catch (Exception e) {
 			    System.out.println("用户不存在！");
 			 }
@@ -381,12 +378,21 @@
 		   
 		   @RequestMapping({"modifyUserInfo.do"})
 		   @ResponseBody
-		   public String modifyUserInfo(@RequestParam("USER_ID") String USER_ID,@RequestParam("loginName") String loginName,@RequestParam("userName") String userName,@RequestParam("userPhone") String userPhone,@RequestParam("email") String email,HttpServletRequest request) {//这个得怎么返回？？？map  
+		   public String modifyUserInfo(@RequestParam("USER_ID") String USER_ID,@RequestParam("loginName") String loginName,@RequestParam("loginPwd") String loginPwd ,@RequestParam("userName") String userName,@RequestParam("userPhone") String userPhone,@RequestParam("email") String email,HttpServletRequest request) {//这个得怎么返回？？？map  
 			   System.out.println("编辑个人信息！");
-			   int userId=Integer.parseInt(USER_ID);;
+			   int userId=Integer.parseInt(USER_ID);
 			   SysUser sysuser=this.sysUserService.findByKey(userId);//找到用户
+			 //对传过来的旧密码进行shiro加密
+			   String hashAlgorithmName = "MD5";
+			   Object credentials = loginPwd;
+			   Object salt = ByteSource.Util.bytes(loginName);
+			   int hashIterations = 1024;
+			   Object userPwd1 = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
+			   String loginPwd1=userPwd1.toString();
+			   
 //			   System.out.println("sysuser="+sysuser);
 			   sysuser.setLoginName(loginName);
+			   sysuser.setLoginPwd(loginPwd1);
 			   sysuser.setUserName(userName);
 			   sysuser.setUserPhone(userPhone);
 			   sysuser.setEmail(email);
@@ -407,23 +413,38 @@
 			   String result="fail";
 			   //找到用户
 			   SysUser sysuser=this.sysUserService.findByKey(USER_ID);
-			   //取出密码
-			   String pwd=sysuser.getLoginPwd();
-			   System.out.println("取出来的密码："+pwd);
-			   Md5 md5 = new Md5();
-			   //对传过来的旧密码进行MD5加密
-			   String loginPwd=md5.getMD5ofStr(oldpassword);
-			   System.out.println(loginPwd.equals(pwd));
-			   //加密后的旧密码与取出来的对比，若正确则修改新密码
-			   if(loginPwd.equals(pwd)) {
-				   System.out.println("修改密码...");
-//				   sysuser.setLoginPwd(md5.getMD5ofStr(newpassword));
-				   this.sysUserService.update(sysuser);
-				   result="success";
+			   if(sysuser != null) {
+				   //取出密码
+				   String pwd=sysuser.getLoginPwd();
+				   System.out.println("从数据库中取出来的密码："+pwd);
+				   String userName=sysuser.getLoginName();//用户名
+				   System.out.println("userName:"+userName);
+				   //对传过来的旧密码进行shiro加密
+				   String hashAlgorithmName = "MD5";
+				   Object credentials = oldpassword;
+				   Object salt = ByteSource.Util.bytes(userName);
+				   int hashIterations = 1024;
+				   Object userPwd1 = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
+				   String loginPwd=userPwd1.toString();
+				   System.out.println("shiro加密后密码："+loginPwd);
+				   System.out.println("旧密码和取出来的密码对比："+loginPwd.equals(pwd));
+				   //加密后的旧密码与取出来的对比，若正确则修改新密码
+				   if(loginPwd.equals(pwd)) {
+					   System.out.println("修改密码...");
+					   Object credentials01 = newpassword;
+					   Object userPwd2 = new SimpleHash(hashAlgorithmName, credentials01, salt, hashIterations);
+					   String loginPwd2=userPwd2.toString();
+					   System.out.println("新密码加密后："+loginPwd2);
+					   sysuser.setLoginPwd(loginPwd2);
+					   this.sysUserService.update(sysuser);
+					   result="success";
+				   }else {
+					   System.out.println("旧密码输入有误");
+				   }
 			   }else {
-				   System.out.println("旧密码输入有误");
+				   System.out.println("异常状况");
 			   }
-			   return result;
+			   return result;		   
 		   }
 		   
 		   //用户管理模块-全部用户

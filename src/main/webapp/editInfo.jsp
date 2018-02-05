@@ -51,6 +51,16 @@
 					<div class="controls">
 						<div class="main_input_box">
 							<span>
+								<input type="password" name="loginpwd" id="loginpwd"  value="" placeholder="请输入密码"/>
+							</span>
+						</div>
+					</div>
+				</div>
+				
+				<div class="control-group">
+					<div class="controls">
+						<div class="main_input_box">
+							<span>
 								<input type="text" name="userName" id="userName"  value="" />
 							</span>
 							<span>
@@ -264,6 +274,9 @@
 			/* debugger */
 				/* alert("被点击。。。") */
 				var loginName=$("#loginName").val();
+				var loginpwd=$("#loginpwd").val();
+				/* alert("loginpwd:"+loginpwd); */
+				/* if(loginpwd==""){alert("密码为空");} */
 				var userName=$("#userName").val();
 				var userPhone=$("#userPhone").val();
 				var email = $("#email").val();
@@ -272,10 +285,11 @@
 				var userName0=$("#userName0").val();
 				var userPhone0=$("#userPhone0").val();
 				var email0 = $("#email0").val();
-				if(loginName0 !=loginName || userName0 != userName || userPhone0 != userPhone || email0 !=email){//任意一个改动 ，才进入ajax
+				if((loginName0 !=loginName || userName0 != userName || userPhone0 != userPhone || email0 !=email) && loginpwd!=""){//任意一个改动 ，才进入ajax
+					/* alert("满足修改的条件"); */
 					$.ajax({
 						url:"modifyUserInfo.do",
-				    	data: {"USER_ID":"<%=USER_ID %>","loginName":loginName,"userName":userName,"userPhone":userPhone,"email":email },
+				    	data: {"USER_ID":"<%=USER_ID %>","loginName":loginName,"loginPwd":loginpwd,"userName":userName,"userPhone":userPhone,"email":email },
 						type: "POST",
 						dataType:"json",
 						async: false,	
@@ -288,7 +302,8 @@
 								<%-- setTimeout(function(){ 
 									window.location.href="<%=WEBPATH %>/static/jsp/head.jsp";
 										},1000);  --%>
-								window.location.href="<%=WEBPATH %>/static/jsp/head.jsp";//js,css会被拦截
+								<%-- window.location.href="<%=WEBPATH %>/static/jsp/head.jsp";//js,css会被拦截 --%>
+								window.location.href="<%=WEBPATH %>/login.jsp";
 								
 							}else{
 								alert("修改失败！");

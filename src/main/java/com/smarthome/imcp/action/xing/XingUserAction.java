@@ -2804,150 +2804,151 @@
 /*       */ 
 /*  2807 */     return "success";
 /*       */   }
-/*       */ 
-/*       */   @Action(value="appVersionManager", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
-/*       */   public String appVersionManager()
-/*       */   {
-/*  2818 */     Map map = new HashMap();
-/*  2819 */     HttpServletRequest request = ServletActionContext.getRequest();
-/*  2820 */     String header = request.getHeader("user-agent");
-/*  2821 */     System.err.println(header);
-/*  2822 */     String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/smarthome.IMCPlatform" + "/";
-/*       */     try {
-/*  2824 */       if (this.phoneType.equals("0")) {
-/*  2825 */         if (Integer.valueOf(this.provider).intValue() == 1) {
-/*  2826 */           String root = System.getProperty("webapp.root");
-/*  2827 */           String tempDir = root + "/" + "apk";
-/*  2828 */           ApkInfo apkInfo = GetApkInfo.getApkInfoByFilePath(tempDir + "\\smartHome.apk");
-/*  2829 */           String s1 = this.appVersion.substring(2, 5);
-/*  2830 */           String s2 = apkInfo.getVersionName().substring(2, 5);
-/*  2831 */           System.err.println(s2);
-/*  2832 */           if (Double.valueOf(s1).doubleValue() < Double.valueOf(s2).doubleValue()) {
-/*  2833 */             BoAndroidVersion boAndroidVersion = this.BoAndroidVersionService.findAndroidVersionById(Integer.valueOf(1));
-/*  2834 */             if (boAndroidVersion != null) {
-/*  2835 */               System.err.println(basePath + boAndroidVersion.getApkUrl().toString());
-/*  2836 */               map.put("url", basePath + boAndroidVersion.getApkUrl().toString());
-/*  2837 */               this.requestJson.setData(map);
-/*  2838 */               this.requestJson.setMessage("当前版本较低,请即使更新");
-/*  2839 */               this.requestJson.setSuccess(false);
-/*       */             }
-/*       */           } else {
-/*  2842 */             this.requestJson.setData(map);
-/*  2843 */             this.requestJson.setMessage("当前已是最新版本");
-/*  2844 */             this.requestJson.setSuccess(true);
-/*       */           }
-/*  2846 */         } else if (Integer.valueOf(this.provider).intValue() == 2) {
-/*  2847 */           String root = System.getProperty("webapp.root");
-/*  2848 */           String tempDir = root + "/" + "apk";
-/*  2849 */           ApkInfo apkInfo = GetApkInfo.getApkInfoByFilePath(tempDir + "\\aiborui.apk");
-/*  2850 */           String s1 = this.appVersion.substring(2, 5);
-/*  2851 */           String s2 = apkInfo.getVersionName().substring(2, 5);
-/*  2852 */           System.err.println(apkInfo.getVersionName());
-/*  2853 */           if (Double.valueOf(s1).doubleValue() < Double.valueOf(s2).doubleValue()) {
-/*  2854 */             BoAndroidVersion boAndroidVersion = this.BoAndroidVersionService.findAndroidVersionById(Integer.valueOf(2));
-/*  2855 */             if (boAndroidVersion != null) {
-/*  2856 */               map.put("url", basePath + boAndroidVersion.getApkUrl().toString());
-/*  2857 */               this.requestJson.setData(map);
-/*  2858 */               this.requestJson.setMessage("当前版本较低,请即使更新");
-/*  2859 */               this.requestJson.setSuccess(false);
-/*       */             }
-/*       */           } else {
-/*  2862 */             this.requestJson.setData(map);
-/*  2863 */             this.requestJson.setMessage("当前已是最新版本");
-/*  2864 */             this.requestJson.setSuccess(true);
-/*       */           }
-/*  2866 */         } else if (Integer.valueOf(this.provider).intValue() != 3)
-/*       */         {
-/*  2868 */           if (Integer.valueOf(this.provider).intValue() == 4) {
-/*  2869 */             String root = System.getProperty("webapp.root");
-/*  2870 */             String tempDir = root + "/" + "apk";
-/*  2871 */             ApkInfo apkInfo = GetApkInfo.getApkInfoByFilePath(tempDir + "\\sichuang.apk");
-/*  2872 */             String s1 = this.appVersion.substring(2, 5);
-/*  2873 */             String s2 = apkInfo.getVersionName().substring(2, 5);
-/*  2874 */             System.err.println(apkInfo.getVersionName());
-/*  2875 */             if (Double.valueOf(s1).doubleValue() < Double.valueOf(s2).doubleValue()) {
-/*  2876 */               BoAndroidVersion boAndroidVersion = this.BoAndroidVersionService.findAndroidVersionById(Integer.valueOf(4));
-/*  2877 */               if (boAndroidVersion != null) {
-/*  2878 */                 map.put("url", basePath + boAndroidVersion.getApkUrl().toString());
-/*  2879 */                 this.requestJson.setData(map);
-/*  2880 */                 this.requestJson.setMessage("当前版本较低,请即使更新");
-/*  2881 */                 this.requestJson.setSuccess(false);
-/*       */               }
-/*       */             } else {
-/*  2884 */               this.requestJson.setData(map);
-/*  2885 */               this.requestJson.setMessage("当前已是最新版本");
-/*  2886 */               this.requestJson.setSuccess(true);
-/*       */             }
-/*  2888 */           } else if (Integer.valueOf(this.provider).intValue() == 5) {
-/*  2889 */             String root = System.getProperty("webapp.root");
-/*  2890 */             String tempDir = root + "/" + "apk";
-/*  2891 */             ApkInfo apkInfo = GetApkInfo.getApkInfoByFilePath(tempDir + "\\fengting.apk");
-/*  2892 */             String s1 = this.appVersion.substring(2, 5);
-/*  2893 */             String s2 = apkInfo.getVersionName().substring(2, 5);
-/*  2894 */             System.err.println(apkInfo.getVersionName());
-/*  2895 */             if (Double.valueOf(s1).doubleValue() < Double.valueOf(s2).doubleValue()) {
-/*  2896 */               BoAndroidVersion boAndroidVersion = this.BoAndroidVersionService.findAndroidVersionById(Integer.valueOf(5));
-/*  2897 */               if (boAndroidVersion != null) {
-/*  2898 */                 map.put("url", basePath + boAndroidVersion.getApkUrl().toString());
-/*  2899 */                 this.requestJson.setData(map);
-/*  2900 */                 this.requestJson.setMessage("当前版本较低,请即使更新");
-/*  2901 */                 this.requestJson.setSuccess(false);
-/*       */               }
-/*       */             } else {
-/*  2904 */               this.requestJson.setData(map);
-/*  2905 */               this.requestJson.setMessage("当前已是最新版本");
-/*  2906 */               this.requestJson.setSuccess(true);
-/*       */             }
-/*  2908 */           } else if (Integer.valueOf(this.provider).intValue() == 6) {
-/*  2909 */             String root = System.getProperty("webapp.root");
-/*  2910 */             String tempDir = root + "/" + "apk";
-/*  2911 */             ApkInfo apkInfo = GetApkInfo.getApkInfoByFilePath(tempDir + "\\maibao.apk");
-/*  2912 */             String s1 = this.appVersion.substring(2, 5);
-/*  2913 */             String s2 = apkInfo.getVersionName().substring(2, 5);
-/*  2914 */             System.err.println(apkInfo.getVersionName());
-/*  2915 */             if (Double.valueOf(s1).doubleValue() < Double.valueOf(s2).doubleValue()) {
-/*  2916 */               BoAndroidVersion boAndroidVersion = this.BoAndroidVersionService.findAndroidVersionById(Integer.valueOf(5));
-/*  2917 */               if (boAndroidVersion != null) {
-/*  2918 */                 map.put("url", basePath + boAndroidVersion.getApkUrl().toString());
-/*  2919 */                 this.requestJson.setData(map);
-/*  2920 */                 this.requestJson.setMessage("当前版本较低,请即使更新");
-/*  2921 */                 this.requestJson.setSuccess(false);
-/*       */               }
-/*       */             } else {
-/*  2924 */               this.requestJson.setData(map);
-/*  2925 */               this.requestJson.setMessage("当前已是最新版本");
-/*  2926 */               this.requestJson.setSuccess(true);
-/*       */             }
-/*  2928 */           } else if (Integer.valueOf(this.provider).intValue() == 7) {
-/*  2929 */             this.requestJson.setData(map);
-/*  2930 */             this.requestJson.setMessage("当前已是最新版本");
-/*  2931 */             this.requestJson.setSuccess(true);
-/*       */           }
-/*       */         }
-/*       */       } else { BoIosVersion boIosVersion = this.boIosVersionService.findAndroidVersionById(Integer.valueOf(this.provider));
-/*  2935 */         if (boIosVersion != null) {
-/*  2936 */           if (Double.valueOf(this.appVersion).doubleValue() < Double.valueOf(boIosVersion.getVersion()).doubleValue()) {
-/*  2937 */             map.put("url", boIosVersion.getApkUrl().toString());
-/*  2938 */             this.requestJson.setData(map);
-/*  2939 */             this.requestJson.setMessage("当前版本较低,请即使更新");
-/*  2940 */             this.requestJson.setSuccess(false);
-/*       */           } else {
-/*  2942 */             this.requestJson.setData(map);
-/*  2943 */             this.requestJson.setMessage("当前已是最新版本");
-/*  2944 */             this.requestJson.setSuccess(true);
-/*       */           }
-/*       */         }
-/*       */       }
-/*       */     }
-/*       */     catch (Exception e)
-/*       */     {
-/*  2951 */       logger.info("error_" + e.getMessage());
-/*  2952 */       this.requestJson.setData(map);
-/*  2953 */       this.requestJson.setMessage("服务器发生异常");
-/*  2954 */       this.requestJson.setSuccess(false);
-/*       */     }
-/*  2956 */     return "success";
-/*       */   }
+/*       */     //2018-2-2注释  该方法无用
+///*       */   @Action(value="appVersionManager", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+///*       */   public String appVersionManager()
+///*       */   {//自动登录会进入该方法 --有问题    ==》自动登录不该进入该方法  
+///*  2818 */     Map map = new HashMap();
+///*  2819 */     HttpServletRequest request = ServletActionContext.getRequest();
+///*  2820 */     String header = request.getHeader("user-agent");
+///*  2821 */     System.err.println(header);
+///*  2822 */     String basePath = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort() + "/smarthome.IMCPlatform" + "/";
+//                logger.info("basePath:"+basePath);
+///*       */     try {
+///*  2824 */       if (this.phoneType.equals("0")) {//安卓手机
+///*  2825 */         if (Integer.valueOf(this.provider).intValue() == 1) {
+///*  2826 */           String root = System.getProperty("webapp.root");
+///*  2827 */           String tempDir = root + "/" + "apk";
+///*  2828 */           ApkInfo apkInfo = GetApkInfo.getApkInfoByFilePath(tempDir + "\\smartHome.apk");
+///*  2829 */           String s1 = this.appVersion.substring(2, 5);
+///*  2830 */           String s2 = apkInfo.getVersionName().substring(2, 5);
+///*  2831 */           System.err.println(s2);
+///*  2832 */           if (Double.valueOf(s1).doubleValue() < Double.valueOf(s2).doubleValue()) {
+///*  2833 */             BoAndroidVersion boAndroidVersion = this.BoAndroidVersionService.findAndroidVersionById(Integer.valueOf(1));
+///*  2834 */             if (boAndroidVersion != null) {
+///*  2835 */               System.err.println(basePath + boAndroidVersion.getApkUrl().toString());
+///*  2836 */               map.put("url", basePath + boAndroidVersion.getApkUrl().toString());
+///*  2837 */               this.requestJson.setData(map);
+///*  2838 */               this.requestJson.setMessage("当前版本较低,请即使更新");
+///*  2839 */               this.requestJson.setSuccess(false);
+///*       */             }
+///*       */           } else {
+///*  2842 */             this.requestJson.setData(map);
+///*  2843 */             this.requestJson.setMessage("当前已是最新版本");
+///*  2844 */             this.requestJson.setSuccess(true);
+///*       */           }
+///*  2846 */         } else if (Integer.valueOf(this.provider).intValue() == 2) {
+///*  2847 */           String root = System.getProperty("webapp.root");
+///*  2848 */           String tempDir = root + "/" + "apk";
+///*  2849 */           ApkInfo apkInfo = GetApkInfo.getApkInfoByFilePath(tempDir + "\\aiborui.apk");
+///*  2850 */           String s1 = this.appVersion.substring(2, 5);
+///*  2851 */           String s2 = apkInfo.getVersionName().substring(2, 5);
+///*  2852 */           System.err.println(apkInfo.getVersionName());
+///*  2853 */           if (Double.valueOf(s1).doubleValue() < Double.valueOf(s2).doubleValue()) {
+///*  2854 */             BoAndroidVersion boAndroidVersion = this.BoAndroidVersionService.findAndroidVersionById(Integer.valueOf(2));
+///*  2855 */             if (boAndroidVersion != null) {
+///*  2856 */               map.put("url", basePath + boAndroidVersion.getApkUrl().toString());
+///*  2857 */               this.requestJson.setData(map);
+///*  2858 */               this.requestJson.setMessage("当前版本较低,请即使更新");
+///*  2859 */               this.requestJson.setSuccess(false);
+///*       */             }
+///*       */           } else {
+///*  2862 */             this.requestJson.setData(map);
+///*  2863 */             this.requestJson.setMessage("当前已是最新版本");
+///*  2864 */             this.requestJson.setSuccess(true);
+///*       */           }
+///*  2866 */         } else if (Integer.valueOf(this.provider).intValue() != 3)
+///*       */         {
+///*  2868 */           if (Integer.valueOf(this.provider).intValue() == 4) {
+///*  2869 */             String root = System.getProperty("webapp.root");
+///*  2870 */             String tempDir = root + "/" + "apk";
+///*  2871 */             ApkInfo apkInfo = GetApkInfo.getApkInfoByFilePath(tempDir + "\\sichuang.apk");
+///*  2872 */             String s1 = this.appVersion.substring(2, 5);
+///*  2873 */             String s2 = apkInfo.getVersionName().substring(2, 5);
+///*  2874 */             System.err.println(apkInfo.getVersionName());
+///*  2875 */             if (Double.valueOf(s1).doubleValue() < Double.valueOf(s2).doubleValue()) {
+///*  2876 */               BoAndroidVersion boAndroidVersion = this.BoAndroidVersionService.findAndroidVersionById(Integer.valueOf(4));
+///*  2877 */               if (boAndroidVersion != null) {
+///*  2878 */                 map.put("url", basePath + boAndroidVersion.getApkUrl().toString());
+///*  2879 */                 this.requestJson.setData(map);
+///*  2880 */                 this.requestJson.setMessage("当前版本较低,请即使更新");
+///*  2881 */                 this.requestJson.setSuccess(false);
+///*       */               }
+///*       */             } else {
+///*  2884 */               this.requestJson.setData(map);
+///*  2885 */               this.requestJson.setMessage("当前已是最新版本");
+///*  2886 */               this.requestJson.setSuccess(true);
+///*       */             }
+///*  2888 */           } else if (Integer.valueOf(this.provider).intValue() == 5) {
+///*  2889 */             String root = System.getProperty("webapp.root");
+///*  2890 */             String tempDir = root + "/" + "apk";
+///*  2891 */             ApkInfo apkInfo = GetApkInfo.getApkInfoByFilePath(tempDir + "\\fengting.apk");
+///*  2892 */             String s1 = this.appVersion.substring(2, 5);
+///*  2893 */             String s2 = apkInfo.getVersionName().substring(2, 5);
+///*  2894 */             System.err.println(apkInfo.getVersionName());
+///*  2895 */             if (Double.valueOf(s1).doubleValue() < Double.valueOf(s2).doubleValue()) {
+///*  2896 */               BoAndroidVersion boAndroidVersion = this.BoAndroidVersionService.findAndroidVersionById(Integer.valueOf(5));
+///*  2897 */               if (boAndroidVersion != null) {
+///*  2898 */                 map.put("url", basePath + boAndroidVersion.getApkUrl().toString());
+///*  2899 */                 this.requestJson.setData(map);
+///*  2900 */                 this.requestJson.setMessage("当前版本较低,请即使更新");
+///*  2901 */                 this.requestJson.setSuccess(false);
+///*       */               }
+///*       */             } else {
+///*  2904 */               this.requestJson.setData(map);
+///*  2905 */               this.requestJson.setMessage("当前已是最新版本");
+///*  2906 */               this.requestJson.setSuccess(true);
+///*       */             }
+///*  2908 */           } else if (Integer.valueOf(this.provider).intValue() == 6) {
+///*  2909 */             String root = System.getProperty("webapp.root");
+///*  2910 */             String tempDir = root + "/" + "apk";
+///*  2911 */             ApkInfo apkInfo = GetApkInfo.getApkInfoByFilePath(tempDir + "\\maibao.apk");
+///*  2912 */             String s1 = this.appVersion.substring(2, 5);
+///*  2913 */             String s2 = apkInfo.getVersionName().substring(2, 5);
+///*  2914 */             System.err.println(apkInfo.getVersionName());
+///*  2915 */             if (Double.valueOf(s1).doubleValue() < Double.valueOf(s2).doubleValue()) {
+///*  2916 */               BoAndroidVersion boAndroidVersion = this.BoAndroidVersionService.findAndroidVersionById(Integer.valueOf(5));
+///*  2917 */               if (boAndroidVersion != null) {
+///*  2918 */                 map.put("url", basePath + boAndroidVersion.getApkUrl().toString());
+///*  2919 */                 this.requestJson.setData(map);
+///*  2920 */                 this.requestJson.setMessage("当前版本较低,请即使更新");
+///*  2921 */                 this.requestJson.setSuccess(false);
+///*       */               }
+///*       */             } else {
+///*  2924 */               this.requestJson.setData(map);
+///*  2925 */               this.requestJson.setMessage("当前已是最新版本");
+///*  2926 */               this.requestJson.setSuccess(true);
+///*       */             }
+///*  2928 */           } else if (Integer.valueOf(this.provider).intValue() == 7) {
+///*  2929 */             this.requestJson.setData(map);
+///*  2930 */             this.requestJson.setMessage("当前已是最新版本");
+///*  2931 */             this.requestJson.setSuccess(true);
+///*       */           }
+///*       */         }
+///*       */       } else { BoIosVersion boIosVersion = this.boIosVersionService.findAndroidVersionById(Integer.valueOf(this.provider));
+///*  2935 */         if (boIosVersion != null) {
+///*  2936 */           if (Double.valueOf(this.appVersion).doubleValue() < Double.valueOf(boIosVersion.getVersion()).doubleValue()) {
+///*  2937 */             map.put("url", boIosVersion.getApkUrl().toString());
+///*  2938 */             this.requestJson.setData(map);
+///*  2939 */             this.requestJson.setMessage("当前版本较低,请即使更新");
+///*  2940 */             this.requestJson.setSuccess(false);
+///*       */           } else {
+///*  2942 */             this.requestJson.setData(map);
+///*  2943 */             this.requestJson.setMessage("当前已是最新版本");
+///*  2944 */             this.requestJson.setSuccess(true);
+///*       */           }
+///*       */         }
+///*       */       }
+///*       */     }
+///*       */     catch (Exception e)
+///*       */     {
+///*  2951 */       logger.info("error_" + e.getMessage());
+///*  2952 */       this.requestJson.setData(map);
+///*  2953 */       this.requestJson.setMessage("服务器发生异常");
+///*  2954 */       this.requestJson.setSuccess(false);
+///*       */     }
+///*  2956 */     return "success";
+///*       */   }
 /*       */ 
 /*       */   @Action(value="dropDownControlEnclosureRelayStatus", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String dropDownControlEnclosureRelayStatus()
@@ -3493,7 +3494,7 @@
 /*       */   }
 /*       */ 
 /*       */   @Action(value="gainAlarmRecord", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
-/*       */   public String gainAlarmRecord()
+/*       */   public String gainAlarmRecord()   //推送记录 进的该方法
 /*       */   {
 /*  3522 */     this.requestJson = new RequestJson();
 /*  3523 */     Map map = new HashMap();
@@ -14607,6 +14608,7 @@
 /* 14954 */               map.put("province_city_area", boUsers.getCity().toString());
 /* 14955 */               map.put("signature", boUsers.getSignature().toString());
 /* 14956 */               map.put("headPic", boUsers.getHeadPic().toString());
+						  logger.info("headPic>>"+boUsers.getHeadPic().toString());
 /* 14957 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 14958 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 14959 */               this.requestJson.setTotal(Integer.valueOf(1));
@@ -14631,6 +14633,7 @@
 /* 14976 */               map.put("province_city_area", users.getCity().toString());
 /* 14977 */               map.put("signature", users.getSignature().toString());
 /* 14978 */               map.put("headPic", users.getHeadPic().toString());
+						  logger.info("headPic>>"+boUsers.getHeadPic().toString());
 /* 14979 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 14980 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 14981 */               this.requestJson.setTotal(Integer.valueOf(1));
@@ -14686,6 +14689,7 @@
 /* 15029 */               map.put("province_city_area", boUsers.getCity().toString());
 /* 15030 */               map.put("signature", boUsers.getSignature().toString());
 /* 15031 */               map.put("headPic", boUsers.getHeadPic().toString());
+						  logger.info("headPic>>"+boUsers.getHeadPic().toString());
 /* 15032 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 15033 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 15034 */               this.requestJson.setTotal(Integer.valueOf(1));
@@ -14710,6 +14714,7 @@
 /* 15051 */               map.put("province_city_area", users.getCity().toString());
 /* 15052 */               map.put("signature", users.getSignature().toString());
 /* 15053 */               map.put("headPic", users.getHeadPic().toString());
+						  logger.info("headPic>>"+boUsers.getHeadPic().toString());
 /* 15054 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 15055 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 15056 */               this.requestJson.setTotal(Integer.valueOf(1));
@@ -15252,7 +15257,7 @@
 /*       */     }
 /* 15631 */     return vcode;
 /*       */   }
-/*       */ 
+/*       */   //登录一次后进入这个方法
 /*       */   @Action(value="refresh_accessToken", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String refreshToken()
 /*       */   {
