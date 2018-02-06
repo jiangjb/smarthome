@@ -18,6 +18,8 @@
 /*     */ import com.smarthome.imcp.util.TokeUtil;
 /*     */ import com.smarthome.imcp.util.UserUtil;
 /*     */ import com.smarthome.imcp.util.ValidatorUtil;
+import com.smarthome.imcp.util.android.Demo;
+
 /*     */ import java.io.InputStream;
 /*     */ import java.io.Serializable;
 		  import java.util.ArrayList;
@@ -57,6 +59,10 @@
 /* 761 */   private String phoneType = "";
 /*     */ 
 /* 768 */   private String code = "";
+
+			//2-5 设备标记  友盟单播推送需要的参数
+            private String devicetoken = "";
+
 /*     */ 
 /*     */   @Autowired
 /*     */   private BoUserssServiceIface<BoUsers, Serializable> boUserService;
@@ -438,6 +444,12 @@
 					
 /* 482 */           String fluoriteAccessToken = users.getFluoriteAccessToken();
 /*     */           String EZTOKEN;
+                    //2-5 友盟推送
+					Demo ymPush=new Demo();
+//					ymPush.sendAndroidBroadcast();
+					ymPush.sendAndroidUnicast(this.devicetoken);
+					logger.info("device_token>>"+this.devicetoken);//为空，没取到
+					//END
 				    System.out.println("手机登录成功");
 /* 484 */           if (fluoriteAccessToken.equals(""))
 /* 485 */             EZTOKEN = "NO_BUNDING";
@@ -776,6 +788,12 @@
 /*     */   public void setRequestJson(RequestJson requestJson) {
 /* 783 */     this.requestJson = requestJson;
 /*     */   }
+			public String getDevicetoken() {
+				return devicetoken;
+			}
+			public void setDevicetoken(String devicetoken) {
+				this.devicetoken = devicetoken;
+			}
 /*     */ }
 
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\

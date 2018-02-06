@@ -26,7 +26,8 @@
 /*  29 */   public static Logger logger = Logger.getLogger(FileServiceImpl.class);
 /*     */ 
 /*     */   public ByteArrayInputStream getFile(String filePathName) throws IOException {
-/*  32 */     String root = System.getProperty("webapp.root");
+///*  32 */     String root = System.getProperty("webapp.root");
+			  String root="E:/smarthome/tomcat8";
 /*  33 */     File file = new File(root, filePathName);
 /*  34 */     if ((file == null) || (!file.exists())) {
 /*  35 */       throw new BusinessException("文件不存在或已删除！");
@@ -38,6 +39,7 @@
 /*     */   {
 /*     */     try {
 /*  43 */       String root = System.getProperty("webapp.root");
+//				String root="E:/smarthome/tomcat8";
 /*  44 */       String tempDir = root + "temp" + "/" + 
 /*  45 */         sessionId;
 /*  46 */       File targetDir = new File(tempDir);
@@ -57,8 +59,10 @@
 /*     */   public String saveToDir(File fileupload, String fileName, String dir)
 /*     */   {
 /*     */     try {
-/*  63 */       String root = System.getProperty("webapp.root");
+/*  63 */       String root = System.getProperty("webapp.root");//动态获项目的运行路径
+//	            String root="E:/smarthome";//这里设置服务器tomcat下的一个绝对路径
 /*  64 */       String tempDir = root + "/" + dir;
+                logger.info("tempDir>>"+tempDir);
 /*  65 */       File targetDir = new File(tempDir);
 /*  66 */       if (!targetDir.exists()) {
 /*  67 */         targetDir.mkdirs();
@@ -79,6 +83,7 @@
 /*  83 */       FileVo fileVo = new FileVo();
 /*  84 */       fileVo.setFileName(fileName);
 /*  85 */       String root = System.getProperty("webapp.root");
+//				String root="E:/smarthome/tomcat8";
 /*  86 */       String tempStr = root + "temp" + "/" + 
 /*  87 */         sessionId + "/" + fileName;
 /*  88 */       File tempFile = new File(tempStr);
@@ -140,6 +145,7 @@
 /*     */ 
 /*     */   public FileVo compressImage(FileVo fileVo, int outputWidth, int outputHeight) {
 /* 148 */     String root = System.getProperty("webapp.root");
+//			  String root="E:/smarthome/tomcat8";
 /*     */ 
 /* 150 */     FileVo compressFileVo = new FileVo();
 /* 151 */     compressFileVo.setFileName(fileVo.getFileName());
@@ -181,6 +187,7 @@
 /*     */   public boolean deleteTempDirectory(String sessionId)
 /*     */   {
 /* 218 */     String root = System.getProperty("webapp.root");
+//			  String root="E:/smarthome/tomcat8";
 /* 219 */     String tempPath = root + "temp" + "/" + 
 /* 220 */       sessionId;
 /*     */ 
@@ -240,6 +247,7 @@
 /*     */   {
 /*     */     try {
 /* 291 */       String root = System.getProperty("webapp.root");
+//			    String root="E:/smarthome/tomcat8";
 /* 292 */       String destDir = root + (
 /* 293 */         !root.endsWith("/") ? "/" : 
 /* 294 */         "") + destStr;
