@@ -92,6 +92,8 @@
 /*       */ import com.smarthome.imcp.util.TokeUtil;
 /*       */ import com.smarthome.imcp.util.UuidUtil;
 /*       */ import com.smarthome.imcp.util.YZUitl;
+import com.smarthome.imcp.util.android.Demo;
+
 /*       */ import java.io.BufferedReader;
 /*       */ import java.io.File;
 /*       */ import java.io.IOException;
@@ -15294,10 +15296,10 @@
 /* 15658 */     String header3 = request.getHeader("sign");
 /*       */ 
 /* 15660 */     str = str + "refreshToken=";
-/* 15661 */     str = str + this.refreshToken;
+/* 15661 */     str = str + this.refreshToken;//c24ef3aebb0c49f99642e62eb029a412
 /* 15662 */     System.err.println("refreshToken >-- " + this.refreshToken);
 /* 15663 */     str = str + "&userCode=";
-/* 15664 */     str = str + this.userCode;
+/* 15664 */     str = str + this.userCode;//c24ef3aebb0c49f99642e62eb029a412,18038035290
 /* 15665 */     System.err.println("userCode >-- " + this.userCode);//c24ef3aebb0c49f99642e62eb029a412,18038035290
 /* 15666 */     str = str + "12345";
 /* 15667 */     System.err.println("str " + str);
@@ -15308,7 +15310,7 @@
 /* 15672 */     System.err.println("header_sign" + header3);
 /* 15673 */     System.err.println(this.userCode);
 /* 15674 */     if (this.userCode.contains(",")) {
-/* 15675 */       String[] split = this.userCode.split(",");
+/* 15675 */       String[] split = this.userCode.split(",");//c24ef3aebb0c49f99642e62eb029a412 18038035290
 /* 15676 */       BoUsers users = this.boUserServicess.findByUserPhone(split[1].trim().toString());
 /* 15677 */       Long accessTokenTime = Long.valueOf(1800L);
 /* 15678 */       Long refreshTokenTime = Long.valueOf(2592000L);
@@ -15317,14 +15319,14 @@
 /*       */ 
 /* 15682 */       if (header3.equals(sign)) {
 /* 15683 */         System.err.println("sign验证通过");
-/* 15684 */         System.err.println("手机 》》" + this.refreshToken);
+/* 15684 */         System.err.println("手机 》》" + this.refreshToken);//???
 /*       */ 
 /* 15686 */         if (users == null) {
 /* 15687 */           this.requestJson.setData(map);
 /* 15688 */           this.requestJson.setMessage("Invalid_User");
 /* 15689 */           this.requestJson.setSuccess(true);
 /*       */         }
-/* 15691 */         else if (this.refreshToken.equals(users.getRefreshToken())) {
+/* 15691 */         else if (this.refreshToken.equals(users.getRefreshToken())) {//新的refreshToken 和 从数据库取出来的一样时
 /* 15692 */           System.err.println(users.getRefreshTokenTime());
 /* 15693 */           if (current_time.longValue() < Long.valueOf(users.getRefreshTokenTime()).longValue())
 /*       */           {
@@ -15345,7 +15347,15 @@
 /* 15709 */           this.requestJson.setMessage("超时了");
 /* 15710 */           this.requestJson.setSuccess(false);
 /*       */         }
-/*       */         else {
+/*       */         else {//新的refreshToken 和 从数据库取出来的 不同时
+					//2-6  友盟推送 
+				     String device_token=users.getUserDevicetoken();;
+					 Demo ymPush=new Demo();
+					 try {
+						ymPush.sendAndroidUnicast(device_token);
+					 } catch (Exception e) {
+						e.printStackTrace();
+					 }
 /* 15713 */           System.err.println("refreshToken令牌失效");
 /* 15714 */           this.requestJson.setData(map);
 /* 15715 */           this.requestJson.setMessage("refreshToken令牌失效");
@@ -15414,8 +15424,12 @@
 /* 15785 */     this.requestJson = new RequestJson();
 /*       */ 
 /* 15824 */     Map map = new HashMap();
+				//2-6  两台设备登录账号   登录时会根据下面两个参数做出判断，当不一样时会强制前面的设备退出
 /* 15825 */     String generateTokeCode = TokeUtil.generateTokeCode();
+                logger.info("AccessToken>>>"+generateTokeCode);
 /* 15826 */     String generateTokeCodes = TokeUtil.generateTokeCodes();
+				logger.info("RefreshToken>>>"+generateTokeCodes);
+                //END
 /*       */ 
 /* 15828 */     BoUsersValidation findByUserPhone = this.boUsersValidationServicess.findByUserPhone(this.userPhone);
 /* 15829 */     if (findByUserPhone != null) {
@@ -15433,8 +15447,8 @@
 /* 15841 */           fluoriteAccessTokenTime.longValue());
 /* 15842 */         if (phone2 != null) {
 /* 15843 */           if (phone2.getLogoAccountType().equals("M")) {
-/* 15844 */             phone2.setAccessToken(generateTokeCode);
-/* 15845 */             phone2.setRefreshToken(generateTokeCodes);
+/* 15844 */             phone2.setAccessToken(generateTokeCode);//2-6
+/* 15845 */             phone2.setRefreshToken(generateTokeCodes);//2-6
 /* 15846 */             phone2.setAccessTokenTime(accessTokenTime_o+"");
 /* 15847 */             phone2.setRefreshTokenTime(refreshTokenTime_o+"");
 /* 15848 */             phone2.setCid(this.CID);
@@ -15496,9 +15510,9 @@
 /* 15900 */               phone2.setPhoneType(Integer.valueOf(s));
 /* 15901 */               phone2.setVersionType(this.versionType);
 /* 15902 */               this.boUserServicess.update(phone2);
-/* 15903 */               map.put("accessToken", phone2.getAccessToken());
+/* 15903 */               map.put("accessToken", phone2.getAccessToken());//2-6
 /*       */ 
-/* 15905 */               map.put("refreshToken", phone2.getRefreshToken());
+/* 15905 */               map.put("refreshToken", phone2.getRefreshToken());//2-6
 /*       */ 
 /* 15907 */               map.put("userCode", boUsers.getUserCode() + "," + phone2.getUserPhone());
 /* 15908 */               map.put("userPhone", phone2.getUserPhone());
@@ -15573,8 +15587,8 @@
 /* 15974 */             city3 = split[1];
 /*       */           }
 /* 15976 */           map.put("whetherSetPwd", save.getWhetherSetPwd());
-/* 15977 */           map.put("accessToken", save.getAccessToken());
-/* 15978 */           map.put("refreshToken", save.getRefreshToken());
+/* 15977 */           map.put("accessToken", save.getAccessToken());//2-6
+/* 15978 */           map.put("refreshToken", save.getRefreshToken());//2-6
 /* 15979 */           if (save.getLogoAccountType().equals("M"))
 /* 15980 */             map.put("userCode", save.getUserCode() + "," + save.getUserPhone());
 /*       */           else {

@@ -407,8 +407,13 @@ import com.smarthome.imcp.util.android.Demo;
 /* 464 */           users.setAccessTokenTime(accessTokenTime_o+"");
 /* 465 */           users.setRefreshTokenTime(refreshTokenTime_o+"");
 /* 466 */           users.setCid(this.CID);
+					logger.info("CID >>>"+this.CID);
 /* 467 */           users.setPhoneType(Integer.valueOf(this.phoneType));
 /* 468 */           users.setVersionType(this.versionType);
+                    //2-6将devicetoken存入数据库
+                    users.setUserDevicetoken(this.devicetoken);
+                    logger.info("设备token>>>"+this.devicetoken);
+                    //end
 /* 469 */           BoUsers update = (BoUsers)this.boUserService.update(users);
 /* 470 */           userInfoMap.put("accessToken", update.getAccessToken());
 /* 471 */           userInfoMap.put("refreshToken", update.getRefreshToken());
@@ -557,9 +562,32 @@ import com.smarthome.imcp.util.android.Demo;
 /* 573 */                   BoUsers save = (BoUsers)this.boUserService.save(user);
 /* 574 */                   if (save != null) {
 /* 575 */                     StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, Long.valueOf(ips[1])+"", (Integer.valueOf(ips[2]).intValue() + 1)+"" });
-/* 576 */                     this.requestJson.setData(map);
-/* 577 */                     this.requestJson.setMessage("注册成功");
-/* 578 */                     this.requestJson.setSuccess(true);
+///* 576 */                     this.requestJson.setData(map);
+///* 577 */                     this.requestJson.setMessage("注册成功");
+///* 578 */                     this.requestJson.setSuccess(true);
+                              //2-6
+							  count++;
+///* 562 */                     StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
+/* 563 */                     this.requestJson.setData(map);
+/* 564 */                     this.requestJson.setMessage("注册成功");
+/* 565 */                     this.requestJson.setSuccess(true);
+							  //注册成功时 默认添加一个楼层和四个房间
+							  BoFloor floor=FloorUtil.save(save.getUserCode());
+							  BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
+							  //String userCode,String floorName,String floorCode,String roomName	
+							  System.out.println("楼层名称："+saveF.getFloorName());
+							  String userCode=saveF.getUserCode();
+							  String floorName=saveF.getFloorName();
+//							  String floorName="我的家";
+							  String floorCode=saveF.getFloorCode();
+							  BoRoom room1=RoomUtil.save(userCode,floorName,floorCode,"客厅");
+							  BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
+							  BoRoom room2=RoomUtil.save(userCode,floorName,floorCode,"卧室");
+							  BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
+							  BoRoom room3=RoomUtil.save(userCode,floorName,floorCode,"厨房");
+							  BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
+							  BoRoom room4=RoomUtil.save(userCode,floorName,floorCode,"卫生间");
+							  BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
 /*     */                   }
 /* 580 */                 } else if (Integer.valueOf(ips[2]).intValue() == 4) {
 /* 581 */                   Timer timer = new Timer();
@@ -688,9 +716,32 @@ import com.smarthome.imcp.util.android.Demo;
 /* 657 */                 BoUsers save = (BoUsers)this.boUserService.save(user);
 /* 658 */                 if (save != null) {
 /* 659 */                   StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, Long.valueOf(ips[1])+"", (Integer.valueOf(ips[2]).intValue() + 1)+"" });
-/* 660 */                   this.requestJson.setData(map);
-/* 661 */                   this.requestJson.setMessage("注册成功");
-/* 662 */                   this.requestJson.setSuccess(true);
+///* 660 */                   this.requestJson.setData(map);
+///* 661 */                   this.requestJson.setMessage("注册成功");
+///* 662 */                   this.requestJson.setSuccess(true);
+							//2-6初始化楼层
+							count++;
+///* 562 */                   StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
+/* 563 */                   this.requestJson.setData(map);
+/* 564 */                   this.requestJson.setMessage("注册成功");
+/* 565 */                   this.requestJson.setSuccess(true);
+							//注册成功时 默认添加一个楼层和四个房间
+							BoFloor floor=FloorUtil.save(save.getUserCode());
+							BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
+							//String userCode,String floorName,String floorCode,String roomName	
+							System.out.println("楼层名称："+saveF.getFloorName());
+							String userCode=saveF.getUserCode();
+							String floorName=saveF.getFloorName();
+//							String floorName="我的家";
+							String floorCode=saveF.getFloorCode();
+							BoRoom room1=RoomUtil.save(userCode,floorName,floorCode,"客厅");
+							BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
+							BoRoom room2=RoomUtil.save(userCode,floorName,floorCode,"卧室");
+							BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
+							BoRoom room3=RoomUtil.save(userCode,floorName,floorCode,"厨房");
+							BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
+							BoRoom room4=RoomUtil.save(userCode,floorName,floorCode,"卫生间");
+							BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
 /*     */                 }
 /* 664 */               } else if (Integer.valueOf(ips[2]).intValue() == 4) {
 /* 665 */                 Timer timer = new Timer();
@@ -719,10 +770,33 @@ import com.smarthome.imcp.util.android.Demo;
 /* 687 */               BoUsers user = UserUtil.save(this.userPhone, md5.getMD5ofStr(this.userPwd), this.userEmail);
 /* 688 */               BoUsers save = (BoUsers)this.boUserService.save(user);
 /* 689 */               if (save != null) {
-/* 690 */                 StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
-/* 691 */                 this.requestJson.setData(map);
-/* 692 */                 this.requestJson.setMessage("注册成功");
-/* 693 */                 this.requestJson.setSuccess(true);
+///* 690 */                 StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
+///* 691 */                 this.requestJson.setData(map);
+///* 692 */                 this.requestJson.setMessage("注册成功");
+///* 693 */                 this.requestJson.setSuccess(true);
+                          //2-6 初始化楼层
+							count++;
+/* 562 */                   StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
+/* 563 */                   this.requestJson.setData(map);
+/* 564 */                   this.requestJson.setMessage("注册成功");
+/* 565 */                   this.requestJson.setSuccess(true);
+							//注册成功时 默认添加一个楼层和四个房间
+							BoFloor floor=FloorUtil.save(save.getUserCode());
+							BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
+							//String userCode,String floorName,String floorCode,String roomName	
+							System.out.println("楼层名称："+saveF.getFloorName());
+							String userCode=saveF.getUserCode();
+							String floorName=saveF.getFloorName();
+//							String floorName="我的家";
+							String floorCode=saveF.getFloorCode();
+							BoRoom room1=RoomUtil.save(userCode,floorName,floorCode,"客厅");
+							BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
+							BoRoom room2=RoomUtil.save(userCode,floorName,floorCode,"卧室");
+							BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
+							BoRoom room3=RoomUtil.save(userCode,floorName,floorCode,"厨房");
+							BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
+							BoRoom room4=RoomUtil.save(userCode,floorName,floorCode,"卫生间");
+							BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
 /*     */               }
 /*     */             }
 /*     */           }
