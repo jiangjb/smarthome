@@ -588,10 +588,32 @@ import com.smarthome.imcp.util.android.Demo;
 /* 603 */                 BoUsers user = UserUtil.save(this.userPhone, md5.getMD5ofStr(this.userPwd), this.userEmail);
 /* 604 */                 BoUsers save = (BoUsers)this.boUserService.save(user);
 /* 605 */                 if (save != null) {	
-/* 606 */                   StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
-/* 607 */                   this.requestJson.setData(map);
-/* 608 */                   this.requestJson.setMessage("注册成功");
-/* 609 */                   this.requestJson.setSuccess(true);
+///* 606 */                   StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
+///* 607 */                   this.requestJson.setData(map);
+///* 608 */                   this.requestJson.setMessage("注册成功");
+///* 609 */                   this.requestJson.setSuccess(true);
+							count++;
+/* 562 */                   StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
+/* 563 */                   this.requestJson.setData(map);
+/* 564 */                   this.requestJson.setMessage("注册成功");
+/* 565 */                   this.requestJson.setSuccess(true);
+							//注册成功时 默认添加一个楼层和四个房间
+							BoFloor floor=FloorUtil.save(save.getUserCode());
+							BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
+							//String userCode,String floorName,String floorCode,String roomName	
+							System.out.println("楼层名称："+saveF.getFloorName());
+							String userCode=saveF.getUserCode();
+							String floorName=saveF.getFloorName();
+//							String floorName="我的家";
+							String floorCode=saveF.getFloorCode();
+							BoRoom room1=RoomUtil.save(userCode,floorName,floorCode,"客厅");
+							BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
+							BoRoom room2=RoomUtil.save(userCode,floorName,floorCode,"卧室");
+							BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
+							BoRoom room3=RoomUtil.save(userCode,floorName,floorCode,"厨房");
+							BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
+							BoRoom room4=RoomUtil.save(userCode,floorName,floorCode,"卫生间");
+							BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
 /*     */                 }
 /*     */               }
 /*     */             }
