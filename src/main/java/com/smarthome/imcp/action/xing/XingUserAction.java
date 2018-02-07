@@ -14307,7 +14307,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 14645 */                 BoUsers update = (BoUsers)this.boUserServicess.update(boUsers);
 /* 14646 */                 this.requestJson.setMessage("头像上传成功");
 /* 14647 */                 map.put("headPic", update.getHeadPic());
-							logger.info("`headPic>>"+update.getHeadPic());
+//							logger.info("`headPic>>"+update.getHeadPic());
 ///* 14648 */                 break label1208;
 							return "userPhone == null";
 /* 14649 */               }
@@ -14317,12 +14317,12 @@ import com.smarthome.imcp.util.android.Demo;
 ///* 14652 */                 userCode + "head" + createRandomVcodesss() + ".jpg", dir);//这样命名图片会越来越多
 						  String filePath = this.fileService.saveToDir(this.fileupload, 
 								  userCode + "head" + ".jpg", dir);
-						  logger.info("头像的地址2 filePath>>"+filePath);
+//						  logger.info("头像的地址2 filePath>>"+filePath);
 /* 14653 */               phone.setHeadPic(filePath);
 /* 14654 */               BoUsers update = (BoUsers)this.boUserServicess.update(phone);
 /* 14655 */               this.requestJson.setMessage("头像上传成功");
 /* 14656 */               map.put("headPic", update.getHeadPic());
-						  logger.info("``headPic>>"+update.getHeadPic());
+//						  logger.info("``headPic>>"+update.getHeadPic());
 /* 14657 */               return "success";
 /*       */             }
 /*       */             catch (Exception e)
@@ -14375,7 +14375,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 14704 */               BoUsers update = (BoUsers)this.boUserServicess.update(boUsers);
 /* 14705 */               this.requestJson.setMessage("头像上传成功");
 /* 14706 */               map.put("headPic", update.getHeadPic());
-						  logger.info("······headPic:"+update.getHeadPic());
+//						  logger.info("······headPic:"+update.getHeadPic());
 ///* 14707 */               break label1208;
 						  return "success";
 /* 14708 */             }BoUsers boUser = this.boUserServicess.findByUserPhone(userPhone);
@@ -14385,12 +14385,12 @@ import com.smarthome.imcp.util.android.Demo;
 ///* 14712 */               userCode + "head" + createRandomVcodesss() + ".jpg", dir);
 						String filePath = this.fileService.saveToDir(this.fileupload, 
 								userCode + "head" + ".jpg", dir);
-						logger.info("头像的地址 filePath>>"+filePath);
+//						logger.info("头像的地址 filePath>>"+filePath);
 /* 14713 */             boUser.setHeadPic(filePath);
 /* 14714 */             BoUsers update = (BoUsers)this.boUserServicess.update(boUser);
 /* 14715 */             this.requestJson.setMessage("头像上传成功");
 /* 14716 */             map.put("headPic", update.getHeadPic());
-					    logger.info("·····headPic:"+update.getHeadPic());
+//					    logger.info("·····headPic:"+update.getHeadPic());
 /* 14717 */             return "success";
 /*       */           }
 /*       */           catch (Exception e)
@@ -14626,7 +14626,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 14954 */               map.put("province_city_area", boUsers.getCity().toString());
 /* 14955 */               map.put("signature", boUsers.getSignature().toString());
 /* 14956 */               map.put("headPic", boUsers.getHeadPic().toString());
-						  logger.info("·headPic>>"+boUsers.getHeadPic().toString());
+//						  logger.info("·headPic>>"+boUsers.getHeadPic().toString());
 /* 14957 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 14958 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 14959 */               this.requestJson.setTotal(Integer.valueOf(1));
@@ -14651,7 +14651,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 14976 */               map.put("province_city_area", users.getCity().toString());
 /* 14977 */               map.put("signature", users.getSignature().toString());
 /* 14978 */               map.put("headPic", users.getHeadPic().toString());
-						  logger.info("··headPic>>"+boUsers.getHeadPic().toString());
+//						  logger.info("··headPic>>"+boUsers.getHeadPic().toString());
 /* 14979 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 14980 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 14981 */               this.requestJson.setTotal(Integer.valueOf(1));
@@ -14707,7 +14707,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 15029 */               map.put("province_city_area", boUsers.getCity().toString());
 /* 15030 */               map.put("signature", boUsers.getSignature().toString());
 /* 15031 */               map.put("headPic", boUsers.getHeadPic().toString());
-						  logger.info("···headPic>>"+boUsers.getHeadPic().toString());
+//						  logger.info("···headPic>>"+boUsers.getHeadPic().toString());
 /* 15032 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 15033 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 15034 */               this.requestJson.setTotal(Integer.valueOf(1));
@@ -14732,7 +14732,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 15051 */               map.put("province_city_area", users.getCity().toString());
 /* 15052 */               map.put("signature", users.getSignature().toString());
 /* 15053 */               map.put("headPic", users.getHeadPic().toString());
-						  logger.info("····headPic>>"+boUsers.getHeadPic().toString());
+//						  logger.info("····headPic>>"+boUsers.getHeadPic().toString());
 /* 15054 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 15055 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 15056 */               this.requestJson.setTotal(Integer.valueOf(1));
@@ -15328,6 +15328,8 @@ import com.smarthome.imcp.util.android.Demo;
 /*       */         }
 /* 15691 */         else if (this.refreshToken.equals(users.getRefreshToken())) {//新的refreshToken 和 从数据库取出来的一样时
 /* 15692 */           System.err.println(users.getRefreshTokenTime());
+                      logger.info("新的refreshToken"+this.refreshToken);
+                      logger.info("旧的refreshToken"+users.getRefreshToken());
 /* 15693 */           if (current_time.longValue() < Long.valueOf(users.getRefreshTokenTime()).longValue())
 /*       */           {
 /* 15695 */             String generateTokeCode = TokeUtil.generateTokeCode();
@@ -15349,10 +15351,22 @@ import com.smarthome.imcp.util.android.Demo;
 /*       */         }
 /*       */         else {//新的refreshToken 和 从数据库取出来的 不同时
 					//2-6  友盟推送 
-				     String device_token=users.getUserDevicetoken();;
+				     String device_token=users.getUserDevicetoken();//新设备token
+//				     logger.info("新设备的token>>>"+device_token);
+				     String oldDevice_token=users.getUserAddr();//旧设备token
+//				     logger.info("旧设备的token>>>"+oldDevice_token);
 					 Demo ymPush=new Demo();
 					 try {
-						ymPush.sendAndroidUnicast(device_token);
+						 if(oldDevice_token !=""  || oldDevice_token !=device_token) {
+							 ymPush.sendAndroidUnicast(oldDevice_token,"离线通知","另一台设备正在登录,您已被迫下线");
+							 users.setUserAddr("");
+							 BoUsers update = (BoUsers)this.boUserServicess.update(users);
+							 if(update !=null) {
+								 logger.info("更新操作成功执行");
+							 } 
+						 }
+		
+	                    //end
 					 } catch (Exception e) {
 						e.printStackTrace();
 					 }

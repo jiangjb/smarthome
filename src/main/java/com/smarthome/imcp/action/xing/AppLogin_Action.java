@@ -410,9 +410,12 @@ import com.smarthome.imcp.util.android.Demo;
 					logger.info("CID >>>"+this.CID);
 /* 467 */           users.setPhoneType(Integer.valueOf(this.phoneType));
 /* 468 */           users.setVersionType(this.versionType);
-                    //2-6将devicetoken存入数据库
-                    users.setUserDevicetoken(this.devicetoken);
-                    logger.info("设备token>>>"+this.devicetoken);
+
+					//2-6 暂时将旧设备的token存入userAddr中，待发送离线请求时将新的devicetoken替换，userAddr恢复空值
+					if(this.devicetoken != users.getUserDevicetoken()) {//当不同时判定为有新设备连入
+						users.setUserAddr(users.getUserDevicetoken());   	
+						users.setUserDevicetoken(this.devicetoken);//当前登录的设备token
+					}
                     //end
 /* 469 */           BoUsers update = (BoUsers)this.boUserService.update(users);
 /* 470 */           userInfoMap.put("accessToken", update.getAccessToken());
@@ -449,12 +452,12 @@ import com.smarthome.imcp.util.android.Demo;
 					
 /* 482 */           String fluoriteAccessToken = users.getFluoriteAccessToken();
 /*     */           String EZTOKEN;
-                    //2-5 友盟推送
+//                  2-5 友盟推送
 					Demo ymPush=new Demo();
 //					ymPush.sendAndroidBroadcast();
-					ymPush.sendAndroidUnicast(this.devicetoken);
-					logger.info("device_token>>"+this.devicetoken);//为空，没取到
-					//END
+					ymPush.sendAndroidUnicast(this.devicetoken,"上线通知","您的设备已成功登录");
+					logger.info("device_token>>"+this.devicetoken);
+//					END
 				    System.out.println("手机登录成功");
 /* 484 */           if (fluoriteAccessToken.equals(""))
 /* 485 */             EZTOKEN = "NO_BUNDING";
