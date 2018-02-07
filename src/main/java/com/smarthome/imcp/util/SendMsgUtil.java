@@ -6,7 +6,9 @@
 /*     */ import java.util.HashMap;
           import java.util.List;
 /*     */ import java.util.Map;
-          import com.smarthome.imcp.common.Map2List;
+import java.util.Set;
+
+import com.smarthome.imcp.common.Map2List;
 /*     */ 
 /*     */ @SuppressWarnings("unused")
 		  public class SendMsgUtil
@@ -15,11 +17,9 @@
           public static String sendMsg(String mobile, String content)
 /*     */     throws UnsupportedEncodingException
 /*     */   { 
-	          Map2List map2List=new Map2List();
 /*  31 */     Map params = new HashMap();
-//			  List<String> keys=(List<String>) params.keySet();
-			  List<String> keys=map2List.mapTransitionList(params);
-			  System.out.println("maptolist.......");
+              Set<String> keys= params.keySet();
+			  System.out.println("phoneCode.......");
 /*     */ 
 /*  33 */     params.put("mobile", mobile);
 /*     */ 
@@ -27,7 +27,7 @@
 /*  36 */     String string = null;
 /*  37 */     String contents = null;
 /*     */ 
-/*  39 */     String encode = URLEncoder.encode(content);
+/*  39 */     String encode = URLEncoder.encode(content, "UTF-8");
 /*  40 */     for (String key : keys) {
 /*  41 */       if ("mobile".equals(key)) {
 /*  42 */         string = (String)params.get(key);
@@ -37,7 +37,8 @@
 /*  46 */         contents = (String)params.get(key);
 /*     */       }
 /*     */     }
-/*     */ 
+/*     */     System.out.println("mobile>>>"+mobile);
+			  System.out.println("contents>>>"+contents);
 /*  50 */     String url = "http://222.73.117.158/msg/HttpBatchSendSM?account=Jkdz888&mobile=" + mobile + "&pswd=Hificat882&needstatus=1&msg=" + contents;
 /*  51 */     return HttpRequestUtil.getRequest(url, mobile);
 /*     */   }
@@ -46,10 +47,8 @@
 			public static String aiBoRuisendMsg(String mobile, String content)
 /*     */     throws UnsupportedEncodingException
 /*     */   {
-			  Map2List map2List=new Map2List();
 /*  65 */     Map params = new HashMap();
-///*     */ 	  List<String> keys=(List<String>) params.keySet();
-			  List<String> keys=map2List.mapTransitionList(params);
+/*     */ 	  Set<String> keys= params.keySet();
 			  System.out.println("siChuang.......");
 /*  67 */     params.put("mobile", mobile);
 /*     */ 
@@ -77,10 +76,8 @@
 			public static String siChuangSendMsg(String mobile, String content)
 /*     */     throws UnsupportedEncodingException
 /*     */   {
-	          Map2List map2List=new Map2List();
 /*  99 */     Map params = new HashMap();
-///*     */     List<String> keys=(List<String>) params.keySet();
-			  List<String> keys=map2List.mapTransitionList(params);
+/*     */     Set<String> keys= params.keySet();
 			  System.out.println("siChuang.......");
 /* 101 */     params.put("mobile", mobile);
 /*     */ 
@@ -108,10 +105,8 @@
             public static String fengTingSendMsg(String mobile, String content)
 /*     */     throws UnsupportedEncodingException
 /*     */   {
-	          Map2List map2List=new Map2List();
 /* 133 */     Map params = new HashMap();
-///*     */     List<String> keys=(List<String>) params.keySet();
-			  List<String> keys=map2List.mapTransitionList(params);
+/*     */     Set<String> keys= params.keySet();
 			  System.out.println("fengting.......");
 /* 135 */     params.put("mobile", mobile);
 /*     */ 
@@ -139,29 +134,31 @@
             public static String maiBaoSendMsg(String mobile, String content)
 /*     */     throws UnsupportedEncodingException
 /*     */   {
-	          Map2List map2List=new Map2List();
+//	          Map2List map2List=new Map2List();
 /* 167 */     Map params = new HashMap();
-///*     */     List<String> keys=(List<String>) params.keySet();
-			  List<String> keys=map2List.mapTransitionList(params);
-			  System.out.println("maptolist.......");
+/*     */     Set<String> keys= params.keySet();//把map中的键放在set集合中
+//			  List<String> keys=map2List.mapTransitionList(params);//值和键（keySet）
+			  System.out.println("maibao.......");
 /* 169 */     params.put("mobile", mobile);
 /*     */ 
-/* 171 */     params.put("nr", URLEncoder.encode(content, "UTF-8"));
+/* 171 */     params.put("nr", URLEncoder.encode(content, "UTF-8"));//为什么要转码,不转码会出现错误   什么时候要转码？？？
+//			  params.put("nr", content);
 /* 172 */     String string = null;
 /* 173 */     String contents = null;
-/*     */ 
-/* 175 */     String encode = URLEncoder.encode(content);
+/*     */     
+/* 175 */     String encode = URLEncoder.encode(content, "UTF-8");
+//			  System.out.println("encode>"+encode);
 /* 176 */     for (String key : keys) {
 /* 177 */       if ("mobile".equals(key)) {
 /* 178 */         string = (String)params.get(key);
 /*     */       }
-/*     */ 
+/*     */ 		System.out.println("key>"+(String)params.get(key));
 /* 181 */       if ("nr".equals(key)) {
 /* 182 */         contents = (String)params.get(key);
 /*     */       }
 /*     */ 
 /*     */     }
-/*     */ 
+/*     */     System.out.println("mobile:"+mobile+" contents:"+contents);//null
 /* 187 */     String url = "http://sms.253.com/msg/send?un=N9159092&pw=e432PMNLmJ94cf&phone=" + mobile + "&msg=" + contents + "&rd=1";
 /* 188 */     return HttpRequestUtil.getRequest(url, mobile);
 /*     */   }
@@ -170,10 +167,8 @@
 			public static String lavo(String mobile, String content)
 /*     */     throws UnsupportedEncodingException
 /*     */   {
-			  Map2List map2List=new Map2List();
 /* 202 */     Map params = new HashMap();
-///*     */     List<String> keys=(List<String>) params.keySet();
-			  List<String> keys=map2List.mapTransitionList(params);
+/*     */     Set<String> keys= params.keySet();
 			  System.out.println("lavo.......");
 /* 204 */     params.put("mobile", mobile);
 /*     */ 

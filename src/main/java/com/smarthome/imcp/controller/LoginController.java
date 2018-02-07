@@ -88,7 +88,7 @@
 		   public int login(@RequestParam("loginName") String loginName, @RequestParam("loginPwd") String loginPwd, HttpServletRequest request)
    		{   
 		    int UserID=0;
-			 System.out.println("loginName="+loginName+",loginPwd="+loginPwd);
+//			 System.out.println("loginName="+loginName+",loginPwd="+loginPwd);
 			//先给输入的明文密码加密，然后再与数据库表取出来的数据比较
 		    String hashAlgorithmName = "MD5";
 			Object credentials = loginPwd;
@@ -110,7 +110,7 @@
 		        try {
 		        	System.out.println("1. " + token.hashCode());
 		        	// 执行登录. 
-		            currentUser.login(token);
+		            currentUser.login(token);// Argument for byte conversion cannot be null.
 //		            return 1;
 		        } 
 		        // ... catch more exceptions here (maybe custom ones specific to your application?
@@ -519,10 +519,10 @@
 		   public List<BoUsers> findByTel(@RequestParam("userPhone") String userPhone) {
 			   List<BoUsers> varList=new ArrayList<BoUsers>();
 			   BoUsers bousers = this.boUserssService.findByUserPhone(userPhone);
-//			   System.out.println("bousers:"+bousers);
+			   System.out.println("bousers:"+bousers);
 			   
 			   BoUsers user=new BoUsers();
-			   user.setUserId(bousers.getUserId());
+			   user.setUserId(bousers.getUserId());//空指针
 			   System.out.println(bousers.getUserId());
 			   user.setUserName(bousers.getUserName());
 			   user.setUserSex(bousers.getUserSex());
@@ -1028,7 +1028,7 @@
 		   @RequestMapping({"findudeviceByIndex.do"})
 		   @ResponseBody
 		   public List<BoHostDevice> findudeviceByIndex(@RequestParam("index") int index) {
-			   System.out.println("分页操作 -首页");
+			   System.out.println("分页操作 -by index");
 			   List list=new ArrayList();
 		       List<BoHostDevice> boHosts = this.boHostDeviceService.getAllHostD();		  //直接把这结果传给前台 出现Cannot call sendError() after the response has been committed     
 			   //Page类
@@ -1048,11 +1048,13 @@
 			   }else {
 				   endRow=index*pageSize - 1;
 			   }
-			   System.out.println("totalCount:"+totalCount);
-			   System.out.println("totalPages:"+totalPages);
+			   System.out.println("startRow:"+startRow);
+			   System.out.println("endRow:"+endRow);
+//			   System.out.println("totalCount:"+totalCount);
+//			   System.out.println("totalPages:"+totalPages);
 			   
 			   for(int i=0;i<boHosts.size();i++) {
-				   if(i>=0 && i<=9) {
+				   if(i>=startRow && i<=endRow) {
 					   Map map=new HashMap();
 			        	int id=boHosts.get(i).getId();
 			        	String deviceCode=boHosts.get(i).getBoDevice().getDeviceCode();

@@ -309,28 +309,25 @@ import com.smarthome.imcp.util.android.Demo;
 /* 379 */     this.requestJson = new RequestJson();
 /* 380 */     @SuppressWarnings("rawtypes")
 			  Map map = new HashMap();
-//              System.out.println("1111111111111111111111111111");
 /*     */     try {
 /* 382 */       if (StringUtils.isEmpty(this.userPhone)) {
-//				  System.out.println("2222222222222222222222");
 /* 383 */         this.requestJson = new RequestJson(false, "请输入手机号码", map);
 /* 384 */       } else if (!ValidatorUtil.IsMobile(this.userPhone)) {
 /* 385 */         this.requestJson = new RequestJson(false, "手机号码格式不正确", map);
 /*     */       } else {
-//			      System.out.println("3333333333333333333333");
 /* 387 */         String vcode = "";
 /* 388 */         for (int i = 0; i < 6; i++)
 /* 389 */           vcode = vcode + (int)(Math.random() * 9.0D);
                   System.out.println("0");
 /* 390 */         if (this.versionType.equals("1")) {
-	                System.out.println("1");
+	                System.out.println("this.versionType==1");
 /* 391 */           SendMsgUtil.sendMsg(this.userPhone, "尊敬的用户，您的验证码为 : " + vcode);
                     System.out.println("vcode 1===="+vcode);
 /* 392 */           StaticUtil.msg_code
 /* 393 */             .put(this.userPhone, vcode + "," + new Date().getTime());
 /* 394 */           this.requestJson = new RequestJson(true, "发送成功", map);
 /* 395 */         } else if (this.versionType.equals("2")) {
-					System.out.println("2");
+					System.out.println("this.versionType==2");
 /* 396 */           SendMsgUtil.aiBoRuisendMsg(this.userPhone, "【爱波瑞科技】尊敬的用户，您的验证码为 : " + vcode);
                     System.out.println("vcode 2===="+vcode);
 /* 397 */           StaticUtil.msg_code
@@ -338,7 +335,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 399 */           this.requestJson = new RequestJson(true, "发送成功", map);
 /* 400 */         } else if (!this.versionType.equals("3"))
 /*     */         {
-/* 402 */           if (this.versionType.equals("4")) {
+/* 402 */           if (this.versionType.equals("this.versionType==4")) {
 	                  System.out.println("4");
 /* 403 */             SendMsgUtil.siChuangSendMsg(this.userPhone, "【思创智能】尊敬的用户，您的验证码为 :" + vcode);
                       System.out.println("vcode 4===="+vcode);
@@ -346,16 +343,16 @@ import com.smarthome.imcp.util.android.Demo;
 /* 405 */               .put(this.userPhone, vcode + "," + new Date().getTime());
 /* 406 */             this.requestJson = new RequestJson(true, "发送成功", map);
 /* 407 */           } else if (this.versionType.equals("5")) {
-	                  System.out.println("5");
+	                  System.out.println("this.versionType==5");
 /* 408 */             SendMsgUtil.fengTingSendMsg(this.userPhone, "【峰庭智能】尊敬的用户，您的验证码为 :" + vcode);
                       System.out.println("vcode 5===="+vcode);
 /* 409 */             StaticUtil.msg_code
 /* 410 */               .put(this.userPhone, vcode + "," + new Date().getTime());
 /* 411 */             this.requestJson = new RequestJson(true, "发送成功", map);
 /* 412 */           } else if (this.versionType.equals("6")) {
-	                  System.out.println("6");
+	                  System.out.println("this.versionType==6");
+	                  System.out.println("vcode 6===="+vcode);
 /* 413 */             SendMsgUtil.maiBaoSendMsg(this.userPhone, "【智能屋】尊敬的用户，您的验证码为 :" + vcode);
-                      System.out.println("vcode 6===="+vcode);
 /* 414 */             StaticUtil.msg_code
 /* 415 */               .put(this.userPhone, vcode + "," + new Date().getTime());
 /* 416 */             this.requestJson = new RequestJson(true, "发送成功", map);

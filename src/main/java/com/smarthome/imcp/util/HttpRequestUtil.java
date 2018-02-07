@@ -63,7 +63,7 @@
 /*     */     try
 /*     */     {
 /*  89 */       client.executeMethod(method);
-/*     */ 
+/*     */       System.out.println("client==="+client);
 /*  92 */       result = method.getResponseBodyAsString();
 /*     */     }
 /*     */     catch (HttpException e) {
