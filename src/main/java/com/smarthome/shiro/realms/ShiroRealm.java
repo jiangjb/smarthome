@@ -96,7 +96,8 @@ public class ShiroRealm extends AuthorizingRealm {
 		//shiro加密密码
 	    String hashAlgorithmName = "MD5";
 		Object credentials01 = password;
-		Object salt = ByteSource.Util.bytes(username);;
+//		Object salt = ByteSource.Util.bytes(username);//loginName在找回密码中用不了，所以把这个去了
+		Object salt = ByteSource.Util.bytes("username");
 		int hashIterations = 1024;
 		Object result = new SimpleHash(hashAlgorithmName, credentials01, salt, hashIterations);
 		String userPwd=result.toString();
@@ -115,7 +116,8 @@ public class ShiroRealm extends AuthorizingRealm {
 		//3). realmName: 当前 realm 对象的 name. 调用父类的 getName() 方法即可
 		String realmName = getName();
 		//4). 盐值. 
-		ByteSource credentialsSalt = ByteSource.Util.bytes(username);
+//		ByteSource credentialsSalt = ByteSource.Util.bytes(username);
+		ByteSource credentialsSalt = ByteSource.Util.bytes("username");
 		
 		SimpleAuthenticationInfo info = null; //new SimpleAuthenticationInfo(principal, credentials, realmName);
 		info = new SimpleAuthenticationInfo(principal, credentials, credentialsSalt, realmName);//这个方法，，，不清楚
@@ -126,11 +128,11 @@ public class ShiroRealm extends AuthorizingRealm {
 	public static void main(String[] args) {
 		String hashAlgorithmName = "MD5";
 //		String hashAlgorithmName01 =jdbcReams  //如何获取配置文件里面的属性
-		Object credentials = "123456";
-		Object salt = ByteSource.Util.bytes("user");;
+		Object credentials = "SZ2018mb168";
+		Object salt = ByteSource.Util.bytes("username");
 		int hashIterations = 1024;
 		
-		Object result = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
+		Object result = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);//4c65ed253b74c54922c87081af54375d
 //		String pwd=result.toString();//Object 转      String
 		System.out.println(result);
 //		System.out.println(pwd);

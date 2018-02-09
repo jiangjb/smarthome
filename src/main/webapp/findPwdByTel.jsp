@@ -272,8 +272,9 @@
 					async: false,					
 					/* cache: false, */
 					success: function(data){
-						/* alert(data) */
+						alert(data) 
 						if("success" == data){
+							alert("修改成功，即将跳入登录页面...")
 							setTimeout(function(){//两秒后跳转  
 								window.location.href="<%=WEBPATH %>/login.jsp";
                              },2000); 

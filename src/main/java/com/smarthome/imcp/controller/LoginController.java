@@ -90,12 +90,14 @@
 		    int UserID=0;
 //			 System.out.println("loginName="+loginName+",loginPwd="+loginPwd);
 			//先给输入的明文密码加密，然后再与数据库表取出来的数据比较
-		    String hashAlgorithmName = "MD5";
-			Object credentials = loginPwd;
-			Object salt = ByteSource.Util.bytes(loginName);
-			int hashIterations = 1024;
-			Object result = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
-			String userPwd=result.toString();
+//		    String hashAlgorithmName = "MD5";
+//			Object credentials = loginPwd;
+////			Object salt = ByteSource.Util.bytes(loginName);
+//			Object salt = ByteSource.Util.bytes("username");
+//			int hashIterations = 1024;
+//			Object result = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
+//			String userPwd=result.toString();
+			String userPwd=shiroEncryption(loginPwd);
 			////////////////////////////////shiro加密结束/////////////////////////////////////////////////
 			//认证
 			Subject currentUser = SecurityUtils.getSubject();
@@ -195,12 +197,14 @@
 			   sysuser.setLoginName(userName);
 			   System.out.println("shiro加密方式...");
 			   //shiro加密部分
-			    String hashAlgorithmName = "MD5";
-				Object credentials = userPwd;
-				Object salt = ByteSource.Util.bytes(userName);
-				int hashIterations = 1024;
-				Object result = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
-				String userPwd1=result.toString();
+//			    String hashAlgorithmName = "MD5";
+//				Object credentials = userPwd;
+////				Object salt = ByteSource.Util.bytes(userName);
+//				Object salt = ByteSource.Util.bytes("username");
+//				int hashIterations = 1024;
+//				Object result = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
+//				String userPwd1=result.toString();
+				String userPwd1=shiroEncryption(userPwd);
 				System.out.println("shiro加密后 password:"+userPwd1);
 				/////////////////////////////////////////////加密结束/////////////////////////////////////
 				
@@ -315,14 +319,15 @@
 		   @RequestMapping({"findByTelOrEmail.do"})
 		   @ResponseBody
 		   public String findByTelOrEmail(@RequestParam("UserID") String UserID,@RequestParam("loginPwd") String loginPwd,HttpServletRequest request) {
-			   System.out.println("忘记密码-找回密码-手机|邮箱找回！");
+			   System.out.println("忘记密码-找回密码-手机|邮箱找回！");//验证码通过后便不在继续起作用
 			   Md5 md5 = new Md5();
 			   int UserID1=Integer.parseInt(UserID);
 			   SysUser sysUser = (SysUser)this.sysUserService.findByKey(UserID1);
 			   if (sysUser == null) {
 				   return "error";
 			   }else {
-				   sysUser.setLoginPwd(md5.getMD5ofStr(loginPwd));
+				   //shiro加密
+				   sysUser.setLoginPwd(shiroEncryption(loginPwd));
 				   SysUser sysuser01=this.sysUserService.update(sysUser);
 				   if(sysuser01 !=null) {
 					   System.out.println("修改成功...");
@@ -384,12 +389,15 @@
 			   int userId=Integer.parseInt(USER_ID);
 			   SysUser sysuser=this.sysUserService.findByKey(userId);//找到用户
 			 //对传过来的旧密码进行shiro加密
-			   String hashAlgorithmName = "MD5";
-			   Object credentials = loginPwd;
-			   Object salt = ByteSource.Util.bytes(loginName);
-			   int hashIterations = 1024;
-			   Object userPwd1 = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
-			   String loginPwd1=userPwd1.toString();
+//			   String hashAlgorithmName = "MD5";
+//			   Object credentials = loginPwd;
+////			   Object salt = ByteSource.Util.bytes(loginName);
+//			   Object salt = ByteSource.Util.bytes("username");
+//			   int hashIterations = 1024;
+//			   Object userPwd1 = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
+//			   String loginPwd1=userPwd1.toString();
+			   String loginPwd1=shiroEncryption(loginPwd);
+			   
 			   
 //			   System.out.println("sysuser="+sysuser);
 			   sysuser.setLoginName(loginName);
@@ -421,20 +429,23 @@
 				   String userName=sysuser.getLoginName();//用户名
 				   System.out.println("userName:"+userName);
 				   //对传过来的旧密码进行shiro加密
-				   String hashAlgorithmName = "MD5";
-				   Object credentials = oldpassword;
-				   Object salt = ByteSource.Util.bytes(userName);
-				   int hashIterations = 1024;
-				   Object userPwd1 = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
-				   String loginPwd=userPwd1.toString();
+//				   String hashAlgorithmName = "MD5";
+//				   Object credentials = oldpassword;
+////				   Object salt = ByteSource.Util.bytes(userName);
+//				   Object salt = ByteSource.Util.bytes("username");
+//				   int hashIterations = 1024;
+//				   Object userPwd1 = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
+//				   String loginPwd=userPwd1.toString();
+				   String loginPwd=shiroEncryption(oldpassword);
 				   System.out.println("shiro加密后密码："+loginPwd);
 				   System.out.println("旧密码和取出来的密码对比："+loginPwd.equals(pwd));
 				   //加密后的旧密码与取出来的对比，若正确则修改新密码
 				   if(loginPwd.equals(pwd)) {
 					   System.out.println("修改密码...");
-					   Object credentials01 = newpassword;
-					   Object userPwd2 = new SimpleHash(hashAlgorithmName, credentials01, salt, hashIterations);
-					   String loginPwd2=userPwd2.toString();
+//					   Object credentials01 = newpassword;
+//					   Object userPwd2 = new SimpleHash(hashAlgorithmName, credentials01, salt, hashIterations);
+//					   String loginPwd2=userPwd2.toString();
+					   String loginPwd2=shiroEncryption(newpassword);
 					   System.out.println("新密码加密后："+loginPwd2);
 					   sysuser.setLoginPwd(loginPwd2);
 					   this.sysUserService.update(sysuser);
@@ -1443,6 +1454,21 @@
          public void hello(String str) {
       	   System.out.println("hello"+str);
          }
+         public  String shiroEncryption(String password) {
+        	//shiro加密
+        	String hashAlgorithmName = "MD5";
+ 			Object credentials = password;
+ 			Object salt = ByteSource.Util.bytes("username");//loginName在找回密码中用不了，所以把这个去了.固定
+ 			int hashIterations = 1024;
+ 			Object result = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
+ 			String userPwd=result.toString();
+ 			return userPwd;
+         }
+         public static void main(String[] args) {
+        	 LoginController lg=new LoginController();
+        	 lg.shiroEncryption("SZ2018mb168");//4c65ed253b74c54922c87081af54375d
+        	 System.out.println("密码》"+lg.shiroEncryption("SZ2018mb168"));
+		}
 	}
 
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\

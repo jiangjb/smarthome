@@ -491,21 +491,19 @@
 /*      */   }
 /*      */ 
 /*      */   public static String sendGet(String url, String userCode)
-/*      */   {
+/*      */   {//安防会经过这里
 /*  619 */     String result = "";
 /*  620 */     BufferedReader in = null;
 /*      */     try {
 /*  622 */       String urlNameString = url;
 /*  623 */       URL realUrl = new URL(urlNameString);
-/*      */ 		 logger.info("realUrl>>>"+realUrl);
+///*      */ 		 logger.info("realUrl>>>"+realUrl);
 /*  625 */       URLConnection connection = realUrl.openConnection();
-                 logger.info("connection>>>"+connection);
+//                 logger.info("connection>>>"+connection);
 /*      */ 
 /*  628 */       connection.setRequestProperty("userCode", userCode);
 /*  629 */       connection.setRequestProperty("timestamp", new Date().getTime()+"");
-/*      */       logger.info("111111111");
-/*  631 */       connection.connect();//这里有问题
-				 logger.info("222222222");
+/*  631 */       connection.connect();//这里没问题，但是如果URL错的话就会连不上
 
 /*  633 */       Map map = connection.getHeaderFields();
 				 List<String> keys = new ArrayList<String>(map.keySet());
