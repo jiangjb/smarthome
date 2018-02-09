@@ -43,6 +43,8 @@ public class MailUtil {
         //设置邮件正文  第二个参数是邮件发送的类型
         message.setContent(text,"text/html;charset=UTF-8");
         //发送一封邮件
+        System.out.println("1111111111");
         Transport.send(message);
+        System.out.println("222222222222");
     }
 }

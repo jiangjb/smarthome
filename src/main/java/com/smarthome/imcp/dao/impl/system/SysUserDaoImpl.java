@@ -88,7 +88,6 @@
 				Object[] values = { userPhone };
 				StringBuffer hql = new StringBuffer();
 
-//				hql.append("select 1 from SysUser sysUser");
 				hql.append("select sysUser.userId from SysUser sysUser");
 				hql.append(" where sysUser.userPhone = ?");
 				List list = findByHQL(hql.toString(), values);
@@ -102,11 +101,10 @@
 			
 /*     */   @Override
 			public int findByEmail(String email) {
-				System.out.println("findByPhone");
+				System.out.println("findByEmail");
 				Object[] values = { email };
 				StringBuffer hql = new StringBuffer();
 			
-			//	hql.append("select 1 from SysUser sysUser");
 				hql.append("select sysUser.userId from SysUser sysUser");
 				hql.append(" where sysUser.email = ?");
 				List list = findByHQL(hql.toString(), values);
@@ -115,6 +113,7 @@
 				if (GlobalMethod.isNullorEmpty(list)) {
 					return 0;
 				}
+				System.out.println("result>"+list.get(0));
 				return  (int) list.get(0);
 			}
 

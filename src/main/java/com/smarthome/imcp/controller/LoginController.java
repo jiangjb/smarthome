@@ -288,7 +288,7 @@
 		   @RequestMapping({"emailCode.do"})
 		   @ResponseBody
 		   public Map<String,String> geteEailCode(@RequestParam("email") String email,HttpServletRequest request) {
-			   System.out.println("获取邮箱验证码！");
+			   System.out.println("获取邮箱验证码!!!!!");
 			   if (this.sysUserService.findByUserEmail(email) !=0) {//如果不为0，发送验证码
 				   Map<String,String> map=new HashMap<String,String>();
 				   int UserID = this.sysUserService.findByUserEmail(email);
@@ -296,6 +296,7 @@
 				   
 				   int email_code = (int) ((Math.random() * 9 + 1) * 100000); //验证码服务端生成
 				   String text="您的验证码是：" + email_code + "。请不要把验证码泄露给其他人。";
+				   System.out.println("text>"+text);
 				   
 				   MailUtil mail=new MailUtil();
 				   try {

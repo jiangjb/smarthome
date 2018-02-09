@@ -88,6 +88,7 @@
 /*       */ import com.smarthome.imcp.util.MySecureProtocolSocketFactory;
 /*       */ import com.smarthome.imcp.util.NumComparator;
 /*       */ import com.smarthome.imcp.util.SendMsgUtil;
+import com.smarthome.imcp.util.SimulateHTTPRequestUtil;
 /*       */ import com.smarthome.imcp.util.StaticUtils;
 /*       */ import com.smarthome.imcp.util.TokeUtil;
 /*       */ import com.smarthome.imcp.util.UuidUtil;
@@ -137,6 +138,7 @@ import com.smarthome.imcp.util.android.Demo;
 /*       */ import org.slf4j.Logger;
 /*       */ import org.slf4j.LoggerFactory;
 /*       */ import org.springframework.beans.factory.annotation.Autowired;
+			import org.apache.commons.codec.binary.Base64;//2-9
 
 /*       */ @ParentPackage("auth-check-package")
 /*       */ @Namespace("/xingUser")
@@ -915,65 +917,123 @@ import com.smarthome.imcp.util.android.Demo;
 /*       */             }
 /*       */ 
 /*       */           }
-/*   783 */           else if (obj.getDeviceAddress().toString().length() == 8) {//门锁的地址长度为8位                         门锁相关  设置command?
-/*   784 */             String deviceType = obj.getDeviceType().toString();//门锁 deviceType-5314;	
-/*   785 */             String substring = deviceType.substring(1, 2);//3
-/*   786 */             Integer valueOf = Integer.valueOf(substring);
-/*   787 */             Integer s = null;
-/*   788 */             if (valueOf.intValue() == 1)
-/*   789 */               s = Integer.valueOf(2262);
-/*       */             else {
-/*   791 */               s = Integer.valueOf(1527);//门锁
-/*       */             }
-/*   794 */             String substring2 = deviceType.substring(2, 3);//1
-/*   795 */             Integer valueOf2 = Integer.valueOf(substring2);
-/*   796 */             Integer b = null;
-/*   797 */             if (valueOf2.intValue() == 1)
-/*   798 */               b = Integer.valueOf(315);//门锁315
-/*       */             else {
-/*   800 */               b = Integer.valueOf(433);
-/*       */             }
-/*       */ 
-/*   803 */             String substring3 = deviceType.substring(3, 4);
-/*   804 */             Integer valueOf3 = Integer.valueOf(substring3);
-/*   805 */             Integer c = null;
-/*   806 */             if (valueOf3.intValue() == 1) {
-/*   807 */               c = Integer.valueOf(12);
-/*       */             }
-/*   809 */             if (valueOf3.intValue() == 2) {
-/*   810 */               c = Integer.valueOf(15);
-/*       */             }
-/*   812 */             if (valueOf3.intValue() == 3) {
-/*   813 */               c = Integer.valueOf(22);
-/*       */             }
-/*       */ 
-/*   816 */             if (valueOf3.intValue() == 4) {//门锁531"4"
-/*   817 */               c = Integer.valueOf(33);
-/*       */             }
-/*   819 */             if (valueOf3.intValue() == 5) {
-/*   820 */               c = Integer.valueOf(47);
-/*       */             }
-/*       */             System.out.println("~~~~~~~~~~~~~split[0]:"+split[0]);
-/*   823 */             if (split[0].equals("0"))
-/*       */             {
-/*   884 */               String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(usereCode) + "," + c + 
-/*   885 */                 "," + obj.getDeviceAddress() + 2;
-/*   886 */               byte[] bs = str.getBytes();
-						  System.err.println("<?> "+new String(bs));//PT1527_315M SEND '0',33,78892510'1',OK 
-/*   889 */               this.packetProcessHelper.processSendDData(obj.getBoDevice().getDeviceCode(), bs);
-/*       */             }
-/*       */ 
-/*   892 */             if (split[0].equals("100"))
-/*       */             {//obj
-						  System.out.println("split[0]==100)");
-/*   951 */               String str = "PT" + s + "_" + b + "M-SEND-" + user_num.get(usereCode) + "," + c + 
-/*   952 */                 "," + obj.getDeviceAddress() + 1;
-/*   953 */               byte[] bs = str.getBytes();
-						  System.err.println("<?> "+new String(bs));//PT1527_315M SEND 0,33,788925101,OK
-/*   956 */               this.packetProcessHelper.processSendDData(obj.getBoDevice().getDeviceCode(), bs);
-
-/*       */             }
-/*   958 */           } else if (obj.getDeviceType().equals("8")) {
+						else if (obj.getDeviceType().equals("201")) {
+						    System.out.println("model 201 wifi split[0]:" + split[0]);
+						    byte open_close = 0;
+						    if (split[0].equals("100")) {
+						      open_close = 1;
+						    }
+						
+						    byte[] byte_data = { 2, open_close };
+						    String str_hex = Base64.encodeBase64String(byte_data);
+						    JSONObject jsonSend = new JSONObject();
+						    jsonSend.put("token", "9f93b08e45104e2780136a292aa121a4");
+						    jsonSend.put("device_id", obj.getDeviceAddress());
+						    jsonSend.put("data", str_hex);
+						
+						    String str_content = Base64.encodeBase64String(jsonSend.toString().getBytes());
+						
+						    String sendURL = "http://relay.hificat.com:8000/send_data?content=" + str_content;
+						    SimulateHTTPRequestUtil simulateHTTPRequestUtil = new SimulateHTTPRequestUtil();
+						    String http_result = simulateHTTPRequestUtil.sendGet2(sendURL);
+						    System.out.println("sendURL:" + sendURL + " http_result:" + http_result);
+					  }
+/*   783 */           else if (obj.getDeviceAddress().toString().length() == 8) {//2-9 modify
+					    String deviceType = obj.getDeviceType().toString();
+					    String substring = deviceType.substring(1, 2);
+					    Integer valueOf = Integer.valueOf(substring);
+					    String s_code = null;
+					    if (valueOf.intValue() == 1) {
+					      s_code = "2262";
+					    } else if (valueOf.intValue() == 3) {
+					      int i_deviceType = 0;
+					      try { i_deviceType = Integer.valueOf(deviceType).intValue(); } catch (Exception localException1) {
+					      }
+					      if ((i_deviceType >= 4000) && (i_deviceType <= 4999))
+					      {
+					        s_code = "DYDJ";
+					      } else if ((i_deviceType >= 5000) && (i_deviceType <= 5999))
+					      {
+					        s_code = "ZNMS";
+					      }
+					      System.out.println("------i_deviceType:" + i_deviceType + " s_code:" + s_code);
+					    } else {
+					      s_code = "1527";
+					    }
+					
+					    String substring2 = deviceType.substring(2, 3);
+					    Integer valueOf2 = Integer.valueOf(substring2);
+					    Integer b = null;
+					    if (valueOf2.intValue() == 1)
+					      b = Integer.valueOf(315);
+					    else {
+					      b = Integer.valueOf(433);
+					    }
+					
+					    String substring3 = deviceType.substring(3, 4);
+					    Integer valueOf3 = Integer.valueOf(substring3);
+					    Integer c = null;
+					    if (valueOf3.intValue() == 1) {
+					      c = Integer.valueOf(12);
+					    }
+					    if (valueOf3.intValue() == 2) {
+					      c = Integer.valueOf(15);
+					    }
+					    if (valueOf3.intValue() == 3) {
+					      c = Integer.valueOf(22);
+					    }
+					
+					    if (valueOf3.intValue() == 4) {
+					      c = Integer.valueOf(33);
+					    }
+					    if (valueOf3.intValue() == 5)
+					      c = Integer.valueOf(47);
+					    else if (valueOf3.intValue() == 6)
+					      c = Integer.valueOf(330);
+					    else if (valueOf3.intValue() == 7)
+					      c = Integer.valueOf(390);
+					    else if (valueOf3.intValue() == 8) {
+					      c = Integer.valueOf(200);
+					    }
+					
+					    if (split[0].equals("0"))
+					    {
+					      String str = "PT" + s_code + "_" + b + "M-SEND-" + user_num.get(usereCode) + "," + c + 
+					        "," + obj.getDeviceAddress() + 2;
+					      byte[] bs = str.getBytes();
+					      System.err.println(new String(bs));
+					
+					      this.packetProcessHelper.processSendDData(obj.getBoDevice().getDeviceCode(), bs);
+					    }
+					
+					    if (split[0].equals("50"))
+					    {
+					      String str = "PT" + s_code + "_" + b + "M-SEND-" + user_num.get(usereCode) + "," + c + 
+					        "," + obj.getDeviceAddress() + 3;
+					      byte[] bs = str.getBytes();
+					      System.err.println(new String(bs));
+					      this.packetProcessHelper.processSendDData(obj.getBoDevice().getDeviceCode(), bs);
+					    }
+					
+					    if (split[0].equals("100"))
+					    {
+					      String str = "PT" + s_code + "_" + b + "M-SEND-" + user_num.get(usereCode) + "," + c + 
+					        "," + obj.getDeviceAddress() + 1;
+					      byte[] bs = str.getBytes();
+					      System.err.println(new String(bs));
+					
+					      this.packetProcessHelper.processSendDData(obj.getBoDevice().getDeviceCode(), bs);
+					    }
+					
+					    if (split[0].equals("150"))
+					    {
+					      String str = "PT" + s_code + "_" + b + "M-SEND-" + user_num.get(usereCode) + "," + c + 
+					        "," + obj.getDeviceAddress() + 4;
+					      byte[] bs = str.getBytes();
+					      System.err.println(new String(bs));
+					      this.packetProcessHelper.processSendDData(obj.getBoDevice().getDeviceCode(), bs);
+					    }
+					  } else if (obj.getDeviceType().equals("8")) {
 /*       */             try {
 /*   960 */               this.resendVerification = this.boResendVerificationService
 /*   961 */                 .find(obj.getBoDevice().getDeviceCode(), obj.getDeviceAddress(), split[2]);
@@ -13156,6 +13216,40 @@ import com.smarthome.imcp.util.android.Demo;
 /* 13495 */                 this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 /*       */               }
 /*       */ 				
+						//2-8
+						if (device.getDeviceType().equals("7")) {
+						    int command_type = 1;
+						    Integer commands = null;
+						    if (this.command.intValue() == 0) {
+						      command_type = 1;
+						      commands = Integer.valueOf(0);
+						    }
+						
+						    if (this.command.intValue() == 1) {
+						      commands = Integer.valueOf(1);
+						      command_type = 1;
+						    }
+						
+						    if ((this.command.intValue() >= 100) && (this.command.intValue() <= 200))
+						    {
+						      commands = Integer.valueOf(this.command.intValue() - 100);
+						      command_type = 2;
+						    }
+						
+						    if ((this.command.intValue() >= 300) && (this.command.intValue() <= 400))
+						    {
+						      commands = Integer.valueOf(this.command.intValue() - 300);
+						      command_type = 3;
+						    }
+						
+						    String str = "ZIGBEE_COLOR-SEND-" + user_num.get(userCode2[0].trim().toString()) + "," + device.getDeviceAddress() + 
+						      "," + command_type + "," + commands;
+						    System.err.println(commands + ">-- " + this.command + ">--" + command_type);
+						    byte[] bs = str.getBytes();
+						    System.err.println(new String(bs));
+						    this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
+						  }
+						//end
 
 						//2-1
 						if (device.getDeviceAddress().toString().length() == 8) {

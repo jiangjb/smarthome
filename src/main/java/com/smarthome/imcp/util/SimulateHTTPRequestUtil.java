@@ -33,6 +33,7 @@ import java.util.ArrayList;
 ///*    */       List<String> keys=(List<String>) map.keySet();
 ///* 29 */       for (String key : keys) {
 //			   List<String> keys=(List<String>)map.keySet();
+			   System.out.println( "----------------------------1<" );
 			   for (String key : keys) {
 /* 30 */         System.out.println(key + "--->" + map.get(key));
 /*    */       }
@@ -70,6 +71,58 @@ import java.util.ArrayList;
 /*    */     }
 /* 53 */     return result;
 /*    */   }
+
+			//2-9 new add
+			public static String sendGet2(String url) {
+/*  663 */     String result = "";
+/*  664 */     BufferedReader in = null;
+/*      */     try {
+/*  666 */       String urlNameString = url;
+/*  667 */       URL realUrl = new URL(urlNameString);
+/*  669 */       URLConnection connection = realUrl.openConnection();
+/*      */ 
+/*  674 */       connection.connect();
+/*      */ 
+
+/*  633 */       Map map = connection.getHeaderFields();
+				 List<String> keys = new ArrayList<String>(map.keySet());
+				 System.out.println( "----------------------------2<" );
+/*  678 */       for (String key : keys) {
+/*  679 */         System.out.println(key + "--->" + map.get(key));
+/*      */       }
+/*      */ 
+/*  682 */       in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+/*      */       String line;
+/*  684 */       while ((line = in.readLine()) != null)
+/*      */       {
+/*  685 */         result = result + line;
+/*      */       }
+/*  687 */       System.err.println(result);
+/*      */     } catch (Exception e) {
+/*  689 */       System.out.println("发送GET请求出现异常！" + e);
+/*  690 */       e.printStackTrace();
+/*      */       try
+/*      */       {
+/*  695 */         if (in != null)
+/*  696 */           in.close();
+/*      */       }
+/*      */       catch (Exception e2) {
+/*  699 */         e2.printStackTrace();
+/*      */       }
+/*      */     }
+/*      */     finally
+/*      */     {
+/*      */       try
+/*      */       {
+/*  695 */         if (in != null)
+/*  696 */           in.close();
+/*      */       }
+/*      */       catch (Exception e2) {
+/*  699 */         e2.printStackTrace();
+/*      */       }
+/*      */     }
+/*  702 */     return result;
+/*      */   }
 /*    */ }
 
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\

@@ -102,7 +102,7 @@
 			
 			@Override
 			public int findByUserEmail(String email) {
-				System.out.println("this.sysUserDao.findByPhone(userPhone)==="+this.sysUserDao.findByEmail(email));
+				System.out.println("this.sysUserDao.findByEmail(email)==="+this.sysUserDao.findByEmail(email));
 				return this.sysUserDao.findByEmail(email);
 			}
 /*     */ 

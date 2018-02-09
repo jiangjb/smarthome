@@ -795,7 +795,7 @@
 /* 806 */       page.setTotalCount(getCount(HQL, values).intValue());
 /*     */     }
 /* 808 */     Query query = getCurrentSession().createQuery(HQL);
-              System.out.println("query==="+query);
+//              System.out.println("query==="+query);
 /* 809 */     if (page != null) {
 /* 810 */       query.setFirstResult(page.getStartRow());
 /* 811 */       query.setMaxResults(page.getPageSize());
@@ -807,9 +807,9 @@
 				}
 /* 815 */         
 /*     */     }
-              System.out.println("query.list="+query.list());//query.list=[1]
+//              System.out.println("query.list="+query.list());//query.list=[1]
 /* 817 */     List result = query.list();//问题出现在这
-              System.out.println("result==="+result);//result===[1]
+//              System.out.println("result==="+result);//result===[1]
 /* 818 */     if (page != null) {
 /* 819 */       page.setEndRow(page.getStartRow() + result.size());
 /*     */     }

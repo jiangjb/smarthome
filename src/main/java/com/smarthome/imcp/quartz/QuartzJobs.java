@@ -121,7 +121,7 @@
 /* 124 */             System.err.println(boModel2.getBoUsers().getUserCode());
 /* 125 */             SimulateHTTPRequestUtil s = new SimulateHTTPRequestUtil();
 ///* 126 */             s.sendGet("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + boModel2.getModelId(), boModel2.getBoUsers().getUserCode());
-					  s.sendGet("http://120.77.250.17/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + boModel2.getModelId(), boModel2.getBoUsers().getUserCode());
+					  s.sendGet("http://120.77.250.17:8080/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + boModel2.getModelId(), boModel2.getBoUsers().getUserCode());
 /*     */           }
 /*     */       }
 /*     */     }

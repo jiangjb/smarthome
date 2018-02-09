@@ -178,8 +178,8 @@ import com.smarthome.imcp.util.android.Demo;
 /* 203 */         this.requestJson = new RequestJson(false, "邮箱格式不正确", map);
 /*     */       } else {
 /* 205 */         BoUsers email = this.boUserService.findByUserEmail(this.userEmail);
+                  System.out.println("findUser By email:"+email);
 /*     */         String sd;
-///*     */         String sd;
 /* 207 */         if (email == null)
 /* 208 */           sd = "未绑定账号";
 /*     */         else {
@@ -188,6 +188,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 212 */         String vcode = "";
 /* 213 */         for (int i = 0; i < 6; i++)
 /* 214 */           vcode = vcode + (int)(Math.random() * 9.0D);
+				  System.out.println("发给邮箱的验证码："+vcode);
 /* 215 */         if (this.versionType.equals("1")) {
 /* 216 */           String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
 /* 223 */             this.userEmail + " 邮箱," + sd + "</td>" + "<tr " + 3 + "><td>" + "验证码为:" + vcode + " 请在10分钟内使用" + "</td>" + "</tbody>" + "<tr " + 3 + "><td>" + "若非本人账号获取到验证码请勿去使用app修改密码,若查到,责任自负" + "</td>" + "</tbody>" + "</table>";
@@ -391,7 +392,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 451 */       } else if (StringUtils.isEmpty(this.userPwd)) {
 /* 452 */         this.requestJson = new RequestJson(false, "请输入密码", userInfoMap);
 /*     */       } else {
-/* 454 */         BoUsers users = this.boUserService.findByUserPhonePwd(this.userPhone, md5.getMD5ofStr(this.userPwd));
+	/* 454 */     BoUsers users = this.boUserService.findByUserPhonePwd(this.userPhone, md5.getMD5ofStr(this.userPwd));
 /* 455 */         String generateTokeCode = TokeUtil.generateTokeCode();
 /* 456 */         String generateTokeCodes = TokeUtil.generateTokeCodes();
 /* 457 */         Long accessTokenTime = Long.valueOf(1800L);
@@ -764,6 +765,7 @@ import com.smarthome.imcp.util.android.Demo;
 /*     */               } else {
 /* 682 */                 this.requestJson.setData(map);
 /* 683 */                 this.requestJson.setMessage("当前ip请求频繁");
+
 /* 684 */                 this.requestJson.setSuccess(false);
 /*     */               }
 /*     */             } else {
