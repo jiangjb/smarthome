@@ -4,6 +4,8 @@
 /*    */ import com.smarthome.imcp.dao.bo.BoUserDevicesDaoIface;
 /*    */ import com.smarthome.imcp.dao.model.bo.BoUserDevices;
 /*    */ import java.io.Serializable;
+		 import java.util.List;
+		 import org.hibernate.criterion.DetachedCriteria;
 /*    */ import org.springframework.stereotype.Service;
 /*    */ 
 /*    */ @Service("BoUserDevicesDao")
@@ -14,6 +16,13 @@
 /*    */   {
 /* 18 */     super(BoUserDevices.class);
 /*    */   }
+
+		  @Override
+		  public List<BoUserDevices> find() {
+			  DetachedCriteria criteria = DetachedCriteria.forClass(BoUserDevices.class);
+			  return findByCriteria(criteria);
+		  }
+
 /*    */ }
 
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\

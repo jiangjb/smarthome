@@ -1,5 +1,5 @@
 /*    */ package com.smarthome.imcp.controller;
-/*    */ 
+
 		 import com.smarthome.imcp.common.GlobalMethod;
 		 import com.smarthome.imcp.common.MailUtil;
 /*    */ import com.smarthome.imcp.common.Md5;
@@ -7,22 +7,23 @@
 		 import com.smarthome.imcp.dao.model.bo.BoDevice;
 		 import com.smarthome.imcp.dao.model.bo.BoHostDevice;
          import com.smarthome.imcp.dao.model.bo.BoInfraredPart;
-         import com.smarthome.imcp.dao.model.bo.BoUsers;
+		 import com.smarthome.imcp.dao.model.bo.BoUserDevices;
+		 import com.smarthome.imcp.dao.model.bo.BoUsers;
 		 import com.smarthome.imcp.dao.model.bo.BoUsersValidation;
 /*    */ import com.smarthome.imcp.dao.model.system.SysUser;
-		 import com.smarthome.imcp.exception.BusinessException;
 /*    */ import com.smarthome.imcp.secur.CurrentUser;
 		 import com.smarthome.imcp.service.bo.BoDeviceServiceIface;
 		 import com.smarthome.imcp.service.bo.BoHostDeviceServiceIface;
 		 import com.smarthome.imcp.service.bo.BoInfraredPartServiceIface;
+		 import com.smarthome.imcp.service.bo.BoUserDevicesServiceIface;
 		 import com.smarthome.imcp.service.bo.BoUsersValidationServiceIface;
 		 import com.smarthome.imcp.service.bo.BoUserssServiceIface;
 /*    */ import com.smarthome.imcp.service.secur.SecurServiceIface;
 /*    */ import com.smarthome.imcp.service.system.SysUserServiceIface;
-		 import com.sun.star.sync.SyncAction;
 		 import java.io.IOException;
 /*    */ import java.io.Serializable;
 		 import java.util.ArrayList;
+		 import java.util.Date;
 		 import java.util.HashMap;
 		 import java.util.List;
 		 import java.util.Map;
@@ -50,7 +51,9 @@
 		 import org.dom4j.Document;  
 		 import org.dom4j.DocumentException;  
 		 import org.dom4j.DocumentHelper;  
-		 import org.dom4j.Element; 
+		 import org.dom4j.Element;
+		 import org.slf4j.Logger;
+		 import org.slf4j.LoggerFactory; 
 /*    */ 
 		@Controller
 /*    */ public class LoginController
@@ -77,9 +80,14 @@
 		  @Autowired
 		  private BoInfraredPartServiceIface<BoInfraredPart, Serializable> boInfraredPartService;
 		  
+		  @Autowired
+		  private BoUserDevicesServiceIface<BoUserDevices, Serializable> BoUserDevicesService;
+		  
 //           private RequestJson requestJson;
            //new 短信验证码
            private static String Url = "http://106.ihuyi.com/webservice/sms.php?method=Submit";  
+           
+           private static Logger logger = LoggerFactory.getLogger(LoginController.class);
            
 		  
 /*    */   @RequestMapping({"login.do"})
@@ -338,6 +346,151 @@
 				   }
 			   }  
 			}	      
+		   
+		   
+		   //2018/2/26 build
+		   @RequestMapping({"homePage.do"})
+		   @ResponseBody
+		   public List<BoUserDevices> homePage(HttpServletRequest request) {
+			   System.out.println("获取初始化的数据!");   
+//			   String result="0";//失败用0表示
+			   List varList=new ArrayList();
+			   
+			   List<BoUserDevices> boUserDevices=(List<BoUserDevices>)this.BoUserDevicesService.find();
+			 //Page类
+			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+			   int totalCount=boUserDevices.size();
+			   int pageSize=page.getPageSize();
+			   int totalPages=1;
+			   if(totalCount%pageSize !=0){
+				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = totalCount/pageSize;
+			   }
+			   for(int i=0;i<boUserDevices.size();i++) {
+				   if(i>=0 && i<=9) {  
+					   Map map=new HashMap();
+					   int id=boUserDevices.get(i).getUserDeviceId();
+					   System.out.println("id:"+id);
+					   String USER_NAME=boUserDevices.get(i).getBoUsers().getUserName();
+//					   System.out.println("USER_NAME:"+USER_NAME);
+					   String USER_PHONE=boUserDevices.get(i).getBoUsers().getUserPhone();
+					   String DEVICE_CODE=boUserDevices.get(i).getBoDevice().getDeviceCode();
+//					   System.out.println("DEVICE_CODE:"+DEVICE_CODE);
+					   Date MNT_CREATOR_DATE=boUserDevices.get(i).getBoDevice().getMntCreatorDate();
+//					   System.out.println("MNT_CREATOR_DATE:"+MNT_CREATOR_DATE);
+					   Date MNT_UPDATED_DATE=boUserDevices.get(i).getBoDevice().getMntUpdatedDate();
+//					   System.out.println("MNT_UPDATED_DATE:"+MNT_UPDATED_DATE);
+					   String HOST_STATUS=boUserDevices.get(i).getBoDevice().getHostStatus();
+					   String SIGNATURE=boUserDevices.get(i).getBoUsers().getSignature();
+					   
+					   map.put("id", id);
+					   map.put("USER_NAME", USER_NAME);
+			           map.put("USER_PHONE",USER_PHONE);
+			           map.put("DEVICE_CODE",DEVICE_CODE);
+			           map.put("MNT_CREATOR_DATE",MNT_CREATOR_DATE);
+			           map.put("MNT_UPDATED_DATE", MNT_UPDATED_DATE);
+			           map.put("HOST_STATUS", HOST_STATUS);
+			           map.put("SIGNATURE", SIGNATURE);
+			           varList.add(map);
+				   }
+//				   request.setAttribute("varList", varList);
+//				   model.addAttribute("varList", varList);  
+//				   result="1";//成功用1表示
+			   }
+			   System.out.println("varList:"+varList);
+			 //用于向前台传递的数据  for分页
+			   page.setCurrentPage(1);
+			   page.setTotalPages(totalPages);
+			   varList.add(page);
+			   return varList;
+		   }
+		   @RequestMapping({"findUserDevicesByIndex.do"})
+		   @ResponseBody
+		   public List<BoUserDevices> findUserDevicesByIndex(@RequestParam("index") int index) { 			  			 
+			   System.out.println("分页操作");
+			   List varList=new ArrayList<BoUsers>();
+			   List<BoUserDevices> boUserDevices=(List<BoUserDevices>)this.BoUserDevicesService.find();
+			   //Page类
+			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+			   int totalCount=boUserDevices.size();
+			   int pageSize=page.getPageSize();
+			   int totalPages=1;
+			   if(totalCount%pageSize !=0){
+				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = totalCount/pageSize;
+			   }
+			   int startRow=(index-1)*pageSize;//数据库表中的行数 （从0开始）
+			   int endRow;
+			   if(index == totalPages) {
+				   endRow=totalCount-1;
+			   }else {
+				   endRow=index*pageSize - 1;
+			   }
+			   for(int i=0;i<boUserDevices.size();i++) {
+				   if(i>=startRow && i<=endRow) {
+					   Map map=new HashMap();
+					   int id=boUserDevices.get(i).getUserDeviceId();
+					   System.out.println("id:"+id);
+					   String USER_NAME=boUserDevices.get(i).getBoUsers().getUserName();
+//					   System.out.println("USER_NAME:"+USER_NAME);
+					   String USER_PHONE=boUserDevices.get(i).getBoUsers().getUserPhone();
+					   String DEVICE_CODE=boUserDevices.get(i).getBoDevice().getDeviceCode();
+//					   System.out.println("DEVICE_CODE:"+DEVICE_CODE);
+					   Date MNT_CREATOR_DATE=boUserDevices.get(i).getBoDevice().getMntCreatorDate();
+//					   System.out.println("MNT_CREATOR_DATE:"+MNT_CREATOR_DATE);
+					   Date MNT_UPDATED_DATE=boUserDevices.get(i).getBoDevice().getMntUpdatedDate();
+//					   System.out.println("MNT_UPDATED_DATE:"+MNT_UPDATED_DATE);
+					   String HOST_STATUS=boUserDevices.get(i).getBoDevice().getHostStatus();
+					   String SIGNATURE=boUserDevices.get(i).getBoUsers().getSignature();
+					   
+					   map.put("id", id);
+					   map.put("USER_NAME", USER_NAME);
+			           map.put("USER_PHONE",USER_PHONE);
+			           map.put("DEVICE_CODE",DEVICE_CODE);
+			           map.put("MNT_CREATOR_DATE",MNT_CREATOR_DATE);
+			           map.put("MNT_UPDATED_DATE", MNT_UPDATED_DATE);
+			           map.put("HOST_STATUS", HOST_STATUS);
+			           map.put("SIGNATURE", SIGNATURE);
+			           varList.add(map);
+				   }
+			   }
+			   System.out.println("varList:"+varList);
+			 //用于向前台传递的数据  for分页
+			   page.setCurrentPage(index);
+			   page.setTotalPages(totalPages);
+			   varList.add(page);
+			   return varList;
+		   }
+		   
+		   @RequestMapping({"modifyBZ.do"})
+		   @ResponseBody
+		   public String modifyBZ(@RequestParam("signature") String signature,@RequestParam("id") String id) {//BoUserDevices id>BoUsers id
+			   System.out.println("编辑备注！");
+			   String result="error";
+			   int id00=Integer.parseInt(id);//String 转 int
+			   BoUserDevices boD=this.BoUserDevicesService.findByKey(id00);
+//			   logger.info("boD:"+boD);//null
+			   if(boD != null) {
+				   int UserId=boD.getBoUsers().getUserId();
+//				   logger.info("UserId:"+UserId);
+				   BoUsers boUser=this.boUserssService.findByKey(UserId);
+//				   logger.info("boUser:"+boUser);
+				   boUser.setSignature(signature);
+				   
+				   BoUsers boUser01=this.boUserssService.update(boUser);
+				   
+				   if(boUser01 !=null) {
+					   System.out.println("修改成功...");
+					   result="success";
+				   }else {
+					   System.out.println("修改失败，请重新操作");
+				   }
+			   }
+			   return result;
+		   }
+		   
 		   
 		   
 		   @RequestMapping({"getSysUser.do"})

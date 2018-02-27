@@ -4,6 +4,7 @@
 /*     */ import com.smarthome.imcp.dao.bo.BoUserssDaoIface;
 /*     */ import com.smarthome.imcp.dao.criteria.SearchCriteria;
 /*     */ import com.smarthome.imcp.dao.criteria.smarthome.SearchCriteriaUsers;
+import com.smarthome.imcp.dao.model.bo.BoUserDevices;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoUsers;
 /*     */ import com.smarthome.imcp.service.AbstractBasicService;
 /*     */ import com.smarthome.imcp.service.bo.BoUserssServiceIface;
@@ -41,7 +42,10 @@
 /*     */     }
 /*  60 */     return null;
 /*     */   }
-/*     */ 
+/*     */    public BoUsers findByKey(Serializable id)
+/*     */   {//NEW ADD 2018/2/27
+/*  94 */     return (BoUsers)this.boUserDao.findById(id);
+/*     */   }
 /*     */   public BoUsers findByUserPhone(String userPhone) {
 /*  64 */     DetachedCriteria criteria = DetachedCriteria.forClass(BoUsers.class);
 /*  65 */     criteria.add(Restrictions.eq("userPhone", userPhone));

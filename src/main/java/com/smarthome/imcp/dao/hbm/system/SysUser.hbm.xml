@@ -29,5 +29,12 @@
         <property name="email" type="java.lang.String">
             <column name="EMAIL" length="32" />
         </property>
+        <!-- 2018/2/26 NEW ADD-->
+        <!-- <property name="remarks" type="java.lang.String">
+            <column name="BZ" length="255" />
+        </property>
+        <property name="lastLogin" type="java.lang.String">
+            <column name="LAST_LOGIN" length="255" />
+        </property> -->
     </class>
 </hibernate-mapping>

@@ -22,6 +22,8 @@ public abstract interface BoUserDevicesServiceIface<T, PK extends Serializable> 
   public abstract boolean chkDeleteValid(T paramT);
 
   public abstract BoUserDevices delete(T paramT);
+
+  public abstract List<BoUserDevices> find();//2018/2/26 new
 }
 
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\

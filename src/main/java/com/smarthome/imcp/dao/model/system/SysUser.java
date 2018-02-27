@@ -43,6 +43,21 @@
 /*     */   private String organizeName;
 /*     */   private Integer deptId;
 /*     */   private String deptName;
+//			private String remarks;//备注                         2018/2/26添加
+//			private String lastLogin;//最后登录时间   2018/2/26添加
+			
+//			public String getLastLogin() {
+//				return lastLogin;
+//			}
+//			public void setLastLogin(String lastLogin) {
+//				this.lastLogin = lastLogin;
+//			}
+//			public String getRemarks() {
+//				return remarks;
+//			}
+//			public void setRemarks(String remarks) {
+//				this.remarks = remarks;
+//			}
 /*     */ 
 /*     */   public SysUser()
 /*     */   {
