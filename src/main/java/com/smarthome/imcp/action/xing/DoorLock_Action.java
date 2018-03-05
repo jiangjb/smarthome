@@ -814,7 +814,7 @@
 /*      */   }
 /*      */ 
 /*      */   @Action(value="pushRecord", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
-/*      */   public String pushRecord()
+/*      */   public String pushRecord()                   //开锁记录-BoUnlockingPushRecord
 /*      */     throws InterruptedException
 /*      */   {
 /*  829 */     this.requestJson = new RequestJson();
@@ -826,6 +826,7 @@
 /*  835 */     String sign = request.getHeader("sign");
 /*  836 */     String access_token = request.getHeader("access_token");
 /*  837 */     String userCode = request.getHeader("userCode");
+			   logger.info("pushRecord userCode>>"+userCode);
 /*      */     List voList;
 /*  838 */     if (userCode.contains(",")) {
 /*  839 */       String[] userCode2 = userCode.split(",");
@@ -855,6 +856,7 @@
 /*  863 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
 /*      */             try {
 /*  865 */               List<BoUnlockingPushRecord> record = this.boUnlockingPushRecordServicess.getRecord(userCode2[0].trim().toString(), page);
+						 logger.info("pushRecord record>>"+record);
 /*  866 */               if (record.size() <= 0) {
 /*  867 */                 this.requestJson.setData(map);
 /*  868 */                 this.requestJson.setMessage("没有找到报警记录");
@@ -916,6 +918,7 @@
 /*  924 */         else if (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue()) {
 /*      */           try {
 /*  926 */             List<BoUnlockingPushRecord> record = this.boUnlockingPushRecordServicess.getRecord(userCode, this.page);
+                       logger.info("pushRecord record01>>"+record);
 /*  927 */             if (record.size() <= 0) {
 /*  928 */               this.requestJson.setData(map);
 /*  929 */               this.requestJson.setMessage("没有找到报警记录");

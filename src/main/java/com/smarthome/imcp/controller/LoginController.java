@@ -31,6 +31,7 @@
 /*    */ import javax.servlet.http.HttpServletRequest;
 /*    */ import org.springframework.beans.factory.annotation.Autowired;
 /*    */ import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 /*    */ import org.springframework.web.bind.annotation.RequestMapping;
 /*    */ import org.springframework.web.bind.annotation.RequestParam;
 /*    */ import org.springframework.web.bind.annotation.ResponseBody;
@@ -371,7 +372,7 @@
 				   if(i>=0 && i<=9) {  
 					   Map map=new HashMap();
 					   int id=boUserDevices.get(i).getUserDeviceId();
-					   System.out.println("id:"+id);
+//					   System.out.println("id:"+id);
 					   String USER_NAME=boUserDevices.get(i).getBoUsers().getUserName();
 //					   System.out.println("USER_NAME:"+USER_NAME);
 					   String USER_PHONE=boUserDevices.get(i).getBoUsers().getUserPhone();
@@ -398,7 +399,7 @@
 //				   model.addAttribute("varList", varList);  
 //				   result="1";//成功用1表示
 			   }
-			   System.out.println("varList:"+varList);
+//			   System.out.println("varList:"+varList);
 			 //用于向前台传递的数据  for分页
 			   page.setCurrentPage(1);
 			   page.setTotalPages(totalPages);
@@ -432,7 +433,7 @@
 				   if(i>=startRow && i<=endRow) {
 					   Map map=new HashMap();
 					   int id=boUserDevices.get(i).getUserDeviceId();
-					   System.out.println("id:"+id);
+//					   System.out.println("id:"+id);
 					   String USER_NAME=boUserDevices.get(i).getBoUsers().getUserName();
 //					   System.out.println("USER_NAME:"+USER_NAME);
 					   String USER_PHONE=boUserDevices.get(i).getBoUsers().getUserPhone();
@@ -456,7 +457,7 @@
 			           varList.add(map);
 				   }
 			   }
-			   System.out.println("varList:"+varList);
+//			   System.out.println("varList:"+varList);
 			 //用于向前台传递的数据  for分页
 			   page.setCurrentPage(index);
 			   page.setTotalPages(totalPages);
@@ -491,7 +492,37 @@
 			   return result;
 		   }
 		   
-		   
+		   @RequestMapping({"OneToUnbind.do"})
+		   @ResponseBody
+		   public String OneToUnbind(@RequestParam("deviceCode") String deviceCode,ModelMap map1) {//List<BoHostDevice>
+			   System.out.println("跳转到解绑页面的函数");
+			   List list=new ArrayList();
+//		       List<BoHostDevice> boHosts = this.boHostDeviceService.getDeviceByAddress(deviceAddress); 
+			   List<BoHostDevice> boHosts = this.boHostDeviceService.getAllHostD();
+	    	   for(BoHostDevice bohost:boHosts) {//
+//	    		   System.out.println(bohost.getBoDevice().getDeviceCode().equals(deviceCode));
+	    		   if(bohost.getBoDevice().getDeviceCode().equals(deviceCode)) {//解决从BoUsers表  查询  BoHostDevice表 的问题,,此处不能用等号比较
+//	    			   System.out.println("进");
+	    			   Map map=new HashMap();
+			        	int id=bohost.getId();
+			        	String deviceCode1=bohost.getBoDevice().getDeviceCode();
+			        	String userPhone=bohost.getBoUsers().getUserPhone();
+			        	String nick_name=bohost.getNickName();
+			        	
+			        	int DEVICE_ID=bohost.getBoDevice().getDeviceId();
+			        	int USER_ID=bohost.getBoUsers().getUserId();
+			        	map.put("id", id);
+			        	map.put("deviceCode",deviceCode1);
+			        	map.put("userPhone",userPhone);
+			        	map.put("nick_name",nick_name);
+			        	map.put("DEVICE_ID", DEVICE_ID);
+			        	map.put("USER_ID", USER_ID);
+			        	list.add(map);
+	    		   }
+		        } 
+	    	   map1.addAttribute("list",list);
+		       return "暂未实现跳转";
+		    }
 		   
 		   @RequestMapping({"getSysUser.do"})
 		   @ResponseBody

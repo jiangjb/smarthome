@@ -88,13 +88,12 @@
 /*       */ import com.smarthome.imcp.util.MySecureProtocolSocketFactory;
 /*       */ import com.smarthome.imcp.util.NumComparator;
 /*       */ import com.smarthome.imcp.util.SendMsgUtil;
-import com.smarthome.imcp.util.SimulateHTTPRequestUtil;
+			import com.smarthome.imcp.util.SimulateHTTPRequestUtil;
 /*       */ import com.smarthome.imcp.util.StaticUtils;
 /*       */ import com.smarthome.imcp.util.TokeUtil;
 /*       */ import com.smarthome.imcp.util.UuidUtil;
 /*       */ import com.smarthome.imcp.util.YZUitl;
-import com.smarthome.imcp.util.android.Demo;
-
+			import com.smarthome.imcp.util.androidAndIOS.Demo;
 /*       */ import java.io.BufferedReader;
 /*       */ import java.io.File;
 /*       */ import java.io.IOException;
@@ -446,9 +445,9 @@ import com.smarthome.imcp.util.android.Demo;
 /*       */           }
 /*       */ 
 /*   317 */           String controlCommand2 = obj.getControlCommand();//决定command的值？
-                      logger.info("······controlCommand2:"+controlCommand2);
+//                      logger.info("······controlCommand2:"+controlCommand2);
 /*   318 */           String[] split = controlCommand2.split(",");//a key variable
-					  logger.info("······split[0]:"+split[0]);//
+//					  logger.info("······split[0]:"+split[0]);//
 /*   319 */           System.err.println("时间 " + sss);
 /*       */ 
 /*   321 */           System.err.println("device.getDeviceType() " + obj.getDeviceType());
@@ -1225,6 +1224,16 @@ import com.smarthome.imcp.util.android.Demo;
 /*  1150 */     String header3 = request.getHeader("sign");
 /*  1151 */     String header4 = request.getHeader("access_token");
 /*  1152 */     String userCode = request.getHeader("userCode");
+                logger.info("-------authorize-------");
+                //遍历出request的所有参数
+                Enumeration pNames=request.getParameterNames();
+                while(pNames.hasMoreElements()){
+                    String name=(String)pNames.nextElement();
+                    String value=request.getParameter(name);
+                    logger.info(name + " == " + value);
+                }
+                logger.info("signature>>"+this.signature);
+//                logger.info("accountOperationType>>"+this.accountOperationType); //this == BoUsers对象     ;  request.getHeader("accountOperationType")=null;
 /*  1153 */     if (userCode.contains(",")) {
 /*  1154 */       String[] userCode2 = userCode.split(",");
 /*  1155 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
@@ -1265,6 +1274,7 @@ import com.smarthome.imcp.util.android.Demo;
 /*  1189 */                 accountOperation = "1";
 /*       */               else {
 /*  1191 */                 accountOperation = this.accountOperationType;
+							//在这里把楼层、房间和设备信息 填入 city（不被使用的字段）中   +登录的时候把  被授权者的 userCode也加在后面(userInfoMap.put("userCode", users.getAuthorizationUserCode() + "," + users.getUserPhone()+"," + users.getUserCode()) )
 /*       */               }
 /*  1193 */               users.setAccountOperationType(accountOperation);
 /*  1194 */               users.setAccessToken(generateTokeCode);
@@ -1358,7 +1368,7 @@ import com.smarthome.imcp.util.android.Demo;
 /*  1281 */                   Integer type = users.getPhoneType();
 /*       */ 
 /*  1283 */                   if ((type == null) || (type.intValue() == 0)) {
-/*  1284 */                     pushService.pushToSingle(CID, title, text.toString(), text.toString());
+/*  1284 */                     pushService.pushToSingle(CID, title, text.toString(), text.toString());//推送？
 /*       */                   }
 /*       */                   else {
 /*  1287 */                     pushService.apnPush(CID, title, text.toString(), text.toString());
@@ -2291,7 +2301,7 @@ import com.smarthome.imcp.util.android.Demo;
 /*       */   }
 /*       */ 
 /*       */   @Action(value="gainAuthorizeList", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
-/*       */   public String gainAuthorizeList()
+/*       */   public String gainAuthorizeList()          //授权有关
 /*       */   {
 /*  2234 */     this.requestJson = new RequestJson();
 /*  2235 */     Map map = new HashMap();
@@ -2303,6 +2313,7 @@ import com.smarthome.imcp.util.android.Demo;
 /*  2241 */     String header4 = request.getHeader("access_token");
 /*  2242 */     String userCode = request.getHeader("userCode");
 /*       */     List voList;
+                logger.info("-----------gainAuthorizeList-------------");
 /*  2243 */     if (userCode.contains(",")) {
 /*  2244 */       String[] userCode2 = userCode.split(",");
 /*  2245 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
@@ -2412,6 +2423,8 @@ import com.smarthome.imcp.util.android.Demo;
 /*  2352 */     String header3 = request.getHeader("sign");
 /*  2353 */     String header4 = request.getHeader("access_token");
 /*  2354 */     String userCode = request.getHeader("userCode");
+				logger.info("request>>"+request.getQueryString());//获取授权时请求中的实体内容数据
+				logger.info("授权函数userCode>>"+userCode);
 /*  2355 */     if (userCode.contains(",")) {
 /*  2356 */       String[] userCode2 = userCode.split(",");
 /*  2357 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
@@ -2450,14 +2463,14 @@ import com.smarthome.imcp.util.android.Demo;
 /*  2390 */               this.requestJson.setSuccess(false);
 /*       */             } else {
 /*  2392 */               BoUsers users = this.boUserServicess.findByUserPhone(this.userPhone);
-/*  2393 */               if (!users.getAuthorizationUserCode().equals("")) {
+/*  2393 */               if (!users.getAuthorizationUserCode().equals("")) {//AUTHORIZATION_USER_CODE不为空时 说明被其他账户授权
 /*  2394 */                 map.put("result", "账户已被其他账户授权");
 /*  2395 */                 this.requestJson.setData(map);
 /*  2396 */                 this.requestJson.setSuccess(true);
 /*       */               } else {
 /*  2398 */                 String generateTokeCode = TokeUtil.generateTokeCode();
 /*  2399 */                 String generateTokeCodes = TokeUtil.generateTokeCodes();
-/*  2400 */                 users.setAuthorizationUserCode(boUsers.getUserCode());
+/*  2400 */                 users.setAuthorizationUserCode(boUsers.getUserCode());//将被授权的该字段(authorizationUserCode) 设置成 授权者的userCode
 /*  2401 */                 users.setLogoAccountType("S");
 /*       */                 String accountOperation;
 ///*       */                 String accountOperation;
@@ -3567,6 +3580,7 @@ import com.smarthome.imcp.util.android.Demo;
 /*  3528 */     String header3 = request.getHeader("sign");
 /*  3529 */     String header4 = request.getHeader("access_token");
 /*  3530 */     String userCode = request.getHeader("userCode");
+				logger.info("gainAlarmRecord userCode>>"+userCode);
 /*       */     List voList;
 /*  3531 */     if (userCode.contains(",")) {
 /*  3532 */       String[] userCode2 = userCode.split(",");
@@ -3597,6 +3611,7 @@ import com.smarthome.imcp.util.android.Demo;
 /*  3557 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
 /*       */             try {
 /*  3559 */               List<BoAlarmRecord> list = this.boAlarmRecordService.getAlarmRecordByUserCode(userCode2[0].trim().toString(), page);
+                          logger.info("gainAlarmRecord list>>"+list);//非空  -因为给17779605699加了几条条记录
 /*  3560 */               if (list.size() <= 0) {
 /*  3561 */                 this.requestJson.setData(map);
 /*  3562 */                 this.requestJson.setMessage("没有找到报警记录");
@@ -3617,7 +3632,8 @@ import com.smarthome.imcp.util.android.Demo;
 /*       */                   }
 /*  3578 */                   this.requestJson.setData(voList);
 /*       */                 } finally {
-/*  3580 */                   voList.remove(alarmRecordMap);
+//							  voList.remove(alarmRecordMap);//去掉后 消息推送中的普通记录无法显示   可是默认是有该操作的，为什么？
+/*  3580 */                   voList.remove(map);
 /*       */                 }
 /*       */               }
 /*       */             }
@@ -3661,6 +3677,7 @@ import com.smarthome.imcp.util.android.Demo;
 /*  3621 */         else if (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue()) {
 /*       */           try {
 /*  3623 */             List<BoAlarmRecord> list = this.boAlarmRecordService.getAlarmRecordByUserCode(userCode, this.page);
+						logger.info("gainAlarmRecord list 01>>"+list);
 /*  3624 */             if (list.size() <= 0) {
 /*  3625 */               this.requestJson.setData(map);
 /*  3626 */               this.requestJson.setMessage("没有找到报警记录");
@@ -3681,7 +3698,8 @@ import com.smarthome.imcp.util.android.Demo;
 /*       */                 }
 /*  3642 */                 this.requestJson.setData(voList);
 /*       */               } finally {
-/*  3644 */                 voList.remove(alarmRecordMap);
+///*  3644 */                 voList.remove(alarmRecordMap);//去掉后 消息推送中的普通记录无法显示   可是默认是有该操作的，为什么？
+							  voList.remove(map);
 /*       */               }
 /*       */             }
 /*       */           }
@@ -12360,7 +12378,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 12603 */                 b.setBoUsers(boUsers);
 /* 12604 */                 b.setBoDevice(findByCodes);
 /* 12605 */                 b.setDeviceClassify(this.fid1);
-/* 12606 */                 System.err.println("deviceType 12291L:"+this.deviceType);//门锁-5314
+///* 12606 */                 System.err.println("deviceType 12291L:"+this.deviceType);//门锁-5314
 /* 12607 */                 if (this.deviceType.equals("100"))
 /* 12608 */                   b.setMntDelete("Y");
 /* 12609 */                 else if (this.deviceType.equals("101"))
@@ -12418,6 +12436,7 @@ import com.smarthome.imcp.util.android.Demo;
 /*       */     List voList;
 /* 12666 */     if (userCode.contains(",")) {
 /* 12667 */       String[] userCode2 = userCode.split(",");
+				  logger.info("userCode2>>"+userCode);
 /* 12668 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
 /* 12669 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
 /* 12670 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "已分类房间设备");
@@ -12444,7 +12463,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 12690 */               map.put("deviceNum", boHostDevice.getDeviceNum().toString());
 /* 12691 */               String validationCodes = boHostDevice.getValidationCode().toString();
 /*       */               String validationCodess;
-///*       */               String validationCodess;
+
 /* 12693 */               if (validationCodes == null)
 /* 12694 */                 validationCodess = "";
 /*       */               else {
@@ -12452,18 +12471,20 @@ import com.smarthome.imcp.util.android.Demo;
 /*       */               }
 /* 12698 */               System.err.println("摄像头" + boHostDevice.toString());
 /* 12699 */               map.put("validationCode", validationCodess);
-/* 12700 */               map.put("userCode", boHostDevice.getBoUsers().getUserCode());
+/* 12700 */               map.put("userCode", boHostDevice.getBoUsers().getUserCode());//没有逗号的情况
 /* 12701 */               String nickName2 = boHostDevice.getNickName();
 /*       */               String nickNames;
-///*       */               String nickNames;
+
 /* 12703 */               if (nickName2 == null)
 /* 12704 */                 nickNames = "";
 /*       */               else {
 /* 12706 */                 nickNames = boHostDevice.getNickName();
 /*       */               }
 /* 12708 */               map.put("nickName", nickNames);
+						  logger.info("nickName>>"+nickNames);//设备名称
 /* 12709 */               map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
 /* 12710 */               map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
+						  logger.info("roomName>>"+boHostDevice.getBoRoom().getRoomName().toString());//房间名称
 /*       */ 
 /* 12712 */               map.put("icon", boHostDevice.getIco());
 /* 12713 */               voList.add(map);
@@ -12479,24 +12500,39 @@ import com.smarthome.imcp.util.android.Demo;
 /*       */ 
 /* 12724 */               for (BoHostDevice boHostDevice : list) {
 /* 12725 */                 map = new HashMap();
-/* 12726 */                 map.put("deviceCode", boHostDevice.getBoDevice().getDeviceCode());
-/* 12727 */                 map.put("deviceType", boHostDevice.getDeviceType().toString());
-/* 12728 */                 map.put("deviceAddress", boHostDevice.getDeviceAddress().toString());
-/* 12729 */                 map.put("deviceNum", boHostDevice.getDeviceNum().toString());
-/* 12730 */                 map.put("userCode", boHostDevice.getBoUsers().getUserCode());
-/* 12731 */                 String nickName2 = boHostDevice.getNickName();
-/*       */                 String nickNames;
-///*       */                 String nickNames;
-/* 12733 */                 if (nickName2 == null)
-/* 12734 */                   nickNames = "";
-/*       */                 else {
-/* 12736 */                   nickNames = boHostDevice.getNickName();
-/*       */                 }
-/* 12738 */                 map.put("nickName", nickNames);
-/* 12739 */                 map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
-/* 12740 */                 map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
-/* 12741 */                 map.put("icon", boHostDevice.getIco());
-/* 12742 */                 voList.add(map);
+						    //new 2018-3-1
+							String deviceName="";
+							String roomName=boHostDevice.getBoRoom().getRoomName().toString();
+							if(boHostDevice.getNickName() !=null) {
+								deviceName=boHostDevice.getNickName();
+							}
+//							logger.info("隐藏客厅>>>"+!roomName.equals("客厅"));
+//							if(!roomName.equals("客厅")) {//客厅 没被赋予权限  被隐藏了
+//								if(!deviceName.equals("灯光433")) {  //灯光433 没赋予权限就无法显示了                        	
+		/* 12726 */                 map.put("deviceCode", boHostDevice.getBoDevice().getDeviceCode());
+		/* 12727 */                 map.put("deviceType", boHostDevice.getDeviceType().toString());
+		/* 12728 */                 map.put("deviceAddress", boHostDevice.getDeviceAddress().toString());
+		/* 12729 */                 map.put("deviceNum", boHostDevice.getDeviceNum().toString());
+		/* 12730 */                 map.put("userCode", boHostDevice.getBoUsers().getUserCode());//userCode没有逗号的情况
+		/* 12731 */                 String nickName2 = boHostDevice.getNickName();
+		/*       */                 String nickNames;
+		
+		/* 12733 */                 if (nickName2 == null)
+			/* 12734 */                   nickNames = "";
+		/*       */                 else {
+			/* 12736 */                   nickNames = boHostDevice.getNickName();
+		/*       */                 }
+		/* 12738 */                 map.put("nickName", nickNames);
+									logger.info("nickName 01>>"+nickNames);//设备名称
+		/* 12739 */                 map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
+		/* 12740 */                 map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
+									logger.info("roomName 01>>"+boHostDevice.getBoRoom().getRoomName().toString());//房间名称
+		/* 12741 */                 map.put("icon", boHostDevice.getIco());
+		/* 12742 */                 voList.add(map);
+//								}
+								
+//							}
+                            //前面没有 /* 行数 */的是新添加的
 /*       */               }
 /*       */             }
 /* 12745 */             this.requestJson.setData(voList);
@@ -13690,7 +13726,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 13907 */               else if (valueOf3.intValue() == 8) {
 /* 13908 */                 c = Integer.valueOf(200);
 /*       */               }
-/*       */               logger.info("~~~~~13684~~~~~this.command:"+this.command);//100
+///*       */               logger.info("~~~~~13684~~~~~this.command:"+this.command);//100
 /* 13912 */               if (this.command.intValue() == 0) {
 /* 13913 */                 System.err.println(device.getDeviceAddress());
 /* 13914 */                 String string = device.getDeviceAddress().substring(0, 1);
@@ -14396,7 +14432,7 @@ import com.smarthome.imcp.util.android.Demo;
 ///* 14643 */                   userCode + "head" + createRandomVcodesss() + ".jpg", dir);
 							String filePath = this.fileService.saveToDir(this.fileupload, 
 									userCode + "head" + ".jpg", dir);
-							logger.info("头像的地址1 filePath>>"+filePath);
+//							logger.info("头像的地址1 filePath>>"+filePath);
 /* 14644 */                 boUsers.setHeadPic(filePath);
 /* 14645 */                 BoUsers update = (BoUsers)this.boUserServicess.update(boUsers);
 /* 14646 */                 this.requestJson.setMessage("头像上传成功");
@@ -14524,11 +14560,21 @@ import com.smarthome.imcp.util.android.Demo;
 /* 14754 */     String header2 = request.getHeader("nonce");
 /* 14755 */     String header3 = request.getHeader("sign");
 /* 14756 */     String header4 = request.getHeader("access_token");
-/* 14757 */     String userCode = request.getHeader("userCode");
+/* 14757 */     String userCode = request.getHeader("userCode");//被授权者应该只有部门房间或设备使用权  这里取的应该时AUTHORIZATION_USER_CODE字段，此字段为空的话就是取USER_CODE字段
 /*       */     List list_floor;
-/* 14758 */     if (userCode.contains(",")) {
+				logger.info("-------getroom-------");
+				Enumeration pNames=request.getParameterNames();
+				while(pNames.hasMoreElements()){
+				    String name=(String)pNames.nextElement();
+				    String value=request.getParameter(name);
+				    logger.info(name + " == " + value);
+				}
+				logger.info("获取房间信息的userCode>>"+userCode);//若是被授权者：授权者userCode,userPhone,被授权者userCode ； 若是授权者：本身userCode,userPhone 有可能不带userPhone
+/* 14758 */     if (userCode.contains(",")) {//有逗号的情况----
 /* 14759 */       String[] userCode2 = userCode.split(",");
+//				  logger.info("userCode2[0]>>"+userCode2[0].trim().toString());// 2/28测试被授权的用户的userCode  ==授权者的userCode
 /* 14760 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
+//				  logger.info("boUsers>>"+boUsers);// 2/28 打印  授权者的信息（没有授权者才显示自己的用户信息）
 /* 14761 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
 /* 14762 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "查找用户的楼层房间列表接口");
 /* 14763 */       if (ral.booleanValue()) {
@@ -14557,30 +14603,37 @@ import com.smarthome.imcp.util.android.Demo;
 /* 14786 */             list_floor = new ArrayList();
 /*       */ 
 /* 14788 */             for (BoFloor boFloor : list2) {
-/* 14789 */               Map map = new HashMap();
-/*       */ 
-/* 14791 */               map.put("floorCode", boFloor.getFloorCode().toString());
+							String floorName=boFloor.getFloorName().toString();
+							logger.info("floorName test>"+floorName);
+	                    	if(!floorName .equals("xxx")) {
+	/* 14789 */               Map map = new HashMap();
+	/* 14791 */               map.put("floorCode", boFloor.getFloorCode().toString());
 //						  System.out.println("floor floorCode:"+boFloor.getFloorCode().toString());
-/* 14792 */               map.put("floorName", boFloor.getFloorName().toString());
-//						  System.out.println("floorName:"+boFloor.getFloorName().toString());
-/* 14793 */               list_floor.add(map);
+	/* 14792 */               map.put("floorName", boFloor.getFloorName().toString());
+							  logger.info("floorName :"+boFloor.getFloorName().toString());
+	/* 14793 */               list_floor.add(map);                    		
+	                    	}
 /*       */             }
-/* 14795 */             map_room.put("floorInfo", list_floor);
+/* 14795 */             map_room.put("floorInfo", list_floor);//楼层 信息
 /*       */ 
 /* 14797 */             for (BoRoom boRoom : list) {
-/* 14798 */               Map map = new HashMap();
-/* 14799 */               BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
-/*       */ 
-/* 14801 */               map.put("roomCode", boRoom.getRoomCode().toString());
+							String roomName=boRoom.getRoomName().toString();
+//							logger.info("不允许存在 客厅>"+!roomName .equals("客厅"));
+//							if(!roomName.equals("客厅")) {
+	/* 14798 */               Map map = new HashMap();
+	/* 14799 */               BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
+	/*       */ 
+	/* 14801 */               map.put("roomCode", boRoom.getRoomCode().toString());
 //						  System.out.println("Room roomCode:"+boRoom.getRoomCode().toString());
-/* 14802 */               map.put("roomName", boRoom.getRoomName().toString());
-//						  System.out.println("roomName:"+boRoom.getRoomName().toString());
-/* 14803 */               map.put("floorCode", boRoom.getFloorCode().toString());
+	/* 14802 */               map.put("roomName", boRoom.getRoomName().toString());
+							  logger.info("roomName:"+boRoom.getRoomName().toString());
+	/* 14803 */               map.put("floorCode", boRoom.getFloorCode().toString());
 //						  System.out.println("floorCode:"+boRoom.getFloorCode().toString());
-/* 14804 */               list_room.add(map);
+	/* 14804 */               list_room.add(map);								
+//							}
 /*       */             }
 /*       */ 
-/* 14808 */             map_room.put("roomInfo", list_room);
+/* 14808 */             map_room.put("roomInfo", list_room);//房间  信息
 /*       */ 
 /* 14811 */             voList.add(map_room);
 /* 14812 */             this.requestJson.setData(voList);
@@ -14607,7 +14660,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 14833 */         this.requestJson.setMessage("验证不通过");
 /* 14834 */         this.requestJson.setSuccess(false);
 /*       */       }
-/*       */     } else {
+/*       */     } else {//没有逗号的情况----
 /* 14837 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "修改主机昵称");
 /* 14838 */       if (ral.booleanValue()) {
 /* 14839 */         System.err.println("验证通过");
@@ -14621,6 +14674,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 14847 */           if (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue()) {
 /* 14848 */             List<BoRoom> list = this.boRoomService.getAllListByUserCode(userCode);
 /* 14849 */             List<BoFloor> list2 = this.boFloorService.getAllListByUserCode(userCode);
+                        logger.info("list2>>>>>>"+list2);
 /* 14850 */             if ((list.size() <= 0) && (list2.size() <= 0)) {
 /* 14851 */               Map maps = new HashMap();
 /* 14852 */               this.requestJson.setMessage("没有找到");
@@ -14636,25 +14690,34 @@ import com.smarthome.imcp.util.android.Demo;
 /*       */ 
 /* 14863 */             for (BoFloor boFloor : list2)
 /*       */             {
-/* 14865 */               Map map = new HashMap();
-/*       */ 
-/* 14867 */               map.put("floorCode", boFloor.getFloorCode().toString());
-/* 14868 */               map.put("floorName", boFloor.getFloorName().toString());
-/* 14869 */               list_floor.add(map);
+							String floorName=boFloor.getFloorName().toString();
+							logger.info("floorName test01>"+floorName);
+							if(!floorName .equals("xxx")) {
+	/* 14865 */                 Map map = new HashMap();
+	/*       */ 
+	/* 14867 */                 map.put("floorCode", boFloor.getFloorCode().toString());
+	/* 14868 */                 map.put("floorName", boFloor.getFloorName().toString());
+								logger.info("floorName 01:"+boFloor.getFloorName().toString());
+	/* 14869 */                 list_floor.add(map);							
+							}
 /*       */             }
-/* 14871 */             map_room.put("floorInfo", list_floor);
+/* 14871 */             map_room.put("floorInfo", list_floor);//楼层 信息
 /*       */ 
 /* 14873 */             for (BoRoom boRoom : list) {
-/* 14874 */               Map map = new HashMap();
-/* 14875 */               BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
-/*       */ 
-/* 14877 */               map.put("roomCode", boRoom.getRoomCode().toString());
-/* 14878 */               map.put("roomName", boRoom.getRoomName().toString());
-/* 14879 */               map.put("floorCode", boRoom.getFloorCode().toString());
-/* 14880 */               list_room.add(map);
+							String roomName=boRoom.getRoomName().toString();
+							logger.info("允许存在 客厅 01?>"+!roomName .equals("客厅"));
+//                            if(!roomName .equals("客厅")) {                	  
+  /* 14874 */               	Map map = new HashMap();
+  /* 14875 */               	BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
+  /* 14877 */               	map.put("roomCode", boRoom.getRoomCode().toString());
+  /* 14878 */               	map.put("roomName", boRoom.getRoomName().toString());
+  								logger.info("roomName 01:"+boRoom.getRoomName().toString());
+  /* 14879 */               	map.put("floorCode", boRoom.getFloorCode().toString());
+  /* 14880 */               	list_room.add(map);
+//                            }
 /*       */             }
 /*       */ 
-/* 14884 */             map_room.put("roomInfo", list_room);
+/* 14884 */             map_room.put("roomInfo", list_room);//房间  信息
 /*       */ 
 /* 14887 */             voList.add(map_room);
 /* 14888 */             this.requestJson.setData(voList);
@@ -14745,7 +14808,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 14976 */               map.put("province_city_area", users.getCity().toString());
 /* 14977 */               map.put("signature", users.getSignature().toString());
 /* 14978 */               map.put("headPic", users.getHeadPic().toString());
-						  logger.info("··headPic>>"+boUsers.getHeadPic().toString());
+//						  logger.info("··headPic>>"+boUsers.getHeadPic().toString());
 /* 14979 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 14980 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 14981 */               this.requestJson.setTotal(Integer.valueOf(1));
@@ -14801,7 +14864,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 15029 */               map.put("province_city_area", boUsers.getCity().toString());
 /* 15030 */               map.put("signature", boUsers.getSignature().toString());
 /* 15031 */               map.put("headPic", boUsers.getHeadPic().toString());
-						  logger.info("···headPic>>"+boUsers.getHeadPic().toString());
+//						  logger.info("···headPic>>"+boUsers.getHeadPic().toString());
 /* 15032 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 15033 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 15034 */               this.requestJson.setTotal(Integer.valueOf(1));
@@ -14826,7 +14889,7 @@ import com.smarthome.imcp.util.android.Demo;
 /* 15051 */               map.put("province_city_area", users.getCity().toString());
 /* 15052 */               map.put("signature", users.getSignature().toString());
 /* 15053 */               map.put("headPic", users.getHeadPic().toString());
-						  logger.info("····headPic>>"+boUsers.getHeadPic().toString());
+//						  logger.info("····headPic>>"+boUsers.getHeadPic().toString());
 /* 15054 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 15055 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 15056 */               this.requestJson.setTotal(Integer.valueOf(1));
@@ -15422,8 +15485,8 @@ import com.smarthome.imcp.util.android.Demo;
 /*       */         }
 /* 15691 */         else if (this.refreshToken.equals(users.getRefreshToken())) {//新的refreshToken 和 从数据库取出来的一样时
 /* 15692 */           System.err.println(users.getRefreshTokenTime());
-                      logger.info("新的refreshToken"+this.refreshToken);
-                      logger.info("旧的refreshToken"+users.getRefreshToken());
+//                      logger.info("新的refreshToken"+this.refreshToken);
+//                      logger.info("旧的refreshToken"+users.getRefreshToken());
 /* 15693 */           if (current_time.longValue() < Long.valueOf(users.getRefreshTokenTime()).longValue())
 /*       */           {
 /* 15695 */             String generateTokeCode = TokeUtil.generateTokeCode();
@@ -15449,10 +15512,23 @@ import com.smarthome.imcp.util.android.Demo;
 //				     logger.info("新设备的token>>>"+device_token);
 				     String oldDevice_token=users.getUserAddr();//旧设备token
 //				     logger.info("旧设备的token>>>"+oldDevice_token);
-					 Demo ymPush=new Demo();
+				     //new 2018-3-3  添加手机类型判断
+				     Demo ymPush = new Demo();
+				     
+				     Date currentTime = new Date();
+				     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				     String dateString = formatter.format(currentTime);
 					 try {
-						 if(oldDevice_token !=""  || oldDevice_token !=device_token) {
-							 ymPush.sendAndroidUnicast(oldDevice_token,"离线通知","另一台设备正在登录,您已被迫下线");
+						 if(oldDevice_token !=""  || oldDevice_token != device_token) {
+							 if(users.getPhoneType() == 1) {//new 2018-3-3
+								 Map<String,String> map1=new HashMap<String,String>();
+								 map1.put("title", "离线通知");
+								 map1.put("subtitle", "");
+								 map1.put("body", "另一台设备正在登录,您在"+dateString+"被迫下线");
+								 ymPush.sendIOSUnicast(oldDevice_token,map,"offline");	
+							 }else {
+								 ymPush.sendAndroidUnicast(oldDevice_token,"离线通知","另一台设备正在登录,您在"+dateString+"被迫下线");		 
+							 }
 							 users.setUserAddr("");
 							 BoUsers update = (BoUsers)this.boUserServicess.update(users);
 							 if(update !=null) {
@@ -15964,11 +16040,11 @@ import com.smarthome.imcp.util.android.Demo;
 /* 16240 */     String createRandomVcode = this.s.createRandomVcode();
 /* 16241 */     String sendMsg = null;
 /* 16242 */     Map map = new HashMap();
-                logger.info("···versionType····"+this.versionType);
+//                logger.info("···versionType····"+this.versionType);
 /* 16243 */     if (this.versionType.equals("1")) {
 /* 16244 */       sendMsg = SendMsgUtil.sendMsg(this.userPhone, "尊敬的用户，您的验证码为 :  " + createRandomVcode);
 ///* 16245 */       System.err.println(sendMsg);
-				  logger.info("sendMsg>>"+sendMsg);
+//				  logger.info("sendMsg>>"+sendMsg);
 /* 16246 */       String[] split = sendMsg.split(",");
 /* 16247 */       if (split[1].equals("0"))
 /*       */       {

@@ -17,6 +17,7 @@ public class LoginControllerTest extends TestCase {
 
 	public void testHello() {
 		lc.hello("Mr jiang");						//2、用类的实例 测试相应方法
+		
 	}
 
 }

@@ -1,6 +1,5 @@
 /*     */ package com.smarthome.imcp.util;
 /*     */ 
-/*     */ import java.io.PrintStream;
 /*     */ import java.net.URLEncoder;
 /*     */ import java.security.InvalidAlgorithmParameterException;
 /*     */ import java.security.InvalidKeyException;

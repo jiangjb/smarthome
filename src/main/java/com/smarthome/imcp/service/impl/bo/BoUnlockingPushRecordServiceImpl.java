@@ -92,7 +92,8 @@
 /*     */   {
 /* 122 */     DetachedCriteria criteria = DetachedCriteria.forClass(BoUnlockingPushRecord.class);
 /* 123 */     criteria.add(Restrictions.eq("userCode", userCode));
-/* 124 */     criteria.addOrder(Order.desc("reportTimestamp"));
+///* 124 */     criteria.addOrder(Order.desc("reportTimestamp"));
+			  criteria.addOrder(Order.desc("reportDate"));//改成 按reportDate降序排列
 /* 125 */     return this.boUnlockingPushRecordDao.findByCriteria(criteria, page);
 /*     */   }
 /*     */ }

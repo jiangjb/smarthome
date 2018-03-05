@@ -216,11 +216,17 @@
         						var col="";
 								var creator_date="";
 								var updated_date="";
+								var status="";
+								/* json对象 转成 String类型,再转成单引号 */
+								var a=JSON.stringify(item.DEVICE_CODE).replace(/\"/g,"'");
+								/* alert(a);  */
 	           				     /* alert(item.deviceCode); */
 	   							 if(item.HOST_STATUS =="离线"){
-	   								 col='<td class="center"><span style="color: black;">'+item.DEVICE_CODE+'</span></td>';
+	   								 col='<td class="center"><a onclick="toUnbindPage('+a+')" style="color: black;">'+item.DEVICE_CODE+'</a></td>';
+	   								 status='<td class="center"><span style="color: black;">'+item.HOST_STATUS+'</span></td>';
 	   							 }else{
-	   								 col='<td class="center"><span style="color: blue;">'+item.DEVICE_CODE+'</span></td>';
+	   								 col='<td class="center"><a href="#" style="color: blue;">'+item.DEVICE_CODE+'</a></td>';
+	   								 status='<td class="center"><span style="color: blue;">'+item.HOST_STATUS+'</span></td>';
 	   							 }
 	           				     if(item.MNT_CREATOR_DATE !=null){
 	           				    	creator_date='<td class="center"><span style="color: black;">'+item.MNT_CREATOR_DATE+'</span></td>';
@@ -246,7 +252,7 @@
 	       	    						col+
 	       	    						creator_date+
 	       	    						updated_date+
-	         							'<td class="center"><span style="color: black;">'+item.HOST_STATUS+'</span></td>'+
+	       	    						status+
 	         							'<td class="center"><span style="color: black;">'+item.SIGNATURE+'</span></td>'+
 	         							'<shiro:hasRole name="admin">'+
 		       	    					'<td class="center"><a href="<%=WEBPATH3 %>/static/jsp/editBZ.jsp?signature='+item.SIGNATURE+'&id='+item.id+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
@@ -260,6 +266,19 @@
 		});
 		</script>
 		<script type="text/javascript">
+		function toUnbindPage(deviceCode){
+			/* alert(deviceCode); */
+			$.ajax({
+					url:"OneToUnbind.do",
+			    	data: {"deviceCode":deviceCode }, 
+			    	type: "POST",
+					dataType:"json",
+					async: true,
+					success: function(data){
+						alert(data);
+					}
+				})
+		};
 		//分页
 		function find(index){
 				$.ajax({
@@ -515,11 +534,14 @@
 								var col="";
 								var creator_date="";
 								var updated_date="";
+								var status="";
 	           				     /* alert(item.deviceCode); */
 	   							 if(item.HOST_STATUS =="离线"){
 	   								 col='<td class="center"><span style="color: black;">'+item.DEVICE_CODE+'</span></td>';
+	   								 status='<td class="center"><span style="color: black;">'+item.HOST_STATUS+'</span></td>';
 	   							 }else{
 	   								 col='<td class="center"><span style="color: blue;">'+item.DEVICE_CODE+'</span></td>';
+	   								 status='<td class="center"><span style="color: blue;">'+item.HOST_STATUS+'</span></td>';
 	   							 }
 	           				     if(item.MNT_CREATOR_DATE !=null){
 	           				    	creator_date='<td class="center"><span style="color: black;">'+item.MNT_CREATOR_DATE+'</span></td>';
@@ -545,13 +567,12 @@
 	       	    						col+
 	       	    						creator_date+
 	       	    						updated_date+
-	         							'<td class="center"><span style="color: black;">'+item.HOST_STATUS+'</span></td>'+
+	       	    						status+
 	         							'<td class="center"><span style="color: black;">'+item.SIGNATURE+'</span></td>'+
 	         							'<shiro:hasRole name="admin">'+
 		       	    					'<td class="center"><a href="<%=WEBPATH3 %>/static/jsp/editBZ.jsp?signature='+item.SIGNATURE+'&id='+item.id+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
 		       	    					'</shiro:hasRole>'+
 	       	    					'</tr>'); 
-			        		
 		    				}
 						})								    					
 				}, 

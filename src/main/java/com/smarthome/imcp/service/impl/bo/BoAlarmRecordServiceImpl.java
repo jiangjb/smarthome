@@ -83,7 +83,8 @@
 /*     */   {
 /* 107 */     DetachedCriteria criteria = DetachedCriteria.forClass(BoAlarmRecord.class);
 /* 108 */     criteria.add(Restrictions.eq("userCode", userCode));
-/* 109 */     criteria.addOrder(Order.desc("id"));
+///* 109 */     criteria.addOrder(Order.desc("id"));
+			  criteria.addOrder(Order.desc("reportDate"));//改成 按时间降序排列
 /*     */ 
 /* 114 */     return this.boAlarmRecordDao.findByCriteria(criteria, page);
 /*     */   }

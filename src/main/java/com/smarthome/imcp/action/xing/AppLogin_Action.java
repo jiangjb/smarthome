@@ -18,11 +18,11 @@
 /*     */ import com.smarthome.imcp.util.TokeUtil;
 /*     */ import com.smarthome.imcp.util.UserUtil;
 /*     */ import com.smarthome.imcp.util.ValidatorUtil;
-import com.smarthome.imcp.util.android.Demo;
-
+		  import com.smarthome.imcp.util.androidAndIOS.Demo;
 /*     */ import java.io.InputStream;
 /*     */ import java.io.Serializable;
-		  import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 /*     */ import java.util.Date;
 /*     */ import java.util.HashMap;
 		  import java.util.List;
@@ -222,8 +222,10 @@ import com.smarthome.imcp.util.android.Demo;
 /* 269 */           } else if (this.versionType.equals("6")) {
 /* 270 */             String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
 /* 277 */               this.userEmail + " " + sd + "</td>" + "<tr " + 3 + "><td>" + "验证码为:" + vcode + "请在60秒内使用" + "</td>" + "</tbody>" + "<tr " + 3 + "><td>" + "若非本人账号获取到验证码请勿去使用app修改密码,若查到,责任自负" + "</td>" + "</tbody>" + "</table>";
-/* 278 */             EmailUtils.sendMail(prop.getProperty("fromEmail"), this.userEmail, prop.getProperty("emailName"), prop.getProperty("emailPassword"), "麦宝密码找回", centent);
+/* 278 */             
+					  EmailUtils.sendMail(prop.getProperty("fromEmail"), this.userEmail, prop.getProperty("emailName"), prop.getProperty("emailPassword"), "麦宝密码找回", centent);
 /* 279 */             StaticUtil.msg_email_code.put(this.userEmail, vcode + "," + new Date().getTime());
+
 /* 280 */             this.requestJson = new RequestJson(true, "发送成功", map);
 /* 281 */           } else if (this.versionType.equals("7")) {
 /* 282 */             String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
@@ -419,9 +421,9 @@ import com.smarthome.imcp.util.android.Demo;
 /* 470 */           userInfoMap.put("accessToken", update.getAccessToken());
 /* 471 */           userInfoMap.put("refreshToken", update.getRefreshToken());
 /* 472 */           if (users.getLogoAccountType().equals("M"))
-/* 473 */             userInfoMap.put("userCode", users.getUserCode() + "," + users.getUserPhone());
+/* 473 */             userInfoMap.put("userCode", users.getUserCode() + "," + users.getUserPhone());//LogoAccountType=M时 传 本身的userCode
 /*     */           else {
-/* 475 */             userInfoMap.put("userCode", users.getAuthorizationUserCode() + "," + users.getUserPhone());
+/* 475 */             userInfoMap.put("userCode", users.getAuthorizationUserCode() + "," + users.getUserPhone()+"," + users.getUserCode());//LogoAccountType=S时 传授权者的userCode   new+被授权者userCode
 /*     */           }
 /* 477 */           userInfoMap.put("logoAccountType", users.getLogoAccountType());
 /* 478 */           userInfoMap.put("accountOperationType", users.getAccountOperationType());
@@ -451,9 +453,22 @@ import com.smarthome.imcp.util.android.Demo;
 /* 482 */           String fluoriteAccessToken = users.getFluoriteAccessToken();
 /*     */           String EZTOKEN;
 //                  2-5 友盟推送
-					Demo ymPush=new Demo();
-//					ymPush.sendAndroidBroadcast();
-					ymPush.sendAndroidUnicast(this.devicetoken,"上线通知","您的设备已成功登录");
+					Demo ymPush = new Demo();
+//					logger.info("phoneType>>"+users.getPhoneType());
+					//+上线时间 
+					Date currentTime = new Date();
+					SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					String dateString = formatter.format(currentTime);
+					if(users.getPhoneType() == 1) {//0 代表 安卓;1代表 ios
+						Map<String,String> map1=new HashMap<String,String>();
+						map1.put("title", "上线通知");
+						map1.put("subtitle", "");
+						map1.put("body", "您的设备在"+dateString+"成功登录");
+						ymPush.sendIOSUnicast(this.devicetoken,map1,"applogin");
+					}else {
+						ymPush.sendAndroidUnicast(this.devicetoken,"上线通知","您的设备在"+dateString+"成功登录");
+					}
+
 					logger.info("device_token>>"+this.devicetoken);
 //					END
 				    System.out.println("手机登录成功");
