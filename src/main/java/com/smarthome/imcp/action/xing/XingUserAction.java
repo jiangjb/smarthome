@@ -4360,7 +4360,7 @@
 /*       */ 
 /*       */   @Action(value="gaininfraredvalue", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String gainInfraredValue()
-/*       */   {
+/*       */   { //红外模块
 /*  4326 */     this.requestJson = new RequestJson();
 /*  4327 */     Map maps = new HashMap();
 /*  4328 */     HttpServletRequest request = ServletActionContext.getRequest();
@@ -4370,6 +4370,7 @@
 /*  4332 */     String header4 = request.getHeader("access_token");
 /*  4333 */     String userCode = request.getHeader("userCode");
 /*       */     Set set;
+                logger.info("gain红外参数 userCode>"+userCode);
 /*  4334 */     if (userCode.contains(",")) {
 /*  4335 */       String[] userCode2 = userCode.split(",");
 /*  4336 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
@@ -4502,11 +4503,11 @@
 /*  4470 */         else if (header4.equals(phone.getAccessToken())) {
 /*  4471 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
 /*  4472 */             String classesInfo1 = this.classesInfo.substring(0, 1);
-/*  4473 */             System.err.println(classesInfo1);
-/*  4474 */             String info = this.classesInfo.substring(1, this.classesInfo.length());
+/*  4473 */             System.err.println("classesInfo>>"+this.classesInfo);//E2,C1,B0
+/*  4474 */             String info = this.classesInfo.substring(1, this.classesInfo.length());//
 /*  4475 */             System.err.println(info);
 /*  4476 */             int index = getIndexFromArr(classesInfo1.charAt(0));
-/*  4477 */             int base = index * 50 + Integer.valueOf(info).intValue() * 500;
+/*  4477 */             int base = index * 50 + Integer.valueOf(info).intValue() * 500;//注意
 /*  4478 */             int s = base + 50;
 /*  4479 */             BoHostDevice hostDevice = this.boHostDeviceService.findBydeviceAddress(userCode2[0].trim().toString(), this.deviceCode, this.deviceAddress);
 /*       */ 
@@ -4697,6 +4698,7 @@
 /*  4672 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "创建红外按键");
 /*  4673 */       if (ral.booleanValue()) {
 /*  4674 */         System.err.println("验证通过");
+					logger.info("验证通过 0");
 /*  4675 */         Long accessToken = Long.valueOf(header);
 /*  4676 */         if ((phone == null) || (boUsers == null)) {
 /*  4677 */           this.requestJson.setData(map);
@@ -4706,7 +4708,9 @@
 /*  4681 */         else if (header4.equals(phone.getAccessToken())) {
 /*  4682 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
 /*  4683 */             BoHostDevice hostDevice = this.boHostDeviceService.findBydeviceAddress(userCode2[0].trim().toString(), this.deviceCode, this.deviceAddress);
-/*       */ 
+/*       */             logger.info("hostDevice 0>"+hostDevice);
+						logger.info("classesInfo 0>"+this.classesInfo);
+						logger.info("infraredButtonsInfo 0>"+this.infraredButtonsInfo);
 /*  4685 */             System.err.println(this.classesInfo);
 /*  4686 */             System.err.println(this.infraredButtonsInfo);
 
@@ -4779,6 +4783,7 @@
 /*  4748 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "创建红外按键");
 /*  4749 */       if (ral.booleanValue()) {
 /*  4750 */         System.err.println("验证通过");
+					logger.info("验证通过 1");
 /*  4751 */         Long accessToken = Long.valueOf(header);
 /*  4752 */         BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode);
 /*  4753 */         if (boUsers == null) {
@@ -12975,7 +12980,7 @@
 /*       */
 /*       */   @Action(value="commad", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String commad()
-/*       */   {
+/*       */   {//主机在线、离线
 	            System.out.println("····进入commad方法····");
 /* 13223 */     this.requestJson = new RequestJson();
 /* 13224 */     HttpServletRequest request = ServletActionContext.getRequest();
@@ -13406,6 +13411,20 @@
 						      this.packetProcessHelper.processSendDData(device.getBoDevice().getDeviceCode(), bs);
 						    }
 						  }
+						//2018-3-6 setSuccess(true)时 设置Mseeage="主机昵称（状态）"
+						String deviceCode=device.getBoDevice().getDeviceCode();
+						int status=device.getBoDevice().getStatus();
+						String host_status="离线";
+						if(status == 1) {
+							host_status="在线";
+						}
+						List<BoUserDevices> boUs=this.boUserDevicesServicess.getListByDeviceCode(deviceCode);
+						String nickName=boUs.get(0).getNickName();
+						logger.info("nickName=="+nickName);
+						String msg=nickName+","+host_status;
+						logger.info("msg=="+msg);
+						this.requestJson.setMessage(msg);
+						//END
 /*       */             }
 /*       */             else
 /*       */             {

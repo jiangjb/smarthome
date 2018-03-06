@@ -24,7 +24,7 @@ http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 	<!-- 启用spring mvc 注解    *SSH框架中也是能用spring mvc的东西的，毕竟spring mvc也是spring内部的东西-->
     <context:annotation-config />
  	
-    <!-- 设置使用注解的类所在的jar包 -->
+    <!-- 设置使用注解的类所在的包 -->
     <context:component-scan base-package="com.smarthome.imcp.controller"></context:component-scan>
     
 	

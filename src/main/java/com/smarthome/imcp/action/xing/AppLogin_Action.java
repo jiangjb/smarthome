@@ -423,6 +423,7 @@ import java.util.ArrayList;
 /* 472 */           if (users.getLogoAccountType().equals("M"))
 /* 473 */             userInfoMap.put("userCode", users.getUserCode() + "," + users.getUserPhone());//LogoAccountType=M时 传 本身的userCode
 /*     */           else {
+//					  userInfoMap.put("userCode", users.getAuthorizationUserCode() + "," + users.getUserPhone());
 /* 475 */             userInfoMap.put("userCode", users.getAuthorizationUserCode() + "," + users.getUserPhone()+"," + users.getUserCode());//LogoAccountType=S时 传授权者的userCode   new+被授权者userCode
 /*     */           }
 /* 477 */           userInfoMap.put("logoAccountType", users.getLogoAccountType());
