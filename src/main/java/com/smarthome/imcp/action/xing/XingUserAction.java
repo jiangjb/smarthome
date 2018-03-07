@@ -4373,7 +4373,7 @@
                 logger.info("gain红外参数 userCode>"+userCode);
 /*  4334 */     if (userCode.contains(",")) {
 /*  4335 */       String[] userCode2 = userCode.split(",");
-/*  4336 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
+/*  4336 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());//授权者 或 本身（不存在授权问题时）
 /*  4337 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
 /*  4338 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "获取红外模板按键");
 /*  4339 */       if (ral.booleanValue()) {
@@ -4389,7 +4389,9 @@
 /*  4349 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue())
 /*       */           {
 /*  4351 */             List<BoInfraredButtons> list = this.boInfraredButtonsService.getListBy(userCode2[0].trim().toString(), this.deviceCode, this.deviceAddress);
-/*  4352 */             Map Vmaps = new HashMap();
+/*  4352 */             logger.info("test获取红外参数   》"+userCode2[0].trim().toString()+","+this.deviceCode+","+this.deviceAddress);
+						logger.info("test获取红外模块对象 list》"+list);//[]
+						Map Vmaps = new HashMap();
 /*  4353 */             if (list.size() <= 0) {
 /*  4354 */               this.requestJson.setData(maps);
 /*  4355 */               this.requestJson.setMessage("没有");
@@ -4399,6 +4401,7 @@
 /*  4359 */               set = new HashSet();
 /*  4360 */               for (BoInfraredButtons boInfraredButtons : list)
 /*       */               {
+	                        logger.info("test获取红外参数  getTemplate》"+boInfraredButtons.getTemplate());
 /*  4363 */                 set.add(boInfraredButtons.getTemplate());
 /*  4364 */                 map.put(boInfraredButtons.getInfraredButtonsValuess().toString(), boInfraredButtons.getInfraredButtonsName());
 /*  4365 */                 Vmaps.put("shunxu", set);
@@ -4476,6 +4479,7 @@
 /*       */   @Action(value="deleteButton", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String deleteButton()
 /*       */   {
+				logger.info("deleteButton method");
 /*  4448 */     this.requestJson = new RequestJson();
 /*  4449 */     Map map = new HashMap();
 /*  4450 */     HttpServletRequest request = ServletActionContext.getRequest();
@@ -4515,7 +4519,9 @@
 /*  4482 */             System.err.println(this.deviceAddress);
 /*  4483 */             System.err.println(hostDevice.getBoDevice().getDeviceCode());
 /*  4484 */             List<BoInfraredButtons> list = this.boInfraredButtonsService.getListBy(userCode2[0].trim().toString(), this.deviceCode, this.deviceAddress, base, s);
-/*  4485 */             if (list.size() <= 0) {
+/*  4485 */             logger.info("deleteButton参数="+userCode2[0].trim().toString()+","+this.deviceCode+","+this.deviceAddress+","+base+","+s);
+						logger.info("deleteButton list="+list);
+						if (list.size() <= 0) {
 /*  4486 */               System.err.println("没有");
 /*       */             } else {
 /*  4488 */               BoInfraredButtons buttons = this.boInfraredButtonsService.findBydeviceAddress(userCode2[0].trim().toString(), this.deviceCode, this.deviceAddress);
@@ -4682,6 +4688,7 @@
 /*       */   @Action(value="createButton", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String createButton()
 /*       */   {
+	            logger.info("createButton method");
 /*  4660 */     this.requestJson = new RequestJson();
 /*  4661 */     Map map = new HashMap();
 /*  4662 */     HttpServletRequest request = ServletActionContext.getRequest();
@@ -4709,14 +4716,14 @@
 /*  4682 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
 /*  4683 */             BoHostDevice hostDevice = this.boHostDeviceService.findBydeviceAddress(userCode2[0].trim().toString(), this.deviceCode, this.deviceAddress);
 /*       */             logger.info("hostDevice 0>"+hostDevice);
-						logger.info("classesInfo 0>"+this.classesInfo);
-						logger.info("infraredButtonsInfo 0>"+this.infraredButtonsInfo);
+						logger.info("classesInfo 0>"+this.classesInfo);//B0
+						logger.info("infraredButtonsInfo 0>"+this.infraredButtonsInfo);//{"56":"6","55":"5","61":"0","69":"19","65":"15","62":"回看","54":"4","64":"14","53":"3","58":"8","60":"-/--","57":"7","63":"13","59":"9","70":"20","68":"18","52":"2","67":"17","66":"16","51":"1"}
 /*  4685 */             System.err.println(this.classesInfo);
 /*  4686 */             System.err.println(this.infraredButtonsInfo);
 
 
 /*  4763 */             Map data = new HashMap();
-						List<String> keys = new ArrayList<String>(data.keySet());
+//						List<String> keys = new ArrayList<String>(data.keySet());
 ///*       */ 			List<String> keys=(List<String>) data.keySet();
 						//Set 转   List
 //						Set<String> keys0 = data.keySet();
@@ -4734,29 +4741,38 @@
 /*       */             }
 /*       */ 
 /*  4700 */             String s = null;
-/*  4701 */             List<BoInfraredButtons> list = this.boInfraredButtonsService.getListBy(userCode2[0].trim().toString(), this.deviceCode, this.deviceAddress);
-/*       */ 
+/*  4701 */             List<BoInfraredButtons> list = this.boInfraredButtonsService.getListBy(userCode2[0].trim().toString(), this.deviceCode, this.deviceAddress);//userCode,deviceCode,deviceAddress
+						logger.info("test创建button ="+userCode2[0].trim().toString()+","+this.deviceCode+","+this.deviceAddress);
+/*       */             logger.info("test创建button list="+list);
 /*  4703 */             if (list.size() > 0) {
 /*  4704 */               for (BoInfraredButtons boInfraredButtons : list) {
 /*  4705 */                 s = boInfraredButtons.getTemplate();
+							logger.info("test创建button classesInfo="+ this.classesInfo + ",");
+						    logger.info("test创建button Template="+boInfraredButtons.getTemplate() + this.classesInfo + ",");
 /*  4706 */                 boInfraredButtons.setTemplate(boInfraredButtons.getTemplate() + this.classesInfo + ",");
 /*  4707 */                 this.boInfraredButtonsService.update(boInfraredButtons);
 /*       */               }
 /*       */ 
 /*       */             }
-/*       */ 
+/*       */ 		    List<String> keys = new ArrayList<String>(data.keySet());
 /*  4712 */             for (String key : keys)
 /*       */             {
+	                      logger.info("test创建button ButtonsValuess="+key);
+	                      logger.info("test创建button ButtonsName="+(String)data.get(key));
+	                      
 /*  4714 */               BoInfraredButtons bo = new BoInfraredButtons();
 /*  4715 */               bo.setBoDevice(hostDevice.getBoDevice());
 /*  4716 */               bo.setBoUsers(boUsers);
 /*  4717 */               bo.setDeviceAddress(this.deviceAddress);
 /*  4718 */               bo.setInfraredButtonsValuess(Integer.valueOf(key));
 /*  4719 */               bo.setInfraredButtonsName((String)data.get(key));
-/*  4720 */               if ((s == null) || (s.equals("")))
+/*  4720 */               if ((s == null) || (s.equals(""))) {
 /*  4721 */                 bo.setTemplate(this.classesInfo + ",");
+							logger.info("test创建button Template="+this.classesInfo + ",");
+						  }
 /*       */               else {
 /*  4723 */                 bo.setTemplate(s + this.classesInfo + ",");
+						    logger.info("test创建button Template01="+s + this.classesInfo + ",");
 /*       */               }
 /*       */ 
 /*  4726 */               this.boInfraredButtonsService.save(bo);
@@ -4799,7 +4815,7 @@
 					  
 
 /*  4763 */           Map data = new HashMap();
-				      List<String> keys = new ArrayList<String>(data.keySet());//map key 转为  list  List<String> mapKeyList = new ArrayList<String>(map.keySet());
+//				      List<String> keys = new ArrayList<String>(data.keySet());//map key 转为  list  List<String> mapKeyList = new ArrayList<String>(map.keySet());
 //					  List<String> keys=(List<String>) data.keySet();
 					  //Set 转   List
 //					  Set<String> keys0 = data.keySet();
@@ -4827,7 +4843,7 @@
 /*       */             }
 /*       */ 
 /*       */           }
-/*       */ 
+/*       */ 		  List<String> keys = new ArrayList<String>(data.keySet());//map key 转为  list  List<String> mapKeyList = new ArrayList<String>(map.keySet());
 /*  4788 */           for (String key : keys)
 /*       */           {
 /*  4790 */             BoInfraredButtons bo = new BoInfraredButtons();
@@ -11679,7 +11695,7 @@
 
 /* 11915 */             Map deviceAddressMap = new HashMap();
 //						List<String> keys=(List<String>) deviceAddressMap.keySet();//Set can't cast to List 
-					    List<String> keys = new ArrayList<String>(deviceAddressMap.keySet());
+//					    List<String> keys = new ArrayList<String>(deviceAddressMap.keySet());
 						//Set 转    List
 //						Set<String> keys0 = deviceAddressMap.keySet();
 //						List<String> keys = new ArrayList<>(keys0);
@@ -11696,7 +11712,7 @@
 /* 11923 */                 deviceAddressMap.put(boHostDevice.getDeviceAddress(), boHostDevice.getDeviceAddress() + "," + boHostDevice.getDeviceType() + "," + boHostDevice.getBoDevice().getDeviceCode());
 /*       */               }
 /*       */             }
-/*       */ 
+/*       */             List<String> keys = new ArrayList<String>(deviceAddressMap.keySet());//map key 转为  list  List<String> mapKeyList = new ArrayList<String>(map.keySet());
 /* 11927 */             for (String key : keys) {
 /* 11928 */               packNum(userCode2[0].trim().toString());
 /* 11929 */               Thread.sleep(400L);
@@ -11764,7 +11780,7 @@
 
 /* 11915 */             Map deviceAddressMap = new HashMap();
 						//List<String> keys=(List<String>) deviceAddressMap.keySet();//Set can't cast to List 
-						List<String> keys = new ArrayList<String>(deviceAddressMap.keySet());
+//						List<String> keys = new ArrayList<String>(deviceAddressMap.keySet());
 						//Set 转    List
 //						Set<String> keys0 = deviceAddressMap.keySet();
 //						List<String> keys = new ArrayList<>(keys0);
@@ -11780,7 +11796,7 @@
 /* 11999 */                 deviceAddressMap.put(boHostDevice.getDeviceAddress(), boHostDevice.getDeviceAddress() + "," + boHostDevice.getDeviceType() + "," + boHostDevice.getBoDevice().getDeviceCode());
 /*       */               }
 /*       */             }
-/*       */ 
+/*       */ 			List<String> keys = new ArrayList<String>(deviceAddressMap.keySet());
 /* 12003 */             for (String key : keys) {
 /* 12004 */               packNum(userCode);
 /* 12005 */               Thread.sleep(400L);
@@ -13420,9 +13436,9 @@
 						}
 						List<BoUserDevices> boUs=this.boUserDevicesServicess.getListByDeviceCode(deviceCode);
 						String nickName=boUs.get(0).getNickName();
-						logger.info("nickName=="+nickName);
+//						logger.info("nickName=="+nickName);
 						String msg=nickName+","+host_status;
-						logger.info("msg=="+msg);
+//						logger.info("msg=="+msg);
 						this.requestJson.setMessage(msg);
 						//END
 /*       */             }
@@ -13793,9 +13809,20 @@
 /* 13962 */                 this.packetProcessHelper.setUserCode(userCode);
 /*       */               }
 /*       */             }
-
-
-/*       */ 
+						//2018-3-6 setSuccess(true)时 设置Mseeage="主机昵称（状态）"
+						String deviceCode=device.getBoDevice().getDeviceCode();
+						int status=device.getBoDevice().getStatus();
+						String host_status="离线";
+						if(status == 1) {
+							host_status="在线";
+						}
+						List<BoUserDevices> boUs=this.boUserDevicesServicess.getListByDeviceCode(deviceCode);
+						String nickName=boUs.get(0).getNickName();
+						logger.info("nickName 01=="+nickName);
+						String msg=nickName+","+host_status;
+						logger.info("msg 01=="+msg);
+						this.requestJson.setMessage(msg);
+						//END
 /*       */           }
 /*       */           else
 /*       */           {
@@ -15527,38 +15554,41 @@
 /*       */         }
 /*       */         else {//新的refreshToken 和 从数据库取出来的 不同时
 					//2-6  友盟推送 
-				     String device_token=users.getUserDevicetoken();//新设备token
+//				     String device_token=users.getUserDevicetoken();//新设备token
 //				     logger.info("新设备的token>>>"+device_token);
-				     String oldDevice_token=users.getUserAddr();//旧设备token
+//				     String oldDevice_token=users.getUserAddr();//旧设备token
 //				     logger.info("旧设备的token>>>"+oldDevice_token);
-				     //new 2018-3-3  添加手机类型判断
-				     Demo ymPush = new Demo();
-				     
-				     Date currentTime = new Date();
-				     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-				     String dateString = formatter.format(currentTime);
-					 try {
-						 if(oldDevice_token !=""  || oldDevice_token != device_token) {
-							 if(users.getPhoneType() == 1) {//new 2018-3-3
-								 Map<String,String> map1=new HashMap<String,String>();
-								 map1.put("title", "离线通知");
-								 map1.put("subtitle", "");
-								 map1.put("body", "另一台设备正在登录,您在"+dateString+"被迫下线");
-								 ymPush.sendIOSUnicast(oldDevice_token,map,"offline");	
-							 }else {
-								 ymPush.sendAndroidUnicast(oldDevice_token,"离线通知","另一台设备正在登录,您在"+dateString+"被迫下线");		 
-							 }
-							 users.setUserAddr("");
-							 BoUsers update = (BoUsers)this.boUserServicess.update(users);
-							 if(update !=null) {
-								 logger.info("更新操作成功执行");
-							 } 
-						 }
-		
-	                    //end
-					 } catch (Exception e) {
-						e.printStackTrace();
-					 }
+//				     //new 2018-3-3  添加手机类型判断
+//				     Demo ymPush = new Demo();
+//				     
+//				     Date currentTime = new Date();
+//				     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//				     String dateString = formatter.format(currentTime);
+//					 try {
+//						 logger.info("离线在线="+(oldDevice_token !=""  && oldDevice_token != device_token));//true
+//						 if(oldDevice_token !=""  && oldDevice_token != device_token) {
+//							 if(users.getPhoneType() == 1) {//new 2018-3-3
+//								 logger.info("IOS离线通知");
+//								 Map<String,String> map1=new HashMap<String,String>();
+//								 map1.put("title", "离线通知");
+//								 map1.put("subtitle", "");
+//								 map1.put("body", "另一台设备正在登录,您在"+dateString+"被迫下线");
+//								 ymPush.sendIOSUnicast(oldDevice_token,map,"offline");	
+//							 }else {
+//								 logger.info("安卓离线通知");
+//								 ymPush.sendAndroidUnicast(oldDevice_token,"离线通知","另一台设备正在登录,您在"+dateString+"被迫下线");		 
+//							 }
+//							 users.setUserAddr("");
+//							 BoUsers update = (BoUsers)this.boUserServicess.update(users);
+//							 if(update !=null) {
+//								 logger.info("更新操作成功执行");
+//							 } 
+//						 }
+//		
+//	                    //end
+//					 } catch (Exception e) {
+//						e.printStackTrace();
+//					 }
 /* 15713 */           System.err.println("refreshToken令牌失效");
 /* 15714 */           this.requestJson.setData(map);
 /* 15715 */           this.requestJson.setMessage("refreshToken令牌失效");

@@ -411,10 +411,35 @@ import java.util.ArrayList;
 /* 467 */           users.setPhoneType(Integer.valueOf(this.phoneType));
 /* 468 */           users.setVersionType(this.versionType);
 
-					//2-6 暂时将旧设备的token存入userAddr中，待发送离线请求时将新的devicetoken替换，userAddr恢复空值
-					if(this.devicetoken != users.getUserDevicetoken()) {//当不同时判定为有新设备连入
-						users.setUserAddr(users.getUserDevicetoken());   	
+					//2018-2-6: 首先将旧设备的token存入userAddr中，待另一台设备登录时       旧的userAddr被新的devicetoken替换
+                    logger.info("新的deviceToken==="+this.devicetoken);
+					logger.info("旧手机的deviceToken==="+users.getUserAddr());
+					if(users.getUserAddr() == "") {
+						users.setUserAddr(this.devicetoken);
+					}
+					else if(!this.devicetoken.equals(users.getUserAddr()) ) {//当不同时判定为有新设备连入 -----》发送离线通知
+						
+						//2-5 友盟推送
+						Demo ymPush = new Demo();
+						//+上线时间 
+						Date currentTime = new Date();
+						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+						String dateString = formatter.format(currentTime);
+						logger.info("设备类型>>"+users.getPhoneType());
+						if(users.getPhoneType() == 1) {//new 2018-3-7
+							 logger.info("IOS离线通知");
+							 Map<String,String> map1=new HashMap<String,String>();
+							 map1.put("title", "离线通知");
+							 map1.put("subtitle", "");
+							 map1.put("body", "另一台设备正在登录,您在"+dateString+"被迫下线");
+							 ymPush.sendIOSUnicast(users.getUserAddr(),map1,"appoffline");	
+						 }else {
+							 logger.info("安卓离线通知");
+							 ymPush.sendAndroidUnicast(users.getUserAddr(),"离线通知","另一台设备正在登录,您在"+dateString+"被迫下线");		 
+						 }
+						users.setUserAddr(this.devicetoken);   	
 						users.setUserDevicetoken(this.devicetoken);//当前登录的设备token
+//						END
 					}
                     //end
 /* 469 */           BoUsers update = (BoUsers)this.boUserService.update(users);
@@ -453,24 +478,22 @@ import java.util.ArrayList;
 					
 /* 482 */           String fluoriteAccessToken = users.getFluoriteAccessToken();
 /*     */           String EZTOKEN;
-//                  2-5 友盟推送
-					Demo ymPush = new Demo();
-//					logger.info("phoneType>>"+users.getPhoneType());
-					//+上线时间 
-					Date currentTime = new Date();
-					SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					String dateString = formatter.format(currentTime);
-					if(users.getPhoneType() == 1) {//0 代表 安卓;1代表 ios
-						Map<String,String> map1=new HashMap<String,String>();
-						map1.put("title", "上线通知");
-						map1.put("subtitle", "");
-						map1.put("body", "您的设备在"+dateString+"成功登录");
-						ymPush.sendIOSUnicast(this.devicetoken,map1,"applogin");
-					}else {
-						ymPush.sendAndroidUnicast(this.devicetoken,"上线通知","您的设备在"+dateString+"成功登录");
-					}
-
-					logger.info("device_token>>"+this.devicetoken);
+////                  2-5 友盟推送
+//					Demo ymPush = new Demo();
+////					logger.info("phoneType>>"+users.getPhoneType());
+//					//+上线时间 
+//					Date currentTime = new Date();
+//					SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//					String dateString = formatter.format(currentTime);
+//					if(users.getPhoneType() == 1) {//0 代表 安卓;1代表 ios
+//						Map<String,String> map1=new HashMap<String,String>();
+//						map1.put("title", "上线通知");
+//						map1.put("subtitle", "");
+//						map1.put("body", "您的设备在"+dateString+"成功登录");
+//						ymPush.sendIOSUnicast(this.devicetoken,map1,"applogin");
+//					}else {
+//						ymPush.sendAndroidUnicast(this.devicetoken,"上线通知","您的设备在"+dateString+"成功登录");
+//					}
 //					END
 				    System.out.println("手机登录成功");
 /* 484 */           if (fluoriteAccessToken.equals(""))
