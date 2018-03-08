@@ -4722,14 +4722,7 @@
 /*  4686 */             System.err.println(this.infraredButtonsInfo);
 
 
-/*  4763 */             Map data = new HashMap();
-//						List<String> keys = new ArrayList<String>(data.keySet());
-///*       */ 			List<String> keys=(List<String>) data.keySet();
-						//Set 转   List
-//						Set<String> keys0 = data.keySet();
-//						List<String> keys = new ArrayList<>(keys0);
-//						System.out.println("keys:"+keys);
-						
+/*  4763 */             Map data = new HashMap();					
 /*  4689 */             JSONObject jsonObject = JSONObject.fromObject(this.infraredButtonsInfo);
 /*  4690 */             Iterator it = jsonObject.keys();
 /*       */ 
@@ -4754,7 +4747,7 @@
 /*       */               }
 /*       */ 
 /*       */             }
-/*       */ 		    List<String> keys = new ArrayList<String>(data.keySet());
+/*       */ 		    List<String> keys = new ArrayList<String>(data.keySet());//该句的位置很重要，等data存好值再转为List
 /*  4712 */             for (String key : keys)
 /*       */             {
 	                      logger.info("test创建button ButtonsValuess="+key);
@@ -14554,7 +14547,8 @@
 //						  logger.info("······headPic:"+update.getHeadPic());
 ///* 14707 */               break label1208;
 						  return "success";
-/* 14708 */             }BoUsers boUser = this.boUserServicess.findByUserPhone(userPhone);
+/* 14708 */             }
+						BoUsers boUser = this.boUserServicess.findByUserPhone(userPhone);
 /* 14709 */             String dir = "uploads/headpic";
 /* 14710 */             System.err.println("<>>>>>>>>fileupload " + this.fileupload);
 ///* 14711 */             String filePath = this.fileService.saveToDir(this.fileupload, 

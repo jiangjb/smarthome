@@ -410,14 +410,14 @@ import java.util.ArrayList;
 					logger.info("CID >>>"+this.CID);
 /* 467 */           users.setPhoneType(Integer.valueOf(this.phoneType));
 /* 468 */           users.setVersionType(this.versionType);
-
-					//2018-2-6: 首先将旧设备的token存入userAddr中，待另一台设备登录时       旧的userAddr被新的devicetoken替换
-                    logger.info("新的deviceToken==="+this.devicetoken);
-					logger.info("旧手机的deviceToken==="+users.getUserAddr());
+					
+					//2018-3-7: 首先将旧设备的token存入userAddr中，待另一台设备登录时（判断是否相同）       若不同则将旧的userAddr被新的devicetoken替换
+//                    logger.info("新的deviceToken==="+this.devicetoken);
+//					logger.info("旧手机的deviceToken==="+users.getUserAddr());
 					if(users.getUserAddr() == "") {
 						users.setUserAddr(this.devicetoken);
 					}
-					else if(!this.devicetoken.equals(users.getUserAddr()) ) {//当不同时判定为有新设备连入 -----》发送离线通知
+					else if(!this.devicetoken.equals(users.getUserAddr())) {//当不同时判定为有新设备连入 -----》发送离线通知
 						
 						//2-5 友盟推送
 						Demo ymPush = new Demo();
@@ -425,18 +425,32 @@ import java.util.ArrayList;
 						Date currentTime = new Date();
 						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 						String dateString = formatter.format(currentTime);
-						logger.info("设备类型>>"+users.getPhoneType());
-						if(users.getPhoneType() == 1) {//new 2018-3-7
-							 logger.info("IOS离线通知");
-							 Map<String,String> map1=new HashMap<String,String>();
-							 map1.put("title", "离线通知");
-							 map1.put("subtitle", "");
-							 map1.put("body", "另一台设备正在登录,您在"+dateString+"被迫下线");
-							 ymPush.sendIOSUnicast(users.getUserAddr(),map1,"appoffline");	
-						 }else {
-							 logger.info("安卓离线通知");
-							 ymPush.sendAndroidUnicast(users.getUserAddr(),"离线通知","另一台设备正在登录,您在"+dateString+"被迫下线");		 
-						 }
+						int PrePhoneType=Integer.parseInt(users.getUserAge());
+						int NowPhoneType=Integer.valueOf(this.phoneType);
+						logger.info("旧设备类型>>"+PrePhoneType);
+						logger.info("新设备类型>>"+NowPhoneType);
+						Map<String,String> map1=new HashMap<String,String>();
+						map1.put("title", "离线通知");
+						map1.put("subtitle", "");
+						map1.put("body", "另一台设备正在登录,您在"+dateString+"被迫下线");
+						//取出旧设备的phoneType，根据旧设备的phoneType选择安卓推送还是IOS推送
+						if(NowPhoneType == 1) {
+							if(PrePhoneType == 1) {//苹果设备 挤掉  苹果设备
+								ymPush.sendIOSUnicast(users.getUserAddr(),map1,"appoffline");
+							}else {//苹果设备 挤掉 安卓设备，给安卓设备发送 离线通知
+								logger.info("苹果设备挤掉安卓设备");
+								ymPush.sendAndroidUnicast(users.getUserAddr(),"离线通知","另一台设备正在登录,您在"+dateString+"被迫下线");	
+							}
+						}else {
+							if(PrePhoneType == 0) {
+								ymPush.sendAndroidUnicast(users.getUserAddr(),"离线通知","另一台设备正在登录,您在"+dateString+"被迫下线");	
+							}else {
+								logger.info("安卓设备挤掉苹果设备");
+								ymPush.sendIOSUnicast(users.getUserAddr(),map1,"appoffline");
+							}
+						}
+						//end
+						users.setUserAge(this.phoneType+"");//2018-3-8 将这台设备的设备类型存在 无用字段 UserAge中
 						users.setUserAddr(this.devicetoken);   	
 						users.setUserDevicetoken(this.devicetoken);//当前登录的设备token
 //						END
