@@ -267,7 +267,7 @@
 /*       */   @Autowired
 /*       */   private PacketProcessHelper packetProcessHelper;
 
-/*       */   private File fileupload;
+/*       */   private File fileupload;//成员变量 这个怎么获取？
 /*       */   private String fileuploadFileName;
 /*       */   private String fileuploadContentType;
 /* 16448 */   private RequestJson requestJson = new RequestJson();
@@ -4808,13 +4808,6 @@
 					  
 
 /*  4763 */           Map data = new HashMap();
-//				      List<String> keys = new ArrayList<String>(data.keySet());//map key 转为  list  List<String> mapKeyList = new ArrayList<String>(map.keySet());
-//					  List<String> keys=(List<String>) data.keySet();
-					  //Set 转   List
-//					  Set<String> keys0 = data.keySet();
-//					  List<String> keys = new ArrayList<>(keys0);
-//					  System.out.println("keys:"+keys);
-/*       */ 
 /*  4765 */           JSONObject jsonObject = JSONObject.fromObject(this.infraredButtonsInfo);
 /*  4766 */           Iterator it = jsonObject.keys();
 /*       */ 
@@ -14445,7 +14438,7 @@
 /* 14619 */     String header3 = request.getHeader("sign");
 /* 14620 */     String header4 = request.getHeader("access_token");
 /* 14621 */     String userCode = request.getHeader("userCode");
-/* 14622 */     String userPhone = request.getHeader("userPhone");
+/* 14622 */     String userPhone = request.getHeader("userPhone");//timestamp、nonce、sign、access_token、userCode和userPhone是app那边传来
 				
 /* 14623 */     if (userCode.contains(",")) {
 /* 14624 */       String[] userCode2 = userCode.split(",");
@@ -14466,29 +14459,49 @@
 /*       */             try {
 /* 14639 */               if ((userPhone == null) || (userPhone.equals(""))) {
 /* 14640 */                 String dir = "uploads/headpic";//不能放在项目目录下，不然每次重新部署都会消失
-/* 14641 */                 System.err.println("<>>>>>>>>fileupload " + this.fileupload);
-///* 14642 */                 String filePath = this.fileService.saveToDir(this.fileupload, 
-///* 14643 */                   userCode + "head" + createRandomVcodesss() + ".jpg", dir);
-							String filePath = this.fileService.saveToDir(this.fileupload, 
-									userCode + "head" + ".jpg", dir);
-//							logger.info("头像的地址1 filePath>>"+filePath);
+/* 14641 */                 logger.info("<>>>>>>>>fileupload1 " + this.fileupload);
+/* 14642 */                 String filePath = this.fileService.saveToDir(this.fileupload, 
+/* 14643 */                   userCode + "head" + createRandomVcodesss() + ".jpg", dir);
+//							String filePath = this.fileService.saveToDir(this.fileupload, 
+//									userCode + "head" + ".jpg", dir);
+							logger.info("头像的地址1 filePath>>"+filePath);
+							String old_pic=phone.getHeadPic();//3-10 先把图片的地址写下来，，若是更新了头像则将这种旧的头像删除
 /* 14644 */                 boUsers.setHeadPic(filePath);
 /* 14645 */                 BoUsers update = (BoUsers)this.boUserServicess.update(boUsers);
+							//3-10
+							if(!old_pic.equals(update.getHeadPic())) {
+								  String root = System.getProperty("webapp.root");
+								  String url0=root + "/" +old_pic;
+								  String url = url0.replace('/', '\\');
+								  new File(url).delete();//删除图片只能这样写 new File("E:\\smarthome\\sss.txt").delete();  
+							}
 /* 14646 */                 this.requestJson.setMessage("头像上传成功");
 /* 14647 */                 map.put("headPic", update.getHeadPic());
 //							logger.info("`headPic>>"+update.getHeadPic());
 ///* 14648 */                 break label1208;
-							return "userPhone == null";
+							return "success";
 /* 14649 */               }
 						  String dir = "uploads/headpic";//不能放在项目目录下，不然每次重新部署都会消失
-/* 14650 */               System.err.println("<>>>>>>>>fileupload " + this.fileupload);
-///* 14651 */               String filePath = this.fileService.saveToDir(this.fileupload, 
-///* 14652 */                 userCode + "head" + createRandomVcodesss() + ".jpg", dir);//这样命名图片会越来越多
-						  String filePath = this.fileService.saveToDir(this.fileupload, 
-								  userCode + "head" + ".jpg", dir);
-//						  logger.info("头像的地址2 filePath>>"+filePath);
+/* 14650 */               logger.info("<>>>>>>>>fileupload2 " + this.fileupload);//一个tmp结尾的缓存文件
+						  logger.info("fileupload usercode>>"+userCode);
+/* 14651 */               String filePath = this.fileService.saveToDir(this.fileupload, 
+/* 14652 */                 userCode + "head" + createRandomVcodesss() + ".jpg", dir);//这样命名图片会越来越多 >解决方法：删除前一张图片
+//						  String filePath = this.fileService.saveToDir(this.fileupload, 
+//								  userCode + "head" + ".jpg", dir);//该方式不能确保图片的实时更新 --有问题
+						  logger.info("头像的地址2 filePath>>"+filePath);
+						  String old_pic=phone.getHeadPic();//3-10 先把图片的地址写下来，，若是更新了头像则将这种旧的头像删除
 /* 14653 */               phone.setHeadPic(filePath);
 /* 14654 */               BoUsers update = (BoUsers)this.boUserServicess.update(phone);
+						  //3-10 删除前一张图片 ，确保一个用户只有一张图片	
+						  logger.info("NEW_PIC>>"+update.getHeadPic()+",OLD_PIC>>"+old_pic);
+						  if(!old_pic.equals(update.getHeadPic())) {
+							  String root = System.getProperty("webapp.root");
+							  logger.info("root>>"+root);//root=E:\smarthome\tomcat8\webapps\smarthome.IMCPlatform\
+							  String url0=root + "/" +old_pic;
+							  String url = url0.replace('/', '\\');
+							  logger.info("url=="+url);
+							  new File(url).delete();//删除图片只能这样写 new File("E:\\smarthome\\sss.txt").delete();  
+						  }
 /* 14655 */               this.requestJson.setMessage("头像上传成功");
 /* 14656 */               map.put("headPic", update.getHeadPic());
 //						  logger.info("``headPic>>"+update.getHeadPic());
@@ -14535,12 +14548,13 @@
 /*       */           try {
 /* 14698 */             if ((userPhone == null) || (userPhone.equals(""))) {
 /* 14699 */               String dir = "uploads/headpic";
-/* 14700 */               System.err.println("<>>>>>>>>fileupload " + this.fileupload);
-///* 14701 */               String filePath = this.fileService.saveToDir(this.fileupload, 
-///* 14702 */                 userCode + "head" + createRandomVcodesss() + ".jpg", dir);
-						  String filePath = this.fileService.saveToDir(this.fileupload, 
-								  userCode + "head" + ".jpg", dir);
-/* 14703 */               boUsers.setHeadPic(filePath);
+/* 14700 */               logger.info("<>>>>>>>>fileupload3 " + this.fileupload);
+/* 14701 */               String filePath = this.fileService.saveToDir(this.fileupload, 
+/* 14702 */                 userCode + "head" + createRandomVcodesss() + ".jpg", dir);
+//						  String filePath = this.fileService.saveToDir(this.fileupload, 
+//								  userCode + "head" + ".jpg", dir);//创建图片 并返回要存入数据库的字符串
+						  logger.info("头像的地址3 filePath>>"+filePath);
+/* 14703 */               boUsers.setHeadPic(filePath);//地址存入数据库
 /* 14704 */               BoUsers update = (BoUsers)this.boUserServicess.update(boUsers);
 /* 14705 */               this.requestJson.setMessage("头像上传成功");
 /* 14706 */               map.put("headPic", update.getHeadPic());
@@ -14550,14 +14564,22 @@
 /* 14708 */             }
 						BoUsers boUser = this.boUserServicess.findByUserPhone(userPhone);
 /* 14709 */             String dir = "uploads/headpic";
-/* 14710 */             System.err.println("<>>>>>>>>fileupload " + this.fileupload);
-///* 14711 */             String filePath = this.fileService.saveToDir(this.fileupload, 
-///* 14712 */               userCode + "head" + createRandomVcodesss() + ".jpg", dir);
-						String filePath = this.fileService.saveToDir(this.fileupload, 
-								userCode + "head" + ".jpg", dir);
-//						logger.info("头像的地址 filePath>>"+filePath);
-/* 14713 */             boUser.setHeadPic(filePath);
-/* 14714 */             BoUsers update = (BoUsers)this.boUserServicess.update(boUser);
+/* 14710 */             logger.info("<>>>>>>>>fileupload4 " + this.fileupload);
+/* 14711 */             String filePath = this.fileService.saveToDir(this.fileupload, 
+/* 14712 */               userCode + "head" + createRandomVcodesss() + ".jpg", dir);
+//						String filePath = this.fileService.saveToDir(this.fileupload, 
+//								userCode + "head" + ".jpg", dir);
+						logger.info("头像的地址4 filePath>>"+filePath);
+						String old_pic=boUsers.getHeadPic();//3-10 先把图片的地址写下来，，若是更新了头像则将这种旧的头像删除
+/* 14644 */             boUsers.setHeadPic(filePath);
+/* 14645 */             BoUsers update = (BoUsers)this.boUserServicess.update(boUsers);
+						//3-10
+						if(!old_pic.equals(update.getHeadPic())) {
+							  String root = System.getProperty("webapp.root");
+							  String url0=root + "/" +old_pic;
+							  String url = url0.replace('/', '\\');
+							  new File(url).delete();//删除图片只能这样写 new File("E:\\smarthome\\sss.txt").delete();  
+						}
 /* 14715 */             this.requestJson.setMessage("头像上传成功");
 /* 14716 */             map.put("headPic", update.getHeadPic());
 //					    logger.info("·····headPic:"+update.getHeadPic());
@@ -14823,12 +14845,13 @@
 /* 14954 */               map.put("province_city_area", boUsers.getCity().toString());
 /* 14955 */               map.put("signature", boUsers.getSignature().toString());
 /* 14956 */               map.put("headPic", boUsers.getHeadPic().toString());
-//						  logger.info("·headPic>>"+boUsers.getHeadPic().toString());
+						  logger.info("getuser headPic1>>"+boUsers.getHeadPic().toString());
 /* 14957 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 14958 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 14959 */               this.requestJson.setTotal(Integer.valueOf(1));
 /* 14960 */               this.requestJson.setData(map);
-/*       */             } else {
+/*       */             } else {  
+//	                      logger.info("getuser this.userPhone>>"+this.userPhone);//15180301173 是当前的号码
 /* 14962 */               BoUsers users = this.boUserServicess.findByUserPhone(this.userPhone);
 /*       */ 
 /* 14964 */               map.put("userName", users.getUserName().toString());
@@ -14848,7 +14871,7 @@
 /* 14976 */               map.put("province_city_area", users.getCity().toString());
 /* 14977 */               map.put("signature", users.getSignature().toString());
 /* 14978 */               map.put("headPic", users.getHeadPic().toString());
-//						  logger.info("··headPic>>"+boUsers.getHeadPic().toString());
+						  logger.info("getuser headPic2>>"+boUsers.getHeadPic().toString());//授权者的头像。。。。
 /* 14979 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 14980 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 14981 */               this.requestJson.setTotal(Integer.valueOf(1));
@@ -14904,7 +14927,7 @@
 /* 15029 */               map.put("province_city_area", boUsers.getCity().toString());
 /* 15030 */               map.put("signature", boUsers.getSignature().toString());
 /* 15031 */               map.put("headPic", boUsers.getHeadPic().toString());
-//						  logger.info("···headPic>>"+boUsers.getHeadPic().toString());
+						  logger.info("getuser headPic3>>"+boUsers.getHeadPic().toString());
 /* 15032 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 15033 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 15034 */               this.requestJson.setTotal(Integer.valueOf(1));
@@ -14929,7 +14952,7 @@
 /* 15051 */               map.put("province_city_area", users.getCity().toString());
 /* 15052 */               map.put("signature", users.getSignature().toString());
 /* 15053 */               map.put("headPic", users.getHeadPic().toString());
-//						  logger.info("····headPic>>"+boUsers.getHeadPic().toString());
+						  logger.info("getuser headPic4>>"+boUsers.getHeadPic().toString());
 /* 15054 */               this.requestJson.setPage(Integer.valueOf(1));
 /* 15055 */               this.requestJson.setTotalPages(Integer.valueOf(1));
 /* 15056 */               this.requestJson.setTotal(Integer.valueOf(1));
@@ -15516,14 +15539,14 @@
 /*       */ 
 /* 15682 */       if (header3.equals(sign)) {
 /* 15683 */         System.err.println("sign验证通过");
-/* 15684 */         System.err.println("手机 》》" + this.refreshToken);//???
+/* 15684 */         System.err.println("手机 》》" + this.refreshToken);
 /*       */ 
 /* 15686 */         if (users == null) {
 /* 15687 */           this.requestJson.setData(map);
 /* 15688 */           this.requestJson.setMessage("Invalid_User");
 /* 15689 */           this.requestJson.setSuccess(true);
 /*       */         }
-/* 15691 */         else if (this.refreshToken.equals(users.getRefreshToken())) {//新的refreshToken 和 从数据库取出来的一样时
+/* 15691 */         else if (this.refreshToken.equals(users.getRefreshToken())) {//新的refreshToken 和 从数据库取出来的一样时 自动登录
 /* 15692 */           System.err.println(users.getRefreshTokenTime());
 //                      logger.info("新的refreshToken"+this.refreshToken);
 //                      logger.info("旧的refreshToken"+users.getRefreshToken());
@@ -15546,43 +15569,7 @@
 /* 15709 */           this.requestJson.setMessage("超时了");
 /* 15710 */           this.requestJson.setSuccess(false);
 /*       */         }
-/*       */         else {//新的refreshToken 和 从数据库取出来的 不同时
-					//2-6  友盟推送 
-//				     String device_token=users.getUserDevicetoken();//新设备token
-//				     logger.info("新设备的token>>>"+device_token);
-//				     String oldDevice_token=users.getUserAddr();//旧设备token
-//				     logger.info("旧设备的token>>>"+oldDevice_token);
-//				     //new 2018-3-3  添加手机类型判断
-//				     Demo ymPush = new Demo();
-//				     
-//				     Date currentTime = new Date();
-//				     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//				     String dateString = formatter.format(currentTime);
-//					 try {
-//						 logger.info("离线在线="+(oldDevice_token !=""  && oldDevice_token != device_token));//true
-//						 if(oldDevice_token !=""  && oldDevice_token != device_token) {
-//							 if(users.getPhoneType() == 1) {//new 2018-3-3
-//								 logger.info("IOS离线通知");
-//								 Map<String,String> map1=new HashMap<String,String>();
-//								 map1.put("title", "离线通知");
-//								 map1.put("subtitle", "");
-//								 map1.put("body", "另一台设备正在登录,您在"+dateString+"被迫下线");
-//								 ymPush.sendIOSUnicast(oldDevice_token,map,"offline");	
-//							 }else {
-//								 logger.info("安卓离线通知");
-//								 ymPush.sendAndroidUnicast(oldDevice_token,"离线通知","另一台设备正在登录,您在"+dateString+"被迫下线");		 
-//							 }
-//							 users.setUserAddr("");
-//							 BoUsers update = (BoUsers)this.boUserServicess.update(users);
-//							 if(update !=null) {
-//								 logger.info("更新操作成功执行");
-//							 } 
-//						 }
-//		
-//	                    //end
-//					 } catch (Exception e) {
-//						e.printStackTrace();
-//					 }
+/*       */         else {
 /* 15713 */           System.err.println("refreshToken令牌失效");
 /* 15714 */           this.requestJson.setData(map);
 /* 15715 */           this.requestJson.setMessage("refreshToken令牌失效");
@@ -15840,7 +15827,7 @@
 /* 15999 */           this.requestJson.setSuccess(true);
 /*       */ 
 /* 16001 */           String root = System.getProperty("webapp.root");
-/* 16002 */           String tempDir = root + "/" + "photo_library" + "/" + this.userPhone;
+/* 16002 */           String tempDir = root + "/" + "photo_library" + "/" + this.userPhone;//
 /* 16003 */           File f = new File(tempDir);
 /* 16004 */           System.err.println(f.exists());
 /*       */ 

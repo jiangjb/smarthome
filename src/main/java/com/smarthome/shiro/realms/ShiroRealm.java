@@ -1,5 +1,6 @@
 package com.smarthome.shiro.realms;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Iterator;

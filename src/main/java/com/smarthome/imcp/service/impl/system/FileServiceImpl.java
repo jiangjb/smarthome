@@ -42,6 +42,7 @@
 //				String root="E:/smarthome/tomcat8";
 /*  44 */       String tempDir = root + "temp" + "/" + 
 /*  45 */         sessionId;
+				logger.info("saveToTemp tempDir>>"+tempDir);
 /*  46 */       File targetDir = new File(tempDir);
 /*  47 */       if (!targetDir.exists()) {
 /*  48 */         targetDir.mkdirs();
@@ -62,16 +63,16 @@
 /*  63 */       String root = System.getProperty("webapp.root");//动态获项目的运行路径
 //	            String root="E:/smarthome";//这里设置服务器tomcat下的一个绝对路径
 /*  64 */       String tempDir = root + "/" + dir;
-                logger.info("tempDir>>"+tempDir);
+//				String tempDir = root + dir;//root=E:\smarthome\tomcat8\webapps\smarthome.IMCPlatform\
+                logger.info("saveToDir tempDir>>"+tempDir);//E:\smarthome\tomcat8\webapps\smarthome.IMCPlatform\/uploads/headpic
 /*  65 */       File targetDir = new File(tempDir);
 /*  66 */       if (!targetDir.exists()) {
 /*  67 */         targetDir.mkdirs();
 /*     */       }
-/*     */ 
 /*  70 */       File destFile = new File(targetDir, fileName);
 /*  71 */       FileUtils.copyFile(fileupload, destFile);
 /*  72 */       return dir + "/" + fileName;
-/*     */     } catch (IOException e) {
+/*     */     } catch (Exception e) {
 /*  74 */       e.printStackTrace();
 /*  75 */     }throw new BusinessException("保存文件出错！");
 /*     */   }
@@ -86,6 +87,7 @@
 //				String root="E:/smarthome/tomcat8";
 /*  86 */       String tempStr = root + "temp" + "/" + 
 /*  87 */         sessionId + "/" + fileName;
+				logger.error("copyTempFileToDir tempStr = " + tempStr);
 /*  88 */       File tempFile = new File(tempStr);
 /*  89 */       if (!tempFile.exists()) {
 /*  90 */         logger.error("sessionId = " + sessionId);

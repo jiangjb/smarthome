@@ -238,22 +238,6 @@
 					}
 				}
 /*     */   }
-
-
-			@Scheduled(cron="0/1 * * * * ?")    //每隔1秒钟触发
-/*     */   public void deviceStatus() throws ParseException
-/*     */   {
-//				System.out.println("tomcat加载完后，每隔1秒钟触发更新主机设备的在线离线状态");
-//				XingUserAction xA=new XingUserAction();
-//				try {	
-//					HttpServletRequest request = ServletActionContext.getRequest();
-//					if(request != null) {
-//						xA.getAllHost();	
-//					}
-//				} catch (Exception e) {
-//					
-//				}	
-/*     */   }
 /*     */ 
 /*     */   @Scheduled(cron="0/1 * * * * ?")
 /*     */   public void sds()
