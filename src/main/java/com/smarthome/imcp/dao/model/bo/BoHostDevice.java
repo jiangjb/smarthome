@@ -23,6 +23,8 @@
 /*     */   private String whetherQueryStateSign;
 /*     */   private String pushSet;
 /*     */   private String state;
+			private int isAuthorized;//new 2018-3-12
+			
 /*  29 */   private Set boControlEnclosures = new HashSet(0);
 /*     */ 
 /*     */   public BoHostDevice()
@@ -48,7 +50,12 @@
 /*  54 */     this.whetherQueryStateSign = whetherQueryStateSign;
 /*  55 */     this.boControlEnclosures = boControlEnclosures;
 /*     */   }
-/*     */ 
+/*     */   public int getIsAuthorized() {
+				return isAuthorized;
+			}
+			public void setIsAuthorized(int isAuthorized) {
+				this.isAuthorized = isAuthorized;
+			}
 /*     */   public Integer getId()
 /*     */   {
 /*  61 */     return this.id;

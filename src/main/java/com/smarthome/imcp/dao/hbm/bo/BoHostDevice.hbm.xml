@@ -55,6 +55,9 @@
         <property name="state" type="java.lang.String">
             <column name="STATE" />
         </property>
+        <property name="isAuthorized" type="java.lang.Integer">
+            <column name="IsAuthorized"/>
+        </property>
         <set name="boControlEnclosures" inverse="true">
             <key>
                 <column name="HOST_DEVICE_ID" />

@@ -1211,7 +1211,375 @@
 /*       */ 
 /*  1133 */     return isR;
 /*       */   }
-/*       */ 
+/*       */   //test 授权
+			  @Action(value="authorize1", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+/*       */   public String authorize1()
+/*       */   {
+				  this.requestJson = new RequestJson();
+  /*  1145 */     Map map = new HashMap();
+  /*  1146 */     HttpServletRequest request = ServletActionContext.getRequest();
+  /*  1147 */     String ip = request.getRemoteAddr();
+  /*  1148 */     String header = request.getHeader("timestamp");
+  /*  1149 */     String header2 = request.getHeader("nonce");
+  /*  1150 */     String header3 = request.getHeader("sign");
+  /*  1151 */     String header4 = request.getHeader("access_token");
+  /*  1152 */     String userCode = request.getHeader("userCode");
+                  logger.info("-------authorize-------");
+                  //遍历出request的所有参数
+                  Enumeration pNames=request.getParameterNames();
+                  while(pNames.hasMoreElements()){
+                      String name=(String)pNames.nextElement();
+                      String value=request.getParameter(name);
+                      if(name.equals("approvalinfo")) {
+                    	  logger.info("开始授权");
+//				          int phoneType=Integer.parseInt(this.phoneType);
+//				          if(phoneType == 1) {
+//				          logger.info("解析苹果数据");
+                    	  JSONArray jsonArray = JSONArray.fromObject(value);
+                  		  List<Map<String,String>> list = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
+                    		  for(int i=0;i<list.size();i++) {
+                    			  BoUsers boUser=this.boUserServicess.findByUserPhone(this.userPhone);
+                    			  String userCode01=boUser.getUserCode();
+                    			  BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,"deviceAddress");
+                    			  boHostDevice.setIsAuthorized(Integer.parseInt(list.get(i).get("isAuthorized")));
+                    			  logger.info("isAuthorized=="+Integer.parseInt(list.get(i).get("isAuthorized")));
+//                    			  BoHostDevice boHostDevice01=this.boHostDeviceService.update(boHostDevice);
+//                    			  if (boHostDevice01 == null) {
+//                    				  this.requestJson.setData(map);
+//                    				  this.requestJson.setMessage("授权失败");
+//                    				  this.requestJson.setSuccess(false);
+//                    			  }
+                    		  }
+                    	  }
+                      logger.info(name + " == " + value);//name-"approvalinfo"
+                  }
+                  logger.info("signature>>"+this.signature);
+//				  logger.info("accountOperationType>>"+this.accountOperationType); //this == BoUsers对象     ;  request.getHeader("accountOperationType")=null;
+  /*  1153 */     if (userCode.contains(",")) {
+  /*  1154 */       String[] userCode2 = userCode.split(",");
+  /*  1155 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
+  /*  1156 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
+  /*  1157 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "授权用户");
+  /*  1158 */       if (ral.booleanValue()) {
+  /*  1159 */         System.err.println("验证通过");
+  /*  1160 */         if ((phone == null) || (boUsers == null)) {
+  /*  1161 */           this.requestJson.setData(map);
+  /*  1162 */           this.requestJson.setMessage("Invalid_User");
+  /*  1163 */           this.requestJson.setSuccess(true);
+  /*       */         } else {
+  /*  1165 */           List list = this.boUserServicess.getByAuthorizeUserCode(boUsers.getUserCode());
+  /*  1166 */           if (list.size() > 8) {
+  /*  1167 */             this.requestJson.setData(map);
+  /*  1168 */             System.err.println("当前版本暂时只能授权用户7个");
+  /*  1169 */             this.requestJson.setMessage("当前版本暂时只能授权用户7个");
+  /*  1170 */             this.requestJson.setSuccess(false);
+  /*       */           } else {
+  /*  1172 */             BoUsers users = this.boUserServicess.findByUserPhone(this.userPhone);
+  /*  1173 */             if (users == null) {
+  /*  1174 */               this.requestJson.setData(map);
+  /*  1175 */               this.requestJson.setMessage("该账户尚未注册");
+  /*  1176 */               this.requestJson.setSuccess(false);
+  /*       */             }
+  /*  1178 */             else if (!users.getAuthorizationUserCode().equals("")) {
+  /*  1179 */               map.put("result", "账户已被其他账户授权");
+  /*  1180 */               this.requestJson.setData(map);
+  /*  1181 */               this.requestJson.setSuccess(true);
+  /*       */             } else {
+  /*  1183 */               String generateTokeCode = TokeUtil.generateTokeCode();
+  /*  1184 */               String generateTokeCodes = TokeUtil.generateTokeCodes();
+  /*  1185 */               users.setAuthorizationUserCode(boUsers.getUserCode());
+  /*  1186 */               users.setLogoAccountType("S");
+  /*       */               String accountOperation;
+  ///*       */               String accountOperation;
+  /*  1188 */               if ((this.accountOperationType == null) || (this.accountOperationType.equals("")))
+  /*  1189 */                 accountOperation = "1";
+  /*       */               else {
+  /*  1191 */                 accountOperation = this.accountOperationType;
+  							//在这里把楼层、房间和设备信息 填入 city（不被使用的字段）中   +登录的时候把  被授权者的 userCode也加在后面(userInfoMap.put("userCode", users.getAuthorizationUserCode() + "," + users.getUserPhone()+"," + users.getUserCode()) )
+  /*       */               }
+  /*  1193 */               users.setAccountOperationType(accountOperation);
+  /*  1194 */               users.setAccessToken(generateTokeCode);
+  /*  1195 */               users.setRefreshToken(generateTokeCodes);
+  /*  1196 */               users.setAccessTokenTime("940923880");
+  /*  1197 */               users.setRefreshTokenTime("940923880");
+  /*  1198 */               BoUsers update = (BoUsers)this.boUserServicess.update(users);
+  /*  1199 */               if (update == null) {
+  /*  1200 */                 this.requestJson.setData(map);
+  /*  1201 */                 this.requestJson.setMessage("授权失败");
+  /*  1202 */                 this.requestJson.setSuccess(false);
+  /*       */               } else {
+  /*  1204 */                 PushService pushService = new PushService();
+  /*  1205 */                 if (users.getVersionType().equals("1")) {
+  /*  1206 */                   System.err.println("易联智家KEY");
+  /*  1207 */                   pushService.setAppId("C2rT1RdCoB7BaZ83l2AJM7");
+  /*  1208 */                   pushService.setAppkey("ApgJ2YFdI573k57hLt9Mz9");
+  /*  1209 */                   pushService.setMaster("JBWO7E3WyW75zgd2Bdr4NA");
+  /*  1210 */                 } else if (users.getVersionType().equals("2")) {
+  /*  1211 */                   System.err.println("爱博瑞KEY");
+  /*  1212 */                   pushService.setAppId("qy0HMfNc8o6fiLdtUGRfo1");
+  /*  1213 */                   pushService.setAppkey("cu1LHpYRwnAwDtTjq8XaQ7");
+  /*  1214 */                   pushService.setMaster("UpAQnXf7S47Snh00l5P5E8");
+  /*  1215 */                 } else if (!users.getVersionType().equals("3"))
+  /*       */                 {
+  /*  1217 */                   if (users.getVersionType().equals("4")) {
+  /*  1218 */                     System.err.println("思创智能KEY");
+  /*  1219 */                     pushService.setAppId("m5H4RPxliZAVXBlG1jka32");
+  /*  1220 */                     pushService.setAppkey("xizBIaTLNY5g7HxCi6kP05");
+  /*  1221 */                     pushService.setMaster("TRuul8ZWoO8rfFexEbvN09");
+  /*  1222 */                   } else if (users.getVersionType().equals("5")) {
+  /*  1223 */                     System.err.println("峰庭智能KEY");
+  /*  1224 */                     pushService.setAppId("8qv7s4OhGEAjDjEaC5bBw4");
+  /*  1225 */                     pushService.setAppkey("DH3NlHfEOG6YtySTspB4LA");
+  /*  1226 */                     pushService.setMaster("utgpb3GAGN9KsVKVun7W32");
+  /*  1227 */                   } else if (users.getVersionType().equals("6")) {
+  /*  1228 */                     System.err.println("麦宝KEY");
+  /*  1229 */                     pushService.setAppId("OAzON9h86e8Y2XREgjU0R9");
+  /*  1230 */                     pushService.setAppkey("SAE1hTMJcW8ZkRfZPRDja6");
+  /*  1231 */                     pushService.setMaster("y5zkumXwYPACBLJ59BZnr6");
+  /*  1232 */                   } else if (users.getVersionType().equals("7")) {
+  /*  1233 */                     System.err.println("乐沃KEY");
+  /*  1234 */                     pushService.setAppId("pHU6NuXh789r2ZXEYzj7z1");
+  /*  1235 */                     pushService.setAppkey("COGyB0sKyQ8nGHmnuNUK41");
+  /*  1236 */                     pushService.setMaster("qSTfJpPIQc7OkaswRI1YH7");
+  /*       */                   }
+  /*       */                 }
+  /*  1238 */                 String title = "";
+  /*  1239 */                 String CID = update.getCid();
+  /*       */ 
+  /*  1241 */                 if ((CID == null) || (CID.equals(""))) {
+  /*  1242 */                   System.err.println("CID为空推送不到信息");
+  /*       */                 } else {
+  /*  1244 */                   StringBuffer text = new StringBuffer();
+  /*       */ 
+  /*  1246 */                   System.err.println("*****<< " + update.getVersionType());
+  /*  1247 */                   if (users.getVersionType().equals("1")) {
+  /*  1248 */                     System.err.println("易联智家推送内容");
+  /*  1249 */                     title = "易家智联";
+  /*  1250 */                     text.append("您的账户已被人授权\n");
+  /*  1251 */                     text.append("打开软件将会进入登录界面请重新登录\n");
+  /*  1252 */                   } else if (users.getVersionType().equals("2")) {
+  /*  1253 */                     System.err.println("爱博瑞推送内容");
+  /*  1254 */                     title = "爱波瑞科技";
+  /*  1255 */                     text.append("您的账户已被人授权\n");
+  /*  1256 */                     text.append("打开软件将会进入登录界面请重新登录\n");
+  /*  1257 */                   } else if (!users.getVersionType().equals("3"))
+  /*       */                   {
+  /*  1259 */                     if (users.getVersionType().equals("4")) {
+  /*  1260 */                       System.err.println("思创智能推送内容");
+  /*  1261 */                       title = "思创智能";
+  /*  1262 */                       text.append("您的账户已被人授权\n");
+  /*  1263 */                       text.append("打开软件将会进入登录界面请重新登录\n");
+  /*  1264 */                     } else if (users.getVersionType().equals("5")) {
+  /*  1265 */                       System.err.println("峰庭智能推送内容");
+  /*  1266 */                       title = "峰庭智能";
+  /*  1267 */                       text.append("您的账户已被人授权\n");
+  /*  1268 */                       text.append("打开软件将会进入登录界面请重新登录\n");
+  /*  1269 */                     } else if (users.getVersionType().equals("6")) {
+  /*  1270 */                       System.err.println("麦宝推送内容");
+  /*  1271 */                       title = "麦宝";
+  /*  1272 */                       text.append("您的账户已被人授权\n");
+  /*  1273 */                       text.append("打开软件将会进入登录界面请重新登录\n");
+  /*  1274 */                     } else if (users.getVersionType().equals("7")) {
+  /*  1275 */                       System.err.println("乐沃推送内容");
+  /*  1276 */                       title = "乐沃";
+  /*  1277 */                       text.append("您的账户已被人授权\n");
+  /*  1278 */                       text.append("打开软件将会进入登录界面请重新登录\n");
+  /*       */                     }
+  /*       */                   }
+  /*  1281 */                   Integer type = users.getPhoneType();
+  /*       */ 
+  /*  1283 */                   if ((type == null) || (type.intValue() == 0)) {
+  /*  1284 */                     pushService.pushToSingle(CID, title, text.toString(), text.toString());//推送？
+  /*       */                   }
+  /*       */                   else {
+  /*  1287 */                     pushService.apnPush(CID, title, text.toString(), text.toString());
+  /*       */                   }
+  /*       */                 }
+  /*       */ 
+  /*  1291 */                 map.put("result", "授权成功");
+  /*  1292 */                 this.requestJson.setData(map);
+  /*  1293 */                 this.requestJson.setSuccess(true);
+  /*       */               }
+  /*       */             }
+  /*       */           }
+  /*       */ 
+  /*       */         }
+  /*       */ 
+  /*       */       }
+  /*       */       else
+  /*       */       {
+  /*  1303 */         System.err.println("验证不通过");
+  /*       */ 
+  /*  1305 */         this.requestJson.setData(map);
+  /*  1306 */         this.requestJson.setMessage("验证不通过");
+  /*  1307 */         this.requestJson.setSuccess(false);
+  /*       */       }
+  /*       */     } else {
+  /*  1310 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "授权用户");
+  /*  1311 */       if (ral.booleanValue()) {
+  /*  1312 */         System.err.println("验证通过");
+  /*  1313 */         BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode);
+  /*  1314 */         if (boUsers == null) {
+  /*  1315 */           this.requestJson.setData(map);
+  /*  1316 */           this.requestJson.setMessage("Invalid_User");
+  /*  1317 */           this.requestJson.setSuccess(true);
+  /*       */         } else {
+  /*  1319 */           List list = this.boUserServicess.getByAuthorizeUserCode(boUsers.getUserCode());
+  /*  1320 */           if (list.size() > 8) {
+  /*  1321 */             this.requestJson.setData(map);
+  /*  1322 */             System.err.println("当前版本暂时只能授权用户7个");
+  /*  1323 */             this.requestJson.setMessage("当前版本暂时只能授权用户7个");
+  /*  1324 */             this.requestJson.setSuccess(false);
+  /*       */           } else {
+  /*  1326 */             BoUsers users = this.boUserServicess.findByUserPhone(this.userPhone);
+  /*  1327 */             if (users == null) {
+  /*  1328 */               this.requestJson.setData(map);
+  /*  1329 */               this.requestJson.setMessage("该账号尚未注册");
+  /*  1330 */               this.requestJson.setSuccess(true);
+  /*       */             }
+  /*  1332 */             else if (!users.getAuthorizationUserCode().equals("")) {
+  /*  1333 */               map.put("result", "账户已被其他账户授权");
+  /*  1334 */               this.requestJson.setData(map);
+  /*  1335 */               this.requestJson.setSuccess(true);
+  /*       */             } else {
+  /*  1337 */               String generateTokeCode = TokeUtil.generateTokeCode();
+  /*  1338 */               String generateTokeCodes = TokeUtil.generateTokeCodes();
+  /*  1339 */               users.setAuthorizationUserCode(boUsers.getUserCode());
+  /*  1340 */               users.setLogoAccountType("S");
+  /*       */               String accountOperation;
+  ///*       */               String accountOperation;
+  /*  1342 */               if ((this.accountOperationType == null) || (this.accountOperationType.equals("")))
+  /*  1343 */                 accountOperation = "1";
+  /*       */               else {
+  /*  1345 */                 accountOperation = this.accountOperationType;
+  /*       */               }
+  /*  1347 */               users.setAccountOperationType(accountOperation);
+  /*  1348 */               users.setAccessToken(generateTokeCode);
+  /*  1349 */               users.setRefreshToken(generateTokeCodes);
+  /*  1350 */               users.setAccessTokenTime("940923880");
+  /*  1351 */               users.setRefreshTokenTime("940923880");
+  /*  1352 */               BoUsers update = (BoUsers)this.boUserServicess.update(users);
+  /*  1353 */               if (update == null) {
+  /*  1354 */                 this.requestJson.setData(map);
+  /*  1355 */                 this.requestJson.setMessage("授权失败");
+  /*  1356 */                 this.requestJson.setSuccess(false);
+  /*       */               } else {
+  /*  1358 */                 PushService pushService = new PushService();
+  /*  1359 */                 if (boUsers.getVersionType().equals("1")) {
+  /*  1360 */                   System.err.println("易联智家KEY");
+  /*  1361 */                   pushService.setAppId("C2rT1RdCoB7BaZ83l2AJM7");
+  /*  1362 */                   pushService.setAppkey("ApgJ2YFdI573k57hLt9Mz9");
+  /*  1363 */                   pushService.setMaster("JBWO7E3WyW75zgd2Bdr4NA");
+  /*  1364 */                 } else if (boUsers.getVersionType().equals("2")) {
+  /*  1365 */                   System.err.println("爱博瑞KEY");
+  /*  1366 */                   pushService.setAppId("qy0HMfNc8o6fiLdtUGRfo1");
+  /*  1367 */                   pushService.setAppkey("cu1LHpYRwnAwDtTjq8XaQ7");
+  /*  1368 */                   pushService.setMaster("UpAQnXf7S47Snh00l5P5E8");
+  /*  1369 */                 } else if (!boUsers.getVersionType().equals("3"))
+  /*       */                 {
+  /*  1371 */                   if (boUsers.getVersionType().equals("4")) {
+  /*  1372 */                     System.err.println("思创智能KEY");
+  /*  1373 */                     pushService.setAppId("m5H4RPxliZAVXBlG1jka32");
+  /*  1374 */                     pushService.setAppkey("xizBIaTLNY5g7HxCi6kP05");
+  /*  1375 */                     pushService.setMaster("TRuul8ZWoO8rfFexEbvN09");
+  /*  1376 */                   } else if (boUsers.getVersionType().equals("5")) {
+  /*  1377 */                     System.err.println("峰庭智能KEY");
+  /*  1378 */                     pushService.setAppId("8qv7s4OhGEAjDjEaC5bBw4");
+  /*  1379 */                     pushService.setAppkey("DH3NlHfEOG6YtySTspB4LA");
+  /*  1380 */                     pushService.setMaster("utgpb3GAGN9KsVKVun7W32");
+  /*  1381 */                   } else if (boUsers.getVersionType().equals("6")) {
+  /*  1382 */                     System.err.println("麦宝KEY");
+  /*  1383 */                     pushService.setAppId("OAzON9h86e8Y2XREgjU0R9");
+  /*  1384 */                     pushService.setAppkey("SAE1hTMJcW8ZkRfZPRDja6");
+  /*  1385 */                     pushService.setMaster("y5zkumXwYPACBLJ59BZnr6");
+  /*  1386 */                   } else if (boUsers.getVersionType().equals("7")) {
+  /*  1387 */                     System.err.println("乐沃KEY");
+  /*  1388 */                     pushService.setAppId("pHU6NuXh789r2ZXEYzj7z1");
+  /*  1389 */                     pushService.setAppkey("COGyB0sKyQ8nGHmnuNUK41");
+  /*  1390 */                     pushService.setMaster("qSTfJpPIQc7OkaswRI1YH7");
+  /*       */                   }
+  /*       */                 }
+  /*  1392 */                 String title = "";
+  /*  1393 */                 String CID = update.getCid();
+  /*       */ 
+  /*  1395 */                 if ((CID == null) || (CID.equals(""))) {
+  /*  1396 */                   System.err.println("CID为空推送不到信息");
+  /*       */                 } else {
+  /*  1398 */                   StringBuffer text = new StringBuffer();
+  /*       */ 
+  /*  1400 */                   System.err.println("*****<< " + update.getVersionType());
+  /*  1401 */                   if (boUsers.getVersionType().equals("1")) {
+  /*  1402 */                     System.err.println("易联智家推送内容");
+  /*  1403 */                     title = "易家智联";
+  /*  1404 */                     text.append("您的账户已被人授权\n");
+  /*  1405 */                     text.append("打开软件将会进入登录界面请重新登录\n");
+  /*  1406 */                   } else if (boUsers.getVersionType().equals("2")) {
+  /*  1407 */                     System.err.println("爱博瑞推送内容");
+  /*  1408 */                     title = "爱波瑞科技";
+  /*  1409 */                     text.append("您的账户已被人授权\n");
+  /*  1410 */                     text.append("打开软件将会进入登录界面请重新登录\n");
+  /*  1411 */                   } else if (!boUsers.getVersionType().equals("3"))
+  /*       */                   {
+  /*  1413 */                     if (boUsers.getVersionType().equals("4")) {
+  /*  1414 */                       System.err.println("思创智能推送内容");
+  /*  1415 */                       title = "思创智能";
+  /*  1416 */                       text.append("您的账户已被人授权\n");
+  /*  1417 */                       text.append("打开软件将会进入登录界面请重新登录\n");
+  /*  1418 */                     } else if (boUsers.getVersionType().equals("5")) {
+  /*  1419 */                       System.err.println("峰庭智能推送内容");
+  /*  1420 */                       title = "峰庭智能";
+  /*  1421 */                       text.append("您的账户已被人授权\n");
+  /*  1422 */                       text.append("打开软件将会进入登录界面请重新登录\n");
+  /*  1423 */                     } else if (boUsers.getVersionType().equals("6")) {
+  /*  1424 */                       System.err.println("麦宝推送内容");
+  /*  1425 */                       title = "麦宝";
+  /*  1426 */                       text.append("您的账户已被人授权\n");
+  /*  1427 */                       text.append("打开软件将会进入登录界面请重新登录\n");
+  /*  1428 */                     } else if (boUsers.getVersionType().equals("7")) {
+  /*  1429 */                       System.err.println("乐沃推送内容");
+  /*  1430 */                       title = "乐沃";
+  /*  1431 */                       text.append("您的账户已被人授权\n");
+  /*  1432 */                       text.append("打开软件将会进入登录界面请重新登录\n");
+  /*       */                     }
+  /*       */                   }
+  /*  1435 */                   Integer type = update.getPhoneType();
+  /*       */ 
+  /*  1437 */                   if ((type == null) || (type.intValue() == 0)) {
+  /*  1438 */                     pushService.pushToSingle(CID, title, text.toString(), text.toString());
+  /*       */                   }
+  /*       */                   else {
+  /*  1441 */                     pushService.apnPush(CID, title, text.toString(), text.toString());
+  /*       */                   }
+  /*       */                 }
+  /*       */ 
+  /*  1445 */                 map.put("result", "授权成功");
+  /*  1446 */                 this.requestJson.setData(map);
+  /*  1447 */                 this.requestJson.setSuccess(true);
+  /*       */               }
+  /*       */             }
+  /*       */ 
+  /*       */           }
+  /*       */ 
+  /*       */         }
+  /*       */ 
+  /*       */       }
+  /*       */       else
+  /*       */       {
+  /*  1458 */         System.err.println("验证不通过");
+  /*       */ 
+  /*  1460 */         this.requestJson.setData(map);
+  /*  1461 */         this.requestJson.setMessage("验证不通过");
+  /*  1462 */         this.requestJson.setSuccess(false);
+  /*       */       }
+  /*       */     }
+  /*  1465 */     return "success";
+			  }
+			  //test 编辑权限
+			  @Action(value="update", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public String update()
+			  {
+			  		return "";
+			  }
 /*       */   @Action(value="authorize", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String authorize()
 /*       */   {
@@ -1224,6 +1592,7 @@
 /*  1150 */     String header3 = request.getHeader("sign");
 /*  1151 */     String header4 = request.getHeader("access_token");
 /*  1152 */     String userCode = request.getHeader("userCode");
+
                 logger.info("-------authorize-------");
                 //遍历出request的所有参数
                 Enumeration pNames=request.getParameterNames();
@@ -1231,6 +1600,32 @@
                     String name=(String)pNames.nextElement();
                     String value=request.getParameter(name);
                     logger.info(name + " == " + value);
+                    logger.info("approvalinfo是否存在=="+name.equals("approvalinfo"));
+                    if(name.equals("approvalinfo")) {
+                  	  logger.info("开始授权。。。");
+//				          int phoneType=Integer.parseInt(this.phoneType);
+//				          if(phoneType == 1) {
+//				          logger.info("解析苹果数据");
+                  	  JSONArray jsonArray = JSONArray.fromObject(value);
+                		  List<Map<String,String>> list = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
+                		  logger.info("list=="+list);
+                  		  for(int i=0;i<list.size();i++) {
+//                  			  BoUsers boUser=this.boUserServicess.findByUserPhone(this.userPhone);
+//                  			  String userCode01=boUser.getUserCode();
+//                  			  BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,"deviceAddress");
+                  			  String str=list.get(i).get("isAuthorized");
+                  			  int isAuthorized=Integer.parseInt(str);//不能转化为int
+//                  			  boHostDevice.setIsAuthorized(list.get(i).get("isAuthorized"));
+                  			logger.info("list.get(i)=="+list.get(i));//ok
+                  			logger.info("isAuthorized=="+isAuthorized);//ok
+//                  			  BoHostDevice boHostDevice01=this.boHostDeviceService.update(boHostDevice);
+//                  			  if (boHostDevice01 == null) {
+//                  				  this.requestJson.setData(map);
+//                  				  this.requestJson.setMessage("授权失败");
+//                  				  this.requestJson.setSuccess(false);
+//                  			  }
+                  		  }
+                  	  }
                 }
                 logger.info("signature>>"+this.signature);
 //                logger.info("accountOperationType>>"+this.accountOperationType); //this == BoUsers对象     ;  request.getHeader("accountOperationType")=null;
