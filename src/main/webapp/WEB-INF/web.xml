@@ -112,7 +112,7 @@
   </servlet-mapping>
   <servlet>
     <servlet-name>proxooladmin</servlet-name>
-    <servlet-class>org.logicalcobwebs.proxool.admin.servlet.AdminServlet</servlet-class>
+    <servlet-class>org.logicalcobwebs.proxool.admin.servlet.AdminServlet</servlet-class><!-- source not found是因为java版本过高 -->
   </servlet>
   <servlet-mapping>
     <servlet-name>proxooladmin</servlet-name>
