@@ -21,8 +21,8 @@
 		  import com.smarthome.imcp.util.androidAndIOS.Demo;
 /*     */ import java.io.InputStream;
 /*     */ import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+		  import java.text.SimpleDateFormat;
+		  import java.util.ArrayList;
 /*     */ import java.util.Date;
 /*     */ import java.util.HashMap;
 		  import java.util.List;
@@ -407,53 +407,59 @@ import java.util.ArrayList;
 /* 464 */           users.setAccessTokenTime(accessTokenTime_o+"");
 /* 465 */           users.setRefreshTokenTime(refreshTokenTime_o+"");
 /* 466 */           users.setCid(this.CID);
-					logger.info("CID >>>"+this.CID);
-/* 467 */           users.setPhoneType(Integer.valueOf(this.phoneType));
+//					logger.info("CID >>>"+this.CID);
+//					logger.info("this.phoneType==="+Integer.parseInt(this.phoneType));
+					int pt=Integer.parseInt(this.phoneType);
+///* 467 */           users.setPhoneType(Integer.parseInt(this.phoneType));
+					users.setPhoneType(pt);
 /* 468 */           users.setVersionType(this.versionType);
 					
 					//2018-3-7: 首先将旧设备的token存入userAddr中，待另一台设备登录时（判断是否相同）       若不同则将旧的userAddr被新的devicetoken替换
 //                    logger.info("新的deviceToken==="+this.devicetoken);
 //					logger.info("旧手机的deviceToken==="+users.getUserAddr());
-					if(users.getUserAddr() == "") {
+//					logger.info("UserAddr==="+users.getUserAddr().equals(""));
+//					if(users.getUserAddr() == "") {//字符串不能这么比较，改用equals方法
+					if(users.getUserAddr().equals("")) {
 						users.setUserAddr(this.devicetoken);
 					}
-					else if(!this.devicetoken.equals(users.getUserAddr())) {//当不同时判定为有新设备连入 -----》发送离线通知
-						
-						//2-5 友盟推送
-						Demo ymPush = new Demo();
-						//+上线时间 
-						Date currentTime = new Date();
-						SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-						String dateString = formatter.format(currentTime);
-						int PrePhoneType=Integer.parseInt(users.getUserAge());
-						int NowPhoneType=Integer.valueOf(this.phoneType);
-//						logger.info("旧设备类型>>"+PrePhoneType);
-//						logger.info("新设备类型>>"+NowPhoneType);
-						Map<String,String> map1=new HashMap<String,String>();
-						map1.put("title", "离线通知");
-						map1.put("subtitle", "");
-						map1.put("body", "另一台设备正在登录,您在"+dateString+"被迫下线");
-						//取出旧设备的phoneType，根据旧设备的phoneType选择安卓推送还是IOS推送
-						if(NowPhoneType == 1) {
-							if(PrePhoneType == 1) {//苹果设备 挤掉  苹果设备
-								ymPush.sendIOSUnicast(users.getUserAddr(),map1,"appoffline");
-							}else {//苹果设备 挤掉 安卓设备，给安卓设备发送 离线通知
-								logger.info("苹果设备挤掉安卓设备");
-								ymPush.sendAndroidUnicast(users.getUserAddr(),"离线通知","另一台设备正在登录,您在"+dateString+"被迫下线");	
-							}
-						}else {
-							if(PrePhoneType == 0) {
-								ymPush.sendAndroidUnicast(users.getUserAddr(),"离线通知","另一台设备正在登录,您在"+dateString+"被迫下线");	
+					else{//当不同时判定为有新设备连入 -----》发送离线通知
+						if(!this.devicetoken.equals(users.getUserAddr())) {						
+							//2-5 友盟推送
+							Demo ymPush = new Demo();
+							//+上线时间 
+							Date currentTime = new Date();
+							SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+							String dateString = formatter.format(currentTime);
+							int PrePhoneType=Integer.parseInt(users.getUserAge());//这里出了问题  "" 转 int,数字类型转换异常
+							int NowPhoneType=Integer.parseInt(this.phoneType);
+//							logger.info("旧设备类型>>"+PrePhoneType);
+//							logger.info("新设备类型>>"+NowPhoneType);
+							Map<String,String> map1=new HashMap<String,String>();
+							map1.put("title", "离线通知");
+							map1.put("subtitle", "");
+							map1.put("body", "另一台设备正在登录,您在"+dateString+"被迫下线");
+							//取出旧设备的phoneType，根据旧设备的phoneType选择安卓推送还是IOS推送
+							if(NowPhoneType == 1) {
+								if(PrePhoneType == 1) {//苹果设备 挤掉  苹果设备
+									ymPush.sendIOSUnicast(users.getUserAddr(),map1,"appoffline");
+								}else {//苹果设备 挤掉 安卓设备，给安卓设备发送 离线通知
+									logger.info("苹果设备挤掉安卓设备");
+									ymPush.sendAndroidUnicast(users.getUserAddr(),"离线通知","另一台设备正在登录,您在"+dateString+"被迫下线");	
+								}
 							}else {
-								logger.info("安卓设备挤掉苹果设备");
-								ymPush.sendIOSUnicast(users.getUserAddr(),map1,"appoffline");
+								if(PrePhoneType == 0) {
+									ymPush.sendAndroidUnicast(users.getUserAddr(),"离线通知","另一台设备正在登录,您在"+dateString+"被迫下线");	
+								}else {
+									logger.info("安卓设备挤掉苹果设备");
+									ymPush.sendIOSUnicast(users.getUserAddr(),map1,"appoffline");
+								}
 							}
-						}
-						//end
-						users.setUserAge(this.phoneType+"");//2018-3-8 将这台设备的设备类型存在 无用字段 UserAge中
-						users.setUserAddr(this.devicetoken);   	
-						users.setUserDevicetoken(this.devicetoken);//当前登录的设备token
+							//end
+							users.setUserAge(this.phoneType+"");//2018-3-8 将这台设备的设备类型存在 无用字段 UserAge中
+							users.setUserAddr(this.devicetoken);   	
+							users.setUserDevicetoken(this.devicetoken);//当前登录的设备token
 //						END
+						}
 					}
                     //end
 /* 469 */           BoUsers update = (BoUsers)this.boUserService.update(users);
@@ -472,23 +478,25 @@ import java.util.ArrayList;
 /* 481 */           userInfoMap.put("whetherSetPwd", users.getWhetherSetPwd());
 					//添加初始的楼层、房间信息  2018/1/3
 					BoFloor floor=this.boFloorService.findByUserCode(users.getUserCode());
-					String floorName=floor.getFloorName();
-					userInfoMap.put("floorName", floorName);
-					List<BoRoom> rooms=this.boRoomService.getAllListByUserCode(users.getUserCode());
-					List list_room = new ArrayList();
-					for (BoRoom boRoom : rooms) {
-		               Map map = new HashMap();
-		               BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode()); 
-		               map.put("roomCode", boRoom.getRoomCode().toString());
-		//												  System.out.println("Room roomCode:"+boRoom.getRoomCode().toString());
-		               map.put("roomName", boRoom.getRoomName().toString());
-		//												  System.out.println("roomName:"+boRoom.getRoomName().toString());
-		               map.put("floorCode", boRoom.getFloorCode().toString());
-		//												  System.out.println("floorCode:"+boRoom.getFloorCode().toString());
-		              list_room.add(map);
+					if(floor != null) {
+						String floorName=floor.getFloorName();//空指针
+						userInfoMap.put("floorName", floorName);
+						List<BoRoom> rooms=this.boRoomService.getAllListByUserCode(users.getUserCode());
+						List list_room = new ArrayList();
+						for (BoRoom boRoom : rooms) {
+							Map map = new HashMap();
+							BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode()); 
+							map.put("roomCode", boRoom.getRoomCode().toString());
+							//												  System.out.println("Room roomCode:"+boRoom.getRoomCode().toString());
+							map.put("roomName", boRoom.getRoomName().toString());
+							//												  System.out.println("roomName:"+boRoom.getRoomName().toString());
+							map.put("floorCode", boRoom.getFloorCode().toString());
+							//												  System.out.println("floorCode:"+boRoom.getFloorCode().toString());
+							list_room.add(map);
+						}
+						userInfoMap.put("roomInfo", list_room);
+						//////////////////////////////////////////////////楼层、房间添加默认值END///////////////////////////////////////////////////////
 					}
-					userInfoMap.put("roomInfo", list_room);
-					//////////////////////////////////////////////////楼层、房间添加默认值END////////////////////////////////////////////////////////
 					
 /* 482 */           String fluoriteAccessToken = users.getFluoriteAccessToken();
 /*     */           String EZTOKEN;
