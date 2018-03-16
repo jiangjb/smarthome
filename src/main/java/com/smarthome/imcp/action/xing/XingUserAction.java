@@ -1224,40 +1224,49 @@
   /*  1150 */     String header3 = request.getHeader("sign");
   /*  1151 */     String header4 = request.getHeader("access_token");
   /*  1152 */     String userCode = request.getHeader("userCode");
-                  logger.info("-------authorize-------");
-                  //遍历出request的所有参数
-                  Enumeration pNames=request.getParameterNames();
-                  while(pNames.hasMoreElements()){
-                      String name=(String)pNames.nextElement();
-                      String value=request.getParameter(name);
-                      if(name.equals("approvalinfo")) {
-                    	  logger.info("开始授权");
-//				          int phoneType=Integer.parseInt(this.phoneType);
-//				          if(phoneType == 1) {
-//				          logger.info("解析苹果数据");
-                    	  JSONArray jsonArray = JSONArray.fromObject(value);
-                  		  List<Map<String,String>> list = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
-                    		  for(int i=0;i<list.size();i++) {
-                    			  BoUsers boUser=this.boUserServicess.findByUserPhone(this.userPhone);
-                    			  String userCode01=boUser.getUserCode();
-                    			  BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,"deviceAddress");
-                    			  boHostDevice.setIsAuthorized(Integer.parseInt(list.get(i).get("isAuthorized")));
-                    			  logger.info("isAuthorized=="+Integer.parseInt(list.get(i).get("isAuthorized")));
-//                    			  BoHostDevice boHostDevice01=this.boHostDeviceService.update(boHostDevice);
-//                    			  if (boHostDevice01 == null) {
-//                    				  this.requestJson.setData(map);
-//                    				  this.requestJson.setMessage("授权失败");
-//                    				  this.requestJson.setSuccess(false);
-//                    			  }
-                    		  }
-                    	  }
-                      logger.info(name + " == " + value);//name-"approvalinfo"
-                  }
-                  logger.info("signature>>"+this.signature);
+                  logger.info("-------new authorize-------");
+                //遍历出request的所有参数
+//                  Enumeration pNames=request.getParameterNames();
+//                  while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，给设备
+//                      String name=(String)pNames.nextElement();
+//                      String value=request.getParameter(name);
+//                      logger.info(name + " == " + value);
+//                      logger.info("approvalinfo是否存在=="+name.equals("approvalinfo"));
+//                      if(name.equals("approvalinfo")) {
+//                      	logger.info("开始授权。。。");
+////  				          int phoneType=Integer.parseInt(this.phoneType);
+////  				          if(phoneType == 1) {
+////  				          logger.info("解析苹果数据");
+//                	        JSONArray jsonArray = JSONArray.fromObject(value);
+//              		    List<Map<String,String>> list = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
+//              		    if(list.size() ==0) {
+//                      		logger.info("授权管理员...");
+//                      	}else {
+//                      		logger.info("授权一般用户...");
+////                  		  logger.info("list=="+list);
+//                      		for(int i=0;i<list.size();i++) {
+//                      			BoUsers boUser=this.boUserServicess.findByUserPhone(this.userPhone);
+//                      			String userCode01=boUser.getUserCode();
+//                      			BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,"deviceAddress");
+//                      			String isAuth=list.get(i).get("isAuthorized");
+////                    			  int isAuthorized=Integer.parseInt(isAuth);//不能转化为int
+//                      			boHostDevice.setIsAuthorized(isAuth);
+////                    			  logger.info("list.get(i)=="+list.get(i));//ok
+////                    			  logger.info("isAuthorized=="+isAuth);//ok
+//                      			BoHostDevice boHostDevice01=this.boHostDeviceService.update(boHostDevice);
+//                      			if (boHostDevice01 == null) {
+//                      				this.requestJson.setData(map);
+//                      				this.requestJson.setMessage("授权失败");
+//                      				this.requestJson.setSuccess(false);
+//                      			}
+//                      		}
+//                      	}
+//                    	  }
+//                  }
 //				  logger.info("accountOperationType>>"+this.accountOperationType); //this == BoUsers对象     ;  request.getHeader("accountOperationType")=null;
   /*  1153 */     if (userCode.contains(",")) {
   /*  1154 */       String[] userCode2 = userCode.split(",");
-  /*  1155 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
+  /*  1155 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());//用户：授权者
   /*  1156 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
   /*  1157 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "授权用户");
   /*  1158 */       if (ral.booleanValue()) {
@@ -1267,14 +1276,14 @@
   /*  1162 */           this.requestJson.setMessage("Invalid_User");
   /*  1163 */           this.requestJson.setSuccess(true);
   /*       */         } else {
-  /*  1165 */           List list = this.boUserServicess.getByAuthorizeUserCode(boUsers.getUserCode());
+  /*  1165 */           List<BoUsers> list = this.boUserServicess.getByAuthorizeUserCode(boUsers.getUserCode());//一个用户最多授权   7个人
   /*  1166 */           if (list.size() > 8) {
   /*  1167 */             this.requestJson.setData(map);
   /*  1168 */             System.err.println("当前版本暂时只能授权用户7个");
   /*  1169 */             this.requestJson.setMessage("当前版本暂时只能授权用户7个");
   /*  1170 */             this.requestJson.setSuccess(false);
   /*       */           } else {
-  /*  1172 */             BoUsers users = this.boUserServicess.findByUserPhone(this.userPhone);
+  /*  1172 */             BoUsers users = this.boUserServicess.findByUserPhone(this.userPhone);//用户：被授权者
   /*  1173 */             if (users == null) {
   /*  1174 */               this.requestJson.setData(map);
   /*  1175 */               this.requestJson.setMessage("该账户尚未注册");
@@ -1284,11 +1293,55 @@
   /*  1179 */               map.put("result", "账户已被其他账户授权");
   /*  1180 */               this.requestJson.setData(map);
   /*  1181 */               this.requestJson.setSuccess(true);
-  /*       */             } else {
+  /*       */             } else {//前面是授权前的判断
+	  						//BEGIN -----现在开始授权 
   /*  1183 */               String generateTokeCode = TokeUtil.generateTokeCode();
   /*  1184 */               String generateTokeCodes = TokeUtil.generateTokeCodes();
   /*  1185 */               users.setAuthorizationUserCode(boUsers.getUserCode());
-  /*  1186 */               users.setLogoAccountType("S");
+						    Enumeration pNames=request.getParameterNames();
+						    while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+						        String name=(String)pNames.nextElement();
+						        String value=request.getParameter(name);
+						        logger.info(name + " == " + value);
+//						        logger.info("approvalinfo是否存在=="+name.equals("approvalinfo"));
+						        if(name.equals("approvalinfo")) {
+						      	    logger.info("新的授权方式...");
+						//	          int phoneType=Integer.parseInt(this.phoneType);
+						//	          if(phoneType == 1) {
+						//	          logger.info("解析苹果数据");
+							        JSONArray jsonArray = JSONArray.fromObject(value);
+								    List<Map<String,String>> list01 = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
+								    if(list01.size() ==0) {//授权对象是管理员时，不传房间等信息过来
+								    	logger.info("授权管理员...");
+								    	users.setLogoAccountType("S");
+								    }else {
+								    	logger.info("授权一般用户...");
+								    	users.setLogoAccountType("M");
+						//  		  logger.info("list=="+list01);
+								    	for(int i=0;i<list01.size();i++) {
+//								    		BoUsers boUser=this.boUserServicess.findByUserPhone(this.userPhone);
+								    		String userCode01=users.getUserCode();//获取被授权者的userCode
+								    		String deviceCode01=list01.get(i).get("deviceAddress");//获取app传过来的设备地址
+								    		BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,deviceCode01);
+								    		String isAuth=list01.get(i).get("isAuthorized");//获取app传过来的 授权标识  即isAuthorized
+								    		if(isAuth.equals("1")) {
+								    			boHostDevice.setIsAuthorized(this.fid1);	
+								    		}else {
+								    			boHostDevice.setIsAuthorized(this.fid);
+								    		}
+						//    			  int isAuthorized=Integer.parseInt(isAuth);//不能转化为int
+						//    			  logger.info("list01.get(i)=="+list01.get(i));//ok
+						//    			  logger.info("isAuthorized=="+isAuth);//ok
+								    		BoHostDevice boHostDevice01=this.boHostDeviceService.update(boHostDevice);
+								    		if (boHostDevice01 == null) {
+								    			this.requestJson.setData(map);
+								    			this.requestJson.setMessage("授权失败");
+								    			this.requestJson.setSuccess(false);
+								    		}
+								    	}
+								    }
+						        }
+						    }
   /*       */               String accountOperation;
   ///*       */               String accountOperation;
   /*  1188 */               if ((this.accountOperationType == null) || (this.accountOperationType.equals("")))
@@ -1303,6 +1356,7 @@
   /*  1196 */               users.setAccessTokenTime("940923880");
   /*  1197 */               users.setRefreshTokenTime("940923880");
   /*  1198 */               BoUsers update = (BoUsers)this.boUserServicess.update(users);
+  							//END -----授权结束
   /*  1199 */               if (update == null) {
   /*  1200 */                 this.requestJson.setData(map);
   /*  1201 */                 this.requestJson.setMessage("授权失败");
@@ -1445,9 +1499,53 @@
   /*  1337 */               String generateTokeCode = TokeUtil.generateTokeCode();
   /*  1338 */               String generateTokeCodes = TokeUtil.generateTokeCodes();
   /*  1339 */               users.setAuthorizationUserCode(boUsers.getUserCode());
-  /*  1340 */               users.setLogoAccountType("S");
+							Enumeration pNames=request.getParameterNames();
+							while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+							    String name=(String)pNames.nextElement();
+							    String value=request.getParameter(name);
+							    logger.info(name + " == " + value);
+							//      logger.info("approvalinfo是否存在=="+name.equals("approvalinfo"));
+							    if(name.equals("approvalinfo")) {
+							    	  logger.info("新的授权方式...");
+							//	          int phoneType=Integer.parseInt(this.phoneType);
+							//	          if(phoneType == 1) {
+							//	          logger.info("解析苹果数据");
+								      JSONArray jsonArray = JSONArray.fromObject(value);
+									  List<Map<String,String>> list01 = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
+									  if(list01.size() ==0) {//授权对象是管理员时，不传房间等信息过来
+										  logger.info("授权管理员...");
+									      users.setLogoAccountType("S");
+									   }else {
+									      logger.info("授权一般用户...");
+									      users.setLogoAccountType("M");
+							//  		  logger.info("list=="+list01);
+									      for(int i=0;i<list01.size();i++) {
+									    	  String userCode01=users.getUserCode();//获取被授权者的userCode
+									    	  String deviceCode01=list01.get(i).get("deviceAddress");//获取app传过来的设备地址
+									    	  BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,deviceCode01);
+									    	  String isAuth=list01.get(i).get("isAuthorized");//获取app传过来的 授权标识  即isAuthorized
+							//    			  int isAuthorized=Integer.parseInt(isAuth);//不能转化为int
+									    	  if(isAuth.equals("1")) {
+									    			boHostDevice.setIsAuthorized(this.fid1);	
+									    		}else {
+									    			boHostDevice.setIsAuthorized(this.fid);
+									    		}
+//									    	  boHostDevice.setIsAuthorized(isAuth);
+							//    			  logger.info("list01.get(i)=="+list01.get(i));//ok
+							//    			  logger.info("isAuthorized=="+isAuth);//ok
+									    	  BoHostDevice boHostDevice01=this.boHostDeviceService.update(boHostDevice);
+									    	  if (boHostDevice01 == null) {
+									    		  this.requestJson.setData(map);
+									    		  this.requestJson.setMessage("授权失败");
+									    		  this.requestJson.setSuccess(false);
+									    	  }
+									      }
+									  }
+							  	  }
+							  }
+  
+//  /*  1340 */               users.setLogoAccountType("S");
   /*       */               String accountOperation;
-  ///*       */               String accountOperation;
   /*  1342 */               if ((this.accountOperationType == null) || (this.accountOperationType.equals("")))
   /*  1343 */                 accountOperation = "1";
   /*       */               else {
@@ -1578,7 +1676,63 @@
 			  @Action(value="update", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 			  public String update()
 			  {
-			  		return "";
+				  this.requestJson = new RequestJson();
+				  Map map001 = new HashMap();
+				  
+				  //通过手机号 找到用户
+				  BoUsers boUser=this.boUserServicess.findByUserPhone(this.userPhone);
+				  String userCode=boUser.getUserCode();
+				  //通过用户 找到所有的楼层
+				  List<BoFloor> bofloors=this.boFloorService.getAllListByUserCode(userCode);
+				  if(bofloors.size() != 0) {
+					  for(BoFloor bofloor:bofloors) {
+						  String flCode=bofloor.getFloorCode();
+						  //通过楼层 找到所有的房间(楼层-房间)
+						  List<BoRoom> borooms=this.boRoomService.getAllListByFloorCode(userCode);
+						  if(borooms .size() != 0) {
+							  for(BoRoom boroom:borooms) {
+								  String rmCode=boroom.getRoomCode();
+								  //通过用户和房间编号 找到房间下的所有设备（房间-设备）
+								  List<BoHostDevice> bhdevices=this.boHostDeviceService.getroomCode(userCode,rmCode);	
+								  if(bhdevices.size() != 0) {
+									  //向安卓、IOS传递的参数
+									  List<Map<String,String>> list=new ArrayList<Map<String,String>>();
+									  for(BoHostDevice bhdevice:bhdevices) {
+										  String dvAddr=bhdevice.getDeviceAddress();
+										  Boolean isAuth=bhdevice.getIsAuthorized();
+										  Map<String,String> map=new HashMap<String,String>();
+										  String floorCode=flCode;
+										  String roomCode=rmCode;
+										  String deviceAddress=dvAddr;
+										  Boolean isAuthorited=isAuth;
+										  if(isAuthorited) {
+											  map.put("isAuthorited", "1");	  
+										  }else {
+											  map.put("isAuthorited", "0");	
+										  }
+										  map.put("floorCode", floorCode);
+										  map.put("roomCode", roomCode);
+										  map.put("deviceAddress", deviceAddress);
+										  JSONObject smsparam = JSONObject.fromObject(map);//map 转   json对象
+										  list.add(smsparam);
+									  }
+									  logger.info("传给app的设备列表："+list);
+									  map001.put("result",list);
+									  this.requestJson.setData(map001);
+									  this.requestJson.setMessage("设备列表");
+									  this.requestJson.setSuccess(true);
+								  }else {
+									  map001.put("result", "获取失败");
+									  this.requestJson.setData(map001);
+									  this.requestJson.setMessage("设备列表不存在");
+									  this.requestJson.setSuccess(false);
+								  }
+								  
+							  }
+						  }	  
+					  }
+				  }
+			  		return "success";
 			  }
 /*       */   @Action(value="authorize", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String authorize()
@@ -1594,39 +1748,44 @@
 /*  1152 */     String userCode = request.getHeader("userCode");
 
                 logger.info("-------authorize-------");
-                //遍历出request的所有参数
-                Enumeration pNames=request.getParameterNames();
-                while(pNames.hasMoreElements()){
-                    String name=(String)pNames.nextElement();
-                    String value=request.getParameter(name);
-                    logger.info(name + " == " + value);
-                    logger.info("approvalinfo是否存在=="+name.equals("approvalinfo"));
-                    if(name.equals("approvalinfo")) {
-                  	  logger.info("开始授权。。。");
-//				          int phoneType=Integer.parseInt(this.phoneType);
-//				          if(phoneType == 1) {
-//				          logger.info("解析苹果数据");
-                  	  JSONArray jsonArray = JSONArray.fromObject(value);
-                		  List<Map<String,String>> list = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
-                		  logger.info("list=="+list);
-                  		  for(int i=0;i<list.size();i++) {
-//                  			  BoUsers boUser=this.boUserServicess.findByUserPhone(this.userPhone);
-//                  			  String userCode01=boUser.getUserCode();
-//                  			  BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,"deviceAddress");
-                  			  String str=list.get(i).get("isAuthorized");
-                  			  int isAuthorized=Integer.parseInt(str);//不能转化为int
-//                  			  boHostDevice.setIsAuthorized(list.get(i).get("isAuthorized"));
-                  			logger.info("list.get(i)=="+list.get(i));//ok
-                  			logger.info("isAuthorized=="+isAuthorized);//ok
-//                  			  BoHostDevice boHostDevice01=this.boHostDeviceService.update(boHostDevice);
-//                  			  if (boHostDevice01 == null) {
-//                  				  this.requestJson.setData(map);
-//                  				  this.requestJson.setMessage("授权失败");
-//                  				  this.requestJson.setSuccess(false);
-//                  			  }
-                  		  }
-                  	  }
-                }
+//                //遍历出request的所有参数
+//                Enumeration pNames=request.getParameterNames();
+//                while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，给设备
+//                    String name=(String)pNames.nextElement();
+//                    String value=request.getParameter(name);
+//                    logger.info(name + " == " + value);
+//                    logger.info("approvalinfo是否存在=="+name.equals("approvalinfo"));
+//                    if(name.equals("approvalinfo")) {
+//                    	logger.info("开始授权。。。");
+////				          int phoneType=Integer.parseInt(this.phoneType);
+////				          if(phoneType == 1) {
+////				          logger.info("解析苹果数据");
+//              	        JSONArray jsonArray = JSONArray.fromObject(value);
+//            		    List<Map<String,String>> list = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
+//            		    if(list.size() ==0) {
+//                    		logger.info("授权管理员...");
+//                    	}else {
+//                    		logger.info("授权一般用户...");
+////                		  logger.info("list=="+list);
+//                    		for(int i=0;i<list.size();i++) {
+//                    			BoUsers boUser=this.boUserServicess.findByUserPhone(this.userPhone);
+//                    			String userCode01=boUser.getUserCode();
+//                    			BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,"deviceAddress");
+//                    			String isAuth=list.get(i).get("isAuthorized");
+////                  			  int isAuthorized=Integer.parseInt(isAuth);//不能转化为int
+//                    			boHostDevice.setIsAuthorized(isAuth);
+////                  			  logger.info("list.get(i)=="+list.get(i));//ok
+////                  			  logger.info("isAuthorized=="+isAuth);//ok
+//                    			BoHostDevice boHostDevice01=this.boHostDeviceService.update(boHostDevice);
+//                    			if (boHostDevice01 == null) {
+//                    				this.requestJson.setData(map);
+//                    				this.requestJson.setMessage("授权失败");
+//                    				this.requestJson.setSuccess(false);
+//                    			}
+//                    		}
+//                    	}
+//                  	  }
+//                }
                 logger.info("signature>>"+this.signature);
 //                logger.info("accountOperationType>>"+this.accountOperationType); //this == BoUsers对象     ;  request.getHeader("accountOperationType")=null;
 /*  1153 */     if (userCode.contains(",")) {
@@ -12562,9 +12721,6 @@
 /* 12396 */                     hostDevice.setWhetherQueryStateSign("");
 /* 12397 */                     hostDevice.setPushSet("0");
 /* 12398 */                     hostDevice.setState("");
-//								hostDevice.setWhetherQueryStateSign("Y");
-//								hostDevice.setPushSet("");
-//								hostDevice.setState("0");
 /*       */                   } else {
 /* 12400 */                     hostDevice.setWhetherQueryStateSign("");
 /* 12401 */                     hostDevice.setPushSet("");
@@ -13271,7 +13427,7 @@
 /*       */ 
 /* 13091 */             isFirst = boUsers.getIsFirst();
 /* 13092 */             if (isFirst == this.fid) {
-/* 13093 */               boUsers.setIsFirst(this.fid1);
+/* 13093 */               boUsers.setIsFirst(this.fid1);//给isFirst赋值1
 /* 13094 */               this.boUserServicess.update(boUsers);
 /*       */             }
 /* 13096 */             this.requestJson.setData(map);

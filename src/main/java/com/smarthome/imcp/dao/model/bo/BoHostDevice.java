@@ -18,12 +18,12 @@
 /*     */   private String deviceAddress;
 /*     */   private String validationCode;
 /*     */   private Integer deviceNum;
-/*     */   private Boolean deviceClassify;
+/*     */   private Boolean deviceClassify;//数据库中是bit
 /*     */   private String mntDelete;
 /*     */   private String whetherQueryStateSign;
 /*     */   private String pushSet;
 /*     */   private String state;
-			private int isAuthorized;//new 2018-3-12
+			private Boolean isAuthorized;//new 2018-3-12
 			
 /*  29 */   private Set boControlEnclosures = new HashSet(0);
 /*     */ 
@@ -50,10 +50,10 @@
 /*  54 */     this.whetherQueryStateSign = whetherQueryStateSign;
 /*  55 */     this.boControlEnclosures = boControlEnclosures;
 /*     */   }
-/*     */   public int getIsAuthorized() {
+/*     */   public Boolean getIsAuthorized() {
 				return isAuthorized;
 			}
-			public void setIsAuthorized(int isAuthorized) {
+			public void setIsAuthorized(Boolean isAuthorized) {
 				this.isAuthorized = isAuthorized;
 			}
 /*     */   public Integer getId()
