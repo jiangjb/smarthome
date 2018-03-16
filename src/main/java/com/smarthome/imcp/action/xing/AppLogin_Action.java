@@ -417,13 +417,15 @@
 					//2018-3-7: 首先将旧设备的token存入userAddr中，待另一台设备登录时（判断是否相同）       若不同则将旧的userAddr被新的devicetoken替换
 //                    logger.info("新的deviceToken==="+this.devicetoken);
 //					logger.info("旧手机的deviceToken==="+users.getUserAddr());
-//					logger.info("UserAddr==="+users.getUserAddr().equals(""));
+//					logger.info("UserAddr==="+(users.getUserAddr().equals("") || users.getUserAge().equals("")));
 //					if(users.getUserAddr() == "") {//字符串不能这么比较，改用equals方法
-					if(users.getUserAddr().equals("")) {
+					if(users.getUserAddr().equals("") || users.getUserAge().equals("")) {
 						users.setUserAddr(this.devicetoken);
+						users.setUserAge(this.phoneType+"");//2018-3-15 将这台设备的设备类型存在 无用字段 UserAge中
 					}
-					else{//当不同时判定为有新设备连入 -----》发送离线通知
-						if(!this.devicetoken.equals(users.getUserAddr())) {						
+					else{
+						logger.info("是否是同一台设备："+this.devicetoken.equals(users.getUserAddr()));
+						if(!this.devicetoken.equals(users.getUserAddr())) {//当不同时判定为有新设备连入 -----》发送离线通知						
 							//2-5 友盟推送
 							Demo ymPush = new Demo();
 							//+上线时间 
@@ -455,7 +457,6 @@
 								}
 							}
 							//end
-							users.setUserAge(this.phoneType+"");//2018-3-8 将这台设备的设备类型存在 无用字段 UserAge中
 							users.setUserAddr(this.devicetoken);   	
 							users.setUserDevicetoken(this.devicetoken);//当前登录的设备token
 //						END
@@ -474,7 +475,12 @@
 /* 477 */           userInfoMap.put("logoAccountType", users.getLogoAccountType());
 /* 478 */           userInfoMap.put("accountOperationType", users.getAccountOperationType());
 /* 479 */           userInfoMap.put("userPhone", users.getUserPhone());
-/* 480 */           userInfoMap.put("isFirst", users.getIsFirst());
+					//如果是一般用户，则isFirst直接赋值1，直接进入主界面==通过authorizationUserCode判断，不为空则直接进入主界面   2018-3-16实现
+                    if(!update.getAuthorizationUserCode().equals("")) {//实现 被授权者直接进入主界面，不用进入房间管理页面的判断
+                    	userInfoMap.put("isFirst", Boolean.valueOf(true));
+                    }else {
+                    	userInfoMap.put("isFirst", users.getIsFirst());	
+                    }
 /* 481 */           userInfoMap.put("whetherSetPwd", users.getWhetherSetPwd());
 					//添加初始的楼层、房间信息  2018/1/3
 					BoFloor floor=this.boFloorService.findByUserCode(users.getUserCode());
