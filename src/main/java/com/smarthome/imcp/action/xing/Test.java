@@ -3,8 +3,11 @@
 /*    */ import java.io.PrintStream;
 		import java.util.ArrayList;
 		import java.util.HashMap;
-		import java.util.List;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 		import java.util.Map;
+import java.util.Set;
 
 import com.smarthome.imcp.dao.model.bo.BoDevice;
 /*    */ 
@@ -21,8 +24,23 @@ import com.smarthome.imcp.dao.model.bo.BoDevice;
 //			 int a = Integer.parseInt(str);
 //			 Integer i=new Integer(a);
 //			 System.out.println(Integer.parseInt(str));
-			Map map=new HashMap();
-			System.out.println(map);
+			Set set=new HashSet();//不能存放重复的值
+			set.add(1);
+			set.add(1);
+			set.add(2);
+//			System.out.println(set);
+			Iterator it = set.iterator(); 
+			while (it.hasNext()) {  
+				  int str = (int) it.next();  
+				  System.out.println("set---"+str);
+				  for(int i=0;i<10;i++) {
+					  System.out.println(i);
+					  if(i==5) {
+						  break;//跳出for循环
+					  }
+				  }
+//				  System.out.println(str);  
+				}
 /*    */   }
 /*    */ }
 

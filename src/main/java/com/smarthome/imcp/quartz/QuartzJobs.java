@@ -227,6 +227,10 @@
 /*     */   public void deviceS()
 /*     */     throws ParseException
 /*     */   {
+				//4-17 4s扫描一次主机
+//				XingUserAction xing=new XingUserAction();
+//				xing.verifyWithSweepHost();
+				//END
 //				System.out.println("tomcat加载完后，每隔4秒钟触发更新设备hostStatus状态");
 				//new add 更新设备的hostStatus状态
 				List<BoDevice> devicesList = this.boDeviceService.getAllHostDevices();

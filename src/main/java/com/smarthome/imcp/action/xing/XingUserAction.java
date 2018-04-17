@@ -14150,6 +14150,80 @@
 /* 12896 */               this.requestJson.setMessage("您没有绑定主机");
 /* 12897 */               this.requestJson.setSuccess(true);
 /*       */             } else {
+						//该块影响搜索设备的速度，但是有用   （当一个绑定用户的主机对应没有四个模块时可以使用）
+						//4-17 为之前绑定的每台主机   新增三个红外模块；一个用户可以有多个主机，不同用户可以拥有相同主机，给每个用户对应的主机添加三个红外模块   （通过用户userCode和主机设备deviceCode确定红外模块是否存在）
+//						  List<BoHostDevice> boHostDevices=this.boHostDeviceService.getAllHostD();
+//						  for(BoHostDevice boHostDevice0:boHostDevices) {	
+//							  BoDevice boDevice=boHostDevice0.getBoDevice();
+//							  BoUsers boUser=boHostDevice0.getBoUsers();
+//							  int device_ID=boDevice.getDeviceId();
+//							  if(device_ID!=14) {//一个用户可能对应多台主机，主机ID为14的是摄像头，，它不绑定主机
+//								  BoHostDevice hostDevice1 = this.boHostDeviceService.findBydeviceAddress(boUser.getUserCode().toString(), boDevice.getDeviceCode(), "65535," + boDevice.getDeviceCode()+",1");
+//								  BoHostDevice hostDevice2 = this.boHostDeviceService.findBydeviceAddress(boUser.getUserCode().toString(), boDevice.getDeviceCode(), "65535," + boDevice.getDeviceCode()+",2");
+//								  BoHostDevice hostDevice3 = this.boHostDeviceService.findBydeviceAddress(boUser.getUserCode().toString(), boDevice.getDeviceCode(), "65535," + boDevice.getDeviceCode()+",3");
+//								  if((boDevice.getType().equals("G")) && 
+//										  (hostDevice1 == null)) {
+//									  BoHostDevice boHostDevice = new BoHostDevice();
+//									  boHostDevice.setBoDevice(boDevice);
+//									  boHostDevice.setBoUsers(boUser);
+//									  boHostDevice.setDeviceType("98");
+//									  boHostDevice.setDeviceAddress("65535," + boDevice.getDeviceCode()+",1");
+//									  boHostDevice.setIco("WIFI红外");
+//									  boHostDevice.setNickName("");
+//									  boHostDevice.setWhetherQueryStateSign("");
+//									  boHostDevice.setDeviceNum(Integer.valueOf(0));
+//									  boHostDevice.setPushSet("");
+//									  boHostDevice.setState("");
+//									  boHostDevice.setBoRoom(null);
+//									  boHostDevice.setDeviceClassify(this.fid);
+//									  boHostDevice.setMntDelete("N");
+//									  boHostDevice.setValidationCode("");
+//									  boHostDevice.setIsAuthorized(true);
+//									  this.boHostDeviceService.save(boHostDevice);
+//								  }
+//								  if((boDevice.getType().equals("G")) && 
+//										  (hostDevice2 == null)) {
+//									  BoHostDevice boHostDevice = new BoHostDevice();
+//									  boHostDevice.setBoDevice(boDevice);
+//									  boHostDevice.setBoUsers(boUser);
+//									  boHostDevice.setDeviceType("98");
+//									  boHostDevice.setDeviceAddress("65535," + boDevice.getDeviceCode()+",2");
+//									  boHostDevice.setIco("WIFI红外");
+//									  boHostDevice.setNickName("");
+//									  boHostDevice.setWhetherQueryStateSign("");
+//									  boHostDevice.setDeviceNum(Integer.valueOf(0));
+//									  boHostDevice.setPushSet("");
+//									  boHostDevice.setState("");
+//									  boHostDevice.setBoRoom(null);
+//									  boHostDevice.setDeviceClassify(this.fid);
+//									  boHostDevice.setMntDelete("N");
+//									  boHostDevice.setValidationCode("");
+//									  boHostDevice.setIsAuthorized(true);
+//									  this.boHostDeviceService.save(boHostDevice);
+//								  }
+//								  if((boDevice.getType().equals("G")) && 
+//										  (hostDevice3 == null)) { 
+//									  BoHostDevice boHostDevice = new BoHostDevice();
+//									  boHostDevice.setBoDevice(boDevice);
+//									  boHostDevice.setBoUsers(boUser);
+//									  boHostDevice.setDeviceType("98");
+//									  boHostDevice.setDeviceAddress("65535," + boDevice.getDeviceCode()+",3");
+//									  boHostDevice.setIco("WIFI红外");
+//									  boHostDevice.setNickName("");
+//									  boHostDevice.setWhetherQueryStateSign("");
+//									  boHostDevice.setDeviceNum(Integer.valueOf(0));
+//									  boHostDevice.setPushSet("");
+//									  boHostDevice.setState("");
+//									  boHostDevice.setBoRoom(null);
+//									  boHostDevice.setDeviceClassify(this.fid);
+//									  boHostDevice.setMntDelete("N");
+//									  boHostDevice.setValidationCode("");
+//									  boHostDevice.setIsAuthorized(true);
+//									  this.boHostDeviceService.save(boHostDevice);
+//								  }
+//							  }
+//						  }
+						//END
 /* 12899 */               Thread.sleep(1500L);
 /* 12900 */               list = this.boUserDevicesServicess.getBy(userCode2[0].trim().toString());
 /* 12901 */               for (BoUserDevices boUserDevices : list) {
@@ -15464,6 +15538,7 @@
 /*       */   {
 /* 14167 */     this.requestJson = new RequestJson();
 /* 14168 */     Map map = new HashMap();
+				logger.info("验证与扫描主机 ");
 /* 14169 */     HttpServletRequest request = ServletActionContext.getRequest();
 /* 14170 */     String header = request.getHeader("timestamp");
 /* 14171 */     String header2 = request.getHeader("nonce");
@@ -15528,6 +15603,10 @@
 /* 14230 */                   this.requestJson.setData(map);
 /*       */                 } else {
 /* 14232 */                   BoHostDevice hostDevice = this.boHostDeviceService.findBydeviceAddress(userCode2[0].trim().toString(), this.deviceCode, "65535," + boDevice.getDeviceCode());
+							  //4-17初始化时默认添加四个红外模块，包括之前的一个再加三个红外模块
+							  BoHostDevice hostDevice1 = this.boHostDeviceService.findBydeviceAddress(userCode2[0].trim().toString(), this.deviceCode, "65535," + boDevice.getDeviceCode()+",1");
+							  BoHostDevice hostDevice2 = this.boHostDeviceService.findBydeviceAddress(userCode2[0].trim().toString(), this.deviceCode, "65535," + boDevice.getDeviceCode()+",2");
+							  BoHostDevice hostDevice3 = this.boHostDeviceService.findBydeviceAddress(userCode2[0].trim().toString(), this.deviceCode, "65535," + boDevice.getDeviceCode()+",3");
 /* 14233 */                   if ((boDevice.getType().equals("G")) && 
 /* 14234 */                     (hostDevice == null)) {
 /* 14235 */                     BoHostDevice boHostDevice = new BoHostDevice();
@@ -15545,9 +15624,70 @@
 /* 14247 */                     boHostDevice.setDeviceClassify(this.fid);
 /* 14248 */                     boHostDevice.setMntDelete("N");
 /* 14249 */                     boHostDevice.setValidationCode("");
-								boHostDevice.setIsAuthorized(true);//3-19
+								boHostDevice.setIsAuthorized(true);
 /* 14250 */                     this.boHostDeviceService.save(boHostDevice);
 /*       */                   }
+							  if((boDevice.getType().equals("G")) && 
+		/* 14234 */                     (hostDevice1 == null)) {
+									BoHostDevice boHostDevice = new BoHostDevice();
+	/* 14236 */                     boHostDevice.setBoDevice(boDevice);
+	/* 14237 */                     boHostDevice.setBoUsers(boUsers);
+	/* 14238 */                     boHostDevice.setDeviceType("98");
+	/* 14239 */                     boHostDevice.setDeviceAddress("65535," + boDevice.getDeviceCode()+",1");
+	/* 14240 */                     boHostDevice.setIco("WIFI红外");
+	/* 14241 */                     boHostDevice.setNickName("");
+	/* 14242 */                     boHostDevice.setWhetherQueryStateSign("");
+	/* 14243 */                     boHostDevice.setDeviceNum(Integer.valueOf(0));
+	/* 14244 */                     boHostDevice.setPushSet("");
+	/* 14245 */                     boHostDevice.setState("");
+	/* 14246 */                     boHostDevice.setBoRoom(null);
+	/* 14247 */                     boHostDevice.setDeviceClassify(this.fid);
+	/* 14248 */                     boHostDevice.setMntDelete("N");
+	/* 14249 */                     boHostDevice.setValidationCode("");
+									boHostDevice.setIsAuthorized(true);
+	/* 14250 */                     this.boHostDeviceService.save(boHostDevice);
+							  }
+							  if((boDevice.getType().equals("G")) && 
+										(hostDevice2 == null)) {
+									BoHostDevice boHostDevice = new BoHostDevice();
+	/* 14236 */                     boHostDevice.setBoDevice(boDevice);
+	/* 14237 */                     boHostDevice.setBoUsers(boUsers);
+	/* 14238 */                     boHostDevice.setDeviceType("98");
+	/* 14239 */                     boHostDevice.setDeviceAddress("65535," + boDevice.getDeviceCode()+",2");
+	/* 14240 */                     boHostDevice.setIco("WIFI红外");
+	/* 14241 */                     boHostDevice.setNickName("");
+	/* 14242 */                     boHostDevice.setWhetherQueryStateSign("");
+	/* 14243 */                     boHostDevice.setDeviceNum(Integer.valueOf(0));
+	/* 14244 */                     boHostDevice.setPushSet("");
+	/* 14245 */                     boHostDevice.setState("");
+	/* 14246 */                     boHostDevice.setBoRoom(null);
+	/* 14247 */                     boHostDevice.setDeviceClassify(this.fid);
+	/* 14248 */                     boHostDevice.setMntDelete("N");
+	/* 14249 */                     boHostDevice.setValidationCode("");
+									boHostDevice.setIsAuthorized(true);
+	/* 14250 */                     this.boHostDeviceService.save(boHostDevice);
+							  }
+							  if((boDevice.getType().equals("G")) && 
+										(hostDevice3 == null)) { 
+									BoHostDevice boHostDevice = new BoHostDevice();
+									boHostDevice.setBoDevice(boDevice);
+									boHostDevice.setBoUsers(boUsers);
+									boHostDevice.setDeviceType("98");
+									boHostDevice.setDeviceAddress("65535," + boDevice.getDeviceCode()+",3");
+									boHostDevice.setIco("WIFI红外");
+									boHostDevice.setNickName("");
+									boHostDevice.setWhetherQueryStateSign("");
+									boHostDevice.setDeviceNum(Integer.valueOf(0));
+									boHostDevice.setPushSet("");
+									boHostDevice.setState("");
+									boHostDevice.setBoRoom(null);
+									boHostDevice.setDeviceClassify(this.fid);
+									boHostDevice.setMntDelete("N");
+									boHostDevice.setValidationCode("");
+									boHostDevice.setIsAuthorized(true);
+									this.boHostDeviceService.save(boHostDevice);
+							  }
+							  //4-17END
 /*       */ 
 /* 14253 */                   String str = "ZIGBEE_SCAN-DEVEICE-NOW";//门锁 有经过？
 /* 14254 */                   byte[] bs = str.getBytes();
@@ -15633,27 +15773,89 @@
 /* 14334 */                   userCode, new Date().getTime()+"" });
 /* 14335 */                 this.requestJson.setData(map);
 /*       */               } else {
-/* 14337 */                 BoHostDevice hostDevice = this.boHostDeviceService.findBydeviceAddress(userCode, this.deviceCode, "65535," + boDevice.getDeviceCode());
-/* 14338 */                 if ((boDevice.getType().equals("G")) && 
-/* 14339 */                   (hostDevice == null)) {
-/* 14340 */                   BoHostDevice boHostDevice = new BoHostDevice();
-/* 14341 */                   boHostDevice.setBoDevice(boDevice);
-/* 14342 */                   boHostDevice.setBoUsers(boUsers);
-/* 14343 */                   boHostDevice.setDeviceType("98");
-/* 14344 */                   boHostDevice.setDeviceAddress("65535," + boDevice.getDeviceCode());
-/* 14345 */                   boHostDevice.setIco("WIFI红外");
-/* 14346 */                   boHostDevice.setNickName("");
-/* 14347 */                   boHostDevice.setWhetherQueryStateSign("");
-/* 14348 */                   boHostDevice.setDeviceNum(Integer.valueOf(0));
-/* 14349 */                   boHostDevice.setPushSet("");
-/* 14350 */                   boHostDevice.setState("");
-/* 14351 */                   boHostDevice.setBoRoom(null);
-/* 14352 */                   boHostDevice.setDeviceClassify(this.fid);
-/* 14353 */                   boHostDevice.setMntDelete("N");
-/* 14354 */                   boHostDevice.setValidationCode("");
-							  boHostDevice.setIsAuthorized(true);//3-19
-/* 14355 */                   this.boHostDeviceService.save(boHostDevice);
-/*       */                 }
+/* 14338 */                 BoHostDevice hostDevice = this.boHostDeviceService.findBydeviceAddress(userCode, this.deviceCode, "65535," + boDevice.getDeviceCode());
+							//4-17初始化时默认添加四个红外模块，包括之前的一个再加三个红外模块
+							BoHostDevice hostDevice1 = this.boHostDeviceService.findBydeviceAddress(userCode, this.deviceCode, "65535," + boDevice.getDeviceCode()+",1");
+							BoHostDevice hostDevice2 = this.boHostDeviceService.findBydeviceAddress(userCode, this.deviceCode, "65535," + boDevice.getDeviceCode()+",2");
+							BoHostDevice hostDevice3 = this.boHostDeviceService.findBydeviceAddress(userCode, this.deviceCode, "65535," + boDevice.getDeviceCode()+",3");
+							if ((boDevice.getType().equals("G")) && 
+									(hostDevice == null)) {
+								BoHostDevice boHostDevice = new BoHostDevice();
+								boHostDevice.setBoDevice(boDevice);
+								boHostDevice.setBoUsers(boUsers);
+								boHostDevice.setDeviceType("98");
+								boHostDevice.setDeviceAddress("65535," + boDevice.getDeviceCode());
+								boHostDevice.setIco("WIFI红外");
+								boHostDevice.setNickName("");
+								boHostDevice.setWhetherQueryStateSign("");
+								boHostDevice.setDeviceNum(Integer.valueOf(0));
+								boHostDevice.setPushSet("");
+								boHostDevice.setState("");
+								boHostDevice.setBoRoom(null);
+								boHostDevice.setDeviceClassify(this.fid);
+								boHostDevice.setMntDelete("N");
+								boHostDevice.setValidationCode("");
+								boHostDevice.setIsAuthorized(true);
+								this.boHostDeviceService.save(boHostDevice);
+							}else if((boDevice.getType().equals("G")) && 
+									(hostDevice1 == null)) {
+								BoHostDevice boHostDevice = new BoHostDevice();
+								boHostDevice.setBoDevice(boDevice);
+								boHostDevice.setBoUsers(boUsers);
+								boHostDevice.setDeviceType("98");
+								boHostDevice.setDeviceAddress("65535," + boDevice.getDeviceCode()+",1");
+								boHostDevice.setIco("WIFI红外");
+								boHostDevice.setNickName("");
+								boHostDevice.setWhetherQueryStateSign("");
+								boHostDevice.setDeviceNum(Integer.valueOf(0));
+								boHostDevice.setPushSet("");
+								boHostDevice.setState("");
+								boHostDevice.setBoRoom(null);
+								boHostDevice.setDeviceClassify(this.fid);
+								boHostDevice.setMntDelete("N");
+								boHostDevice.setValidationCode("");
+								boHostDevice.setIsAuthorized(true);
+								this.boHostDeviceService.save(boHostDevice);
+							}else if((boDevice.getType().equals("G")) && 
+										(hostDevice2 == null)) {
+								BoHostDevice boHostDevice = new BoHostDevice();
+								boHostDevice.setBoDevice(boDevice);
+								boHostDevice.setBoUsers(boUsers);
+								boHostDevice.setDeviceType("98");
+								boHostDevice.setDeviceAddress("65535," + boDevice.getDeviceCode()+",2");
+								boHostDevice.setIco("WIFI红外");
+								boHostDevice.setNickName("");
+								boHostDevice.setWhetherQueryStateSign("");
+								boHostDevice.setDeviceNum(Integer.valueOf(0));
+								boHostDevice.setPushSet("");
+								boHostDevice.setState("");
+								boHostDevice.setBoRoom(null);
+								boHostDevice.setDeviceClassify(this.fid);
+								boHostDevice.setMntDelete("N");
+								boHostDevice.setValidationCode("");
+								boHostDevice.setIsAuthorized(true);
+								this.boHostDeviceService.save(boHostDevice);
+							}else if((boDevice.getType().equals("G")) && 
+										(hostDevice3 == null)) { 
+									BoHostDevice boHostDevice = new BoHostDevice();
+									boHostDevice.setBoDevice(boDevice);
+									boHostDevice.setBoUsers(boUsers);
+									boHostDevice.setDeviceType("98");
+									boHostDevice.setDeviceAddress("65535," + boDevice.getDeviceCode()+",3");
+									boHostDevice.setIco("WIFI红外");
+									boHostDevice.setNickName("");
+									boHostDevice.setWhetherQueryStateSign("");
+									boHostDevice.setDeviceNum(Integer.valueOf(0));
+									boHostDevice.setPushSet("");
+									boHostDevice.setState("");
+									boHostDevice.setBoRoom(null);
+									boHostDevice.setDeviceClassify(this.fid);
+									boHostDevice.setMntDelete("N");
+									boHostDevice.setValidationCode("");
+									boHostDevice.setIsAuthorized(true);
+									this.boHostDeviceService.save(boHostDevice);
+							}
+							//4-17END
 /*       */ 
 /* 14358 */                 String str = "ZIGBEE_SCAN-DEVEICE-NOW";
 /* 14359 */                 byte[] bs = str.getBytes();
@@ -16329,58 +16531,6 @@
 /*       */ 
 /* 14814 */             this.requestJson.setSuccess(true);
 /*       */           }
-///* 14847 */           if (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue()) {
-///* 14848 */             List<BoRoom> list = this.boRoomService.getAllListByUserCode(userCode);
-///* 14849 */             List<BoFloor> list2 = this.boFloorService.getAllListByUserCode(userCode);
-//                        logger.info("list2>>>>>>"+list2);
-///* 14850 */             if ((list.size() <= 0) && (list2.size() <= 0)) {
-///* 14851 */               Map maps = new HashMap();
-///* 14852 */               this.requestJson.setMessage("没有找到");
-///* 14853 */               this.requestJson.setData(maps);
-///* 14854 */               this.requestJson.setSuccess(true);
-///* 14855 */               return "success";
-///*       */             }
-///* 14857 */             List voList = new ArrayList();
-///* 14858 */             List list_room = new ArrayList();
-///* 14859 */             Map map_room = new HashMap();
-///*       */ 
-///* 14861 */             list_floor = new ArrayList();
-///*       */ 
-///* 14863 */             for (BoFloor boFloor : list2)
-///*       */             {
-//							String floorName=boFloor.getFloorName().toString();
-//							logger.info("floorName test01>"+floorName);
-//							if(!floorName .equals("xxx")) {
-//	/* 14865 */                 Map map = new HashMap();
-//	/*       */ 
-//	/* 14867 */                 map.put("floorCode", boFloor.getFloorCode().toString());
-//	/* 14868 */                 map.put("floorName", boFloor.getFloorName().toString());
-//								logger.info("floorName 01:"+boFloor.getFloorName().toString());
-//	/* 14869 */                 list_floor.add(map);							
-//							}
-///*       */             }
-///* 14871 */             map_room.put("floorInfo", list_floor);//楼层 信息
-///*       */ 
-///* 14873 */             for (BoRoom boRoom : list) {
-//							String roomName=boRoom.getRoomName().toString();
-//							logger.info("允许存在 客厅 01?>"+!roomName .equals("客厅"));
-////                            if(!roomName .equals("客厅")) {                	  
-//  /* 14874 */               	Map map = new HashMap();
-//  /* 14875 */               	BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
-//  /* 14877 */               	map.put("roomCode", boRoom.getRoomCode().toString());
-//  /* 14878 */               	map.put("roomName", boRoom.getRoomName().toString());
-//  								logger.info("roomName 01:"+boRoom.getRoomName().toString());
-//  /* 14879 */               	map.put("floorCode", boRoom.getFloorCode().toString());
-//  /* 14880 */               	list_room.add(map);
-////                            }
-///*       */             }
-///*       */ 
-///* 14884 */             map_room.put("roomInfo", list_room);//房间  信息
-///* 14887 */             voList.add(map_room);
-///* 14888 */             this.requestJson.setData(voList);
-///*       */ 
-///* 14890 */             this.requestJson.setSuccess(true);
-///*       */           }
 /*       */           else {
 /* 14893 */             this.requestJson.setMessage("超时了");
 /* 14894 */             this.requestJson.setSuccess(false);
@@ -16394,163 +16544,7 @@
 /*       */     }
 /* 14903 */     return "success";
 /*       */   }
-//			@Action(value="getroom", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
-//			public String getRoom()
-//			{
-//			  this.requestJson = new RequestJson();
-//			  Map mapss = new HashMap();
-//			  HttpServletRequest request = ServletActionContext.getRequest();
-//			  String header = request.getHeader("timestamp");
-//			  String header2 = request.getHeader("nonce");
-//			  String header3 = request.getHeader("sign");
-//			  String header4 = request.getHeader("access_token");
-//			  String userCode = request.getHeader("userCode");
-//			  List list_floor;
-//			  if (userCode.contains(",")) {
-//			    String[] userCode2 = userCode.split(",");
-//			    BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
-//			    BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
-//			    Boolean ral = isRal(header, header2, header3, header4, userCode, "查找用户的楼层房间列表接口");
-//			    if (ral.booleanValue()) {
-//			      System.err.println("验证通过");
-//			      if ((phone == null) || (boUsers == null)) {
-//			        this.requestJson.setData(mapss);
-//			        this.requestJson.setMessage("Invalid_User");
-//			        this.requestJson.setSuccess(true);
-//			      }
-//			      else if (header4.equals(phone.getAccessToken())) {
-//			        Long accessToken = Long.valueOf(header);
-//			        if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
-//			          List<BoRoom> list = this.boRoomService.getAllListByUserCode(userCode2[0].trim().toString());
-//			          List<BoFloor> list2 = this.boFloorService.getAllListByUserCode(userCode2[0].trim().toString());
-//			          if ((list.size() <= 0) && (list2.size() <= 0)) {
-//			            Map maps = new HashMap();
-//			            this.requestJson.setMessage("没有找到");
-//			            this.requestJson.setData(maps);
-//			            this.requestJson.setSuccess(true);
-//			            return "success";
-//			          }
-//			          List voList = new ArrayList();
-//			          List list_room = new ArrayList();
-//			          Map map_room = new HashMap();
-//			
-//			          list_floor = new ArrayList();
-//			
-//			          for (BoFloor boFloor : list2)
-//			          {
-//			            Map map = new HashMap();
-//			
-//			            map.put("floorCode", boFloor.getFloorCode().toString());
-//			            map.put("floorName", boFloor.getFloorName().toString());
-//			            list_floor.add(map);
-//			          }
-//			          map_room.put("floorInfo", list_floor);
-//			
-//			          for (BoRoom boRoom : list) {
-//			            Map map = new HashMap();
-//			            BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
-//			
-//			            map.put("roomCode", boRoom.getRoomCode().toString());
-//			            map.put("roomName", boRoom.getRoomName().toString());
-//			            map.put("floorCode", boRoom.getFloorCode().toString());
-//			            list_room.add(map);
-//			          }
-//			
-//			          map_room.put("roomInfo", list_room);
-//			
-//			          voList.add(map_room);
-//			          this.requestJson.setData(voList);
-//			
-//			          this.requestJson.setSuccess(true);
-//			        }
-//			        else {
-//			          this.requestJson.setData(mapss);
-//			          this.requestJson.setMessage("超时了");
-//			          this.requestJson.setSuccess(false);
-//			        }
-//			      } else {
-//			        System.err.println("超时了");
-//			        this.requestJson.setData(mapss);
-//			        this.requestJson.setMessage("超时了");
-//			        this.requestJson.setSuccess(false);
-//			      }
-//			
-//			    }
-//			    else
-//			    {
-//			      System.err.println("验证不通过");
-//			      this.requestJson.setData(mapss);
-//			      this.requestJson.setMessage("验证不通过");
-//			      this.requestJson.setSuccess(false);
-//			    }
-//			  } else {
-//			    Boolean ral = isRal(header, header2, header3, header4, userCode, "修改主机昵称");
-//			    if (ral.booleanValue()) {
-//			      System.err.println("验证通过");
-//			      BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode);
-//			      if (boUsers == null) {
-//			        this.requestJson.setData(mapss);
-//			        this.requestJson.setMessage("Invalid_User");
-//			        this.requestJson.setSuccess(true);
-//			      } else {
-//			        Long accessToken = Long.valueOf(header);
-//			        if (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue()) {
-//			          List<BoRoom> list = this.boRoomService.getAllListByUserCode(userCode);
-//			          List<BoFloor> list2 = this.boFloorService.getAllListByUserCode(userCode);
-//			          if ((list.size() <= 0) && (list2.size() <= 0)) {
-//			            Map maps = new HashMap();
-//			            this.requestJson.setMessage("没有找到");
-//			            this.requestJson.setData(maps);
-//			            this.requestJson.setSuccess(true);
-//			            return "success";
-//			          }
-//			          List voList = new ArrayList();
-//			          List list_room = new ArrayList();
-//			          Map map_room = new HashMap();
-//			
-//			          list_floor = new ArrayList();
-//			
-//			          for (BoFloor boFloor : list2)
-//			          {
-//			            Map map = new HashMap();
-//			
-//			            map.put("floorCode", boFloor.getFloorCode().toString());
-//			            map.put("floorName", boFloor.getFloorName().toString());
-//			            list_floor.add(map);
-//			          }
-//			          map_room.put("floorInfo", list_floor);
-//			
-//			          for (BoRoom boRoom : list) {
-//			            Map map = new HashMap();
-//			            BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
-//			
-//			            map.put("roomCode", boRoom.getRoomCode().toString());
-//			            map.put("roomName", boRoom.getRoomName().toString());
-//			            map.put("floorCode", boRoom.getFloorCode().toString());
-//			            list_room.add(map);
-//			          }
-//			
-//			          map_room.put("roomInfo", list_room);
-//			
-//			          voList.add(map_room);
-//			          this.requestJson.setData(voList);
-//			
-//			          this.requestJson.setSuccess(true);
-//			        }
-//			        else {
-//			          this.requestJson.setMessage("超时了");
-//			          this.requestJson.setSuccess(false);
-//			        }
-//			      }
-//			    } else {
-//			      System.err.println("验证不通过");
-//			      this.requestJson.setMessage("验证不通过");
-//			      this.requestJson.setSuccess(false);
-//			    }
-//			  }
-//			  return "success";
-//			}
-/*       */ 
+
 /*       */   @Action(value="getuser", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String getUser()
 /*       */   {
