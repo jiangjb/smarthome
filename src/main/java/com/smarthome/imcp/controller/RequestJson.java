@@ -1,4 +1,7 @@
 /*    */ package com.smarthome.imcp.controller;
+
+import java.util.List;
+
 /*    */ 
 /*    */ public class RequestJson
 /*    */ {
@@ -8,6 +11,22 @@
 /*  9 */   private boolean success = true;
 /* 10 */   private String message = "";
 /*    */   private Object data;
+		   private String accountOperationType;//3-29 用于存放区分管理员和一般用户的标识
+		   private List modelIds;//4-9 用于存放向Android|IOS传递的情景模式 的modelId
+		   
+		   
+		   public List getModelIds() {
+			   return modelIds;
+		   }
+		   public void setModelIds(List modelIdList) {
+			   this.modelIds = modelIdList;
+		   }
+		   public String getAccountOperationType() {
+			   return accountOperationType;
+		   }
+		   public void setAccountOperationType(String accountOperationType) {
+			   this.accountOperationType = accountOperationType;
+		   }
 /*    */ 
 /*    */   public Integer getPage()
 /*    */   {

@@ -362,6 +362,7 @@
 /* 17057 */   private Integer pageNum = Integer.valueOf(1); private Integer pageSize = Integer.valueOf(50);
 /*       */   private String orderField;
 /*       */   private String orderDirection;
+              private String modelNameList;//3-30用于存放被授权的情景模式名称
 
 /*       */   public void packNum(String userCode)
 /*       */   {
@@ -407,7 +408,7 @@
 /*       */   }
 /*       */ 
 /*       */   public Boolean commandMode(String usereCode, String modelId)
-/*       */   {//这里面的怎么都不打印
+/*       */   {//情景模式相关
 	            logger.info("in commandMode Method");
 /*   276 */     System.err.println(usereCode + modelId);
 /*   277 */     Map map = new HashMap();
@@ -416,6 +417,7 @@
 /*       */     try
 /*       */     {
 /*   282 */       List list = this.boModelInfoServicess.getBy(usereCode, modelId);
+				  logger.info("----boModelInfo list:"+list);
 /*   283 */       System.err.println(list.size());
 /*   284 */       if (list.size() <= 0)
 /*       */       {
@@ -1211,9 +1213,10 @@
 /*       */ 
 /*  1133 */     return isR;
 /*       */   }
-/*       */   //test 授权
-			  @Action(value="authorize1", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
-/*       */   public String authorize1()
+				
+/*       */   //授权-new
+			  @Action(value="newAuthorization", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+/*       */   public String newAuthorization()
 /*       */   {
 				  this.requestJson = new RequestJson();
   /*  1145 */     Map map = new HashMap();
@@ -1224,131 +1227,195 @@
   /*  1150 */     String header3 = request.getHeader("sign");
   /*  1151 */     String header4 = request.getHeader("access_token");
   /*  1152 */     String userCode = request.getHeader("userCode");
-                  logger.info("-------new authorize-------");
-                //遍历出request的所有参数
-//                  Enumeration pNames=request.getParameterNames();
-//                  while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，给设备
-//                      String name=(String)pNames.nextElement();
-//                      String value=request.getParameter(name);
-//                      logger.info(name + " == " + value);
-//                      logger.info("approvalinfo是否存在=="+name.equals("approvalinfo"));
-//                      if(name.equals("approvalinfo")) {
-//                      	logger.info("开始授权。。。");
-////  				          int phoneType=Integer.parseInt(this.phoneType);
-////  				          if(phoneType == 1) {
-////  				          logger.info("解析苹果数据");
-//                	        JSONArray jsonArray = JSONArray.fromObject(value);
-//              		    List<Map<String,String>> list = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
-//              		    if(list.size() ==0) {
-//                      		logger.info("授权管理员...");
-//                      	}else {
-//                      		logger.info("授权一般用户...");
-////                  		  logger.info("list=="+list);
-//                      		for(int i=0;i<list.size();i++) {
-//                      			BoUsers boUser=this.boUserServicess.findByUserPhone(this.userPhone);
-//                      			String userCode01=boUser.getUserCode();
-//                      			BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,"deviceAddress");
-//                      			String isAuth=list.get(i).get("isAuthorized");
-////                    			  int isAuthorized=Integer.parseInt(isAuth);//不能转化为int
-//                      			boHostDevice.setIsAuthorized(isAuth);
-////                    			  logger.info("list.get(i)=="+list.get(i));//ok
-////                    			  logger.info("isAuthorized=="+isAuth);//ok
-//                      			BoHostDevice boHostDevice01=this.boHostDeviceService.update(boHostDevice);
-//                      			if (boHostDevice01 == null) {
-//                      				this.requestJson.setData(map);
-//                      				this.requestJson.setMessage("授权失败");
-//                      				this.requestJson.setSuccess(false);
-//                      			}
-//                      		}
-//                      	}
-//                    	  }
-//                  }
+                  logger.info("-------new authorize-------"+userCode+",this.userPhone="+this.userPhone);
+//                  logger.info("userCode>"+userCode);//null 修改过的方法怎么userCode是null（IOS那边做了修改，，做了拼接操作） 已正常
 //				  logger.info("accountOperationType>>"+this.accountOperationType); //this == BoUsers对象     ;  request.getHeader("accountOperationType")=null;
   /*  1153 */     if (userCode.contains(",")) {
   /*  1154 */       String[] userCode2 = userCode.split(",");
   /*  1155 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());//用户：授权者
-  /*  1156 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
+  /*  1156 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());//用户：被授权者
+  					logger.info("授权userId:"+phone.getUserId());
   /*  1157 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "授权用户");
   /*  1158 */       if (ral.booleanValue()) {
+	  				  logger.info("验证通过");
   /*  1159 */         System.err.println("验证通过");
   /*  1160 */         if ((phone == null) || (boUsers == null)) {
   /*  1161 */           this.requestJson.setData(map);
   /*  1162 */           this.requestJson.setMessage("Invalid_User");
   /*  1163 */           this.requestJson.setSuccess(true);
   /*       */         } else {
-  /*  1165 */           List<BoUsers> list = this.boUserServicess.getByAuthorizeUserCode(boUsers.getUserCode());//一个用户最多授权   7个人
-  /*  1166 */           if (list.size() > 8) {
+  /*  1165 */           List<BoUsers> list = this.boUserServicess.getByAuthorizeUserCode(boUsers.getUserCode());//一个用户最多授权   7个人（通过userCode找回被授权者有多少人）
+//  						logger.info("被授权的list>"+list);
+  /*  1166 */           if (list.size() > 8) {//这里去掉可以不止授权七个
   /*  1167 */             this.requestJson.setData(map);
   /*  1168 */             System.err.println("当前版本暂时只能授权用户7个");
   /*  1169 */             this.requestJson.setMessage("当前版本暂时只能授权用户7个");
   /*  1170 */             this.requestJson.setSuccess(false);
   /*       */           } else {
   /*  1172 */             BoUsers users = this.boUserServicess.findByUserPhone(this.userPhone);//用户：被授权者
+//  						  logger.info("被授权者手机号："+this.userPhone+" users.userId:"+users.getUserId());//被授权者手机号：17779605698 users.userId:338
   /*  1173 */             if (users == null) {
   /*  1174 */               this.requestJson.setData(map);
   /*  1175 */               this.requestJson.setMessage("该账户尚未注册");
   /*  1176 */               this.requestJson.setSuccess(false);
   /*       */             }
   /*  1178 */             else if (!users.getAuthorizationUserCode().equals("")) {
-  /*  1179 */               map.put("result", "账户已被其他账户授权");
+	  						logger.info("账户已被其他账户授权");
+//  /*  1179 */               map.put("result", "账户已被其他账户授权");
+  							this.requestJson.setMessage("账户已被其他账户授权");
   /*  1180 */               this.requestJson.setData(map);
   /*  1181 */               this.requestJson.setSuccess(true);
   /*       */             } else {//前面是授权前的判断
+	  						logger.info("开始新的授权");
 	  						//BEGIN -----现在开始授权 
   /*  1183 */               String generateTokeCode = TokeUtil.generateTokeCode();
   /*  1184 */               String generateTokeCodes = TokeUtil.generateTokeCodes();
   /*  1185 */               users.setAuthorizationUserCode(boUsers.getUserCode());
+  							users.setLogoAccountType("S");
 						    Enumeration pNames=request.getParameterNames();
 						    while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
 						        String name=(String)pNames.nextElement();
 						        String value=request.getParameter(name);
 						        logger.info(name + " == " + value);
 //						        logger.info("approvalinfo是否存在=="+name.equals("approvalinfo"));
-						        if(name.equals("approvalinfo")) {
-						      	    logger.info("新的授权方式...");
-						//	          int phoneType=Integer.parseInt(this.phoneType);
-						//	          if(phoneType == 1) {
-						//	          logger.info("解析苹果数据");
-							        JSONArray jsonArray = JSONArray.fromObject(value);
-								    List<Map<String,String>> list01 = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
-								    if(list01.size() ==0) {//授权对象是管理员时，不传房间等信息过来
-								    	logger.info("授权管理员...");
-								    	users.setLogoAccountType("S");
-								    }else {
-								    	logger.info("授权一般用户...");
-								    	users.setLogoAccountType("M");
-						//  		  logger.info("list=="+list01);
-								    	for(int i=0;i<list01.size();i++) {
-//								    		BoUsers boUser=this.boUserServicess.findByUserPhone(this.userPhone);
-								    		String userCode01=users.getUserCode();//获取被授权者的userCode
-								    		String deviceCode01=list01.get(i).get("deviceAddress");//获取app传过来的设备地址
-								    		BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,deviceCode01);
-								    		String isAuth=list01.get(i).get("isAuthorized");//获取app传过来的 授权标识  即isAuthorized
-								    		if(isAuth.equals("1")) {
-								    			boHostDevice.setIsAuthorized(this.fid1);	
-								    		}else {
-								    			boHostDevice.setIsAuthorized(this.fid);
+						        if(this.accountOperationType.equals("2")) {//4-8  如果不是一般一般用户，不需要执行以下的操作
+							        if(name.equals("approvalinfo")) {
+								        JSONArray jsonArray = JSONArray.fromObject(value);
+									    List<Map<String,String>> list01 = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
+//									    logger.info("approvalinfo list:"+list01);
+									    for(int i=0;i<list01.size();i++) {
+								    		String userCode01=users.getUserCode();
+//								    		logger.info("userCode01="+userCode01);
+//								    		logger.info("userId:"+users.getUserId());
+								    		String deviceAddr01=list01.get(i).get("deviceAddress");//获取app传过来的设备地址
+								    		String deviceType=list01.get(i).get("type");
+								    		String deviceCode01="commonsxt";
+								    		if(!deviceType.equals("100")) {//摄像头没有主机
+								    			deviceCode01=list01.get(i).get("deviceCode");
 								    		}
-						//    			  int isAuthorized=Integer.parseInt(isAuth);//不能转化为int
-						//    			  logger.info("list01.get(i)=="+list01.get(i));//ok
-						//    			  logger.info("isAuthorized=="+isAuth);//ok
-								    		BoHostDevice boHostDevice01=this.boHostDeviceService.update(boHostDevice);
-								    		if (boHostDevice01 == null) {
+								    		BoDevice boDevice=this.boDeviceService.findByCode(deviceCode01);//find BY deviceCode	
+//								    		logger.info("bodevice:"+boDevice);
+								    		String roomCode =list01.get(i).get("roomCode");
+//								    	logger.info("roomCode="+roomCode);
+//								    	logger.info("deviceCode="+deviceCode01);
+								    		BoRoom boroom=this.boRoomService.getAllListByRommCode(roomCode).get(0);//错了
+//								    	logger.info("deviceType = "+deviceType);
+								    		String nickName=list01.get(i).get("name");
+//								    		logger.info("nickName = "+nickName);
+								    		String ico=list01.get(i).get("icon");
+//								    	logger.info("ico = "+ico);
+//								    	String deviceNum=list01.get(i).get("num");
+//								    	logger.info("deviceNum = "+deviceNum);
+								    		String isAuth=list01.get(i).get("isAuthorited");//获取app传过来的 授权标识  即isAuthorized
+								    		logger.info("isAuthorized="+isAuth);
+								    		BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,deviceAddr01);	
+								    		logger.info("boHostDevice="+boHostDevice);
+								    		BoHostDevice boHostDevice01 = new BoHostDevice();
+								    		BoHostDevice boHostDevice02 = new BoHostDevice();
+								    		if(boHostDevice == null) {//第二步：新增设备:主机+用户+房间+......(只限定一般用户进入，管理员不创建新设备 和授权者公用)
+								    			boHostDevice01.setBoDevice(boDevice);//摄像头没有关联的主机
+								    			boHostDevice01.setBoUsers(users);//被授权用户
+								    			boHostDevice01.setDeviceType(deviceType);
+								    			boHostDevice01.setDeviceAddress(deviceAddr01);
+								    			boHostDevice01.setNickName(nickName);//有可能为空
+								    			boHostDevice01.setWhetherQueryStateSign("");
+								    			boHostDevice01.setIco(ico);
+								    			boHostDevice01.setDeviceNum(Integer.valueOf(1));
+								    			boHostDevice01.setPushSet("");
+								    			boHostDevice01.setState("");
+								    			boHostDevice01.setBoRoom(boroom);//被授权用户对应的房间
+								    			boHostDevice01.setDeviceClassify(this.fid1);
+								    			logger.info("deviceType:"+deviceType+",ValidationCode="+list01.get(i).get("validationCode"));
+								    			if(deviceType.equals("100")) {//如果是摄像头就存入ValidationCode字段    				
+								    				boHostDevice01.setValidationCode(list01.get(i).get("validationCode"));
+								    				boHostDevice01.setMntDelete("Y");
+								    			}else {		
+								    				boHostDevice01.setMntDelete("N");//这个字段也很关键
+								    			}
+								    			if(isAuth.equals("1")) {
+								    				boHostDevice01.setIsAuthorized(this.fid1);	
+								    			}else {
+								    				boHostDevice01.setIsAuthorized(this.fid);
+								    			}
+								    			boHostDevice02=this.boHostDeviceService.save(boHostDevice01);
+								    		}else {
+								    			logger.info("授权时，设备不应该存在...（会在解绑时删除）");
+								    		}
+								    		if (boHostDevice02 == null) {
 								    			this.requestJson.setData(map);
 								    			this.requestJson.setMessage("授权失败");
 								    			this.requestJson.setSuccess(false);
 								    		}
 								    	}
 								    }
+							        //情景模式 授权4-9          modelId,modelName,ico存在boModel中吧，modelInfo中的信息存在boModelinfo中(以字段形式传参 只能添加一个情景模式，多个就不能这样传)
+							        if(name.equals("modelIds")) {//情景模式的modelId集合
+							        	JSONArray jsonArray = JSONArray.fromObject(value);
+									    List<String> list00 = (List<String>) JSONArray.toCollection(jsonArray,List.class);
+									    logger.info("boModel list:"+list00);
+									    for(int k=0;k<list00.size();k++) {
+									    	BoModel boModel = this.boModelService.find(userCode2[0].trim().toString(), list00.get(k));//找到授权者相应的情景模式
+									    	
+									    	//在授权者赋予的情景模式基础上 ，新建一般用户的情景模式
+									    	BoModel bomodel=new BoModel();
+									    	bomodel.setBoUsers(users);
+//									    	logger.info("boModel users:"+users.getUserPhone());
+									    	String modelId=list00.get(k);
+//									    	logger.info("boModel modelId:"+modelId);
+									    	bomodel.setModelId(modelId);
+									    	bomodel.setName(boModel.getName());
+//									    	logger.info("boModel modelName:"+boModel.getName());
+									    	bomodel.setIco(boModel.getIco());
+//									    	logger.info("boModel ico:"+boModel.getIco());
+									    	bomodel.setFlag(this.fid);
+									    	bomodel.setWeek("");
+									    	bomodel.setTime("");
+									    	BoModel save = (BoModel)this.boModelService.save(bomodel);
+									    	if (save != null) {
+									    		List<BoModelInfo> list01 = this.boModelInfoServicess.getBy(userCode2[0].trim().toString(), modelId);//找到授权者的情景模式下对应的设备
+									    		if(list01.size()>0) {
+									    			for(BoModelInfo bo:list01) {
+									    				//在授权者情景模式下存在的设备 的基础上，新建与一般用户情景模式对应的设备信息
+								    					BoModelInfo bomodelinfo=new BoModelInfo();
+								    					BoHostDevice hostDevice = this.boHostDeviceService
+								    							.findBydeviceAddress(users.getUserCode(), bo.getDeviceAddress());
+								    					bomodelinfo.setBoModel(save);
+								    					bomodelinfo.setBoUsers(users);
+								    					bomodelinfo.setBoDevice(hostDevice.getBoDevice());//通过设备找到主机
+								    					bomodelinfo.setDeviceAddress(bo.getDeviceAddress());
+//								    					logger.info("boModelinfo deviceAddress:"+bo.getDeviceAddress());
+								    					bomodelinfo.setDeviceType(bo.getDeviceType());
+//								    					logger.info("boModelinfo deviceType:"+bo.getDeviceType());
+								    					bomodelinfo.setControlCommand(bo.getControlCommand());
+								    					bomodelinfo.setDelayValues(bo.getDelayValues());
+//								    					logger.info("boModelinfo delayValues:"+bo.getDelayValues());
+								    					BoModelInfo save01 = (BoModelInfo)this.boModelInfoServicess.save(bomodelinfo);
+								    					if (save01 != null) {
+								    						this.requestJson.setData(map);
+								    						this.requestJson.setMessage("添加成功");
+								    						this.requestJson.setSuccess(true);
+								    					} else {
+								    						this.requestJson.setData(map);
+								    						this.requestJson.setMessage("添加失败");
+								    						this.requestJson.setSuccess(false);
+								    					}
+									    			}
+									    		}
+										        
+									    	} else {
+										    	this.requestJson.setData(map);
+										    	this.requestJson.setMessage("添加失败");
+										    	this.requestJson.setSuccess(false);
+									    	}
+									    }
+							        }
 						        }
 						    }
-  /*       */               String accountOperation;
-  ///*       */               String accountOperation;
+  /*       */               String accountOperation;//accountOperationType=1（管理员），accountOperationType=2（一般用户）
   /*  1188 */               if ((this.accountOperationType == null) || (this.accountOperationType.equals("")))
   /*  1189 */                 accountOperation = "1";
   /*       */               else {
   /*  1191 */                 accountOperation = this.accountOperationType;
-  							//在这里把楼层、房间和设备信息 填入 city（不被使用的字段）中   +登录的时候把  被授权者的 userCode也加在后面(userInfoMap.put("userCode", users.getAuthorizationUserCode() + "," + users.getUserPhone()+"," + users.getUserCode()) )
   /*       */               }
   /*  1193 */               users.setAccountOperationType(accountOperation);
   /*  1194 */               users.setAccessToken(generateTokeCode);
@@ -1363,6 +1430,7 @@
   /*  1202 */                 this.requestJson.setSuccess(false);
   /*       */               } else {
   /*  1204 */                 PushService pushService = new PushService();
+  							  logger.info("11111 pushService"+pushService);
   /*  1205 */                 if (users.getVersionType().equals("1")) {
   /*  1206 */                   System.err.println("易联智家KEY");
   /*  1207 */                   pushService.setAppId("C2rT1RdCoB7BaZ83l2AJM7");
@@ -1399,6 +1467,7 @@
   /*       */                 }
   /*  1238 */                 String title = "";
   /*  1239 */                 String CID = update.getCid();
+//  							  logger.info("33333 CID:"+CID);
   /*       */ 
   /*  1241 */                 if ((CID == null) || (CID.equals(""))) {
   /*  1242 */                   System.err.println("CID为空推送不到信息");
@@ -1441,22 +1510,22 @@
   /*       */                     }
   /*       */                   }
   /*  1281 */                   Integer type = users.getPhoneType();
-  /*       */ 
+  /*       */ 					logger.info("55555 type:"+type);
   /*  1283 */                   if ((type == null) || (type.intValue() == 0)) {
-  /*  1284 */                     pushService.pushToSingle(CID, title, text.toString(), text.toString());//推送？
+//  /*  1284 */                     pushService.pushToSingle(CID, title, text.toString(), text.toString());//推送？   4-13注释
+  								  logger.info("666666666666");
   /*       */                   }
   /*       */                   else {
-  /*  1287 */                     pushService.apnPush(CID, title, text.toString(), text.toString());
+//  /*  1287 */                     pushService.apnPush(CID, title, text.toString(), text.toString());//4-13注释
   /*       */                   }
   /*       */                 }
-  /*       */ 
-  /*  1291 */                 map.put("result", "授权成功");
+  							  logger.info("授权成功...");
+  							  this.requestJson.setMessage("授权成功");
   /*  1292 */                 this.requestJson.setData(map);
   /*  1293 */                 this.requestJson.setSuccess(true);
   /*       */               }
   /*       */             }
   /*       */           }
-  /*       */ 
   /*       */         }
   /*       */ 
   /*       */       }
@@ -1468,7 +1537,7 @@
   /*  1306 */         this.requestJson.setMessage("验证不通过");
   /*  1307 */         this.requestJson.setSuccess(false);
   /*       */       }
-  /*       */     } else {
+  /*       */     } else {//没有逗号的情况：userCode对应被授权者的 AuthorizationUserCode
   /*  1310 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "授权用户");
   /*  1311 */       if (ral.booleanValue()) {
   /*  1312 */         System.err.println("验证通过");
@@ -1492,71 +1561,92 @@
   /*  1330 */               this.requestJson.setSuccess(true);
   /*       */             }
   /*  1332 */             else if (!users.getAuthorizationUserCode().equals("")) {
-  /*  1333 */               map.put("result", "账户已被其他账户授权");
+//  /*  1333 */               map.put("result", "账户已被其他账户授权");
+  							this.requestJson.setMessage("账户已被其他账户授权");
   /*  1334 */               this.requestJson.setData(map);
   /*  1335 */               this.requestJson.setSuccess(true);
   /*       */             } else {
-  /*  1337 */               String generateTokeCode = TokeUtil.generateTokeCode();
-  /*  1338 */               String generateTokeCodes = TokeUtil.generateTokeCodes();
-  /*  1339 */               users.setAuthorizationUserCode(boUsers.getUserCode());
-							Enumeration pNames=request.getParameterNames();
-							while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
-							    String name=(String)pNames.nextElement();
-							    String value=request.getParameter(name);
-							    logger.info(name + " == " + value);
-							//      logger.info("approvalinfo是否存在=="+name.equals("approvalinfo"));
-							    if(name.equals("approvalinfo")) {
-							    	  logger.info("新的授权方式...");
-							//	          int phoneType=Integer.parseInt(this.phoneType);
-							//	          if(phoneType == 1) {
-							//	          logger.info("解析苹果数据");
-								      JSONArray jsonArray = JSONArray.fromObject(value);
-									  List<Map<String,String>> list01 = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
-									  if(list01.size() ==0) {//授权对象是管理员时，不传房间等信息过来
-										  logger.info("授权管理员...");
-									      users.setLogoAccountType("S");
-									   }else {
-									      logger.info("授权一般用户...");
-									      users.setLogoAccountType("M");
-							//  		  logger.info("list=="+list01);
-									      for(int i=0;i<list01.size();i++) {
-									    	  String userCode01=users.getUserCode();//获取被授权者的userCode
-									    	  String deviceCode01=list01.get(i).get("deviceAddress");//获取app传过来的设备地址
-									    	  BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,deviceCode01);
-									    	  String isAuth=list01.get(i).get("isAuthorized");//获取app传过来的 授权标识  即isAuthorized
-							//    			  int isAuthorized=Integer.parseInt(isAuth);//不能转化为int
-									    	  if(isAuth.equals("1")) {
-									    			boHostDevice.setIsAuthorized(this.fid1);	
-									    		}else {
-									    			boHostDevice.setIsAuthorized(this.fid);
-									    		}
-//									    	  boHostDevice.setIsAuthorized(isAuth);
-							//    			  logger.info("list01.get(i)=="+list01.get(i));//ok
-							//    			  logger.info("isAuthorized=="+isAuth);//ok
-									    	  BoHostDevice boHostDevice01=this.boHostDeviceService.update(boHostDevice);
-									    	  if (boHostDevice01 == null) {
-									    		  this.requestJson.setData(map);
-									    		  this.requestJson.setMessage("授权失败");
-									    		  this.requestJson.setSuccess(false);
-									    	  }
-									      }
-									  }
-							  	  }
-							  }
-  
-//  /*  1340 */               users.setLogoAccountType("S");
-  /*       */               String accountOperation;
-  /*  1342 */               if ((this.accountOperationType == null) || (this.accountOperationType.equals("")))
-  /*  1343 */                 accountOperation = "1";
-  /*       */               else {
-  /*  1345 */                 accountOperation = this.accountOperationType;
-  /*       */               }
-  /*  1347 */               users.setAccountOperationType(accountOperation);
-  /*  1348 */               users.setAccessToken(generateTokeCode);
-  /*  1349 */               users.setRefreshToken(generateTokeCodes);
-  /*  1350 */               users.setAccessTokenTime("940923880");
-  /*  1351 */               users.setRefreshTokenTime("940923880");
-  /*  1352 */               BoUsers update = (BoUsers)this.boUserServicess.update(users);
+	  						//BEGIN
+  /*  1183 */               String generateTokeCode = TokeUtil.generateTokeCode();
+  /*  1184 */               String generateTokeCodes = TokeUtil.generateTokeCodes();
+  /*  1185 */               users.setAuthorizationUserCode(boUsers.getUserCode());
+  							users.setLogoAccountType("S");
+						    Enumeration pNames=request.getParameterNames();
+						    while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+						        String name=(String)pNames.nextElement();
+						        String value=request.getParameter(name);
+						        logger.info(name + " == " + value);
+//							        logger.info("approvalinfo是否存在=="+name.equals("approvalinfo"));
+						        if(name.equals("approvalinfo")) {
+						        	JSONArray jsonArray = JSONArray.fromObject(value);
+								    List<Map<String,String>> list01 = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
+								    for(int i=0;i<list01.size();i++) {
+								    	if(this.accountOperationType.equals("2")) {
+								    		String userCode01=users.getUserCode();
+								    		String deviceAddr01=list01.get(i).get("deviceAddress");//获取app传过来的设备地址
+								    		String deviceCode01=list01.get(i).get("deviceCode");
+								    		String roomCode =list01.get(i).get("roomCode");
+//								    	logger.info("roomCode="+roomCode);
+//								    	logger.info("deviceCode="+deviceCode01);
+								    		BoDevice boDevice=this.boDeviceService.findByCode(deviceCode01);//find BY deviceCode
+								    		BoRoom boroom=this.boRoomService.getAllListByRommCode(roomCode).get(0);//错了
+								    		String deviceType=list01.get(i).get("type");
+//								    	logger.info("deviceType = "+deviceType);
+								    		String nickName=list01.get(i).get("name");
+								    		logger.info("nickName = "+nickName);
+								    		String ico=list01.get(i).get("icon");
+//								    	logger.info("ico = "+ico);
+//								    	String deviceNum=list01.get(i).get("num");
+//								    	logger.info("deviceNum = "+deviceNum);
+								    		String isAuth=list01.get(i).get("isAuthorited");//获取app传过来的 授权标识  即isAuthorized
+								    		logger.info("isAuthorized="+isAuth);
+								    		BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,deviceAddr01);							    	
+								    		BoHostDevice boHostDevice01 = new BoHostDevice();
+								    		BoHostDevice boHostDevice02 = new BoHostDevice();
+								    		if(boHostDevice == null) {//第二步：新增设备:主机+用户+房间+......(只限定一般用户进入，管理员不创建新设备 和授权者公用)
+								    			boHostDevice01.setBoDevice(boDevice);//被授权设备
+								    			boHostDevice01.setBoUsers(users);//被授权用户
+								    			boHostDevice01.setDeviceType(deviceType);
+								    			boHostDevice01.setDeviceAddress(deviceAddr01);
+								    			boHostDevice01.setNickName(nickName);//有可能为空
+								    			boHostDevice01.setWhetherQueryStateSign("");
+								    			boHostDevice01.setIco(ico);
+								    			boHostDevice01.setDeviceNum(Integer.valueOf(1));
+								    			boHostDevice01.setPushSet("");
+								    			boHostDevice01.setState("");
+								    			boHostDevice01.setBoRoom(boroom);//被授权用户对应的房间
+								    			boHostDevice01.setDeviceClassify(this.fid1);
+								    			logger.info("deviceType:"+deviceType);
+								    			if(deviceType.equals("100")) {//如果是摄像头就存入ValidationCode字段    				
+								    				boHostDevice01.setValidationCode(list01.get(i).get("validationCode"));
+								    				boHostDevice01.setMntDelete("Y");
+								    			}else {		
+								    				boHostDevice01.setMntDelete("N");//这个字段也很关键
+								    			}
+								    			if(isAuth.equals("1")) {
+								    				boHostDevice01.setIsAuthorized(this.fid1);	
+								    			}else {
+								    				boHostDevice01.setIsAuthorized(this.fid);
+								    			}
+								    			boHostDevice02=this.boHostDeviceService.save(boHostDevice01);
+								    		}else {
+								    			logger.info("授权时，设备不应该存在...（会在解绑时删除）");
+								    		}
+								    		if (boHostDevice02 == null) {
+								    			this.requestJson.setData(map);
+								    			this.requestJson.setMessage("授权失败");
+								    			this.requestJson.setSuccess(false);
+								    		}
+								    	}
+								    }			    
+						        }
+						    }
+  /*  1194 */               users.setAccessToken(generateTokeCode);
+  /*  1195 */               users.setRefreshToken(generateTokeCodes);
+  /*  1196 */               users.setAccessTokenTime("940923880");
+  /*  1197 */               users.setRefreshTokenTime("940923880");
+  /*  1198 */               BoUsers update = (BoUsers)this.boUserServicess.update(users);
+  							//END -----授权结束
   /*  1353 */               if (update == null) {
   /*  1354 */                 this.requestJson.setData(map);
   /*  1355 */                 this.requestJson.setMessage("授权失败");
@@ -1650,7 +1740,7 @@
   /*       */                   }
   /*       */                 }
   /*       */ 
-  /*  1445 */                 map.put("result", "授权成功");
+  							  this.requestJson.setMessage("授权成功");
   /*  1446 */                 this.requestJson.setData(map);
   /*  1447 */                 this.requestJson.setSuccess(true);
   /*       */               }
@@ -1672,66 +1762,372 @@
   /*       */     }
   /*  1465 */     return "success";
 			  }
-			  //test 编辑权限
-			  @Action(value="update", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
-			  public String update()
-			  {
+			  public String getModelNameList() {
+				return modelNameList;
+			}
+			public void setModelNameList(String modelNameList) {
+				this.modelNameList = modelNameList;
+			}
+			//设备授权列表 （by userPhone）
+			  @Action(value="gainDevicesList", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public String gainDevicesList() {
 				  this.requestJson = new RequestJson();
-				  Map map001 = new HashMap();
+				  logger.info("-----------gainDevicesList--------userPhone:"+this.userPhone);
+				  List<Map<String,String>> voList=new ArrayList<Map<String,String>>();
+				  List accOtype=new ArrayList();
+				  BoUsers users=this.boUserServicess.findByUserPhone(this.userPhone);
+				  String userCode=users.getUserCode();
+				  String accountOperationType=users.getAccountOperationType();
+				  List modelIdList=new ArrayList();//4-9 存放一般用户情景模式的modelId集
 				  
-				  //通过手机号 找到用户
-				  BoUsers boUser=this.boUserServicess.findByUserPhone(this.userPhone);
-				  String userCode=boUser.getUserCode();
-				  //通过用户 找到所有的楼层
-				  List<BoFloor> bofloors=this.boFloorService.getAllListByUserCode(userCode);
-				  if(bofloors.size() != 0) {
-					  for(BoFloor bofloor:bofloors) {
-						  String flCode=bofloor.getFloorCode();
-						  //通过楼层 找到所有的房间(楼层-房间)
-						  List<BoRoom> borooms=this.boRoomService.getAllListByFloorCode(userCode);
-						  if(borooms .size() != 0) {
-							  for(BoRoom boroom:borooms) {
-								  String rmCode=boroom.getRoomCode();
-								  //通过用户和房间编号 找到房间下的所有设备（房间-设备）
-								  List<BoHostDevice> bhdevices=this.boHostDeviceService.getroomCode(userCode,rmCode);	
-								  if(bhdevices.size() != 0) {
-									  //向安卓、IOS传递的参数
-									  List<Map<String,String>> list=new ArrayList<Map<String,String>>();
-									  for(BoHostDevice bhdevice:bhdevices) {
-										  String dvAddr=bhdevice.getDeviceAddress();
-										  Boolean isAuth=bhdevice.getIsAuthorized();
-										  Map<String,String> map=new HashMap<String,String>();
-										  String floorCode=flCode;
-										  String roomCode=rmCode;
-										  String deviceAddress=dvAddr;
-										  Boolean isAuthorited=isAuth;
-										  if(isAuthorited) {
-											  map.put("isAuthorited", "1");	  
-										  }else {
-											  map.put("isAuthorited", "0");	
-										  }
-										  map.put("floorCode", floorCode);
-										  map.put("roomCode", roomCode);
-										  map.put("deviceAddress", deviceAddress);
-										  JSONObject smsparam = JSONObject.fromObject(map);//map 转   json对象
-										  list.add(smsparam);
-									  }
-									  logger.info("传给app的设备列表："+list);
-									  map001.put("result",list);
-									  this.requestJson.setData(map001);
-									  this.requestJson.setMessage("设备列表");
-									  this.requestJson.setSuccess(true);
-								  }else {
-									  map001.put("result", "获取失败");
-									  this.requestJson.setData(map001);
-									  this.requestJson.setMessage("设备列表不存在");
-									  this.requestJson.setSuccess(false);
-								  }
-								  
+				  List<BoHostDevice> bohostDevices=this.boHostDeviceService.findHostByUserPhone(this.userPhone);//不存在 ，会返回null   （这里找到该用户所有的设备，包括自己本身的和被授权的，只是本身的在app那边用不上，会被过滤）
+				  logger.info("bohostDevices::"+bohostDevices);
+				  if(bohostDevices != null) {//这个地方可以是被授权者本身就有设备
+					  Map map1=new HashMap();
+					  map1.put("accountOperationType", accountOperationType);
+					  //4-9modelIdList存放一般用户情景模式的modelId
+					  List<BoModel> boModels=this.boModelService.getListBy(userCode);//找到一般用户的情景模式
+					  if(boModels.size() > 0) {
+						  for(BoModel boModel:boModels) {
+							  String modelId=boModel.getModelId()+"";
+							  modelIdList.add(modelId);
+						  }
+					  }
+					  
+					  for(BoHostDevice bohostDevice:bohostDevices) {
+						  Map map =new HashMap();//这个如果写在循环外面的话，就只能传单一的数据
+						  //增加accountOperationType
+						  if(accountOperationType.equals("2")) {//一般用户             
+//							  map.put("id", bohostDevice.getId());//4-8
+							  logger.info("id:"+bohostDevice.getId());
+							  map.put("userCode", userCode);
+							  String roomCode=bohostDevice.getBoRoom().getRoomCode();
+							  map.put("roomCode", roomCode);
+							  String equipID=bohostDevice.getId().toString();
+							  map.put("deviceAddress", bohostDevice.getDeviceAddress());//设备id
+							  String deviceCode=bohostDevice.getBoDevice().getDeviceCode();
+							  map.put("deviceCode", deviceCode);
+							  String type=bohostDevice.getDeviceType();
+							  map.put("type", type);
+							  String name=bohostDevice.getNickName();//去掉toString方法，若是空的话会造成空指针异常
+							  logger.info("name="+name);
+							  map.put("name", name);
+							  String icon=bohostDevice.getIco();
+							  map.put("icon", icon);
+							  boolean isAuth=bohostDevice.getIsAuthorized();
+							  String isAuthorited;
+							  if(isAuth) {
+								  isAuthorited="1";
+							  }else {
+								  isAuthorited="0";
 							  }
-						  }	  
+							  map.put("isAuthorited", isAuthorited);
+//							  map.put("validationCode", bohostDevice.getValidationCode());//3-29
+							  map.put("num", bohostDevice.getDeviceNum());
+							//检测roomCode,如果roomCode下没有标识为1的设备，则roomCode不传过去  3-27
+							  List<BoHostDevice> bhds=this.boHostDeviceService.getroomCode(userCode, roomCode);//被授权用户是否拥有 授权者设备的权限
+							  if(bhds.size() > 0) {
+								  for(BoHostDevice bhd:bhds) {
+									  logger.info("isAuthorized==="+bhd.getIsAuthorized());
+									  if(bhd.getIsAuthorized()) {
+										  voList.add(map);
+										  break;
+									  }
+								  }
+							  }
+						  }
+					  }
+					  logger.info("voList=="+voList);
+					  this.requestJson.setData(voList); 
+					  this.requestJson.setAccountOperationType(accountOperationType);
+					  this.requestJson.setModelIds(modelIdList);
+					  //3-30
+//					  this.requestJson.setModelNameList(modelNameList);
+					  this.requestJson.setMessage("获取成功");
+					  this.requestJson.setSuccess(true);
+				  }else {//管理员下面是可以没有设备的，但返回也是正确的 3-28
+//					  Map map =new HashMap();
+//					  map.put("roomCode", "ceshi");
+//					  voList.add(map);
+					  this.requestJson.setData(voList);
+					  this.requestJson.setAccountOperationType(accountOperationType);
+					  this.requestJson.setModelIds(modelIdList);
+					  this.requestJson.setMessage("获取成功");
+					  this.requestJson.setSuccess(true);  
+				  }
+				  return "success";
+			  }
+			  //test 编辑权限           --IOS和Android那边只传递打开房间的设备（标识为0和1的都有）
+			  @Action(value="updateAuthorization", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public String updateAuthorization()
+			  {   //传过来的信息和授权方法一样
+				  this.requestJson = new RequestJson();
+				  HttpServletRequest request = ServletActionContext.getRequest();
+				  String ip = request.getRemoteAddr();
+				  String header = request.getHeader("timestamp");
+				  String header2 = request.getHeader("nonce");
+				  String header3 = request.getHeader("sign");
+				  String header4 = request.getHeader("access_token");
+				  String userCode = request.getHeader("userCode");
+				  logger.info("-------编辑权限-------"+userCode);
+				  logger.info("updateAuthorization.action userPhone="+this.userPhone);
+				  Map map001 = new HashMap();
+				  //通过手机号 找到用户
+				  String[] userCode2 = userCode.split(",");
+				  BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());//用户：授权者
+				  BoUsers users=this.boUserServicess.findByUserPhone(this.userPhone);
+				  String userCode01=users.getUserCode();
+				  users.setAccountOperationType(this.accountOperationType);
+//				  users.setCity(this.modelNameList);//3-30
+				  BoUsers boUser = this.boUserServicess.update(users);//更改用户（被授权者）的类型
+				  if(this.accountOperationType.equals("2")) {//如果是一般用户，执行下面的操作
+					  Enumeration pNames=request.getParameterNames();
+					  while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+						  String name=(String)pNames.nextElement();
+						  String value=request.getParameter(name);
+						  logger.info(name + " == " + value);
+				          logger.info("approvalinfo是否存在=="+name.equals("approvalinfo"));
+						  if(name.equals("approvalinfo")) {
+							  JSONArray jsonArray = JSONArray.fromObject(value);
+							  List<Map<String,String>> list01 = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
+							  logger.info("approvalinfo list:"+list01);
+							  List list02=new ArrayList();//存放 app传递过来的房间
+							  if(list01.size()>0) {//Android或IOS那边传过来的数据不为空
+								  for(int i=0;i<list01.size();i++) {					    		
+									  String deviceAddr01=list01.get(i).get("deviceAddress");//获取app传过来的设备地址
+									  String deviceType=list01.get(i).get("type");
+									  String deviceCode01="commonsxt";
+									  if(!deviceType.equals("100")) {//摄像头没有主机
+										  deviceCode01=list01.get(i).get("deviceCode");
+									  }
+									  String roomCode =list01.get(i).get("roomCode");
+									  list02.add(roomCode);//3-27
+									  BoDevice boDevice=this.boDeviceService.findByCode(deviceCode01);//find BY deviceCode
+									  BoRoom boroom=this.boRoomService.getAllListByRommCode(roomCode).get(0);//关键
+									  String nickName=list01.get(i).get("name");
+	//						    	logger.info("nickName = "+nickName);
+									  String ico=list01.get(i).get("icon");
+									  String isAuth=list01.get(i).get("isAuthorited");//获取app传过来的 授权标识  即isAuthorized
+									  BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,deviceAddr01);//通过userCode和设备地址定位设备，如果存在则只修改isAuthorized,否则新增							    	
+									  BoHostDevice boHostDevice01 = new BoHostDevice();
+									  BoHostDevice boHostDevice02 = new BoHostDevice();
+									  if(boHostDevice == null) {//新增设备:主机+用户+房间+......
+										  boHostDevice01.setBoDevice(boDevice);//被授权设备
+										  boHostDevice01.setBoUsers(boUser);//被授权用户
+										  boHostDevice01.setDeviceType(deviceType);
+										  boHostDevice01.setDeviceAddress(deviceAddr01);
+										  boHostDevice01.setNickName(nickName);
+										  boHostDevice01.setWhetherQueryStateSign("");
+										  boHostDevice01.setIco(ico);
+										  boHostDevice01.setDeviceNum(Integer.valueOf(1));
+										  boHostDevice01.setPushSet("");
+										  boHostDevice01.setState("");
+										  boHostDevice01.setBoRoom(boroom);//被授权用户对应的房间
+										  boHostDevice01.setDeviceClassify(this.fid1);
+										  if(deviceType.equals("100")) {//如果是摄像头就存入ValidationCode字段   
+											  boHostDevice01.setValidationCode(list01.get(i).get("validationCode"));
+											  boHostDevice01.setMntDelete("Y");
+										  }else {		
+											  boHostDevice01.setMntDelete("N");
+										  }
+										  if(isAuth.equals("1")) {
+											  boHostDevice01.setIsAuthorized(this.fid1);	
+										  }else {
+											  boHostDevice01.setIsAuthorized(this.fid);
+										  }
+										  boHostDevice02=this.boHostDeviceService.save(boHostDevice01);
+									  }else {//已经存在，则需要判断和传过来的roomCode是否相等，相等后改该用户的isAuthorized属性即可 （注意不是新增用户boHostDevice01） ；不相等则把设备标识改0
+										  if(isAuth.equals("1")) {
+											  boHostDevice.setIsAuthorized(this.fid1);	
+										  }else {
+											  boHostDevice.setIsAuthorized(this.fid);
+										  }
+										  boHostDevice02=this.boHostDeviceService.update(boHostDevice);
+									  }
+									  if (boHostDevice02 == null || boUser == null) {//编辑授权更改被授权者的信息和被授权者的设备信息
+										  this.requestJson.setData(map001);
+										  this.requestJson.setMessage("编辑授权失败");
+										  this.requestJson.setAccountOperationType("2");
+										  this.requestJson.setSuccess(false);
+									  }else {
+										  this.requestJson.setData(map001);
+										  this.requestJson.setMessage("编辑授权成功");
+										  this.requestJson.setAccountOperationType("2");//这个是为了避免返回NULL才返回给app的
+										  this.requestJson.setSuccess(true);
+									  }
+								  }
+								  //这里处理没有传过来的房间中的设备   设备标识设为0
+								  if(list02.size()>0) {
+									  List list03=new ArrayList();//最终用于存放关闭的房间，用于将改房间下的设备删除
+//									  logger.info("授权者拥有的房间："+list02);
+									  //把多余的设备标识改为0
+									  List<BoRoom> borooms=this.boRoomService.getAllListByUserCode(userCode2[0].trim().toString());//找到授权者对应的所有房间
+									  for(BoRoom boroom1:borooms) {
+										  String rmCode=boroom1.getRoomCode();
+										  list03.add(rmCode);//将授权者拥有的房间加入list集合
+									  }
+//									  logger.info("过滤前："+list03); 
+									  if(list03.size()>0) {
+										  for(int i=0;i<list03.size();i++) {
+//											  logger.info("list03.get("+i+"):"+list03.get(i));
+											  for(int j=0;j<list02.size();j++) {
+//												  logger.info("list02.get("+j+"):"+list02.get(j));
+//												  logger.info("list03.get("+i+").equals(list02.get("+j+")):"+list03.get(i).equals(list02.get(j)));
+												  if(list03.get(i).equals(list02.get(j))) {
+													  list03.remove(i);//remove后list03大小减一，list03[1]遍历的就是原来的list03[2]
+													  i--;
+													  break;
+												  }
+											  }
+										  }
+									  }
+//									  logger.info("过滤后："+list03);//剩下存在的房间   
+									  if(list03.size()>0) {
+										  //这是没有传过来的房间的信息
+										  for(int z=0;z<list03.size();z++) {
+											  String rmcode=list03.get(z).toString();
+											  List<BoHostDevice> lists=this.boHostDeviceService.getroomCode(userCode01,rmcode);
+											  if(lists.size()>0) {
+												  for(BoHostDevice boDevice00:lists) {
+													  boDevice00.setIsAuthorized(this.fid);
+													  this.boHostDeviceService.update(boDevice00);
+												  }
+											  }
+										  }
+									  }
+								  }
+							  }else {
+								  this.requestJson.setData(map001);
+								  this.requestJson.setMessage("编辑授权失败");
+								  this.requestJson.setAccountOperationType("2");
+								  this.requestJson.setSuccess(false);
+							  }
+						  }
+						//情景模式 授权4-9          modelId,modelName,ico存在boModel中吧，modelInfo中的信息存在boModelinfo中(以字段形式传参 只能添加一个情景模式，多个就不能这样传)
+				        if(name.equals("modelIds")) {//情景模式的modelId集合
+				        	JSONArray jsonArray = JSONArray.fromObject(value);
+						    List<String> list00 = (List<String>) JSONArray.toCollection(jsonArray,List.class);//授权的情景模式modelId集
+//							    logger.info("boModel list:"+list00);
+						    //4-10
+						    List<String> list=new ArrayList<String>();//1)这个用于存放未被授权的 情景模式的modelId集
+						    List<BoModel> boModels0=this.boModelService.getListBy(userCode2[0].trim().toString());//2)授权者的情景模式
+						    for(BoModel boModel:boModels0) {
+						    	list.add(boModel.getModelId());
+						    }
+						    logger.info("授权者情景模式的modelId:"+list);
+						    logger.info("获取的情景模式modelId:"+list00);
+						    for(int k=0;k<list00.size();k++) {
+						    	list.remove(list00.get(k));//3)移除 赋予权限的情景模式的modelId
+						    	
+						    	List<BoModel> boModels=this.boModelService.getListBy(users.getUserCode());//一般用户的所有的情景模式  
+						    	String modelid=list00.get(k);
+						    	for(BoModel boModel:boModels) {
+						    		if(modelid.equals(boModel.getModelId())) {//这里用modelid代替list00.get(k)，不然如果k=0，再--就是-1了   或者后面加个break也能解决
+						    			list00.remove(list00.get(k));//移除一般用户中已经存在的modelId
+						    			k--;//这个操作没有的话，就会漏掉一次循环
+						    			break;
+						    		}
+						    	}
+						    }
+						    logger.info("需要添加的modelId:"+list00);
+						    for(int k=0;k<list00.size();k++) {
+						    	//在授权者赋予的情景模式基础上 ，新建一般用户的情景模式
+						    	BoModel boModel=this.boModelService.find(userCode2[0].trim().toString(), list00.get(k));//授权者相应的情景模式   （用于取值，赋给被授权者）
+					    		BoModel bomodel=new BoModel();
+					    		bomodel.setBoUsers(users);
+					    		String modelId=list00.get(k);
+//					    		logger.info("boModel modelId:"+modelId);
+					    		bomodel.setModelId(modelId);
+					    		bomodel.setName(boModel.getName());
+//					    		logger.info("boModel modelName:"+boModel.getName());
+					    		bomodel.setIco(boModel.getIco());
+//					    		logger.info("boModel ico:"+boModel.getIco());
+					    		bomodel.setFlag(this.fid);
+					    		bomodel.setWeek("");
+					    		bomodel.setTime("");
+					    		BoModel save = (BoModel)this.boModelService.save(bomodel);
+					    		if (save != null) {
+					    			List<BoModelInfo> list01 = this.boModelInfoServicess.getBy(userCode2[0].trim().toString(), modelId);//找到授权者的情景模式
+				    				for(BoModelInfo bo:list01) {
+				    					//在授权者情景模式下存在的设备 的基础上，新建与一般用户情景模式对应的设备信息
+				    					BoModelInfo bomodelinfo=new BoModelInfo();
+				    					BoHostDevice hostDevice = this.boHostDeviceService
+				    							.findBydeviceAddress(users.getUserCode().toString(), bo.getDeviceAddress());
+				    					bomodelinfo.setBoModel(save);
+				    					bomodelinfo.setBoUsers(users);
+				    					bomodelinfo.setBoDevice(hostDevice.getBoDevice());//通过设备找到主机
+				    					bomodelinfo.setDeviceAddress(bo.getDeviceAddress());
+//				    					logger.info("boModelinfo deviceAddress:"+bo.getDeviceAddress());
+				    					bomodelinfo.setDeviceType(bo.getDeviceType());
+//				    					logger.info("boModelinfo deviceType:"+bo.getDeviceType());
+				    					bomodelinfo.setControlCommand(bo.getControlCommand());
+//				    					logger.info("boModelinfo controlCommand:"+bo.getControlCommand());
+				    					bomodelinfo.setDelayValues(bo.getDelayValues());
+//				    					logger.info("boModelinfo delayValues:"+bo.getDelayValues());
+				    					BoModelInfo save01 = (BoModelInfo)this.boModelInfoServicess.save(bomodelinfo);
+				    					if (save01 != null) {
+				    						this.requestJson.setData(map001);
+				    						this.requestJson.setMessage("编辑授权成功");
+				    						this.requestJson.setAccountOperationType("2");
+				    						this.requestJson.setSuccess(true);
+				    					} else {
+				    						this.requestJson.setData(map001);
+				    						this.requestJson.setMessage("编辑授权失败");
+				    						this.requestJson.setAccountOperationType("2");
+				    						this.requestJson.setSuccess(false);
+				    					}
+				    				}
+					    		} else {
+					    			this.requestJson.setData(map001);
+					    			this.requestJson.setMessage("编辑授权失败");
+					    			this.requestJson.setAccountOperationType("2");
+					    			this.requestJson.setSuccess(false);
+					    		}
+						    }
+						    //4)将未被授权的情景模式以及情景模式下的设备删除
+						    logger.info("要清除的情景模式的modelId:"+list);
+						    for(int i=0;i<list.size();i++) {
+						    	String modelId=list.get(i);
+						    	List<BoModel> boModels=this.boModelService.getListBy(users.getUserCode());//一般用户的所有的情景模式
+						    	for(BoModel boModel:boModels) {
+									if(modelId.equals(boModel.getModelId())) {//移除一般用户中未授权的情景模式
+										logger.info("解除绑定 被授权者modelId:"+boModel.getModelId());
+										List<BoModelInfo> list01 = this.boModelInfoServicess.getBy(users.getUserCode(), boModel.getModelId());//找到授权者的情景模式下对应的设备
+										for(BoModelInfo boModelInfo:list01) {
+											BoModelInfo remove=this.boModelInfoServicess.delete(boModelInfo);
+											if(remove == null) {
+												this.requestJson.setData(map001);
+												this.requestJson.setMessage("编辑授权失败");
+												this.requestJson.setAccountOperationType("2");
+												this.requestJson.setSuccess(false);
+											}
+										}
+										BoModel remove=this.boModelService.delete(boModel);
+										if(remove == null) {
+											this.requestJson.setData(map001);
+											this.requestJson.setMessage("编辑授权失败");
+											this.requestJson.setAccountOperationType("2");
+											this.requestJson.setSuccess(false);
+										}
+									}
+								}
+						    }
+				         }
+					 }
+				  }else {//如果是管理员，不用更新设备信息或者情景模式信息   因为管理员是和授权者共享设备|情景模式
+					  if(boUser == null) {
+						  this.requestJson.setData(map001);
+						  this.requestJson.setMessage("编辑授权失败");
+						  this.requestJson.setAccountOperationType("1");
+						  this.requestJson.setSuccess(false);
+					  }else {
+						  this.requestJson.setData(map001);
+						  this.requestJson.setMessage("编辑授权成功");
+						  this.requestJson.setAccountOperationType("1");//这个是为了避免返回NULL才返回给app的
+						  this.requestJson.setSuccess(true);	
 					  }
 				  }
+				  logger.info("this.requestJson accountOperationType="+this.requestJson.getAccountOperationType()+",message"+this.requestJson.getMessage()+",page="+this.requestJson.getPage()+",total="+this.requestJson.getTotal()+",totalPages="+this.requestJson.getTotalPages()+",class="+this.requestJson.getClass()+",data="+this.requestJson.getData()+",modelIds="+this.requestJson.getModelIds());
 			  		return "success";
 			  }
 /*       */   @Action(value="authorize", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
@@ -1748,44 +2144,6 @@
 /*  1152 */     String userCode = request.getHeader("userCode");
 
                 logger.info("-------authorize-------");
-//                //遍历出request的所有参数
-//                Enumeration pNames=request.getParameterNames();
-//                while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，给设备
-//                    String name=(String)pNames.nextElement();
-//                    String value=request.getParameter(name);
-//                    logger.info(name + " == " + value);
-//                    logger.info("approvalinfo是否存在=="+name.equals("approvalinfo"));
-//                    if(name.equals("approvalinfo")) {
-//                    	logger.info("开始授权。。。");
-////				          int phoneType=Integer.parseInt(this.phoneType);
-////				          if(phoneType == 1) {
-////				          logger.info("解析苹果数据");
-//              	        JSONArray jsonArray = JSONArray.fromObject(value);
-//            		    List<Map<String,String>> list = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
-//            		    if(list.size() ==0) {
-//                    		logger.info("授权管理员...");
-//                    	}else {
-//                    		logger.info("授权一般用户...");
-////                		  logger.info("list=="+list);
-//                    		for(int i=0;i<list.size();i++) {
-//                    			BoUsers boUser=this.boUserServicess.findByUserPhone(this.userPhone);
-//                    			String userCode01=boUser.getUserCode();
-//                    			BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,"deviceAddress");
-//                    			String isAuth=list.get(i).get("isAuthorized");
-////                  			  int isAuthorized=Integer.parseInt(isAuth);//不能转化为int
-//                    			boHostDevice.setIsAuthorized(isAuth);
-////                  			  logger.info("list.get(i)=="+list.get(i));//ok
-////                  			  logger.info("isAuthorized=="+isAuth);//ok
-//                    			BoHostDevice boHostDevice01=this.boHostDeviceService.update(boHostDevice);
-//                    			if (boHostDevice01 == null) {
-//                    				this.requestJson.setData(map);
-//                    				this.requestJson.setMessage("授权失败");
-//                    				this.requestJson.setSuccess(false);
-//                    			}
-//                    		}
-//                    	}
-//                  	  }
-//                }
                 logger.info("signature>>"+this.signature);
 //                logger.info("accountOperationType>>"+this.accountOperationType); //this == BoUsers对象     ;  request.getHeader("accountOperationType")=null;
 /*  1153 */     if (userCode.contains(",")) {
@@ -2487,10 +2845,15 @@
 /*  1859 */     String header3 = request.getHeader("sign");
 /*  1860 */     String header4 = request.getHeader("access_token");
 /*  1861 */     String userCode = request.getHeader("userCode");
+				logger.info("次账户解绑 userCode:"+userCode);
 /*  1862 */     if (userCode.contains(",")) {
 /*  1863 */       String[] userCode2 = userCode.split(",");
 /*  1864 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
 /*  1865 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
+				  //4-13 解绑后删除主账户赋予的设备权限 + 情景模式以及情景模式下绑定的设备				  
+				  BoUsers authorizor=this.boUserServicess.findByUserUserCode(phone.getAuthorizationUserCode());
+				  logger.info("authorizor's phone:"+authorizor.getUserPhone());
+				  //END
 /*  1866 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "次账户解除授权");
 /*  1867 */       if (ral.booleanValue()) {
 /*  1868 */         System.err.println("验证通过");
@@ -2504,6 +2867,47 @@
 /*  1876 */         else if (header4.equals(phone.getAccessToken())) {
 /*  1877 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
 /*  1878 */             BoUsers users = this.boUserServicess.findByUserPhone(this.userPhone);
+						
+						//4-13将被授权用户相应房间的所有设备删除
+						logger.info("解绑-------删除相应房间下的设备");
+						String userCode01=users.getUserCode();//获取被授权者的userCode
+						List<BoRoom> borooms=this.boRoomService.getAllListByUserCode(authorizor.getUserCode());//找到授权者对应的所有房间
+						for(BoRoom boroom:borooms) {
+							String rCode=boroom.getRoomCode();
+							logger.info("要删除设备的房间："+boroom.getRoomName());
+							List<BoHostDevice> bhs=this.boHostDeviceService.getroomCode(userCode01,rCode);//被授权者userCode+授权者的房间roomCode
+							if(bhs.size()>0) {
+								for(BoHostDevice bh:bhs) {
+									this.boHostDeviceService.delete(bh);
+								}				
+							}
+						}
+						//删除相应的情景模式 4-13
+						List<BoModel> boModels0=this.boModelService.getListBy(authorizor.getUserCode());//授权者的情景模式
+						for(BoModel boModel0:boModels0) {
+							String modelId=boModel0.getModelId();
+							List<BoModel> boModels=this.boModelService.getListBy(users.getUserCode());//一般用户的情景模式        
+							for(BoModel boModel:boModels) {
+								if(modelId.equals(boModel.getModelId())) {//删除授权者赋予的情景模式
+									List<BoModelInfo> list01 = this.boModelInfoServicess.getBy(users.getUserCode(), boModel.getModelId());//找到授权者的情景模式下对应的设备
+									for(BoModelInfo boModelInfo:list01) {
+										BoModelInfo remove=this.boModelInfoServicess.delete(boModelInfo);
+										if(remove == null) {
+											this.requestJson.setData(map);
+											this.requestJson.setMessage("删除情景模式下的设备异常");
+											this.requestJson.setSuccess(false);
+										}
+									}
+									BoModel remove=this.boModelService.delete(boModel);
+									if(remove == null) {
+										this.requestJson.setData(map);
+										this.requestJson.setMessage("删除情景模式异常");
+										this.requestJson.setSuccess(false);
+									}
+								}
+							}
+						}
+						//END
 /*  1879 */             users.setAuthorizationUserCode("");
 /*  1880 */             users.setLogoAccountType("M");
 /*  1881 */             users.setAccountOperationType("1");
@@ -2583,7 +2987,7 @@
 /*       */     }
 /*  1956 */     return "success";
 /*       */   }
-/*       */ 
+/*       */   //授权解绑
 /*       */   @Action(value="primaryAccountRemoveBelowAccount", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String primaryAccountRemoveBelowAccount()
 /*       */   {
@@ -2600,6 +3004,7 @@
 /*  1975 */       String[] userCode2 = userCode.split(",");
 /*  1976 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
 /*  1977 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
+				  logger.info("解除绑定 phone:"+phone.getUserPhone());
 /*  1978 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "主账户解除其下次授权账户");
 /*  1979 */       if (ral.booleanValue()) {
 /*  1980 */         System.err.println("验证通过");
@@ -2612,9 +3017,53 @@
 /*       */         }
 /*  1988 */         else if (header4.equals(phone.getAccessToken())) {
 /*  1989 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
+	
 /*  1990 */             String generateTokeCode = TokeUtil.generateTokeCode();
 /*  1991 */             String generateTokeCodes = TokeUtil.generateTokeCodes();
 /*  1992 */             BoUsers users = this.boUserServicess.findByUserPhone(this.userPhone);
+						//将被授权用户相应房间的所有设备删除
+						logger.info("解绑-------删除相应房间下的设备");
+						String userCode01=users.getUserCode();//获取被授权者的userCode
+						List<BoRoom> borooms=this.boRoomService.getAllListByUserCode(userCode2[0].trim().toString());//找到授权者对应的所有房间
+						for(BoRoom boroom:borooms) {
+							String rCode=boroom.getRoomCode();
+							logger.info("要删除设备的房间："+boroom.getRoomName());
+							List<BoHostDevice> bhs=this.boHostDeviceService.getroomCode(userCode01,rCode);//被授权者userCode+授权者的房间roomCode
+							if(bhs.size()>0) {
+								for(BoHostDevice bh:bhs) {
+									this.boHostDeviceService.delete(bh);
+								}				
+							}
+						}
+						//end
+						//删除相应的情景模式 4-10
+						List<BoModel> boModels0=this.boModelService.getListBy(userCode2[0].trim().toString());//授权者的情景模式
+						for(BoModel boModel0:boModels0) {
+							String modelId=boModel0.getModelId();
+							logger.info("解除绑定 授权者modelId:"+modelId);
+							List<BoModel> boModels=this.boModelService.getListBy(users.getUserCode());//一般用户的情景模式        
+							for(BoModel boModel:boModels) {
+								logger.info("解除绑定 被授权者modelId:"+boModel.getModelId());
+								if(modelId.equals(boModel.getModelId())) {//删除授权者赋予的情景模式
+									List<BoModelInfo> list01 = this.boModelInfoServicess.getBy(users.getUserCode(), boModel.getModelId());//找到授权者的情景模式下对应的设备
+									for(BoModelInfo boModelInfo:list01) {
+										BoModelInfo remove=this.boModelInfoServicess.delete(boModelInfo);
+										if(remove == null) {
+											this.requestJson.setData(map);
+											this.requestJson.setMessage("删除情景模式下的设备异常");
+											this.requestJson.setSuccess(false);
+										}
+									}
+									BoModel remove=this.boModelService.delete(boModel);
+									if(remove == null) {
+										this.requestJson.setData(map);
+										this.requestJson.setMessage("删除情景模式异常");
+										this.requestJson.setSuccess(false);
+									}
+								}
+							}
+						}
+						//END
 /*  1993 */             users.setAuthorizationUserCode("");
 /*  1994 */             users.setLogoAccountType("M");
 /*  1995 */             users.setAccountOperationType("1");
@@ -2853,9 +3302,9 @@
 /*       */     }
 /*  2226 */     return "success";
 /*       */   }
-/*       */ 
+/*       */   //进入权限编辑页面，给app(IOS/android)返回授权者下被授权的用户
 /*       */   @Action(value="gainAuthorizeList", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
-/*       */   public String gainAuthorizeList()          //授权有关
+/*       */   public String gainAuthorizeList()         
 /*       */   {
 /*  2234 */     this.requestJson = new RequestJson();
 /*  2235 */     Map map = new HashMap();
@@ -5473,6 +5922,7 @@
 /*  4881 */                   boHostDevice.setDeviceClassify(this.fid);
 /*  4882 */                   boHostDevice.setMntDelete("N");
 /*  4883 */                   boHostDevice.setValidationCode("");
+                              boHostDevice.setIsAuthorized(true);//3-19
 /*  4884 */                   this.boHostDeviceService.save(boHostDevice);
 /*       */                 }
 /*       */ 
@@ -5540,6 +5990,7 @@
 /*  4948 */                 boHostDevice.setDeviceClassify(this.fid);
 /*  4949 */                 boHostDevice.setMntDelete("N");
 /*  4950 */                 boHostDevice.setValidationCode("");
+							boHostDevice.setIsAuthorized(true);//3-19
 /*  4951 */                 this.boHostDeviceService.save(boHostDevice);
 /*       */               }
 /*       */ 
@@ -7723,7 +8174,7 @@
 /*  7210 */     Map map = new HashMap();
 /*  7211 */     String ip = request.getRemoteAddr();
 /*  7212 */     System.out.println("ip :"+ip);
-                System.out.println("modelId"+this.modelId);//new
+                System.out.println("modelId ："+this.modelId);
 /*  7213 */     String header = request.getHeader("timestamp");
 /*  7214 */     String header2 = request.getHeader("nonce");
 /*  7215 */     String header3 = request.getHeader("sign");
@@ -7749,7 +8200,15 @@
 /*  7233 */           System.err.println(phone.getAccessToken());
 ///*  7234 */           if ((ip.equals("127.0.0.1")) || (ip.equals("0:0:0:0:0:0:0:1"))) {
 					  if ((ip.equals("120.77.250.17")) || (ip.equals("0:0:0:0:0:0:0:1"))) {
-/*  7235 */             Boolean commandMode = commandMode(userCode2[0].trim().toString(), this.modelId);
+						//4-11
+						  Boolean commandMode;
+						  if(phone.getAccountOperationType().equals("1")) {
+							  commandMode = commandMode(userCode2[0].trim().toString(), this.modelId);
+						  }else {
+							  commandMode = commandMode(phone.getUserCode().toString(), this.modelId);
+						  }
+						  //end
+///*  7235 */             Boolean commandMode = commandMode(userCode2[0].trim().toString(), this.modelId);
 /*  7236 */             if (!commandMode.booleanValue()) {
 /*  7237 */               this.requestJson.setData(map);
 /*  7238 */               this.requestJson.setMessage("该情景模式没有情景信息");
@@ -7766,7 +8225,15 @@
 /*       */           {
 /*  7252 */             System.err.println(" userCode-- " + userCode2[0].trim().toString());
 /*  7253 */             System.err.println(" modelId-- " + this.modelId);
-/*  7254 */             Boolean commandMode = commandMode(userCode2[0].trim().toString(), this.modelId);
+//4-11
+						Boolean commandMode;
+						if(phone.getAccountOperationType().equals("1")) {
+							  commandMode = commandMode(userCode2[0].trim().toString(), this.modelId);
+						}else {
+							  commandMode = commandMode(phone.getUserCode().toString(), this.modelId);
+						}
+						//end
+///*  7254 */             Boolean commandMode = commandMode(userCode2[0].trim().toString(), this.modelId);
 /*  7255 */             if (!commandMode.booleanValue()) {
 /*  7256 */               this.requestJson.setData(map);
 /*  7257 */               this.requestJson.setMessage("该情景模式没有情景信息");
@@ -7903,6 +8370,7 @@
 /*  7394 */                 boHostDevice.setDeviceClassify(this.fid1);
 /*  7395 */                 boHostDevice.setBoUsers(boUsers);
 /*  7396 */                 boHostDevice.setIco(this.ico);
+							boHostDevice.setIsAuthorized(true);//3-19
 /*  7397 */                 this.boHostDeviceService.save(boHostDevice);
 /*       */               } else {
 /*  7399 */                 hostDevice.setBoDevice(userDevices.getBoDevice());
@@ -7956,6 +8424,7 @@
 /*  7447 */               boHostDevice.setDeviceClassify(this.fid1);
 /*  7448 */               boHostDevice.setBoUsers(boUsers);
 /*  7449 */               boHostDevice.setIco(this.ico);
+						  boHostDevice.setIsAuthorized(true);//3-19
 /*  7450 */               this.boHostDeviceService.save(boHostDevice);
 /*       */             } else {
 /*  7452 */               hostDevice.setBoDevice(userDevices.getBoDevice());
@@ -7994,6 +8463,7 @@
 /*  7490 */     String header4 = request.getHeader("access_token");
 /*  7491 */     String userCode = request.getHeader("userCode");
 /*       */     List voList;
+				logger.info("获取情景模式信息列表 userCode："+userCode);
 /*  7492 */     if (userCode.contains(",")) {
 /*  7493 */       String[] userCode2 = userCode.split(",");
 /*  7494 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
@@ -8010,7 +8480,16 @@
 /*  7505 */         else if (header4.equals(phone.getAccessToken())) {
 /*  7506 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
 /*  7507 */             logger.info("获取情景模式信息列表 ]-userCode " + userCode2[0].trim().toString() + "<------>" + "modelId " + this.modelId);
-/*  7508 */             List<BoModelInfo> list = this.boModelInfoServicess.getBy(userCode2[0].trim().toString(), this.modelId);
+						//4-4 添加情景模式授权 时新增
+						List<BoModelInfo> list;
+						if(phone.getAccountOperationType().equals("1")) {//管理员或授权者
+							list = this.boModelInfoServicess.getBy(userCode2[0].trim().toString(), this.modelId);
+						}else {
+							list = this.boModelInfoServicess.getBy(phone.getUserCode(), this.modelId);
+						}
+						//END
+///*  7508 */             List<BoModelInfo> list = this.boModelInfoServicess.getBy(userCode2[0].trim().toString(), this.modelId);
+						logger.info("获取情景模式："+list);
 /*  7509 */             if (list.size() <= 0) {
 /*  7510 */               this.requestJson.setData(is);
 /*  7511 */               this.requestJson.setMessage("没有找到该情景模式信息");
@@ -8024,8 +8503,8 @@
 /*  7519 */                 map.put("deviceCode", boModelInfo.getBoDevice().getDeviceCode());
 /*  7520 */                 map.put("deviceType", boModelInfo.getDeviceType());
 /*  7521 */                 map.put("controlCommand", boModelInfo.getControlCommand());
+							logger.info("modelId:"+boModelInfo.getModelId()+",deviceType:"+deviceType+",controlCommand:"+controlCommand);
 /*  7522 */                 map.put("delayValues", boModelInfo.getDelayValues());
-/*       */ 
 /*  7524 */                 voList.add(map);
 /*       */               }
 /*  7526 */               this.requestJson.setData(voList);
@@ -8077,7 +8556,7 @@
 /*  7572 */                 map.put("deviceType", boModelInfo.getDeviceType());
 /*  7573 */                 map.put("controlCommand", boModelInfo.getControlCommand());
 /*  7574 */                 map.put("delayValues", boModelInfo.getDelayValues());
-/*       */ 
+/*       */ 				//+判断：如果被授权用户的city里面没有相应的model则不传递到app
 /*  7576 */                 voList.add(map);
 /*       */               }
 /*  7578 */               this.requestJson.setData(voList);
@@ -8128,15 +8607,25 @@
 /*  7629 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
 /*  7630 */             System.err.println(">>>-- " + userCode2[0].trim().toString());
 /*  7631 */             System.err.println(">>>-- " + this.modelId);
-/*  7632 */             List<BoModelInfo> list = this.boModelInfoServicess.getBy(userCode2[0].trim().toString(), this.modelId);
-/*  7633 */             by = this.boModelService.getBy(userCode2[0].trim().toString(), this.modelId);
+						//4-10
+						List<BoModelInfo> list;
+						if(phone.getAccountOperationType().equals("1")) {
+							list = this.boModelInfoServicess.getBy(userCode2[0].trim().toString(), this.modelId);
+							by = this.boModelService.getBy(userCode2[0].trim().toString(), this.modelId);
+						}else {
+							list = this.boModelInfoServicess.getBy(phone.getUserCode().toString(), this.modelId);
+							by = this.boModelService.getBy(phone.getUserCode().toString(), this.modelId);
+						}
+						//END
+///*  7632 */             List<BoModelInfo> list = this.boModelInfoServicess.getBy(userCode2[0].trim().toString(), this.modelId);
+///*  7633 */             by = this.boModelService.getBy(userCode2[0].trim().toString(), this.modelId);
 /*  7634 */             if (by.size() <= 0) {
 /*  7635 */               this.requestJson.setData(map);
 /*  7636 */               this.requestJson.setMessage("没有该情景模式");
 /*  7637 */               this.requestJson.setSuccess(true);
 /*       */             } else {
 /*  7639 */               for (BoModelInfo boModelInfo : list) {
-/*  7640 */                 this.boModelInfoServicess.delete(boModelInfo);
+/*  7640 */                 this.boModelInfoServicess.delete(boModelInfo);//先删再加
 /*       */               }
 /*  7642 */               JSONArray json = JSONArray.fromObject(this.modelInfo);
 /*  7643 */               System.err.println("modelInfo " + this.modelInfo);
@@ -8145,10 +8634,21 @@
 /*  7646 */               for (BoModelInfo boModelInfo : persons) {
 /*  7647 */                 BoHostDevice hostDevice = this.boHostDeviceService
 /*  7648 */                   .findBydeviceAddress(userCode2[0].trim().toString(), boModelInfo.getDeviceAddress());
-/*  7649 */                 BoModel boModel = this.boModelService.find(userCode2[0].trim().toString(), this.modelId);
+							//4-10
+							BoModel boModel;
+							if(phone.getAccountOperationType().equals("1")) {
+								boModel = this.boModelService.find(userCode2[0].trim().toString(), this.modelId);
+								boModelInfo.setBoUsers(boUsers);
+							}else {
+								boModel = this.boModelService.find(phone.getUserCode().toString(), this.modelId);
+								boModelInfo.setBoUsers(phone);
+							}
+							//END
+///*  7649 */                 BoModel boModel = this.boModelService.find(userCode2[0].trim().toString(), this.modelId);
 /*  7650 */                 boModelInfo.setBoModel(boModel);
+							logger.info("添加情景模式boModel-userPhone:"+boModel.getBoUsers().getUserPhone());
 /*  7651 */                 boModelInfo.setBoDevice(hostDevice.getBoDevice());
-/*  7652 */                 boModelInfo.setBoUsers(boUsers);
+///*  7652 */                 boModelInfo.setBoUsers(boUsers);
 /*  7653 */                 boModelInfo.setDeviceAddress(boModelInfo.getDeviceAddress());
 /*  7654 */                 boModelInfo.setDeviceType(boModelInfo.getDeviceType());
 /*  7655 */                 boModelInfo.setControlCommand(boModelInfo.getControlCommand());
@@ -8266,6 +8766,7 @@
 /*  7772 */     String header3 = request.getHeader("sign");
 /*  7773 */     String header4 = request.getHeader("access_token");
 /*  7774 */     String userCode = request.getHeader("userCode");
+//				logger.info("gainmodel.action userCode:"+userCode);
 /*       */     List voList;
 /*  7775 */     if (userCode.contains(",")) {
 /*  7776 */       String[] userCode2 = userCode.split(",");
@@ -8282,7 +8783,16 @@
 /*       */         }
 /*  7788 */         else if (header4.equals(phone.getAccessToken())) {
 /*  7789 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
-/*  7790 */             List<BoModel> list = this.boModelService.getListBy(userCode2[0].trim().toString());
+						//4-4
+						List<BoModel> list;
+						logger.info("accountOperationType:"+phone.getAccountOperationType());
+						if(phone.getAccountOperationType().equals("1")) {//管理员或授权者
+							list = this.boModelService.getListBy(userCode2[0].trim().toString());
+						}else {//一般用户
+							list = this.boModelService.getListBy(phone.getUserCode().toString());
+						}
+						//END
+///*  7790 */             List<BoModel> list = this.boModelService.getListBy(userCode2[0].trim().toString());
 /*  7791 */             if (list.size() <= 0) {
 /*  7792 */               this.requestJson.setData(maps);
 /*  7793 */               this.requestJson.setMessage("没有找到");
@@ -8378,6 +8888,7 @@
 /*  7883 */     String header3 = request.getHeader("sign");
 /*  7884 */     String header4 = request.getHeader("access_token");
 /*  7885 */     String userCode = request.getHeader("userCode");
+				logger.info("gainModelTiming userCode:"+userCode);
 /*  7886 */     if (userCode.contains(",")) {
 /*  7887 */       String[] userCode2 = userCode.split(",");
 /*  7888 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
@@ -8602,13 +9113,28 @@
 /*       */         }
 /*  8111 */         else if (header4.equals(phone.getAccessToken())) {
 /*  8112 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
-/*  8113 */             BoModel boModel = this.boModelService.find(userCode2[0].trim().toString(), this.modelId);
+						//4-11
+						BoModel boModel;
+						if(phone.getAccountOperationType().equals("1")) {
+							boModel = this.boModelService.find(userCode2[0].trim().toString(), this.modelId);
+						}else {
+							boModel = this.boModelService.find(phone.getUserCode().toString(), this.modelId);
+						}
+						//end
+///*  8113 */             BoModel boModel = this.boModelService.find(userCode2[0].trim().toString(), this.modelId);
 /*  8114 */             if (boModel == null) {
 /*  8115 */               this.requestJson.setData(map);
 /*  8116 */               this.requestJson.setMessage("没有找到该情景模式");
 /*  8117 */               this.requestJson.setSuccess(true);
 /*       */             } else {
-/*  8119 */               list = this.boModelInfoServicess.getBy(userCode2[0].trim().toString(), this.modelId);
+							//4-11
+							if(phone.getAccountOperationType().equals("1")) {
+								 list = this.boModelInfoServicess.getBy(userCode2[0].trim().toString(), this.modelId);
+							}else {
+								 list = this.boModelInfoServicess.getBy(phone.getUserCode().toString(), this.modelId);
+							}
+							//end
+///*  8119 */               list = this.boModelInfoServicess.getBy(userCode2[0].trim().toString(), this.modelId);
 /*  8120 */               for (BoModelInfo boModelInfo : list) {
 /*  8121 */                 this.boModelInfoServicess.delete(boModelInfo);
 /*       */               }
@@ -8714,6 +9240,7 @@
 /*  8227 */     String header3 = request.getHeader("sign");
 /*  8228 */     String header4 = request.getHeader("access_token");
 /*  8229 */     String userCode = request.getHeader("userCode");
+				logger.info("添加情景模式userCode:"+userCode);
 /*  8230 */     if (userCode.contains(",")) {
 /*  8231 */       String[] userCode2 = userCode.split(",");
 /*  8232 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
@@ -8730,13 +9257,37 @@
 /*  8243 */         else if (header4.equals(phone.getAccessToken())) {
 /*  8244 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
 /*       */             try {
-/*  8246 */               BoModel boModel = this.boModelService.find(userCode2[0].trim().toString(), this.modelId);
+						  //4-10
+						  BoModel boModel;
+						  logger.info("是否一般用户："+phone.getAccountOperationType().equals("2")+"，phone.getAccountOperationType()："+phone.getAccountOperationType());
+						  if(phone.getAccountOperationType().equals("1")) {//管理员或授权者
+							  boModel = this.boModelService.find(userCode2[0].trim().toString(), this.modelId);
+						  }else {//一般用户
+							  boModel = this.boModelService.find(phone.getUserCode().toString(), this.modelId);
+						  }
+						  //END
+///*  8246 */               BoModel boModel = this.boModelService.find(userCode2[0].trim().toString(), this.modelId);
 /*  8247 */               if (boModel == null) {
 /*  8248 */                 System.err.println("没有");
-/*  8249 */                 BoModel model = this.boModelService.findby(userCode2[0].trim().toString(), this.modelName);
-/*  8250 */                 if (model == null) {
+							//4-10
+							BoModel model;
+							if(phone.getAccountOperationType().equals("1")) {//管理员或授权者
+								model = this.boModelService.findby(userCode2[0].trim().toString(), this.modelName);//去掉这个判断,情景模式可以重名
+							}else {//一般用户
+								model = this.boModelService.findby(phone.getUserCode().toString(), this.modelName);//去掉这个判断,情景模式可以重名
+							}
+							//END
+///*  8249 */                 BoModel model = this.boModelService.findby(userCode2[0].trim().toString(), this.modelName);//去掉这个判断,情景模式可以重名
+/*  8250 */                 if (model == null) {//去掉这个判断
 /*  8251 */                   BoModel boModels = new BoModel();
-/*  8252 */                   boModels.setBoUsers(boUsers);
+							  //4-10
+							  if(phone.getAccountOperationType().equals("1")) {
+								  boModels.setBoUsers(boUsers);
+							  }else {
+								  boModels.setBoUsers(phone);
+							  }
+							  //END
+///*  8252 */                   boModels.setBoUsers(boUsers);
 /*  8253 */                   boModels.setModelId(this.modelId);
 /*  8254 */                   boModels.setName(this.modelName);
 /*  8255 */                   boModels.setIco(this.ico);
@@ -8760,7 +9311,7 @@
 /*  8273 */                   this.requestJson.setSuccess(false);
 /*       */                 }
 /*       */               }
-/*       */               else {
+/*       */               else {//编辑情景模式
 /*  8277 */                 System.err.println("有");
 /*  8278 */                 boModel.setModelId(this.modelId);
 /*  8279 */                 boModel.setIco(this.ico);
@@ -8805,7 +9356,9 @@
 /*  8318 */         this.requestJson.setSuccess(false);
 /*       */       }
 /*       */     } else {
-/*  8321 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "添加情景模式");
+/*  8321 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "."
+		+ ""
+		+ "");
 /*  8322 */       if (ral.booleanValue()) {
 /*  8323 */         System.err.println("验证通过");
 /*  8324 */         Long accessToken = Long.valueOf(header);
@@ -12979,6 +13532,239 @@
 /*       */     }
 /* 12647 */     return "success";
 /*       */   }
+
+
+///*       */   @Action(value="classifyqueryequipment", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+///*       */   public String classifyQueryeQuipment()
+///*       */   {
+///* 12658 */     this.requestJson = new RequestJson();
+///* 12659 */     Map maps = new HashMap();
+///* 12660 */     HttpServletRequest request = ServletActionContext.getRequest();
+///* 12661 */     String header = request.getHeader("timestamp");
+///* 12662 */     String header2 = request.getHeader("nonce");
+///* 12663 */     String header3 = request.getHeader("sign");
+///* 12664 */     String header4 = request.getHeader("access_token");
+///* 12665 */     String userCode = request.getHeader("userCode");
+///*       */     List voList;
+///* 12666 */     if (userCode.contains(",")) {
+///* 12667 */       String[] userCode2 = userCode.split(",");
+//				  logger.info("userCode2>>"+userCode);
+///* 12668 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
+///* 12669 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
+///* 12670 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "已分类房间设备");
+///* 12671 */       if (ral.booleanValue()) {
+///* 12672 */         System.err.println("验证通过");
+///* 12673 */         Long accessToken = Long.valueOf(header);
+///*       */ 
+///* 12675 */         if ((phone == null) || (boUsers == null)) {
+///* 12676 */           this.requestJson.setData(maps);
+///* 12677 */           this.requestJson.setMessage("Invalid_User");
+///* 12678 */           this.requestJson.setSuccess(true);
+///*       */         }
+///* 12680 */         else if (header4.equals(phone.getAccessToken())) {
+///* 12681 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
+///* 12682 */             List by = this.boUserDevicesServicess.getBy(userCode2[0].trim().toString());
+///* 12683 */             List<BoHostDevice> lists = this.boHostDeviceService.getListByUserCodes(userCode2[0].trim().toString(), "commonsxt", 
+///* 12684 */               this.fid1);
+///* 12685 */             voList = new ArrayList();
+///*       */             Map map;
+///* 12686 */             for (BoHostDevice boHostDevice : lists) {
+///* 12687 */               map = new HashMap();
+///* 12688 */               map.put("deviceType", boHostDevice.getDeviceType().toString());
+///* 12689 */               map.put("deviceAddress", boHostDevice.getDeviceAddress().toString());
+///* 12690 */               map.put("deviceNum", boHostDevice.getDeviceNum().toString());
+///* 12691 */               String validationCodes = boHostDevice.getValidationCode().toString();
+///*       */               String validationCodess;
+//
+///* 12693 */               if (validationCodes == null)
+///* 12694 */                 validationCodess = "";
+///*       */               else {
+///* 12696 */                 validationCodess = boHostDevice.getValidationCode().toString();
+///*       */               }
+///* 12698 */               System.err.println("摄像头" + boHostDevice.toString());
+///* 12699 */               map.put("validationCode", validationCodess);
+///* 12700 */               map.put("userCode", boHostDevice.getBoUsers().getUserCode());//没有逗号的情况
+///* 12701 */               String nickName2 = boHostDevice.getNickName();
+///*       */               String nickNames;
+//
+///* 12703 */               if (nickName2 == null)
+///* 12704 */                 nickNames = "";
+///*       */               else {
+///* 12706 */                 nickNames = boHostDevice.getNickName();
+///*       */               }
+///* 12708 */               map.put("nickName", nickNames);
+//						  logger.info("nickName>>"+nickNames);//设备名称
+///* 12709 */               map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
+///* 12710 */               map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
+//						  logger.info("roomName>>"+boHostDevice.getBoRoom().getRoomName().toString());//房间名称
+///*       */ 
+///* 12712 */               map.put("icon", boHostDevice.getIco());
+///* 12713 */               voList.add(map);
+///*       */             }
+///*       */ 
+///* 12716 */             if (by.size() <= 0)
+///*       */             {
+///* 12718 */               this.requestJson.setMessage("没有");
+///* 12719 */               this.requestJson.setSuccess(true);
+///*       */             }
+///*       */             else {
+///* 12722 */               List<BoHostDevice> list = this.boHostDeviceService.getListByUserCode(userCode2[0].trim().toString(), this.fid1);
+///*       */ 
+///* 12724 */               for (BoHostDevice boHostDevice : list) {
+///* 12725 */                 map = new HashMap();
+//						    //new 2018-3-1
+//							String deviceName="";
+//							String roomName=boHostDevice.getBoRoom().getRoomName().toString();
+//							if(boHostDevice.getNickName() !=null) {
+//								deviceName=boHostDevice.getNickName();
+//							}
+////							logger.info("隐藏客厅>>>"+!roomName.equals("客厅"));
+////							if(!roomName.equals("客厅")) {//客厅 没被赋予权限  被隐藏了
+////								if(!deviceName.equals("灯光433")) {  //灯光433 没赋予权限就无法显示了                        	
+//		/* 12726 */                 map.put("deviceCode", boHostDevice.getBoDevice().getDeviceCode());
+//		/* 12727 */                 map.put("deviceType", boHostDevice.getDeviceType().toString());
+//		/* 12728 */                 map.put("deviceAddress", boHostDevice.getDeviceAddress().toString());
+//		/* 12729 */                 map.put("deviceNum", boHostDevice.getDeviceNum().toString());
+//		/* 12730 */                 map.put("userCode", boHostDevice.getBoUsers().getUserCode());//userCode没有逗号的情况
+//		/* 12731 */                 String nickName2 = boHostDevice.getNickName();
+//		/*       */                 String nickNames;
+//		
+//		/* 12733 */                 if (nickName2 == null)
+//			/* 12734 */                   nickNames = "";
+//		/*       */                 else {
+//			/* 12736 */                   nickNames = boHostDevice.getNickName();
+//		/*       */                 }
+//		/* 12738 */                 map.put("nickName", nickNames);
+//									logger.info("nickName 01>>"+nickNames);//设备名称
+//		/* 12739 */                 map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
+//		/* 12740 */                 map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
+//									logger.info("roomName 01>>"+boHostDevice.getBoRoom().getRoomName().toString());//房间名称
+//		/* 12741 */                 map.put("icon", boHostDevice.getIco());
+//		/* 12742 */                 voList.add(map);
+////								}
+//								
+////							}
+//                            //前面没有 /* 行数 */的是新添加的
+///*       */               }
+///*       */             }
+///* 12745 */             this.requestJson.setData(voList);
+///*       */           } else {
+///* 12747 */             this.requestJson.setMessage("超时了");
+///* 12748 */             this.requestJson.setSuccess(false);
+///*       */           }
+///*       */         } else {
+///* 12751 */           this.requestJson.setMessage("超时了");
+///* 12752 */           this.requestJson.setSuccess(false);
+///*       */         }
+///*       */ 
+///*       */       }
+///*       */       else
+///*       */       {
+///* 12760 */         System.err.println("验证不通过");
+///* 12761 */         this.requestJson.setMessage("验证不通过");
+///* 12762 */         this.requestJson.setSuccess(false);
+///*       */       }
+///*       */     } else {
+///* 12765 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "修改主机昵称");
+///* 12766 */       if (ral.booleanValue()) {
+///* 12767 */         System.err.println("验证通过");
+///* 12768 */         Long accessToken = Long.valueOf(header);
+///* 12769 */         BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode);
+///* 12770 */         if (boUsers == null) {
+///* 12771 */           this.requestJson.setMessage("Invalid_User");
+///* 12772 */           this.requestJson.setSuccess(true);
+///*       */         }
+///* 12774 */         else if (header4.equals(boUsers.getAccessToken())) {
+///* 12775 */           if (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue()) {
+///* 12776 */             List by = this.boUserDevicesServicess.getBy(userCode);
+///* 12777 */             List<BoHostDevice> lists = this.boHostDeviceService.getListByUserCodes(userCode, "commonsxt", 
+///* 12778 */               this.fid1);
+///* 12779 */             voList = new ArrayList();
+///*       */             Map map;
+///* 12780 */             for (BoHostDevice boHostDevice : lists) {
+///* 12781 */               map = new HashMap();
+///* 12782 */               map.put("deviceType", boHostDevice.getDeviceType().toString());
+///* 12783 */               map.put("deviceAddress", boHostDevice.getDeviceAddress().toString());
+///* 12784 */               map.put("deviceNum", boHostDevice.getDeviceNum().toString());
+///* 12785 */               String validationCodes = boHostDevice.getValidationCode().toString();
+///*       */               String validationCodess;
+//
+///* 12787 */               if (validationCodes == null)
+///* 12788 */                 validationCodess = "";
+///*       */               else {
+///* 12790 */                 validationCodess = boHostDevice.getValidationCode().toString();
+///*       */               }
+///* 12792 */               System.err.println("摄像头" + boHostDevice.toString());
+///* 12793 */               map.put("validationCode", validationCodess);
+///* 12794 */               map.put("userCode", boHostDevice.getBoUsers().getUserCode());
+///* 12795 */               String nickName2 = boHostDevice.getNickName();
+///*       */               String nickNames;
+//
+///* 12797 */               if (nickName2 == null)
+///* 12798 */                 nickNames = "";
+///*       */               else {
+///* 12800 */                 nickNames = boHostDevice.getNickName();
+///*       */               }
+///* 12802 */               map.put("nickName", nickNames);
+///* 12803 */               map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
+///* 12804 */               map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
+///*       */ 
+///* 12806 */               map.put("icon", boHostDevice.getIco());
+///* 12807 */               voList.add(map);
+///*       */             }
+///*       */ 
+///* 12810 */             if (by.size() <= 0) {
+///* 12811 */               this.requestJson.setData(maps);
+///* 12812 */               this.requestJson.setMessage("没有");
+///* 12813 */               this.requestJson.setSuccess(true);
+///*       */             }
+///*       */             else {
+///* 12816 */               List<BoHostDevice> list = this.boHostDeviceService.getListByUserCode(userCode, this.fid1);
+///*       */ 
+///* 12818 */               for (BoHostDevice boHostDevice : list) {
+///* 12819 */                 map = new HashMap();
+///* 12820 */                 ((Map)map).put("deviceCode", boHostDevice.getBoDevice().getDeviceCode());
+///* 12821 */                 ((Map)map).put("deviceType", boHostDevice.getDeviceType().toString());
+///* 12822 */                 ((Map)map).put("deviceAddress", boHostDevice.getDeviceAddress().toString());
+///* 12823 */                 ((Map)map).put("deviceNum", boHostDevice.getDeviceNum().toString());
+///* 12824 */                 ((Map)map).put("userCode", boHostDevice.getBoUsers().getUserCode());
+///* 12825 */                 String nickName2 = boHostDevice.getNickName();
+///*       */                 String nickNames;
+//
+///* 12827 */                 if (nickName2 == null)
+///* 12828 */                   nickNames = "";
+///*       */                 else {
+///* 12830 */                   nickNames = boHostDevice.getNickName();
+///*       */                 }
+///* 12832 */                 ((Map)map).put("nickName", nickNames);
+///* 12833 */                 ((Map)map).put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
+///* 12834 */                 ((Map)map).put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
+///* 12835 */                 ((Map)map).put("icon", boHostDevice.getIco());
+///* 12836 */                 voList.add(map);
+///*       */               }
+///*       */             }
+///* 12839 */             this.requestJson.setData(voList);
+///*       */           } else {
+///* 12841 */             this.requestJson.setData(maps);
+///* 12842 */             this.requestJson.setMessage("超时了");
+///* 12843 */             this.requestJson.setSuccess(false);
+///*       */           }
+///*       */         } else {
+///* 12846 */           this.requestJson.setData(maps);
+///* 12847 */           this.requestJson.setMessage("超时了");
+///* 12848 */           this.requestJson.setSuccess(false);
+///*       */         }
+///*       */ 
+///*       */       }
+///*       */       else
+///*       */       {
+///* 12856 */         System.err.println("验证不通过");
+///* 12857 */         this.requestJson.setMessage("验证不通过");
+///* 12858 */         this.requestJson.setSuccess(false);
+///*       */       }
+///*       */     }
+///* 12861 */     return "success";
+///*       */   }
 /*       */ 
 /*       */   @Action(value="classifyqueryequipment", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String classifyQueryeQuipment()
@@ -12991,12 +13777,18 @@
 /* 12663 */     String header3 = request.getHeader("sign");
 /* 12664 */     String header4 = request.getHeader("access_token");
 /* 12665 */     String userCode = request.getHeader("userCode");
+				logger.info("classifyqueryequipment:"+userCode);
 /*       */     List voList;
 /* 12666 */     if (userCode.contains(",")) {
 /* 12667 */       String[] userCode2 = userCode.split(",");
 				  logger.info("userCode2>>"+userCode);
-/* 12668 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
-/* 12669 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
+				  List<BoRoom> list1 = this.boRoomService.getAllListByUserCode(userCode2[0].trim().toString());//参数：授权者userCode
+				  List<BoFloor> list2 = this.boFloorService.getAllListByUserCode(userCode2[0].trim().toString());//参数：授权者userCode
+/* 12668 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());//用户：授权者
+/* 12669 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());//用户：被授权者
+				  logger.info("phone.userID =="+phone.getUserId());
+				  String userCode1=phone.getUserCode();//3-19
+				  String accountOperationType=phone.getAccountOperationType();//3-19
 /* 12670 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "已分类房间设备");
 /* 12671 */       if (ral.booleanValue()) {
 /* 12672 */         System.err.println("验证通过");
@@ -13009,90 +13801,145 @@
 /*       */         }
 /* 12680 */         else if (header4.equals(phone.getAccessToken())) {
 /* 12681 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
-/* 12682 */             List by = this.boUserDevicesServicess.getBy(userCode2[0].trim().toString());
+/* 12682 */             List by = this.boUserDevicesServicess.getBy(userCode2[0].trim().toString());//用户：授权者
+						List by1=this.boUserDevicesServicess.getBy(userCode1);//3-19
+//						List<BoRoom> list = this.boRoomService.getAllListByUserCode(userCode2[0].trim().toString());//3-27
 /* 12683 */             List<BoHostDevice> lists = this.boHostDeviceService.getListByUserCodes(userCode2[0].trim().toString(), "commonsxt", 
-/* 12684 */               this.fid1);
+/* 12684 */               this.fid1);//设备：
+//						logger.info("设备 lists="+lists);
 /* 12685 */             voList = new ArrayList();
 /*       */             Map map;
-/* 12686 */             for (BoHostDevice boHostDevice : lists) {
-/* 12687 */               map = new HashMap();
-/* 12688 */               map.put("deviceType", boHostDevice.getDeviceType().toString());
-/* 12689 */               map.put("deviceAddress", boHostDevice.getDeviceAddress().toString());
-/* 12690 */               map.put("deviceNum", boHostDevice.getDeviceNum().toString());
-/* 12691 */               String validationCodes = boHostDevice.getValidationCode().toString();
-/*       */               String validationCodess;
-
-/* 12693 */               if (validationCodes == null)
-/* 12694 */                 validationCodess = "";
-/*       */               else {
-/* 12696 */                 validationCodess = boHostDevice.getValidationCode().toString();
-/*       */               }
-/* 12698 */               System.err.println("摄像头" + boHostDevice.toString());
-/* 12699 */               map.put("validationCode", validationCodess);
-/* 12700 */               map.put("userCode", boHostDevice.getBoUsers().getUserCode());//没有逗号的情况
-/* 12701 */               String nickName2 = boHostDevice.getNickName();
-/*       */               String nickNames;
-
-/* 12703 */               if (nickName2 == null)
-/* 12704 */                 nickNames = "";
-/*       */               else {
-/* 12706 */                 nickNames = boHostDevice.getNickName();
-/*       */               }
-/* 12708 */               map.put("nickName", nickNames);
-						  logger.info("nickName>>"+nickNames);//设备名称
-/* 12709 */               map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
-/* 12710 */               map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
-						  logger.info("roomName>>"+boHostDevice.getBoRoom().getRoomName().toString());//房间名称
-/*       */ 
-/* 12712 */               map.put("icon", boHostDevice.getIco());
-/* 12713 */               voList.add(map);
-/*       */             }
-/*       */ 
-/* 12716 */             if (by.size() <= 0)
-/*       */             {
-/* 12718 */               this.requestJson.setMessage("没有");
-/* 12719 */               this.requestJson.setSuccess(true);
-/*       */             }
-/*       */             else {
-/* 12722 */               List<BoHostDevice> list = this.boHostDeviceService.getListByUserCode(userCode2[0].trim().toString(), this.fid1);
-/*       */ 
-/* 12724 */               for (BoHostDevice boHostDevice : list) {
-/* 12725 */                 map = new HashMap();
-						    //new 2018-3-1
-							String deviceName="";
-							String roomName=boHostDevice.getBoRoom().getRoomName().toString();
-							if(boHostDevice.getNickName() !=null) {
-								deviceName=boHostDevice.getNickName();
+						if(accountOperationType.equals("2")) {//一般用户
+							logger.info("一般用户 -classifyqueryequipment");
+							map = new HashMap();
+							List<BoRoom> borooms=this.boRoomService.getAllListByUserCode(userCode2[0].trim().toString());//3-28
+							for(BoRoom boroom:borooms) {
+								String rmCode=boroom.getRoomCode();
+								List<BoHostDevice> bhdevices=this.boHostDeviceService.getroomCode(userCode1, rmCode);//查找房间下是否存在设备
+								logger.info("bhdevices="+bhdevices);
+								if(bhdevices.size()>0) {//房间下存在设备时，执行相应操作
+									for (BoHostDevice boHostDevice : bhdevices) {
+										map = new HashMap();
+										String deviceName="";
+										String roomName=boHostDevice.getBoRoom().getRoomName().toString();
+										if(boHostDevice.getNickName() !=null) {
+											deviceName=boHostDevice.getNickName();
+										}                    	
+			/* 12726 */                 map.put("deviceCode", boHostDevice.getBoDevice().getDeviceCode());
+			/* 12727 */                 map.put("deviceType", boHostDevice.getDeviceType().toString());
+			/* 12728 */                 map.put("deviceAddress", boHostDevice.getDeviceAddress().toString());
+			/* 12729 */                 map.put("deviceNum", boHostDevice.getDeviceNum().toString());
+			/* 12730 */                 map.put("userCode", boHostDevice.getBoUsers().getUserCode());//userCode没有逗号的情况
+										String validationCodes=boHostDevice.getValidationCode();
+										String validationCodess;
+										if (validationCodes == null)
+				/* 12694 */                 validationCodess = "";
+			/*       */               	else {
+				/* 12696 */                 validationCodess = boHostDevice.getValidationCode().toString();
+			/*       */               	}
+										map.put("validationCode", validationCodess);
+			/* 12731 */                 String nickName2 = boHostDevice.getNickName();
+										logger.info("nickName2>>"+boHostDevice.getNickName());
+			/*       */                 String nickNames;
+			/* 12733 */                 if (nickName2 == null)
+				/* 12734 */                   nickNames = "";
+			/*       */                 else {
+				/* 12736 */                   nickNames = boHostDevice.getNickName();
+			/*       */                 }
+			/* 12738 */                 map.put("nickName", nickNames);
+										logger.info("nickName 01>>"+nickNames);//设备名称
+			/* 12739 */                 map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
+			/* 12740 */                 map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
+										logger.info("roomName 01>>"+boHostDevice.getBoRoom().getRoomName().toString());//房间名称
+										map.put("icon", boHostDevice.getIco());
+										Boolean isAuth=boHostDevice.getIsAuthorized();
+										if(isAuth) {//楼层的房间下有设备则存入楼层信息
+											voList.add(map);
+										}
+									}
+								}
 							}
-//							logger.info("隐藏客厅>>>"+!roomName.equals("客厅"));
-//							if(!roomName.equals("客厅")) {//客厅 没被赋予权限  被隐藏了
-//								if(!deviceName.equals("灯光433")) {  //灯光433 没赋予权限就无法显示了                        	
-		/* 12726 */                 map.put("deviceCode", boHostDevice.getBoDevice().getDeviceCode());
-		/* 12727 */                 map.put("deviceType", boHostDevice.getDeviceType().toString());
-		/* 12728 */                 map.put("deviceAddress", boHostDevice.getDeviceAddress().toString());
-		/* 12729 */                 map.put("deviceNum", boHostDevice.getDeviceNum().toString());
-		/* 12730 */                 map.put("userCode", boHostDevice.getBoUsers().getUserCode());//userCode没有逗号的情况
-		/* 12731 */                 String nickName2 = boHostDevice.getNickName();
-		/*       */                 String nickNames;
+							
+						}else {//管理员或授权者
+							logger.info("管理员或授权者  classifyqueryequipment");
+	/* 12686 */             for (BoHostDevice boHostDevice : lists) {
+		/* 12687 */               map = new HashMap();
+		/* 12688 */               map.put("deviceType", boHostDevice.getDeviceType().toString());
+		/* 12689 */               map.put("deviceAddress", boHostDevice.getDeviceAddress().toString());
+		/* 12690 */               map.put("deviceNum", boHostDevice.getDeviceNum().toString());
+		/* 12691 */               String validationCodes = boHostDevice.getValidationCode();
+		/*       */               String validationCodess;
 		
-		/* 12733 */                 if (nickName2 == null)
-			/* 12734 */                   nickNames = "";
-		/*       */                 else {
-			/* 12736 */                   nickNames = boHostDevice.getNickName();
-		/*       */                 }
-		/* 12738 */                 map.put("nickName", nickNames);
-									logger.info("nickName 01>>"+nickNames);//设备名称
-		/* 12739 */                 map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
-		/* 12740 */                 map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
-									logger.info("roomName 01>>"+boHostDevice.getBoRoom().getRoomName().toString());//房间名称
-		/* 12741 */                 map.put("icon", boHostDevice.getIco());
-		/* 12742 */                 voList.add(map);
-//								}
-								
-//							}
-                            //前面没有 /* 行数 */的是新添加的
-/*       */               }
-/*       */             }
+		/* 12693 */               if (validationCodes == null)
+			/* 12694 */                 validationCodess = "";
+		/*       */               else {
+			/* 12696 */                 validationCodess = boHostDevice.getValidationCode().toString();
+		/*       */               }
+		/* 12698 */               System.err.println("摄像头" + boHostDevice.toString());
+		/* 12699 */               map.put("validationCode", validationCodess);
+		/* 12700 */               map.put("userCode", boHostDevice.getBoUsers().getUserCode());//没有逗号的情况
+		/* 12701 */               String nickName2 = boHostDevice.getNickName();
+		/*       */               String nickNames;
+		
+		/* 12703 */               if (nickName2 == null)
+			/* 12704 */                 nickNames = "";
+		/*       */               else {
+			/* 12706 */                 nickNames = boHostDevice.getNickName();
+		/*       */               }
+		/* 12708 */               map.put("nickName", nickNames);
+								  logger.info("nickName>>"+nickNames);//设备名称
+		/* 12709 */               map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
+		/* 12710 */               map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
+								  logger.info("roomName>>"+boHostDevice.getBoRoom().getRoomName().toString());//房间名称
+		/*       */ 
+		/* 12712 */               map.put("icon", boHostDevice.getIco());
+		/* 12713 */               voList.add(map);
+	/*       */             }
+	
+	/* 12716 */             if (by.size() <= 0)
+	/*       */             {
+		/* 12718 */               this.requestJson.setMessage("没有");
+		/* 12719 */               this.requestJson.setSuccess(true);
+	/*       */             }
+	/*       */             else {
+		/* 12722 */               List<BoHostDevice> list = this.boHostDeviceService.getListByUserCode(userCode2[0].trim().toString(), this.fid1);
+		/* 12724 */               for (BoHostDevice boHostDevice : list) {
+			/* 12725 */                 map = new HashMap();
+										String deviceName="";
+										String roomName=boHostDevice.getBoRoom().getRoomName().toString();
+										if(boHostDevice.getNickName() !=null) {
+											deviceName=boHostDevice.getNickName();
+										}                    	
+			/* 12726 */                 map.put("deviceCode", boHostDevice.getBoDevice().getDeviceCode());
+//										logger.info("deviceCode>>"+boHostDevice.getBoDevice().getDeviceCode());
+			/* 12727 */                 map.put("deviceType", boHostDevice.getDeviceType().toString());
+//										logger.info("deviceType>>"+boHostDevice.getDeviceType().toString());
+			/* 12728 */                 map.put("deviceAddress", boHostDevice.getDeviceAddress().toString());
+//										logger.info("deviceAddress>>"+boHostDevice.getDeviceAddress().toString());
+			/* 12729 */                 map.put("deviceNum", boHostDevice.getDeviceNum().toString());
+//										logger.info("deviceNum>>"+boHostDevice.getDeviceNum().toString());
+			/* 12730 */                 map.put("userCode", boHostDevice.getBoUsers().getUserCode());//userCode没有逗号的情况
+//										logger.info("userCode>>"+boHostDevice.getBoUsers().getUserCode());
+			/* 12731 */                 String nickName2 = boHostDevice.getNickName();
+										logger.info("nickName2>>"+boHostDevice.getNickName());
+			/*       */                 String nickNames;
+			
+			/* 12733 */                 if (nickName2 == null)
+				/* 12734 */                   nickNames = "";
+			/*       */                 else {
+				/* 12736 */                   nickNames = boHostDevice.getNickName();
+			/*       */                 }
+			/* 12738 */                 map.put("nickName", nickNames);
+										logger.info("nickName 01>>"+nickNames);//设备名称
+			/* 12739 */                 map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
+			/* 12740 */                 map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
+										logger.info("roomName 01>>"+boHostDevice.getBoRoom().getRoomName().toString());//房间名称
+			/* 12741 */                 map.put("icon", boHostDevice.getIco());
+			/* 12742 */                 voList.add(map);
+		/*       */               }
+	/*       */             }
+						}
+//						logger.info("voList:::"+voList);
 /* 12745 */             this.requestJson.setData(voList);
 /*       */           } else {
 /* 12747 */             this.requestJson.setMessage("超时了");
@@ -13110,86 +13957,146 @@
 /* 12761 */         this.requestJson.setMessage("验证不通过");
 /* 12762 */         this.requestJson.setSuccess(false);
 /*       */       }
-/*       */     } else {
+/*       */     } else {//没有逗号的情况：userCode是被授权者的AuthorizationUserCode
 /* 12765 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "修改主机昵称");
 /* 12766 */       if (ral.booleanValue()) {
 /* 12767 */         System.err.println("验证通过");
 /* 12768 */         Long accessToken = Long.valueOf(header);
 /* 12769 */         BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode);
+					BoUsers phone = this.boUserServicess.findByUserPhone(this.userPhone);//这个参数是没有传过来的，暂时用这个来获取被授权者
+					String userCode1=phone.getUserCode();
 /* 12770 */         if (boUsers == null) {
 /* 12771 */           this.requestJson.setMessage("Invalid_User");
 /* 12772 */           this.requestJson.setSuccess(true);
 /*       */         }
 /* 12774 */         else if (header4.equals(boUsers.getAccessToken())) {
-/* 12775 */           if (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue()) {
-/* 12776 */             List by = this.boUserDevicesServicess.getBy(userCode);
-/* 12777 */             List<BoHostDevice> lists = this.boHostDeviceService.getListByUserCodes(userCode, "commonsxt", 
-/* 12778 */               this.fid1);
-/* 12779 */             voList = new ArrayList();
-/*       */             Map map;
-/* 12780 */             for (BoHostDevice boHostDevice : lists) {
-/* 12781 */               map = new HashMap();
-/* 12782 */               map.put("deviceType", boHostDevice.getDeviceType().toString());
-/* 12783 */               map.put("deviceAddress", boHostDevice.getDeviceAddress().toString());
-/* 12784 */               map.put("deviceNum", boHostDevice.getDeviceNum().toString());
-/* 12785 */               String validationCodes = boHostDevice.getValidationCode().toString();
-/*       */               String validationCodess;
-
-/* 12787 */               if (validationCodes == null)
-/* 12788 */                 validationCodess = "";
-/*       */               else {
-/* 12790 */                 validationCodess = boHostDevice.getValidationCode().toString();
-/*       */               }
-/* 12792 */               System.err.println("摄像头" + boHostDevice.toString());
-/* 12793 */               map.put("validationCode", validationCodess);
-/* 12794 */               map.put("userCode", boHostDevice.getBoUsers().getUserCode());
-/* 12795 */               String nickName2 = boHostDevice.getNickName();
-/*       */               String nickNames;
-
-/* 12797 */               if (nickName2 == null)
-/* 12798 */                 nickNames = "";
-/*       */               else {
-/* 12800 */                 nickNames = boHostDevice.getNickName();
-/*       */               }
-/* 12802 */               map.put("nickName", nickNames);
-/* 12803 */               map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
-/* 12804 */               map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
-/*       */ 
-/* 12806 */               map.put("icon", boHostDevice.getIco());
-/* 12807 */               voList.add(map);
-/*       */             }
-/*       */ 
-/* 12810 */             if (by.size() <= 0) {
-/* 12811 */               this.requestJson.setData(maps);
-/* 12812 */               this.requestJson.setMessage("没有");
-/* 12813 */               this.requestJson.setSuccess(true);
-/*       */             }
-/*       */             else {
-/* 12816 */               List<BoHostDevice> list = this.boHostDeviceService.getListByUserCode(userCode, this.fid1);
-/*       */ 
-/* 12818 */               for (BoHostDevice boHostDevice : list) {
-/* 12819 */                 map = new HashMap();
-/* 12820 */                 ((Map)map).put("deviceCode", boHostDevice.getBoDevice().getDeviceCode());
-/* 12821 */                 ((Map)map).put("deviceType", boHostDevice.getDeviceType().toString());
-/* 12822 */                 ((Map)map).put("deviceAddress", boHostDevice.getDeviceAddress().toString());
-/* 12823 */                 ((Map)map).put("deviceNum", boHostDevice.getDeviceNum().toString());
-/* 12824 */                 ((Map)map).put("userCode", boHostDevice.getBoUsers().getUserCode());
-/* 12825 */                 String nickName2 = boHostDevice.getNickName();
-/*       */                 String nickNames;
-
-/* 12827 */                 if (nickName2 == null)
-/* 12828 */                   nickNames = "";
-/*       */                 else {
-/* 12830 */                   nickNames = boHostDevice.getNickName();
-/*       */                 }
-/* 12832 */                 ((Map)map).put("nickName", nickNames);
-/* 12833 */                 ((Map)map).put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
-/* 12834 */                 ((Map)map).put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
-/* 12835 */                 ((Map)map).put("icon", boHostDevice.getIco());
-/* 12836 */                 voList.add(map);
-/*       */               }
-/*       */             }
-/* 12839 */             this.requestJson.setData(voList);
+						if (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue()) {
+	/* 12682 */             List by = this.boUserDevicesServicess.getBy(userCode);//用户：授权者
+							List by1=this.boUserDevicesServicess.getBy(userCode1);//3-19
+	/* 12683 */             List<BoHostDevice> lists = this.boHostDeviceService.getListByUserCodes(userCode.trim().toString(), "commonsxt", 
+	/* 12684 */               this.fid1);//设备：
+	//								logger.info("设备 lists="+lists);
+	/* 12685 */             voList = new ArrayList();
+	/*       */             Map map;
+							if(accountOperationType.equals("2")) {//一般用户
+								logger.info("一般用户 -classifyqueryequipment");
+								map = new HashMap();
+								List<BoHostDevice> bhdevices=this.boHostDeviceService.getListByUserCode(userCode1,this.fid1);//找到设备，设备isAuthorized为0的不传给前台
+								logger.info("bhdevices="+bhdevices);
+								if(bhdevices.size()!=0) {
+									for (BoHostDevice boHostDevice : bhdevices) {
+			/* 12725 */                 map = new HashMap();
+										String deviceName="";
+										String roomName=boHostDevice.getBoRoom().getRoomName().toString();
+										if(boHostDevice.getNickName() !=null) {
+											deviceName=boHostDevice.getNickName();
+										}                    	
+			/* 12726 */                 map.put("deviceCode", boHostDevice.getBoDevice().getDeviceCode());
+			/* 12727 */                 map.put("deviceType", boHostDevice.getDeviceType().toString());
+			/* 12728 */                 map.put("deviceAddress", boHostDevice.getDeviceAddress().toString());
+			/* 12729 */                 map.put("deviceNum", boHostDevice.getDeviceNum().toString());
+			/* 12730 */                 map.put("userCode", boHostDevice.getBoUsers().getUserCode());//userCode没有逗号的情况
+			/* 12731 */                 String nickName2 = boHostDevice.getNickName();
+										logger.info("nickName2>>"+boHostDevice.getNickName());
+			/*       */                 String nickNames;
+			/* 12733 */                 if (nickName2 == null)
+				/* 12734 */                   nickNames = "";
+			/*       */                 else {
+				/* 12736 */                   nickNames = boHostDevice.getNickName();
+			/*       */                 }
+			/* 12738 */                 map.put("nickName", nickNames);
+										logger.info("nickName 01>>"+nickNames);//设备名称
+			/* 12739 */                 map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
+			/* 12740 */                 map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
+										logger.info("roomName 01>>"+boHostDevice.getBoRoom().getRoomName().toString());//房间名称
+			/* 12741 */                 map.put("icon", boHostDevice.getIco());
+										Boolean isAuth=boHostDevice.getIsAuthorized();
+										if(isAuth) {//楼层的房间下有设备则存入楼层信息
+											voList.add(map);
+										}
+		/*       */                 }
+								}
+							}else {//管理员或授权者
+								logger.info("管理员或授权者  classifyqueryequipment");
+		/* 12686 */             for (BoHostDevice boHostDevice : lists) {
+			/* 12687 */               map = new HashMap();
+			/* 12688 */               map.put("deviceType", boHostDevice.getDeviceType().toString());
+			/* 12689 */               map.put("deviceAddress", boHostDevice.getDeviceAddress().toString());
+			/* 12690 */               map.put("deviceNum", boHostDevice.getDeviceNum().toString());
+			/* 12691 */               String validationCodes = boHostDevice.getValidationCode().toString();
+			/*       */               String validationCodess;
+			
+			/* 12693 */               if (validationCodes == null)
+				/* 12694 */                 validationCodess = "";
+			/*       */               else {
+				/* 12696 */                 validationCodess = boHostDevice.getValidationCode().toString();
+			/*       */               }
+			/* 12698 */               System.err.println("摄像头" + boHostDevice.toString());
+			/* 12699 */               map.put("validationCode", validationCodess);
+			/* 12700 */               map.put("userCode", boHostDevice.getBoUsers().getUserCode());//没有逗号的情况
+			/* 12701 */               String nickName2 = boHostDevice.getNickName();
+			/*       */               String nickNames;
+			
+			/* 12703 */               if (nickName2 == null)
+				/* 12704 */                 nickNames = "";
+			/*       */               else {
+				/* 12706 */                 nickNames = boHostDevice.getNickName();
+			/*       */               }
+			/* 12708 */               map.put("nickName", nickNames);
+									  logger.info("nickName>>"+nickNames);//设备名称
+			/* 12709 */               map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
+			/* 12710 */               map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
+									  logger.info("roomName>>"+boHostDevice.getBoRoom().getRoomName().toString());//房间名称
+			/*       */ 
+			/* 12712 */               map.put("icon", boHostDevice.getIco());
+			/* 12713 */               voList.add(map);
+		/*       */             }
+		
+		/* 12716 */             if (by.size() <= 0)
+		/*       */             {
+			/* 12718 */               this.requestJson.setMessage("没有");
+			/* 12719 */               this.requestJson.setSuccess(true);
+		/*       */             }
+		/*       */             else {
+			/* 12722 */               List<BoHostDevice> list = this.boHostDeviceService.getListByUserCode(userCode.trim().toString(), this.fid1);
+			/* 12724 */               for (BoHostDevice boHostDevice : list) {
+				/* 12725 */                 map = new HashMap();
+											String deviceName="";
+											String roomName=boHostDevice.getBoRoom().getRoomName().toString();
+											if(boHostDevice.getNickName() !=null) {
+												deviceName=boHostDevice.getNickName();
+											}                    	
+				/* 12726 */                 map.put("deviceCode", boHostDevice.getBoDevice().getDeviceCode());
+	//												logger.info("deviceCode>>"+boHostDevice.getBoDevice().getDeviceCode());
+				/* 12727 */                 map.put("deviceType", boHostDevice.getDeviceType().toString());
+	//												logger.info("deviceType>>"+boHostDevice.getDeviceType().toString());
+				/* 12728 */                 map.put("deviceAddress", boHostDevice.getDeviceAddress().toString());
+	//												logger.info("deviceAddress>>"+boHostDevice.getDeviceAddress().toString());
+				/* 12729 */                 map.put("deviceNum", boHostDevice.getDeviceNum().toString());
+	//												logger.info("deviceNum>>"+boHostDevice.getDeviceNum().toString());
+				/* 12730 */                 map.put("userCode", boHostDevice.getBoUsers().getUserCode());//userCode没有逗号的情况
+	//												logger.info("userCode>>"+boHostDevice.getBoUsers().getUserCode());
+				/* 12731 */                 String nickName2 = boHostDevice.getNickName();
+											logger.info("nickName2>>"+boHostDevice.getNickName());
+				/*       */                 String nickNames;
+				
+				/* 12733 */                 if (nickName2 == null)
+					/* 12734 */                   nickNames = "";
+				/*       */                 else {
+					/* 12736 */                   nickNames = boHostDevice.getNickName();
+				/*       */                 }
+				/* 12738 */                 map.put("nickName", nickNames);
+											logger.info("nickName 01>>"+nickNames);//设备名称
+				/* 12739 */                 map.put("roomCode", boHostDevice.getBoRoom().getRoomCode().toString());
+				/* 12740 */                 map.put("roomName", boHostDevice.getBoRoom().getRoomName().toString());
+											logger.info("roomName 01>>"+boHostDevice.getBoRoom().getRoomName().toString());//房间名称
+				/* 12741 */                 map.put("icon", boHostDevice.getIco());
+				/* 12742 */                 voList.add(map);
+			/*       */               }
+		/*       */             }
+							}
+//							logger.info("voList:::"+voList);
+	/* 12745 */             this.requestJson.setData(voList);
 /*       */           } else {
 /* 12841 */             this.requestJson.setData(maps);
 /* 12842 */             this.requestJson.setMessage("超时了");
@@ -13534,7 +14441,7 @@
 /*       */   @Action(value="commad", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String commad()
 /*       */   {//主机在线、离线
-	            System.out.println("····进入commad方法····");
+	            logger.info("····进入commad方法····");
 /* 13223 */     this.requestJson = new RequestJson();
 /* 13224 */     HttpServletRequest request = ServletActionContext.getRequest();
 /* 13225 */     Map map = new HashMap();
@@ -14034,6 +14941,7 @@
 /* 13643 */               String substring = deviceAddress2.substring(0, deviceAddress2.length() - 1);
 /* 13644 */               String substring2 = deviceAddress2.substring(deviceAddress2.length() - 1, deviceAddress2.length());
 /* 13645 */               final String string = commands.toString();
+						  logger.info("commad14944 string:"+string);
 /*       */ 
 /* 13647 */               if (substring2.equals("1"))
 /* 13648 */                 this.add = (substring + 1);
@@ -14355,9 +15263,9 @@
 						}
 						List<BoUserDevices> boUs=this.boUserDevicesServicess.getListByDeviceCode(deviceCode);
 						String nickName=boUs.get(0).getNickName();
-						logger.info("nickName 01=="+nickName);
+//						logger.info("nickName 01=="+nickName);
 						String msg=nickName+","+host_status;
-						logger.info("msg 01=="+msg);
+//						logger.info("msg 01=="+msg);
 						this.requestJson.setMessage(msg);
 						//END
 /*       */           }
@@ -14637,6 +15545,7 @@
 /* 14247 */                     boHostDevice.setDeviceClassify(this.fid);
 /* 14248 */                     boHostDevice.setMntDelete("N");
 /* 14249 */                     boHostDevice.setValidationCode("");
+								boHostDevice.setIsAuthorized(true);//3-19
 /* 14250 */                     this.boHostDeviceService.save(boHostDevice);
 /*       */                   }
 /*       */ 
@@ -14742,6 +15651,7 @@
 /* 14352 */                   boHostDevice.setDeviceClassify(this.fid);
 /* 14353 */                   boHostDevice.setMntDelete("N");
 /* 14354 */                   boHostDevice.setValidationCode("");
+							  boHostDevice.setIsAuthorized(true);//3-19
 /* 14355 */                   this.boHostDeviceService.save(boHostDevice);
 /*       */                 }
 /*       */ 
@@ -15158,7 +16068,6 @@
 /*       */       }
 				
 /*       */     }
-///* 14740 */     label1208: return "success";
 				return "success";
 		
 /*       */   }
@@ -15175,20 +16084,22 @@
 /* 14756 */     String header4 = request.getHeader("access_token");
 /* 14757 */     String userCode = request.getHeader("userCode");//被授权者应该只有部门房间或设备使用权  这里取的应该时AUTHORIZATION_USER_CODE字段，此字段为空的话就是取USER_CODE字段
 /*       */     List list_floor;
-				logger.info("-------getroom-------");
+				logger.info("-------getroom-------"+userCode);
 				Enumeration pNames=request.getParameterNames();
 				while(pNames.hasMoreElements()){
 				    String name=(String)pNames.nextElement();
 				    String value=request.getParameter(name);
 				    logger.info(name + " == " + value);
 				}
-				logger.info("获取房间信息的userCode>>"+userCode);//若是被授权者：授权者userCode,userPhone,被授权者userCode ； 若是授权者：本身userCode,userPhone 有可能不带userPhone
+				logger.info("获取房间信息的userCode>>"+userCode);//若是被授权者：授权者userCode,userPhone ； 若是授权者：本身userCode,userPhone 有可能不带userPhone
 /* 14758 */     if (userCode.contains(",")) {//有逗号的情况----
 /* 14759 */       String[] userCode2 = userCode.split(",");
 //				  logger.info("userCode2[0]>>"+userCode2[0].trim().toString());// 2/28测试被授权的用户的userCode  ==授权者的userCode
-/* 14760 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
+/* 14760 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());//用户：授权者
 //				  logger.info("boUsers>>"+boUsers);// 2/28 打印  授权者的信息（没有授权者才显示自己的用户信息）
-/* 14761 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
+/* 14761 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());//用户：被授权者
+				  String userCode1=phone.getUserCode();//3-19
+				  String accountOperationType=phone.getAccountOperationType();
 /* 14762 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "查找用户的楼层房间列表接口");
 /* 14763 */       if (ral.booleanValue()) {
 /* 14764 */         System.err.println("验证通过");
@@ -15199,56 +16110,95 @@
 /*       */         }
 /* 14770 */         else if (header4.equals(phone.getAccessToken())) {
 /* 14771 */           Long accessToken = Long.valueOf(header);
+                      //BEGIN
 /* 14772 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
-/* 14773 */             List<BoRoom> list = this.boRoomService.getAllListByUserCode(userCode2[0].trim().toString());
-/* 14774 */             List<BoFloor> list2 = this.boFloorService.getAllListByUserCode(userCode2[0].trim().toString());
+/* 14773 */             List<BoRoom> list = this.boRoomService.getAllListByUserCode(userCode2[0].trim().toString());//参数：授权者userCode
+/* 14774 */             List<BoFloor> list2 = this.boFloorService.getAllListByUserCode(userCode2[0].trim().toString());//参数：授权者userCode
+						Map maps = new HashMap();
 /* 14775 */             if ((list.size() <= 0) && (list2.size() <= 0)) {
-/* 14776 */               Map maps = new HashMap();
-/* 14777 */               this.requestJson.setMessage("没有找到");
-/* 14778 */               this.requestJson.setData(maps);
-/* 14779 */               this.requestJson.setSuccess(true);
-/* 14780 */               return "success";
-/*       */             }
+	/* 14777 */              this.requestJson.setMessage("没有找到");
+	/* 14778 */              this.requestJson.setData(maps);
+	/* 14779 */              this.requestJson.setSuccess(true);
+	/* 14780 */              return "success";
+/*       */             }	
 /* 14782 */             List voList = new ArrayList();
 /* 14783 */             List list_room = new ArrayList();
 /* 14784 */             Map map_room = new HashMap();
-/*       */ 
 /* 14786 */             list_floor = new ArrayList();
-/*       */ 
-/* 14788 */             for (BoFloor boFloor : list2) {
-							String floorName=boFloor.getFloorName().toString();
-							logger.info("floorName test>"+floorName);
-	                    	if(!floorName .equals("xxx")) {
-	/* 14789 */               Map map = new HashMap();
-	/* 14791 */               map.put("floorCode", boFloor.getFloorCode().toString());
-//						  System.out.println("floor floorCode:"+boFloor.getFloorCode().toString());
-	/* 14792 */               map.put("floorName", boFloor.getFloorName().toString());
-							  logger.info("floorName :"+boFloor.getFloorName().toString());
-	/* 14793 */               list_floor.add(map);                    		
-	                    	}
-/*       */             }
-/* 14795 */             map_room.put("floorInfo", list_floor);//楼层 信息
-/*       */ 
-/* 14797 */             for (BoRoom boRoom : list) {
-							String roomName=boRoom.getRoomName().toString();
-//							logger.info("不允许存在 客厅>"+!roomName .equals("客厅"));
-//							if(!roomName.equals("客厅")) {
-	/* 14798 */               Map map = new HashMap();
-	/* 14799 */               BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
-	/*       */ 
-	/* 14801 */               map.put("roomCode", boRoom.getRoomCode().toString());
-//						  System.out.println("Room roomCode:"+boRoom.getRoomCode().toString());
-	/* 14802 */               map.put("roomName", boRoom.getRoomName().toString());
-							  logger.info("roomName:"+boRoom.getRoomName().toString());
-	/* 14803 */               map.put("floorCode", boRoom.getFloorCode().toString());
-//						  System.out.println("floorCode:"+boRoom.getFloorCode().toString());
-	/* 14804 */               list_room.add(map);								
-//							}
-/*       */             }
-/*       */ 
+/*       */             //房间下设备没有为1的，隐藏对应楼层、房间；若有 则只隐藏为0的设备
+//						logger.info("是否是授权者："+ (boUsers==phone));
+						if(accountOperationType.equals("2")) {//一般用户
+							logger.info("一般用户");
+							for (BoFloor boFloor : list2)
+							{
+								Map map = new HashMap();
+								map.put("floorCode", boFloor.getFloorCode().toString());
+								map.put("floorName", boFloor.getFloorName().toString());
+								logger.info("floorName>"+floorName);
+								if(list.size()!=0) {
+									label:
+										for(BoRoom boroom:list) {//遍历 一般用户的房间
+											String rmCode=boroom.getRoomCode().toString();
+											logger.info("roomName>"+boroom.getRoomName().toString());
+											List<BoHostDevice> bhdevices=this.boHostDeviceService.getroomCode(userCode1,rmCode);//根据被授权者userCode和roomCode定位被授权者在相应房间下有哪些设备
+											logger.info("bhdevices==="+bhdevices);
+											if(bhdevices.size()!=0) {
+												for(BoHostDevice bhdevice:bhdevices) {
+													Boolean isAuth=bhdevice.getIsAuthorized();
+													if(isAuth) {//楼层的房间下有设备则存入楼层信息
+														list_floor.add(map);	
+														break label;//采用这种方式跳出多个循环
+													}
+												}
+											}
+										}
+								}
+							}
+							
+							for (BoRoom boRoom : list) {
+								Map map = new HashMap();
+								BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
+								map.put("roomCode", boRoom.getRoomCode().toString());
+								map.put("roomName", boRoom.getRoomName().toString());
+								logger.info("roomName>"+boRoom.getRoomName().toString());
+								map.put("floorCode", boRoom.getFloorCode().toString());
+								String rmCode=boRoom.getRoomCode().toString();
+								List<BoHostDevice> bhdevices=this.boHostDeviceService.getroomCode(userCode1,rmCode);
+								if(bhdevices.size()!=0) {
+									for(BoHostDevice bhdevice:bhdevices) {
+										Boolean isAuth=bhdevice.getIsAuthorized();
+										if(isAuth) {//楼层的房间下有设备则存入楼层信息
+											list_room.add(map);
+											break;
+										}
+									}
+								}
+							}
+						}else {//授权者或管理员
+							logger.info("授权者或管理员");
+							for (BoFloor boFloor : list2)
+							{
+								Map map = new HashMap();
+								map.put("floorCode", boFloor.getFloorCode().toString());
+								map.put("floorName", boFloor.getFloorName().toString());
+								list_floor.add(map);
+							}
+							for (BoRoom boRoom : list) {
+								Map map = new HashMap();
+								BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
+								map.put("roomCode", boRoom.getRoomCode().toString());
+								map.put("roomName", boRoom.getRoomName().toString());
+								map.put("floorCode", boRoom.getFloorCode().toString());
+								list_room.add(map);
+							}
+								
+						}
+						map_room.put("floorInfo", list_floor);//楼层 信息
+//						logger.info("floorInfo=="+floorInfo);
 /* 14808 */             map_room.put("roomInfo", list_room);//房间  信息
-/*       */ 
+//						logger.info("roomInfo=="+roomInfo);
 /* 14811 */             voList.add(map_room);
+						//END
 /* 14812 */             this.requestJson.setData(voList);
 /*       */ 
 /* 14814 */             this.requestJson.setSuccess(true);
@@ -15277,66 +16227,160 @@
 /* 14837 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "修改主机昵称");
 /* 14838 */       if (ral.booleanValue()) {
 /* 14839 */         System.err.println("验证通过");
-/* 14840 */         BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode);
+/* 14840 */         BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode);//用户：授权者
+					BoUsers phone = this.boUserServicess.findByUserPhone(this.userPhone);//this.userPhone暂时无法获取，getroom.action没有userPhone这个参数
+					String userCode1=phone.getUserCode();
 /* 14841 */         if (boUsers == null) {
 /* 14842 */           this.requestJson.setData(mapss);
 /* 14843 */           this.requestJson.setMessage("Invalid_User");
 /* 14844 */           this.requestJson.setSuccess(true);
 /*       */         } else {
 /* 14846 */           Long accessToken = Long.valueOf(header);
-/* 14847 */           if (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue()) {
-/* 14848 */             List<BoRoom> list = this.boRoomService.getAllListByUserCode(userCode);
-/* 14849 */             List<BoFloor> list2 = this.boFloorService.getAllListByUserCode(userCode);
-                        logger.info("list2>>>>>>"+list2);
-/* 14850 */             if ((list.size() <= 0) && (list2.size() <= 0)) {
-/* 14851 */               Map maps = new HashMap();
-/* 14852 */               this.requestJson.setMessage("没有找到");
-/* 14853 */               this.requestJson.setData(maps);
-/* 14854 */               this.requestJson.setSuccess(true);
-/* 14855 */               return "success";
-/*       */             }
-/* 14857 */             List voList = new ArrayList();
-/* 14858 */             List list_room = new ArrayList();
-/* 14859 */             Map map_room = new HashMap();
-/*       */ 
-/* 14861 */             list_floor = new ArrayList();
-/*       */ 
-/* 14863 */             for (BoFloor boFloor : list2)
-/*       */             {
-							String floorName=boFloor.getFloorName().toString();
-							logger.info("floorName test01>"+floorName);
-							if(!floorName .equals("xxx")) {
-	/* 14865 */                 Map map = new HashMap();
-	/*       */ 
-	/* 14867 */                 map.put("floorCode", boFloor.getFloorCode().toString());
-	/* 14868 */                 map.put("floorName", boFloor.getFloorName().toString());
-								logger.info("floorName 01:"+boFloor.getFloorName().toString());
-	/* 14869 */                 list_floor.add(map);							
+//BEGIN				  //BEGIN 缺少参数（需要app传过来一个userPhone）
+/* 14772 */           if (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue()) {
+/* 14773 */             List<BoRoom> list = this.boRoomService.getAllListByUserCode(userCode);//参数：授权者userCode
+/* 14774 */             List<BoFloor> list2 = this.boFloorService.getAllListByUserCode(userCode);//参数：授权者userCode
+						Map maps = new HashMap();
+/* 14775 */             if ((list.size() <= 0) && (list2.size() <= 0)) {
+	/* 14777 */              this.requestJson.setMessage("没有找到");
+	/* 14778 */              this.requestJson.setData(maps);
+	/* 14779 */              this.requestJson.setSuccess(true);
+	/* 14780 */              return "success";
+/*       */             }	
+/* 14782 */             List voList = new ArrayList();
+/* 14783 */             List list_room = new ArrayList();
+/* 14784 */             Map map_room = new HashMap();
+/* 14786 */             list_floor = new ArrayList();
+/*       */             //房间下设备没有为1的，隐藏对应楼层、房间；若有 则只隐藏为0的设备
+//						logger.info("是否是授权者："+ (boUsers==phone));
+						if(accountOperationType.equals("2")) {//一般用户
+							logger.info("一般用户");
+							for (BoFloor boFloor : list2)
+							{
+								Map map = new HashMap();
+								map.put("floorCode", boFloor.getFloorCode().toString());
+								map.put("floorName", boFloor.getFloorName().toString());
+								logger.info("floorName>"+floorName);
+								if(list.size()!=0) {
+									label:
+										for(BoRoom boroom:list) {//遍历 一般用户的房间
+											String rmCode=boroom.getRoomCode().toString();
+											logger.info("roomName>"+boroom.getRoomName().toString());
+											List<BoHostDevice> bhdevices=this.boHostDeviceService.getroomCode(userCode1,rmCode);//根据被授权者userCode和roomCode定位被授权者在相应房间下有哪些设备
+											logger.info("bhdevices==="+bhdevices);
+											if(bhdevices.size()!=0) {
+												for(BoHostDevice bhdevice:bhdevices) {
+													Boolean isAuth=bhdevice.getIsAuthorized();
+													if(isAuth) {//楼层的房间下有设备则存入楼层信息
+														list_floor.add(map);	
+														break label;//采用这种方式跳出多个循环
+													}
+												}
+											}
+										}
+								}
 							}
-/*       */             }
-/* 14871 */             map_room.put("floorInfo", list_floor);//楼层 信息
+							
+							for (BoRoom boRoom : list) {
+								Map map = new HashMap();
+								BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
+								map.put("roomCode", boRoom.getRoomCode().toString());
+								map.put("roomName", boRoom.getRoomName().toString());
+								logger.info("roomName>"+boRoom.getRoomName().toString());
+								map.put("floorCode", boRoom.getFloorCode().toString());
+								String rmCode=boRoom.getRoomCode().toString();
+								List<BoHostDevice> bhdevices=this.boHostDeviceService.getroomCode(userCode1,rmCode);
+								if(bhdevices.size()!=0) {
+									for(BoHostDevice bhdevice:bhdevices) {
+										Boolean isAuth=bhdevice.getIsAuthorized();
+										if(isAuth) {//楼层的房间下有设备则存入楼层信息
+											list_room.add(map);
+											break;
+										}
+									}
+								}
+							}
+						}else {//授权者或管理员
+							logger.info("授权者或管理员");
+							for (BoFloor boFloor : list2)
+							{
+								Map map = new HashMap();
+								map.put("floorCode", boFloor.getFloorCode().toString());
+								map.put("floorName", boFloor.getFloorName().toString());
+								list_floor.add(map);
+							}
+							for (BoRoom boRoom : list) {
+								Map map = new HashMap();
+								BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
+								map.put("roomCode", boRoom.getRoomCode().toString());
+								map.put("roomName", boRoom.getRoomName().toString());
+								map.put("floorCode", boRoom.getFloorCode().toString());
+								list_room.add(map);
+							}
+								
+						}
+						map_room.put("floorInfo", list_floor);//楼层 信息
+//						logger.info("floorInfo=="+floorInfo);
+/* 14808 */             map_room.put("roomInfo", list_room);//房间  信息
+//						logger.info("roomInfo=="+roomInfo);
+/* 14811 */             voList.add(map_room);
+						//END
+/* 14812 */             this.requestJson.setData(voList);
 /*       */ 
-/* 14873 */             for (BoRoom boRoom : list) {
-							String roomName=boRoom.getRoomName().toString();
-							logger.info("允许存在 客厅 01?>"+!roomName .equals("客厅"));
-//                            if(!roomName .equals("客厅")) {                	  
-  /* 14874 */               	Map map = new HashMap();
-  /* 14875 */               	BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
-  /* 14877 */               	map.put("roomCode", boRoom.getRoomCode().toString());
-  /* 14878 */               	map.put("roomName", boRoom.getRoomName().toString());
-  								logger.info("roomName 01:"+boRoom.getRoomName().toString());
-  /* 14879 */               	map.put("floorCode", boRoom.getFloorCode().toString());
-  /* 14880 */               	list_room.add(map);
-//                            }
-/*       */             }
-/*       */ 
-/* 14884 */             map_room.put("roomInfo", list_room);//房间  信息
-/*       */ 
-/* 14887 */             voList.add(map_room);
-/* 14888 */             this.requestJson.setData(voList);
-/*       */ 
-/* 14890 */             this.requestJson.setSuccess(true);
+/* 14814 */             this.requestJson.setSuccess(true);
 /*       */           }
+///* 14847 */           if (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue()) {
+///* 14848 */             List<BoRoom> list = this.boRoomService.getAllListByUserCode(userCode);
+///* 14849 */             List<BoFloor> list2 = this.boFloorService.getAllListByUserCode(userCode);
+//                        logger.info("list2>>>>>>"+list2);
+///* 14850 */             if ((list.size() <= 0) && (list2.size() <= 0)) {
+///* 14851 */               Map maps = new HashMap();
+///* 14852 */               this.requestJson.setMessage("没有找到");
+///* 14853 */               this.requestJson.setData(maps);
+///* 14854 */               this.requestJson.setSuccess(true);
+///* 14855 */               return "success";
+///*       */             }
+///* 14857 */             List voList = new ArrayList();
+///* 14858 */             List list_room = new ArrayList();
+///* 14859 */             Map map_room = new HashMap();
+///*       */ 
+///* 14861 */             list_floor = new ArrayList();
+///*       */ 
+///* 14863 */             for (BoFloor boFloor : list2)
+///*       */             {
+//							String floorName=boFloor.getFloorName().toString();
+//							logger.info("floorName test01>"+floorName);
+//							if(!floorName .equals("xxx")) {
+//	/* 14865 */                 Map map = new HashMap();
+//	/*       */ 
+//	/* 14867 */                 map.put("floorCode", boFloor.getFloorCode().toString());
+//	/* 14868 */                 map.put("floorName", boFloor.getFloorName().toString());
+//								logger.info("floorName 01:"+boFloor.getFloorName().toString());
+//	/* 14869 */                 list_floor.add(map);							
+//							}
+///*       */             }
+///* 14871 */             map_room.put("floorInfo", list_floor);//楼层 信息
+///*       */ 
+///* 14873 */             for (BoRoom boRoom : list) {
+//							String roomName=boRoom.getRoomName().toString();
+//							logger.info("允许存在 客厅 01?>"+!roomName .equals("客厅"));
+////                            if(!roomName .equals("客厅")) {                	  
+//  /* 14874 */               	Map map = new HashMap();
+//  /* 14875 */               	BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
+//  /* 14877 */               	map.put("roomCode", boRoom.getRoomCode().toString());
+//  /* 14878 */               	map.put("roomName", boRoom.getRoomName().toString());
+//  								logger.info("roomName 01:"+boRoom.getRoomName().toString());
+//  /* 14879 */               	map.put("floorCode", boRoom.getFloorCode().toString());
+//  /* 14880 */               	list_room.add(map);
+////                            }
+///*       */             }
+///*       */ 
+///* 14884 */             map_room.put("roomInfo", list_room);//房间  信息
+///* 14887 */             voList.add(map_room);
+///* 14888 */             this.requestJson.setData(voList);
+///*       */ 
+///* 14890 */             this.requestJson.setSuccess(true);
+///*       */           }
 /*       */           else {
 /* 14893 */             this.requestJson.setMessage("超时了");
 /* 14894 */             this.requestJson.setSuccess(false);
@@ -15350,6 +16394,162 @@
 /*       */     }
 /* 14903 */     return "success";
 /*       */   }
+//			@Action(value="getroom", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+//			public String getRoom()
+//			{
+//			  this.requestJson = new RequestJson();
+//			  Map mapss = new HashMap();
+//			  HttpServletRequest request = ServletActionContext.getRequest();
+//			  String header = request.getHeader("timestamp");
+//			  String header2 = request.getHeader("nonce");
+//			  String header3 = request.getHeader("sign");
+//			  String header4 = request.getHeader("access_token");
+//			  String userCode = request.getHeader("userCode");
+//			  List list_floor;
+//			  if (userCode.contains(",")) {
+//			    String[] userCode2 = userCode.split(",");
+//			    BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
+//			    BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
+//			    Boolean ral = isRal(header, header2, header3, header4, userCode, "查找用户的楼层房间列表接口");
+//			    if (ral.booleanValue()) {
+//			      System.err.println("验证通过");
+//			      if ((phone == null) || (boUsers == null)) {
+//			        this.requestJson.setData(mapss);
+//			        this.requestJson.setMessage("Invalid_User");
+//			        this.requestJson.setSuccess(true);
+//			      }
+//			      else if (header4.equals(phone.getAccessToken())) {
+//			        Long accessToken = Long.valueOf(header);
+//			        if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
+//			          List<BoRoom> list = this.boRoomService.getAllListByUserCode(userCode2[0].trim().toString());
+//			          List<BoFloor> list2 = this.boFloorService.getAllListByUserCode(userCode2[0].trim().toString());
+//			          if ((list.size() <= 0) && (list2.size() <= 0)) {
+//			            Map maps = new HashMap();
+//			            this.requestJson.setMessage("没有找到");
+//			            this.requestJson.setData(maps);
+//			            this.requestJson.setSuccess(true);
+//			            return "success";
+//			          }
+//			          List voList = new ArrayList();
+//			          List list_room = new ArrayList();
+//			          Map map_room = new HashMap();
+//			
+//			          list_floor = new ArrayList();
+//			
+//			          for (BoFloor boFloor : list2)
+//			          {
+//			            Map map = new HashMap();
+//			
+//			            map.put("floorCode", boFloor.getFloorCode().toString());
+//			            map.put("floorName", boFloor.getFloorName().toString());
+//			            list_floor.add(map);
+//			          }
+//			          map_room.put("floorInfo", list_floor);
+//			
+//			          for (BoRoom boRoom : list) {
+//			            Map map = new HashMap();
+//			            BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
+//			
+//			            map.put("roomCode", boRoom.getRoomCode().toString());
+//			            map.put("roomName", boRoom.getRoomName().toString());
+//			            map.put("floorCode", boRoom.getFloorCode().toString());
+//			            list_room.add(map);
+//			          }
+//			
+//			          map_room.put("roomInfo", list_room);
+//			
+//			          voList.add(map_room);
+//			          this.requestJson.setData(voList);
+//			
+//			          this.requestJson.setSuccess(true);
+//			        }
+//			        else {
+//			          this.requestJson.setData(mapss);
+//			          this.requestJson.setMessage("超时了");
+//			          this.requestJson.setSuccess(false);
+//			        }
+//			      } else {
+//			        System.err.println("超时了");
+//			        this.requestJson.setData(mapss);
+//			        this.requestJson.setMessage("超时了");
+//			        this.requestJson.setSuccess(false);
+//			      }
+//			
+//			    }
+//			    else
+//			    {
+//			      System.err.println("验证不通过");
+//			      this.requestJson.setData(mapss);
+//			      this.requestJson.setMessage("验证不通过");
+//			      this.requestJson.setSuccess(false);
+//			    }
+//			  } else {
+//			    Boolean ral = isRal(header, header2, header3, header4, userCode, "修改主机昵称");
+//			    if (ral.booleanValue()) {
+//			      System.err.println("验证通过");
+//			      BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode);
+//			      if (boUsers == null) {
+//			        this.requestJson.setData(mapss);
+//			        this.requestJson.setMessage("Invalid_User");
+//			        this.requestJson.setSuccess(true);
+//			      } else {
+//			        Long accessToken = Long.valueOf(header);
+//			        if (accessToken.longValue() < Long.valueOf(boUsers.getAccessTokenTime()).longValue()) {
+//			          List<BoRoom> list = this.boRoomService.getAllListByUserCode(userCode);
+//			          List<BoFloor> list2 = this.boFloorService.getAllListByUserCode(userCode);
+//			          if ((list.size() <= 0) && (list2.size() <= 0)) {
+//			            Map maps = new HashMap();
+//			            this.requestJson.setMessage("没有找到");
+//			            this.requestJson.setData(maps);
+//			            this.requestJson.setSuccess(true);
+//			            return "success";
+//			          }
+//			          List voList = new ArrayList();
+//			          List list_room = new ArrayList();
+//			          Map map_room = new HashMap();
+//			
+//			          list_floor = new ArrayList();
+//			
+//			          for (BoFloor boFloor : list2)
+//			          {
+//			            Map map = new HashMap();
+//			
+//			            map.put("floorCode", boFloor.getFloorCode().toString());
+//			            map.put("floorName", boFloor.getFloorName().toString());
+//			            list_floor.add(map);
+//			          }
+//			          map_room.put("floorInfo", list_floor);
+//			
+//			          for (BoRoom boRoom : list) {
+//			            Map map = new HashMap();
+//			            BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode());
+//			
+//			            map.put("roomCode", boRoom.getRoomCode().toString());
+//			            map.put("roomName", boRoom.getRoomName().toString());
+//			            map.put("floorCode", boRoom.getFloorCode().toString());
+//			            list_room.add(map);
+//			          }
+//			
+//			          map_room.put("roomInfo", list_room);
+//			
+//			          voList.add(map_room);
+//			          this.requestJson.setData(voList);
+//			
+//			          this.requestJson.setSuccess(true);
+//			        }
+//			        else {
+//			          this.requestJson.setMessage("超时了");
+//			          this.requestJson.setSuccess(false);
+//			        }
+//			      }
+//			    } else {
+//			      System.err.println("验证不通过");
+//			      this.requestJson.setMessage("验证不通过");
+//			      this.requestJson.setSuccess(false);
+//			    }
+//			  }
+//			  return "success";
+//			}
 /*       */ 
 /*       */   @Action(value="getuser", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String getUser()
@@ -16218,7 +17418,6 @@
 /* 15847 */             phone2.setRefreshTokenTime(refreshTokenTime_o+"");
 /* 15848 */             phone2.setCid(this.CID);
 /*       */             String s;
-///*       */             String s;
 /* 15850 */             if (this.phoneType == null)
 /* 15851 */               s = "1";
 /*       */             else {
@@ -16441,9 +17640,9 @@
 /* 16062 */             map.put("accessToken", update.getAccessToken());
 /* 16063 */             map.put("refreshToken", update.getRefreshToken());
 /* 16064 */             if (phone.getLogoAccountType().equals("M"))
-/* 16065 */               map.put("userCode", phone.getUserCode() + "," + phone.getUserPhone());
+/* 16065 */               map.put("userCode", phone.getUserCode() + "," + phone.getUserPhone());//有逗号的情况
 /*       */             else {
-/* 16067 */               map.put("userCode", phone.getAuthorizationUserCode());
+/* 16067 */               map.put("userCode", phone.getAuthorizationUserCode());//没有逗号的情况
 /*       */             }
 /* 16069 */             map.put("logoAccountType", phone.getLogoAccountType());
 /* 16070 */             map.put("userPhone", phone.getUserPhone());

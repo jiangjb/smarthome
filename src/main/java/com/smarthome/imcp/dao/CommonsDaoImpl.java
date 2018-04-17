@@ -581,13 +581,8 @@
 /*     */ 
 /*     */   public List<T> findByCriteria(DetachedCriteria detachedCriteria)
 /*     */   {
-//	          System.out.println("CommonsDaoImpl.java:detachedCriteria="+detachedCriteria);//CommonsDaoImpl.java:detachedCriteria=DetachableCriteria(CriteriaImpl(com.smarthome.imcp.dao.model.system.SysUser:this[][mntDelete=N, loginName=admin, loginPwd=21232F297A57A5A743894A0E4A801FC3]))
 /* 576 */     Criteria criteria = detachedCriteria.getExecutableCriteria(getCurrentSession());
-/* 577 */       
-//			  System.out.println("CommonsDaoImpl.java:criteria="+criteria);//criteria=CriteriaImpl(com.smarthome.imcp.dao.model.system.SysUser:this[][mntDelete=N, loginName=admin, loginPwd=21232F297A57A5A743894A0E4A801FC3])
-/* 578 */     
 			  criteria.setCacheMode(CacheMode.NORMAL);
-//              System.out.println("criteria.list()="+criteria.list());//criteria.list()=[]
 /* 579 */     return criteria.list();
 /*     */   }
 /*     */ 

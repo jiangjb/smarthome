@@ -419,11 +419,17 @@
 //					logger.info("旧手机的deviceToken==="+users.getUserAddr());
 //					logger.info("UserAddr==="+(users.getUserAddr().equals("") || users.getUserAge().equals("")));
 //					if(users.getUserAddr() == "") {//字符串不能这么比较，改用equals方法
-					if(users.getUserAddr().equals("") || users.getUserAge().equals("")) {
+//					logger.info("users.getUserAddr()="+users.getUserAddr()+",是否等于null="+(null==users.getUserAddr()));
+//					logger.info("是否为空："+("".equals(users.getUserAddr()) || "".equals(users.getUserAge()))+","+( users.getUserAddr()==null || users.getUserAge()==null));
+//					logger.info("devicetoken:"+this.devicetoken);
+					//userAddr或userAge为空或null，说明是用户第一次登录，不执行离线推送功能
+					if("".equals(users.getUserAddr()) || "".equals(users.getUserAge())) {
 						users.setUserAddr(this.devicetoken);
 						users.setUserAge(this.phoneType+"");//2018-3-15 将这台设备的设备类型存在 无用字段 UserAge中
-					}
-					else{
+					}else if( null==users.getUserAddr() || null==users.getUserAge()) {//还存在部分UserAddr字段为null,,,,UserAddr和UserAge没有赋值前默认是Null的 把要比较的放前面可以避免空指针  null==,"".equels("")
+						users.setUserAddr(this.devicetoken);
+						users.setUserAge(this.phoneType+"");
+					}else{
 						logger.info("是否是同一台设备："+this.devicetoken.equals(users.getUserAddr()));
 						if(!this.devicetoken.equals(users.getUserAddr())) {//当不同时判定为有新设备连入 -----》发送离线通知						
 							//2-5 友盟推送
@@ -432,7 +438,7 @@
 							Date currentTime = new Date();
 							SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 							String dateString = formatter.format(currentTime);
-							int PrePhoneType=Integer.parseInt(users.getUserAge());//这里出了问题  "" 转 int,数字类型转换异常
+							int PrePhoneType=Integer.parseInt(users.getUserAge());
 							int NowPhoneType=Integer.parseInt(this.phoneType);
 //							logger.info("旧设备类型>>"+PrePhoneType);
 //							logger.info("新设备类型>>"+NowPhoneType);
@@ -470,7 +476,6 @@
 /* 473 */             userInfoMap.put("userCode", users.getUserCode() + "," + users.getUserPhone());//LogoAccountType=M时 传 本身的userCode
 /*     */           else {
 					  userInfoMap.put("userCode", users.getAuthorizationUserCode() + "," + users.getUserPhone());
-///* 475 */             userInfoMap.put("userCode", users.getAuthorizationUserCode() + "," + users.getUserPhone()+"," + users.getUserCode());//LogoAccountType=S时 传授权者的userCode   new+被授权者userCode
 /*     */           }
 /* 477 */           userInfoMap.put("logoAccountType", users.getLogoAccountType());
 /* 478 */           userInfoMap.put("accountOperationType", users.getAccountOperationType());
@@ -484,8 +489,10 @@
 /* 481 */           userInfoMap.put("whetherSetPwd", users.getWhetherSetPwd());
 					//添加初始的楼层、房间信息  2018/1/3
 					BoFloor floor=this.boFloorService.findByUserCode(users.getUserCode());
+					logger.info("floor:"+floor);
 					if(floor != null) {
-						String floorName=floor.getFloorName();//空指针
+						String floorName=floor.getFloorName();//空指针 已解决（floor!=null）
+						logger.info("floorName:"+floorName);
 						userInfoMap.put("floorName", floorName);
 						List<BoRoom> rooms=this.boRoomService.getAllListByUserCode(users.getUserCode());
 						List list_room = new ArrayList();
@@ -505,6 +512,7 @@
 					}
 					
 /* 482 */           String fluoriteAccessToken = users.getFluoriteAccessToken();
+					logger.info("fluoriteAccessToken:"+fluoriteAccessToken);
 /*     */           String EZTOKEN;
 ////                  2-5 友盟推送
 //					Demo ymPush = new Demo();
@@ -524,6 +532,7 @@
 //					}
 //					END
 				    System.out.println("手机登录成功");
+				    logger.debug("手机登录成功。。。");
 /* 484 */           if (fluoriteAccessToken.equals(""))
 /* 485 */             EZTOKEN = "NO_BUNDING";
 /*     */           else {
@@ -569,7 +578,7 @@
 /* 530 */     Md5 md5 = new Md5();
 /* 531 */     this.requestJson = new RequestJson();
 /* 532 */     HttpServletRequest request = ServletActionContext.getRequest();
-/*     */ 
+
 /* 534 */     Map map = new HashMap();
 /*     */     try {
 /* 536 */       if (StringUtils.isEmpty(this.userPhone)) {

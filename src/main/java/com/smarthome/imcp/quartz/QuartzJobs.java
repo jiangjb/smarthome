@@ -243,9 +243,15 @@
 /*     */   public void sds()
 /*     */   {
 /* 248 */     List<BoHostDevice> allList = this.boHostDeviceService.getAllList();
-/* 249 */     for (BoHostDevice boHostDevice : allList)
+/* 249 */     for (BoHostDevice boHostDevice : allList) {
+//				logger.info("isAuthorized="+boHostDevice.getIsAuthorized());
+				if(boHostDevice.getIsAuthorized() == null) {//3-19
+					boHostDevice.setIsAuthorized(true);
+					this.boHostDeviceService.update(boHostDevice);
+				}
 /* 250 */       if (boHostDevice.getBoDevice() == null)
-/* 251 */         this.boHostDeviceService.delete(boHostDevice);
+	/* 251 */         this.boHostDeviceService.delete(boHostDevice);
+			  }
 /*     */   }
 /*     */ }
 

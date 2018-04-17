@@ -1,15 +1,17 @@
 /*    */ package com.smarthome.imcp.action.xing;
 /*    */ 
 /*    */ import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+		import java.util.ArrayList;
+		import java.util.HashMap;
+		import java.util.List;
+		import java.util.Map;
 
-import net.sf.json.JSONObject;
+import com.smarthome.imcp.dao.model.bo.BoDevice;
 /*    */ 
 /*    */ public class Test
 /*    */ {
+		   private static int a=1;
+		   public static void test() {System.out.println("test");};
 /*    */   public static void main(String[] args)
 /*    */   {
 ///* 17 */     String s = "15105873889";
@@ -19,13 +21,8 @@ import net.sf.json.JSONObject;
 //			 int a = Integer.parseInt(str);
 //			 Integer i=new Integer(a);
 //			 System.out.println(Integer.parseInt(str));
-//		   	Boolean b=true;
-//		   	if(b) {
-//		   		System.out.println("True");
-//		   	}else {
-//		   		System.out.println("False");
-//		   	}
-			String const="s";
+			Map map=new HashMap();
+			System.out.println(map);
 /*    */   }
 /*    */ }
 

@@ -390,7 +390,8 @@ import java.util.Map;
 			public List<BoHostDevice> findHostByUserPhone(String userPhone) {
 //				return this.boHostDeviceDao.findHostByUserPhone(userPhone);
 				DetachedCriteria criteria = DetachedCriteria.forClass(BoHostDevice.class);
-				criteria.add(Restrictions.eq("userPhone", userPhone));
+				criteria.createAlias("boUsers", "boUsers");//3-22
+				criteria.add(Restrictions.eq("boUsers.userPhone", userPhone));//3-22
 				List<BoHostDevice> list = this.boHostDeviceDao.findByCriteria(criteria);
 				if ((list == null) || (list.isEmpty())) {
 					return null;
