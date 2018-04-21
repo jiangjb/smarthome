@@ -796,7 +796,7 @@
 /*       */               {
 /*   663 */                 BoInfraredLearnControlMap controlMap = this.boInfraredLearnControlMapService.findBy(usereCode, obj.getDeviceAddress(), split[0]);
 /*   664 */                 if (controlMap == null) {
-/*   665 */                   System.err.println("您还没学习过改按键");
+/*   665 */                   System.err.println("您还没学习过该按键");
 /*       */                 }
 /*       */                 else {
 /*   668 */                   BoInfraredPart findss = this.boInfraredPartService.find(obj.getDeviceAddress());
@@ -1793,7 +1793,6 @@
 							  modelIdList.add(modelId);
 						  }
 					  }
-					  
 					  for(BoHostDevice bohostDevice:bohostDevices) {
 						  Map map =new HashMap();//这个如果写在循环外面的话，就只能传单一的数据
 						  //增加accountOperationType
@@ -1801,7 +1800,10 @@
 //							  map.put("id", bohostDevice.getId());//4-8
 							  logger.info("id:"+bohostDevice.getId());
 							  map.put("userCode", userCode);
-							  String roomCode=bohostDevice.getBoRoom().getRoomCode();
+							  String roomCode="";
+							  if(bohostDevice.getBoRoom() != null) {//4-20 没有选择房间的红外模块会出现空指针，，这里做处理
+								  roomCode=bohostDevice.getBoRoom().getRoomCode();
+							  }
 							  map.put("roomCode", roomCode);
 							  String equipID=bohostDevice.getId().toString();
 							  map.put("deviceAddress", bohostDevice.getDeviceAddress());//设备id
@@ -9547,7 +9549,13 @@
 /*  8523 */     this.requestJson = new RequestJson();
 /*  8524 */     Map is = new HashMap();
 /*  8525 */     HttpServletRequest request = ServletActionContext.getRequest();
-/*       */ 
+//Enumeration pNames=request.getParameterNames();
+//while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+//	String name=(String)pNames.nextElement();
+//	logger.info("name:"+name);//deviceAddress,isStudy(0-未学习，1-学习),infraredButtonsValuess
+//	String value=request.getParameter(name);
+//	logger.info("value:"+value);
+//	}
 /*  8527 */     String header = request.getHeader("timestamp");
 /*  8528 */     String header2 = request.getHeader("nonce");
 /*  8529 */     String header3 = request.getHeader("sign");
@@ -9555,7 +9563,7 @@
 /*  8531 */     String userCode = request.getHeader("userCode");
 /*  8532 */     System.err.println(this.deviceAddress);
 /*  8533 */     System.err.println(this.isStudy);
-/*  8534 */     System.err.println(this.infraredButtonsValuess);
+/*  8534 */     System.err.println("originalValue:"+this.infraredButtonsValuess);
 /*  8535 */     System.err.println(userCode);
 /*  8536 */     if (userCode.contains(",")) {
 /*  8537 */       String[] userCode2 = userCode.split(",");
@@ -9587,7 +9595,6 @@
 /*  8563 */               if (this.isStudy.intValue() == 0) {
 /*  8564 */                 List list = this.boInfraredLearnControlMapService.getListBy(userCode2[0].trim().toString(), device.getBoDevice().getDeviceCode(), this.deviceAddress);
 /*  8565 */                 BoInfraredLearnControlMap controlMapss = this.boInfraredLearnControlMapService.findBy(userCode2[0].trim().toString(), device.getBoDevice().getDeviceCode(), this.deviceAddress, this.infraredButtonsValuess);
-/*       */ 
 /*  8567 */                 if (controlMapss == null)
 /*       */                 {
 /*  8569 */                   BoInfraredLearnControlMap boInfraredLearnControlMap = new BoInfraredLearnControlMap();
@@ -9626,7 +9633,7 @@
 /*  8603 */                 System.err.println(new String(bs));
 /*  8604 */                 this.packetProcessHelper.processSendDDatas(device.getBoDevice().getDeviceCode(), bs);
 /*       */               } else {
-/*  8606 */                 System.err.println("是控制");
+							System.err.println("是控制");
 /*  8607 */                 String[] infraredButtonsValuessSplit = this.infraredButtonsValuess.split(",");
 /*  8608 */                 for (int i = 0; i < infraredButtonsValuessSplit.length; i++) {
 /*  8609 */                   System.err.println("截取 " + infraredButtonsValuessSplit[i]);
@@ -9659,9 +9666,9 @@
 /*  8636 */                     BoInfraredLearnControlMap controlMap = this.boInfraredLearnControlMapService.findBy(userCode2[0].trim().toString(), this.deviceAddress, Valuess);
 /*  8637 */                     if (controlMap == null) {
 /*  8638 */                       this.requestJson.setData(is);
-/*  8639 */                       this.requestJson.setMessage("您还没学习过改按键");
+/*  8639 */                       this.requestJson.setMessage("您还没学习过该按键");
 /*  8640 */                       this.requestJson.setSuccess(true);
-/*  8641 */                       System.err.println("您还没学习过改按键");
+/*  8641 */                       System.err.println("您还没学习过该按键");
 /*       */                     } else {
 /*  8643 */                       BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                       String s;
@@ -9690,7 +9697,7 @@
 /*  8667 */                       this.requestJson.setData(is);
 /*  8668 */                       this.requestJson.setMessage("您还没学习过该按键");
 /*  8669 */                       this.requestJson.setSuccess(true);
-/*  8670 */                       System.err.println("您还没学习过改按键");
+/*  8670 */                       System.err.println("您还没学习过该按键");
 /*       */                     } else {
 /*  8672 */                       BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                       String s;
@@ -9792,9 +9799,9 @@
 /*  8769 */                     BoInfraredLearnControlMap controlMap = this.boInfraredLearnControlMapService.findBy(userCode2[0].trim().toString(), this.deviceAddress, Valuess);
 /*  8770 */                     if (controlMap == null) {
 /*  8771 */                       this.requestJson.setData(is);
-/*  8772 */                       this.requestJson.setMessage("您还没学习过改按键");
+/*  8772 */                       this.requestJson.setMessage("您还没学习过该按键");
 /*  8773 */                       this.requestJson.setSuccess(true);
-/*  8774 */                       System.err.println("您还没学习过改按键");
+/*  8774 */                       System.err.println("您还没学习过该按键");
 /*       */                     } else {
 /*  8776 */                       BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                       String s;
@@ -9815,9 +9822,9 @@
 /*  8791 */                     BoInfraredLearnControlMap controlMap = this.boInfraredLearnControlMapService.findBy(userCode2[0].trim().toString(), this.deviceAddress, Valuess);
 /*  8792 */                     if (controlMap == null) {
 /*  8793 */                       this.requestJson.setData(is);
-/*  8794 */                       this.requestJson.setMessage("您还没学习过改按键");
+/*  8794 */                       this.requestJson.setMessage("您还没学习过该按键");
 /*  8795 */                       this.requestJson.setSuccess(true);
-/*  8796 */                       System.err.println("您还没学习过改按键");
+/*  8796 */                       System.err.println("您还没学习过该按键");
 /*       */                     } else {
 /*  8798 */                       BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */                       String s;
@@ -9964,7 +9971,7 @@
 /*  8940 */                   BoInfraredLearnControlMap controlMap = this.boInfraredLearnControlMapService.findBy(userCode, this.deviceAddress, Valuess);
 /*  8941 */                   if (controlMap == null) {
 /*  8942 */                     this.requestJson.setData(is);
-/*  8943 */                     this.requestJson.setMessage("您还没学习过改按键");
+/*  8943 */                     this.requestJson.setMessage("您还没学习过该按键");
 /*  8944 */                     this.requestJson.setSuccess(true);
 /*  8945 */                     System.err.println("您还没学习过该按键");
 /*       */                   } else {
@@ -10050,6 +10057,7 @@
 /*       */               }
 /*       */ 
 /*  9028 */               System.err.println("是学习");
+						  
 /*  9029 */               BoInfraredPart find = this.boInfraredPartService.find(this.deviceAddress);
 /*       */               String s;
 
@@ -10294,7 +10302,7 @@
 /*  9276 */       String[] userCode2 = userCode.split(",");
 /*  9277 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
 /*  9278 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
-/*  9279 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "删除红外模板");
+/*  9279 */       Boolean ral = isRal(header, header2, header3, header4, userCode, "删除红外模板");//重建红外模块
 /*  9280 */       if (ral.booleanValue())
 /*       */       {
 /*  9282 */         Long accessToken = Long.valueOf(header);
@@ -11857,6 +11865,17 @@
 /* 10954 */             BoSensor boSensor = this.boSensorService.findBydeviceAddress(userCode2[0].trim().toString(), this.deviceAddress);
 /* 10955 */             if (device != null)
 /*       */             {
+						  //删除红外设备时，删除红外模块的对码 4-19
+						  List<BoInfraredLearnControlMap> list = this.boInfraredLearnControlMapService.getListBy(userCode2[0].trim().toString(), device.getBoDevice().getDeviceCode(), this.deviceAddress);
+						  for(BoInfraredLearnControlMap boInfraredLeandControlMap:list) {
+							  this.boInfraredLearnControlMapService.delete(boInfraredLeandControlMap);
+						  }
+						  //删除红外模块图
+						  List<BoInfraredButtons> buttonList = this.boInfraredButtonsService.getListBy(userCode2[0].trim().toString(), device.getBoDevice().getDeviceCode(), this.deviceAddress);
+						  for (BoInfraredButtons boInfraredButtons : buttonList) {
+							  BoInfraredButtons delete = this.boInfraredButtonsService.delete(boInfraredButtons);
+						  }
+						  //END
 /* 10957 */               if (Integer.valueOf(device.getDeviceType()).intValue() <= 99) {
 /* 10958 */                 this.requestJson.setData(maps);
 /* 10959 */                 device.setBoRoom(null);
@@ -11934,6 +11953,17 @@
 /* 11031 */             BoSensor boSensor = this.boSensorService.findBydeviceAddress(userCode, this.deviceAddress);
 /* 11032 */             if (device != null)
 /*       */             {
+						//删除红外设备时，删除红外模块的对码 4-19
+						  List<BoInfraredLearnControlMap> list = this.boInfraredLearnControlMapService.getListBy(userCode, device.getBoDevice().getDeviceCode(), this.deviceAddress);
+						  for(BoInfraredLearnControlMap boInfraredLeandControlMap:list) {
+							  this.boInfraredLearnControlMapService.delete(boInfraredLeandControlMap);
+						  }
+						//删除红外模块图
+						  List<BoInfraredButtons> buttonList = this.boInfraredButtonsService.getListBy(userCode, device.getBoDevice().getDeviceCode(), this.deviceAddress);
+						  for (BoInfraredButtons boInfraredButtons : buttonList) {
+							  BoInfraredButtons delete = this.boInfraredButtonsService.delete(boInfraredButtons);
+						  }
+						  //END
 /* 11034 */               if (Integer.valueOf(device.getDeviceType()).intValue() <= 99) {
 /* 11035 */                 this.requestJson.setData(maps);
 /* 11036 */                 device.setBoRoom(null);

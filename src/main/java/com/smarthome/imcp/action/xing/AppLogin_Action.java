@@ -2,6 +2,7 @@
 /*     */ 
 /*     */ import com.smarthome.dock.server.util.StaticUtil;
 /*     */ import com.smarthome.imcp.action.AbstractAction;
+import com.smarthome.imcp.common.MailUtil;
 /*     */ import com.smarthome.imcp.common.Md5;
 /*     */ import com.smarthome.imcp.controller.RequestJson;
 		  import com.smarthome.imcp.dao.model.bo.BoFloor;
@@ -30,6 +31,8 @@
 /*     */ import java.util.Properties;
 /*     */ import java.util.Timer;
 /*     */ import java.util.TimerTask;
+
+import javax.mail.MessagingException;
 /*     */ import javax.servlet.http.HttpServletRequest;
 /*     */ import org.apache.commons.lang3.StringUtils;
 /*     */ import org.apache.struts2.ServletActionContext;
@@ -121,13 +124,14 @@
 /* 138 */         this.requestJson = new RequestJson(false, "请输入邮箱验证码", map);
 /* 139 */         return "success";
 /*     */       }
+				logger.info("StaticUtil.msg_email_code.get(this.userEmail)="+StaticUtil.msg_email_code.get(this.userEmail));
 /* 141 */       if ((StaticUtil.msg_email_code.get(this.userEmail) == null) || 
 /* 143 */         (StringUtils.isEmpty(StaticUtil.msg_email_code.get(this.userEmail)
 /* 143 */         .toString()))) {
 /* 144 */         this.requestJson = new RequestJson(false, "验证码已失效,请重新获取", map);
 /* 145 */         return "success";
 /*     */       }
-/*     */ 
+/*     */ 		logger.info("str="+StaticUtil.msg_email_code.get(this.userEmail).toString()+",this.code="+this.code);
 /* 148 */       String[] str = StaticUtil.msg_email_code.get(this.userEmail).toString()
 /* 149 */         .split(",");
 /*     */ 
@@ -166,6 +170,7 @@
 /*     */   public String emailVcode()
 /*     */     throws Exception
 /*     */   {
+	          logger.info("发送邮箱验证码");
 /* 194 */     this.requestJson = new RequestJson();
 /* 195 */     Properties prop = new Properties();
 /* 196 */     InputStream in = EmailUtils.in();
@@ -188,51 +193,46 @@
 /* 212 */         String vcode = "";
 /* 213 */         for (int i = 0; i < 6; i++)
 /* 214 */           vcode = vcode + (int)(Math.random() * 9.0D);
-				  System.out.println("发给邮箱的验证码："+vcode);
 /* 215 */         if (this.versionType.equals("1")) {
-/* 216 */           String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
+/* 216 */             String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
 /* 223 */             this.userEmail + " 邮箱," + sd + "</td>" + "<tr " + 3 + "><td>" + "验证码为:" + vcode + " 请在10分钟内使用" + "</td>" + "</tbody>" + "<tr " + 3 + "><td>" + "若非本人账号获取到验证码请勿去使用app修改密码,若查到,责任自负" + "</td>" + "</tbody>" + "</table>";
-/* 224 */           EmailUtils.sendMail(prop.getProperty("fromEmail"), this.userEmail, prop.getProperty("emailName"), prop.getProperty("emailPassword"), "易家智联密码找回", centent);
-/* 225 */           StaticUtil.msg_email_code
-/* 226 */             .put(this.userEmail, vcode + "," + new Date().getTime());
+/* 224 */             EmailUtils.sendMail(prop.getProperty("fromEmail"), this.userEmail, prop.getProperty("emailName"), prop.getProperty("emailPassword"), "易家智联密码找回", centent);
+					  StaticUtil.msg_email_code.put(this.userEmail, vcode + "," + new Date().getTime());
 /* 227 */           this.requestJson = new RequestJson(true, "发送成功", map);
 /* 228 */         } else if (this.versionType.equals("2")) {
-/* 229 */           String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
+/* 229 */             String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
 /* 236 */             this.userEmail + " " + sd + "</td>" + "<tr " + 3 + "><td>" + "验证码为:" + vcode + "请在60秒内使用" + "</td>" + "</tbody>" + "<tr " + 3 + "><td>" + "若非本人账号获取到验证码请勿去使用app修改密码,若查到,责任自负" + "</td>" + "</tbody>" + "</table>";
-/* 237 */           EmailUtils.sendMail(prop.getProperty("fromEmail"), this.userEmail, prop.getProperty("emailName"), prop.getProperty("emailPassword"), "爱波瑞密码找回", centent);
-/* 238 */           StaticUtil.msg_email_code
-/* 239 */             .put(this.userEmail, vcode + "," + new Date().getTime());
+/* 237 */             EmailUtils.sendMail(prop.getProperty("fromEmail"), this.userEmail, prop.getProperty("emailName"), prop.getProperty("emailPassword"), "爱波瑞密码找回", centent);
+					  StaticUtil.msg_email_code.put(this.userEmail, vcode + "," + new Date().getTime());
 /* 240 */           this.requestJson = new RequestJson(true, "发送成功", map);
 /* 241 */         } else if (!this.versionType.equals("3"))
 /*     */         {
 /* 243 */           if (this.versionType.equals("4")) {
-/* 244 */             String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
+/* 244 */               String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
 /* 251 */               this.userEmail + " " + sd + "</td>" + "<tr " + 3 + "><td>" + "验证码为:" + vcode + "请在60秒内使用" + "</td>" + "</tbody>" + "<tr " + 3 + "><td>" + "若非本人账号获取到验证码请勿去使用app修改密码,若查到,责任自负" + "</td>" + "</tbody>" + "</table>";
-/* 252 */             EmailUtils.sendMail(prop.getProperty("fromEmail"), this.userEmail, prop.getProperty("emailName"), prop.getProperty("emailPassword"), "思创科技密码找回", centent);
-/* 253 */             StaticUtil.msg_email_code
-/* 254 */               .put(this.userEmail, vcode + "," + new Date().getTime());
+/* 252 */               EmailUtils.sendMail(prop.getProperty("fromEmail"), this.userEmail, prop.getProperty("emailName"), prop.getProperty("emailPassword"), "思创科技密码找回", centent);
+						StaticUtil.msg_email_code.put(this.userEmail, vcode + "," + new Date().getTime());
 /* 255 */             this.requestJson = new RequestJson(true, "发送成功", map);
 /* 256 */           } else if (this.versionType.equals("5")) {
-/* 257 */             String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
+/* 257 */               String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
 /* 264 */               this.userEmail + " " + sd + "</td>" + "<tr " + 3 + "><td>" + "验证码为:" + vcode + "请在60秒内使用" + "</td>" + "</tbody>" + "<tr " + 3 + "><td>" + "若非本人账号获取到验证码请勿去使用app修改密码,若查到,责任自负" + "</td>" + "</tbody>" + "</table>";
-/* 265 */             EmailUtils.sendMail(prop.getProperty("fromEmail"), this.userEmail, prop.getProperty("emailName"), prop.getProperty("emailPassword"), "峰庭密码找回", centent);
-/* 266 */             StaticUtil.msg_email_code
-/* 267 */               .put(this.userEmail, vcode + "," + new Date().getTime());
+/* 265 */               EmailUtils.sendMail(prop.getProperty("fromEmail"), this.userEmail, prop.getProperty("emailName"), prop.getProperty("emailPassword"), "峰庭密码找回", centent);
+						StaticUtil.msg_email_code
+/* 267 */               	.put(this.userEmail, vcode + "," + new Date().getTime());
 /* 268 */             this.requestJson = new RequestJson(true, "发送成功", map);
 /* 269 */           } else if (this.versionType.equals("6")) {
-/* 270 */             String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
+/* 270 */               String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
 /* 277 */               this.userEmail + " " + sd + "</td>" + "<tr " + 3 + "><td>" + "验证码为:" + vcode + "请在60秒内使用" + "</td>" + "</tbody>" + "<tr " + 3 + "><td>" + "若非本人账号获取到验证码请勿去使用app修改密码,若查到,责任自负" + "</td>" + "</tbody>" + "</table>";
-/* 278 */             
-					  EmailUtils.sendMail(prop.getProperty("fromEmail"), this.userEmail, prop.getProperty("emailName"), prop.getProperty("emailPassword"), "麦宝密码找回", centent);
-/* 279 */             StaticUtil.msg_email_code.put(this.userEmail, vcode + "," + new Date().getTime());
-
+					    EmailUtils.sendMail(prop.getProperty("fromEmail"), this.userEmail, prop.getProperty("emailName"), prop.getProperty("emailPassword"), "麦宝密码找回", centent);
+//					    MailUtil.send_Htmlmail(this.userEmail, centent);
+					    StaticUtil.msg_email_code.put(this.userEmail, vcode + "," + new Date().getTime());
 /* 280 */             this.requestJson = new RequestJson(true, "发送成功", map);
 /* 281 */           } else if (this.versionType.equals("7")) {
-/* 282 */             String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
+/* 282 */               String centent = "<h2>尊敬的用户：</h2><style type=\"text/css\">.common-table{-moz-user-select: none;width:35em;border:0;table-layout : fixed;border-top:0px solid #dedfe1;border-right:0px solid #dedfe1;}/*header*/.common-table thead td,.common-table thead th{    height:23px;   background-color:#e4e8ea;   text-align:center;   border-left:1px solid #dedfe1;}.common-table thead th, .common-table tbody th{padding-left:7px;padding-right:7px;width:15px;text-align:center;}.common-table tbody td,  .common-table tbody th{    height:25px!important;border-bottom:0px solid #dedfe1;border-left:0px solid #dedfe1;cursor:default;word-break: break-all;-moz-outline-style: none;_padding-right:7px;text-align:center;}</style><table class=\"common-table\"><thead><tr><td width=\"100\">" + 
 /* 289 */               this.userEmail + " " + sd + "</td>" + "<tr " + 3 + "><td>" + "验证码为:" + vcode + "请在60秒内使用" + "</td>" + "</tbody>" + "<tr " + 3 + "><td>" + "若非本人账号获取到验证码请勿去使用app修改密码,若查到,责任自负" + "</td>" + "</tbody>" + "</table>";
-/* 290 */             EmailUtils.sendMail(prop.getProperty("fromEmail"), this.userEmail, prop.getProperty("emailName"), prop.getProperty("emailPassword"), "乐沃密码找回", centent);
-/* 291 */             StaticUtil.msg_email_code.put(this.userEmail, vcode + "," + new Date().getTime());
-/* 292 */             this.requestJson = new RequestJson(true, "发送成功", map);
+/* 290 */               EmailUtils.sendMail(prop.getProperty("fromEmail"), this.userEmail, prop.getProperty("emailName"), prop.getProperty("emailPassword"), "乐沃密码找回", centent);
+						StaticUtil.msg_email_code.put(this.userEmail, vcode + "," + new Date().getTime());
+/* 292 */               this.requestJson = new RequestJson(true, "发送成功", map);
 /*     */           }
 /*     */         }
 /*     */       }

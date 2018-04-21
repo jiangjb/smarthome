@@ -300,7 +300,7 @@ import org.springframework.ui.ModelMap;
 		   
 		   @RequestMapping({"emailCode.do"})
 		   @ResponseBody
-		   public Map<String,String> geteEailCode(@RequestParam("email") String email,HttpServletRequest request) {
+		   public Map<String,String> getEmailCode(@RequestParam("email") String email,HttpServletRequest request) {
 			   System.out.println("获取邮箱验证码!!!!!");
 			   if (this.sysUserService.findByUserEmail(email) !=0) {//如果不为0，发送验证码
 				   Map<String,String> map=new HashMap<String,String>();
