@@ -8622,13 +8622,18 @@ import org.apache.commons.codec.binary.Base64;//2-9
 					userCode=newTel.getUserCode();
 					headPic=newTel.getHeadPic();
 				}
+				BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
+				String oldPWD=oldTel.getUserPwd();
+				String oldHeadPic=oldTel.getHeadPic();
+				String oldUserName=oldTel.getUserName();
+				String oldSignature=oldTel.getSignature();
+				String oldSex=oldTel.getUserSex();
+				String oldMail=oldTel.getUserEmail();
+				
 				if(newTel != null) {
 //					logger.info("newTel!=null");
 					int userId=newTel.getUserId();
-					//找到旧号码对应的用户,将该用户的号码和密码换成新用户的
-					BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
-					String oldPWD=oldTel.getUserPwd();
-					String oldHeadPic=oldTel.getHeadPic();
+					//找到旧号码对应的用户,将该用户的号码和密码等信息存入新注册的账号
 					if(oldTel != null) {
 //						logger.info("oldTel != null");
 						oldTel.setUserPhone(newPhone);
@@ -8650,10 +8655,14 @@ import org.apache.commons.codec.binary.Base64;//2-9
 						   }
 						   //删除新账号
 						   BoUsers del=this.boUserssService.delete(newTel01);
-						   //注册新账号（放入老账号的手机号、密码以及头像）
+						   //注册新账号（放入老账号的手机号、密码以及头像等信息）
 						   BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
 						   user.setHeadPic(oldHeadPic);
-//						   this.boUserServicess.update(save);
+						   user.setUserName(oldUserName);
+						   user.setSignature(oldSignature);
+						   user.setUserSex(oldSex);
+						   user.setUserEmail(oldMail);
+//					        this.boUserServicess.update(save);
 						   BoUsers save = (BoUsers)this.boUserServicess.save(user);
 						   if(save != null) {
 								//注册成功时 默认添加一个楼层和四个房间
@@ -8689,10 +8698,7 @@ import org.apache.commons.codec.binary.Base64;//2-9
 					}
 				}else {//新用户未注册
 //					logger.info("newTe==null");
-					//找到旧号码对应的用户,将该用户的号码和密码换成新用户的
-					BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
-					String oldPWD=oldTel.getUserPwd();
-					String oldHeadPic=oldTel.getHeadPic();
+					//将该用户的号码和密码换成新用户的
 					oldTel.setUserPhone(newPhone);
 					oldTel.setUserPwd(md5.getMD5ofStr("888888"));//初始密码：888888
 					oldTel.setHeadPic(headPic);
@@ -8707,7 +8713,10 @@ import org.apache.commons.codec.binary.Base64;//2-9
 						//注册（把旧账号的号码、密码和头像放进去）
 						BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
 						user.setHeadPic(oldHeadPic);
-//						this.boUserServicess.update(save);
+						user.setUserName(oldUserName);
+						user.setSignature(oldSignature);
+						user.setUserSex(oldSex);
+						user.setUserEmail(oldMail);
 						BoUsers save = (BoUsers)this.boUserServicess.save(user);
 						if(save != null) {
 							//注册成功时 默认添加一个楼层和四个房间
