@@ -47,13 +47,6 @@ import com.smarthome.imcp.dao.model.bo.BoUsers;
 
 		@Override
 		public List<BoHostDevice> getAllHostD() {
-//			StringBuffer hql = new StringBuffer();
-//			hql.append("select bhd.id,bu.userPhone,bd.deviceCode,bhd.nickName from BoHostDevice bhd,BoUsers bu,BoDevice bd");//可能有问题
-//			List<BoHostDevice> list=findByHQL(hql.toString());
-//			if(list ==null) {
-//				return null;
-//			}
-//			return list;
 			DetachedCriteria criteria = DetachedCriteria.forClass(BoHostDevice.class);
 			return findByCriteria(criteria);
 		}

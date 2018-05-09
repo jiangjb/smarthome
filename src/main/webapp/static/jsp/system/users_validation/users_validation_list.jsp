@@ -40,7 +40,7 @@
 						</span>
 					</td>
 					<!-- <td style="vertical-align:top;"><button class="btn btn-mini btn-light" onclick="search();"  title="检索"><i id="nav-search-icon" class="icon-search"></i></button></td> -->
-					<td style="vertical-align:top;"><input type="button" style="border:none;" value="搜索"  onclick="search();"  title="检索"></input></td>
+					<td style="vertical-align:top;"><input type="button" style="border:none;height:28px;" value="搜索"  onclick="search();"  title="检索"></input></td>
 					<%-- <c:if test="${QX.cha == 1 }"> --%>
 					<shiro:hasRole name="admin">
 						<td style="vertical-align:top;"><a class="btn btn-mini btn-light" onclick="toExcel();" title="导出到EXCEL"><i id="nav-search-icon" class="icon-download-alt"></i></a></td>
@@ -49,10 +49,7 @@
 				</tr>
 			</table>
 			<!-- 检索  -->
-		
-		
 			<table id="table_report" class="table table-striped table-bordered table-hover">
-				
 				<thead>
 					<tr>
 						<th class="center">
@@ -64,9 +61,7 @@
 						<shiro:hasRole name="admin"><th class="center">操作</th></shiro:hasRole>
 					</tr>
 				</thead>
-										
 				<tbody id="validations">
-					
 				<!-- 开始循环 -->	
 				<c:choose>
 					<c:when test="${not empty varList}">
@@ -175,12 +170,12 @@
     			dataType:"json",
     			async: true,
     			success: function(data){
-    				if(data == null){
+    				if(data == ""){
+   						$("#validations").empty();
     					$("#validations").append('<tr class="main_info">'+
     					'<td colspan="100" class="center" >没有相关数据</td>'+
     					'</tr>');					
     				}else{
-    					/* alert("success") */
         				$.each(data,function(i,item){//i是key,item是value
         					if(item.id == null){
         						var currentPage=item.currentPage;
@@ -581,6 +576,7 @@
 	    			success: function(data){
 	    				/* alert("success"); */
 	    				if(data == ""){
+	    					$("#validations").empty();
 	    					$("#validations").append('<tr class="main_info">'+
 	    					'<td colspan="100" class="center" >没有相关数据</td>'+
 	    					'</tr>');					

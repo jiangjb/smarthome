@@ -238,8 +238,6 @@ import java.io.FileNotFoundException;
 			}
 			@Override
 			public List<BoDevice> findByDCode(String deviceCode) {
-				// TODO Auto-generated method stub
-//				return this.boDeviceDao.findByDCode(deviceCode);
 				DetachedCriteria criteria = DetachedCriteria.forClass(BoDevice.class);
 				criteria.add(Restrictions.eq("deviceCode", deviceCode));
 				List list = this.boDeviceDao.findByCriteria(criteria);

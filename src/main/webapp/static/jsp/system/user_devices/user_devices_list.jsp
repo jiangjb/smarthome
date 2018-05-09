@@ -35,7 +35,7 @@
 					</td>
 					
 					<!-- <td style="vertical-align:top;"><button class="btn btn-mini btn-light" onclick="search();"  title="检索"><i id="nav-search-icon" class="icon-search"></i></button></td> -->
-					<td style="vertical-align:top;"><input type="button" value="搜索"  onclick="search();"  title="检索"></input></td>
+					<td style="vertical-align:top;"><input type="button" style="border:none;height:28px;" value="搜索"  onclick="search(1);"  title="检索"></input></td>
 				</tr>
 			</table>
 			<!-- 检索  -->
@@ -52,7 +52,8 @@
 						<th class="center">USER_PHONE</th>
 						<th class="center">DEVICE_CODE</th>
 						<th class="center">NICK_NAME</th>
-						<shiro:hasRole name="admin"><th class="center">操作</th></shiro:hasRole>
+						<th class="center">操作</th>
+						<%-- <shiro:hasRole name="admin"><th class="center">操作</th></shiro:hasRole> --%>
 					</tr>
 				</thead>
 										
@@ -140,461 +141,1208 @@
 		$(top.hangge());
 		
 		$(function(){
-			//显示所有数据
-			$.ajax({
-    			url: "showHostD.do",
-    	    	data: { },
-    			type: "POST",
-    			dataType:"json",
-    			async: true,
-    			success: function(data){
-    				if(data == ""){
-    					$("#userDevicelist").empty();
-    					$("#userDevicelist").append('<tr class="main_info">'+
-    					'<td colspan="100" class="center" >没有相关数据</td>'+
-    					'</tr>');					
-    				}else{
-    					$.each(data,function(i,item){
-    						if(item.id == null){
-        						var currentPage=item.currentPage;
-        						var totalPages=item.totalPages;
-        						
-        						/* alert(totalPages)  */
-        						var table="";
-        						if(totalPages ==1){
-       								table='<ul>'+
-               									'<li><a><font color="#808080">首页</font></a></li>'+
-               									'<li><a><font color="#808080">上页</font></a></li>'+
-               									'<li><a><font color="#808080">1</font></a></li>'+
-               									'<li><a><font color="#808080">下页</font></a></li>'+
-               									'<li><a><font color="#808080">尾页</font></a></li>'+
-               								'</ul>';
-       							}else if(totalPages ==2){
-       								/* alert("2"); */
-       								table='<ul>'+
-                								'<li><a><font color="#808080">首页</font></a></li>'+
-            									'<li><a><font color="#808080">上页</font></a></li>'+
-            									'<li><a><font color="#808080">1</font></a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(2)">尾页</a></li>'+
-               								'</ul>';
-       							}else if(totalPages ==3){
-       								table='<ul>'+
-               								'<li><a><font color="#808080">首页</font></a></li>'+
-           									'<li><a><font color="#808080">上页</font></a></li>'+
-           									'<li><a><font color="#808080">1</font></a></li>'+
-           									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
-           									'<li style="cursor:pointer;"><a onclick="find(3)">3</a></li>'+
-           									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
-           									'<li style="cursor:pointer;"><a onclick="find(3)">尾页</a></li>'+
-               								'</ul>';
-       							}else if(totalPages ==4){
-       								table='<ul>'+
-                								'<li><a><font color="#808080">首页</font></a></li>'+
-            									'<li><a><font color="#808080">上页</font></a></li>'+
-            									'<li><a><font color="#808080">1</font></a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(3)">3</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(4)">4</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(4)">尾页</a></li>'+
-               								'</ul>';
-       							}else{//totalPages >= 5 时
-       								table='<ul>'+
-                								'<li><a><font color="#808080">首页</font></a></li>'+
-            									'<li><a><font color="#808080">上页</font></a></li>'+
-            									'<li><a><font color="#808080">1</font></a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(3)">3</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(4)">4</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(5)">5</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>'+
-               								'</ul>';
-       							}
-        						
-        						$("#userdeviceList01").append(table);
-        					}else{
-        						$("#userDevicelist").append('<tr>'+
-            	    					'<td class="center" style="width: 30px;">'+
-            	    					'<label>'+
-            	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
-            	    					'<span class="lbl">'+
-            	    					'</span>'+
-            	    					'</label>'+
-            	    					'</td>'+
-            	    					'<td class="center">'+(i+1)+'</td>'+
-            	    					'<td class="center">'+item.userPhone+'</td>'+
-            	    					'<td class="center">'+item.deviceCode+'</td>'+
-            	    					'<td class="center">'+item.nick_name+'</td>'+
-            	    					'<shiro:hasRole name="admin">'+
-            	    					'<td style="width: 30px;" class="center">'+
-            	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
-            	    					'</td>'+
-            	    					'</shiro:hasRole>'+
-            	    					'</tr>');
-        					}
-    					})
-    					
-    				}
-    				
-    			}
-    		});
-		})
+			var role='<%= session.getAttribute("role")%>';
+			var tel='<%= session.getAttribute("userPhone")%>';
+			if(tel!="null"){
+				$.ajax({
+	    			url: "findHostDByPhone.do",
+	    	    	data: {"userPhone":tel },
+	    			type: "POST",
+	    			dataType:"json",
+	    			async: true,
+	    			success: function(data){
+	    				if(data[0].id == null){
+	    					$("#userdeviceList01").empty();
+	    					$("#userDevicelist").empty();
+	    					$("#userDevicelist").append('<tr class="main_info">'+
+	    					'<td colspan="100" class="center" >没有相关数据</td>'+
+	    					'</tr>');					
+	    				}else{
+	    					$.each(data,function(i,item){
+	    						if(item.id == null){
+	        						var currentPage=item.currentPage;
+	        						var totalPages=item.totalPages;
+	        						
+	        						/* alert(totalPages)  */
+	        						var table="";
+	        						if(totalPages ==1){
+	       								table='<ul>'+
+	               									'<li><a><font color="#808080">首页</font></a></li>'+
+	               									'<li><a><font color="#808080">上页</font></a></li>'+
+	               									'<li><a><font color="#808080">1</font></a></li>'+
+	               									'<li><a><font color="#808080">下页</font></a></li>'+
+	               									'<li><a><font color="#808080">尾页</font></a></li>'+
+	               								'</ul>';
+	       							}else if(totalPages ==2){
+	       								/* alert("2"); */
+	       								table='<ul>'+
+	                								'<li><a><font color="#808080">首页</font></a></li>'+
+	            									'<li><a><font color="#808080">上页</font></a></li>'+
+	            									'<li><a><font color="#808080">1</font></a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2);">2</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2);">下页</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2);">尾页</a></li>'+
+	               								'</ul>';
+	       							}else if(totalPages ==3){
+	       								table='<ul>'+
+	               								'<li><a><font color="#808080">首页</font></a></li>'+
+	           									'<li><a><font color="#808080">上页</font></a></li>'+
+	           									'<li><a><font color="#808080">1</font></a></li>'+
+	           									'<li style="cursor:pointer;"><a onclick="find(2);">2</a></li>'+
+	           									'<li style="cursor:pointer;"><a onclick="find(3);">3</a></li>'+
+	           									'<li style="cursor:pointer;"><a onclick="find(2);">下页</a></li>'+
+	           									'<li style="cursor:pointer;"><a onclick="find(3);">尾页</a></li>'+
+	               								'</ul>';
+	       							}else if(totalPages ==4){
+	       								table='<ul>'+
+	                								'<li><a><font color="#808080">首页</font></a></li>'+
+	            									'<li><a><font color="#808080">上页</font></a></li>'+
+	            									'<li><a><font color="#808080">1</font></a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2);">2</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(3);">3</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(4);">4</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2);">下页</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(4);">尾页</a></li>'+
+	               								'</ul>';
+	       							}else{//totalPages >= 5 时
+	       								table='<ul>'+
+	                								'<li><a><font color="#808080">首页</font></a></li>'+
+	            									'<li><a><font color="#808080">上页</font></a></li>'+
+	            									'<li><a><font color="#808080">1</font></a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2);">2</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(3);">3</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(4);">4</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(5);">5</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2);">下页</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>'+
+	               								'</ul>';
+	       							}
+	        						
+	        						$("#userdeviceList01").append(table);
+	        					}else{
+        							$("#userDevicelist").append('<tr>'+
+	            	    					'<td class="center" style="width: 30px;">'+
+	            	    					'<label>'+
+	            	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+	            	    					'<span class="lbl">'+
+	            	    					'</span>'+
+	            	    					'</label>'+
+	            	    					'</td>'+
+	            	    					'<td class="center">'+(i+1)+'</td>'+
+	            	    					'<td class="center">'+item.userPhone+'</td>'+
+	            	    					'<td class="center">'+item.deviceCode+'</td>'+
+	            	    					'<td class="center">'+item.nick_name+'</td>'+
+	            	    					'<shiro:hasRole name="buyer">'+
+	            	    					'<td style="width: 30px;" class="center">'+
+	            	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+	            	    					'</td>'+
+	            	    					'</shiro:hasRole>'+
+	            	    					'</tr>');
+	        						
+	        					}
+	    					})
+	    					
+	    				}
+	    				
+	    			}
+	    		});
+			}else{
+				//显示所有数据
+				$.ajax({
+	    			url: "showUserDevices.do",
+	    	    	data: { },
+	    			type: "POST",
+	    			dataType:"json",
+	    			async: true,
+	    			success: function(data){
+	    				if(data == ""){
+	    					$("#userDevicelist").empty();
+	    					$("#userDevicelist").append('<tr class="main_info">'+
+	    					'<td colspan="100" class="center" >没有相关数据</td>'+
+	    					'</tr>');					
+	    				}else{
+	    					$.each(data,function(i,item){
+	    						if(item.id == null){
+	        						var currentPage=item.currentPage;
+	        						var totalPages=item.totalPages;
+	        						
+	        						/* alert(totalPages)  */
+	        						var table="";
+	        						if(totalPages ==1){
+	       								table='<ul>'+
+	               									'<li><a><font color="#808080">首页</font></a></li>'+
+	               									'<li><a><font color="#808080">上页</font></a></li>'+
+	               									'<li><a><font color="#808080">1</font></a></li>'+
+	               									'<li><a><font color="#808080">下页</font></a></li>'+
+	               									'<li><a><font color="#808080">尾页</font></a></li>'+
+	               								'</ul>';
+	       							}else if(totalPages ==2){
+	       								/* alert("2"); */
+	       								table='<ul>'+
+	                								'<li><a><font color="#808080">首页</font></a></li>'+
+	            									'<li><a><font color="#808080">上页</font></a></li>'+
+	            									'<li><a><font color="#808080">1</font></a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2);">2</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2);">下页</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2);">尾页</a></li>'+
+	               								'</ul>';
+	       							}else if(totalPages ==3){
+	       								table='<ul>'+
+	               								'<li><a><font color="#808080">首页</font></a></li>'+
+	           									'<li><a><font color="#808080">上页</font></a></li>'+
+	           									'<li><a><font color="#808080">1</font></a></li>'+
+	           									'<li style="cursor:pointer;"><a onclick="find(2);">2</a></li>'+
+	           									'<li style="cursor:pointer;"><a onclick="find(3);">3</a></li>'+
+	           									'<li style="cursor:pointer;"><a onclick="find(2);">下页</a></li>'+
+	           									'<li style="cursor:pointer;"><a onclick="find(3);">尾页</a></li>'+
+	               								'</ul>';
+	       							}else if(totalPages ==4){
+	       								table='<ul>'+
+	                								'<li><a><font color="#808080">首页</font></a></li>'+
+	            									'<li><a><font color="#808080">上页</font></a></li>'+
+	            									'<li><a><font color="#808080">1</font></a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2);">2</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(3);">3</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(4);">4</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2);">下页</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(4);">尾页</a></li>'+
+	               								'</ul>';
+	       							}else{//totalPages >= 5 时
+	       								table='<ul>'+
+	                								'<li><a><font color="#808080">首页</font></a></li>'+
+	            									'<li><a><font color="#808080">上页</font></a></li>'+
+	            									'<li><a><font color="#808080">1</font></a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2);">2</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(3);">3</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(4);">4</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(5);">5</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find(2);">下页</a></li>'+
+	            									'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>'+
+	               								'</ul>';
+	       							}
+	        						
+	        						$("#userdeviceList01").append(table);
+	        					}else{
+	        						if(role=="admin"){
+	        							$("#userDevicelist").append('<tr>'+
+		            	    					'<td class="center" style="width: 30px;">'+
+		            	    					'<label>'+
+		            	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		            	    					'<span class="lbl">'+
+		            	    					'</span>'+
+		            	    					'</label>'+
+		            	    					'</td>'+
+		            	    					'<td class="center">'+(i+1)+'</td>'+
+		            	    					'<td class="center">'+item.userPhone+'</td>'+
+		            	    					'<td class="center">'+item.deviceCode+'</td>'+
+		            	    					'<td class="center">'+item.nick_name+'</td>'+
+		            	    					'<shiro:hasRole name="admin">'+
+		            	    					'<td style="width: 30px;" class="center">'+
+		            	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+		            	    					'</td>'+
+		            	    					'</shiro:hasRole>'+
+		            	    					'</tr>');
+	        						}else{
+	        							$("#userDevicelist").append('<tr>'+
+		            	    					'<td class="center" style="width: 30px;">'+
+		            	    					'<label>'+
+		            	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		            	    					'<span class="lbl">'+
+		            	    					'</span>'+
+		            	    					'</label>'+
+		            	    					'</td>'+
+		            	    					'<td class="center">'+(i+1)+'</td>'+
+		            	    					'<td class="center">'+item.userPhone+'</td>'+
+		            	    					'<td class="center">'+item.deviceCode+'</td>'+
+		            	    					'<td class="center">'+item.nick_name+'</td>'+
+		            	    					'<td style="width: 30px;" class="center">'+
+		            	    					'</td>'+
+		            	    					'</tr>');
+	        						}
+	        						
+	        					}
+	    					})
+	    					
+	    				}
+	    				
+	    			}
+	    		});
+			}
+		});
+		
 		
 		//分页 find(index)
 		function find(index){
 			/* alert(index); */
-			$.ajax({
-				url:"findudeviceByIndex.do",
-		    	data: {"index":index }, 
-		    	type: "POST",
-				dataType:"json",
-				async: true,
-				success: function(data){  //list里的实体类都在这里面遍历
-					/* alert("success:"+data) */
-					//清空标签内 [子标签及内容]，再添加
-					$("#userDevicelist").empty();
-					$.each(data,function(i,item){//i是key,item是value
-						var currentPage=item.currentPage;
-						var totalPages=item.totalPages;
-						if(item.id == null){
-							//如果是page实体类  处理一
-							$("#userdeviceList01").empty();
-							
-							
-							//根据 totalPages 和 currentPage 分成 5 种情况
-							if(totalPages > 5  || currentPage != 1){//这里处理 currentPage未最左边一页   时的上一页问题
-								var fore='<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>';
-							}else{//首页时 上页不能再选择
-								var fore='<li><a><font color="#808080">上页</font></a></li>';
-							}
-							
-							//先处理最后一页的分页信息
-							if( (totalPages % 5 == 1) && (currentPage == totalPages) ){//第一种情况：总条数     除 5    余1
-								if(currentPage == totalPages && currentPage !=1){
-									$("#userdeviceList01").append('<ul>'+
-											'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
-											fore+
-											'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-											'<li><a><font color="#808080">下页</font></a></li>'+
-											'<li><a><font color="#808080">尾页</font></a></li>');
-								}else{
-									$("#userdeviceList01").append('<ul>'+
-											'<li><a><font color="#808080">首页</font></a></li>'+
-											fore+
-											'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-											'<li><a><font color="#808080">下页</font></a></li>'+
-											'<li><a><font color="#808080">尾页</font></a></li>');
-								}	
-							}else if( (totalPages % 5 == 2) && ((currentPage == totalPages) || (currentPage == totalPages - 1)) ){
-								if(currentPage == totalPages){
-									$("#userdeviceList01").append('<ul>'+
-											'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
-											fore+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
-											'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-											'<li><a><font color="#808080">下页</font></a></li>'+
-											'<li><a><font color="#808080">尾页</font></a></li>');
-								}else if(currentPage == totalPages - 1){
-									if(currentPage == 1){
-										$("#userdeviceList01").append('<ul>'+
-												'<li><a><font color="#808080">首页</font></a></li>'+
-	        									'<li><a><font color="#808080">上页</font></a></li>'+
-	        									'<li><a><font color="#808080">1</font></a></li>'+
-	        									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
-	        									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
-	        									'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
-									}else{
+			var role= '<%= session.getAttribute("role")%>'; 
+			var deviceCode=$("#nav-search-input").val();
+			/* alert("deviceCode:"+deviceCode); */
+			if(deviceCode == ""){
+				$.ajax({
+					url:"findudeviceByIndex.do",
+			    	data: {"index":index }, 
+			    	type: "POST",
+					dataType:"json",
+					async: true,
+					success: function(data){  //list里的实体类都在这里面遍历
+						/* alert("success:"+data) */
+						//清空标签内 [子标签及内容]，再添加
+						$("#userDevicelist").empty();
+						$.each(data,function(i,item){//i是key,item是value
+							var currentPage=item.currentPage;
+							var totalPages=item.totalPages;
+							if(item.id == null){
+								//如果是page实体类  处理一
+								$("#userdeviceList01").empty();
+								
+								
+								//根据 totalPages 和 currentPage 分成 5 种情况
+								if(totalPages > 5  || currentPage != 1){//这里处理 currentPage未最左边一页   时的上一页问题
+									var fore='<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>';
+								}else{//首页时 上页不能再选择
+									var fore='<li><a><font color="#808080">上页</font></a></li>';
+								}
+								
+								//先处理最后一页的分页信息
+								if( (totalPages % 5 == 1) && (currentPage == totalPages) ){//第一种情况：总条数     除 5    余1
+									if(currentPage == totalPages && currentPage !=1){
 										$("#userdeviceList01").append('<ul>'+
 												'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
+												fore+
 												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');	
-									}
-								}
-							}else if( (totalPages%5==3) && ((currentPage==totalPages) || (currentPage==totalPages-1)|| (currentPage==totalPages-2)) ){
-								if(currentPage == totalPages){
-									$("#userdeviceList01").append('<ul>'+
-											'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
-											fore+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+')">'+(currentPage-2)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
-											'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-											'<li><a><font color="#808080">下页</font></a></li>'+
-											'<li><a><font color="#808080">尾页</font></a></li>');
-								}else if(currentPage == totalPages - 1){
-									$("#userdeviceList01").append('<ul>'+
-											'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
-											'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
-								}else if(currentPage == totalPages - 2){
-									if(currentPage == 1){
-										$("#userdeviceList01").append('<ul>'+
-												'<li><a><font color="#808080">首页</font></a></li>'+
-												'<li><a><font color="#808080">上页</font></a></li>'+
-												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
+												'<li><a><font color="#808080">下页</font></a></li>'+
+												'<li><a><font color="#808080">尾页</font></a></li>');
 									}else{
 										$("#userdeviceList01").append('<ul>'+
-												'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
-												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
-									}
-								}
-							}else if( (totalPages%5==4) && ((currentPage==totalPages) || (currentPage==totalPages-1)|| (currentPage==totalPages-2)|| (currentPage==totalPages-3)) ){
-								if(currentPage == totalPages){
-									$("#userdeviceList01").append('<ul>'+
-											'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
-											fore+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+')">'+(currentPage-3)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+')">'+(currentPage-2)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
-											'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-											'<li><a><font color="#808080">下页</font></a></li>'+
-											'<li><a><font color="#808080">尾页</font></a></li>');
-								}else if(currentPage == totalPages - 1){
-									$("#userdeviceList01").append('<ul>'+
-											'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+')">'+(currentPage-2)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
-											'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
-								}else if(currentPage == totalPages - 2){
-									$("#userdeviceList01").append('<ul>'+
-											'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
-											'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
-								}else if(currentPage == totalPages - 3){
-									if(currentPage == 1){
-										$("#userdeviceList01").append('<ul>'+
 												'<li><a><font color="#808080">首页</font></a></li>'+
-												'<li><a><font color="#808080">上页</font></a></li>'+
+												fore+
 												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+')">'+(currentPage+3)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
-									}else{
-										$("#userdeviceList01").append('<ul>'+
-												'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
-												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+')">'+(currentPage+3)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
-									}
-								}
-							}else{//取整 totalPages % 5 = 0   (总页数：5,10,15...)
-								if(currentPage % 5 == 0){
+												'<li><a><font color="#808080">下页</font></a></li>'+
+												'<li><a><font color="#808080">尾页</font></a></li>');
+									}	
+								}else if( (totalPages % 5 == 2) && ((currentPage == totalPages) || (currentPage == totalPages - 1)) ){
 									if(currentPage == totalPages){
 										$("#userdeviceList01").append('<ul>'+
 												'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
 												fore+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-4)+')">'+(currentPage-4)+'</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
+												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+												'<li><a><font color="#808080">下页</font></a></li>'+
+												'<li><a><font color="#808080">尾页</font></a></li>');
+									}else if(currentPage == totalPages - 1){
+										if(currentPage == 1){
+											$("#userdeviceList01").append('<ul>'+
+													'<li><a><font color="#808080">首页</font></a></li>'+
+		        									'<li><a><font color="#808080">上页</font></a></li>'+
+		        									'<li><a><font color="#808080">1</font></a></li>'+
+		        									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
+		        									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
+		        									'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
+										}else{
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');	
+										}
+									}
+								}else if( (totalPages%5==3) && ((currentPage==totalPages) || (currentPage==totalPages-1)|| (currentPage==totalPages-2)) ){
+									if(currentPage == totalPages){
+										$("#userdeviceList01").append('<ul>'+
+												'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
+												fore+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+')">'+(currentPage-2)+'</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
+												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+												'<li><a><font color="#808080">下页</font></a></li>'+
+												'<li><a><font color="#808080">尾页</font></a></li>');
+									}else if(currentPage == totalPages - 1){
+										$("#userdeviceList01").append('<ul>'+
+												'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
+												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
+									}else if(currentPage == totalPages - 2){
+										if(currentPage == 1){
+											$("#userdeviceList01").append('<ul>'+
+													'<li><a><font color="#808080">首页</font></a></li>'+
+													'<li><a><font color="#808080">上页</font></a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
+										}else{
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
+										}
+									}
+								}else if( (totalPages%5==4) && ((currentPage==totalPages) || (currentPage==totalPages-1)|| (currentPage==totalPages-2)|| (currentPage==totalPages-3)) ){
+									if(currentPage == totalPages){
+										$("#userdeviceList01").append('<ul>'+
+												'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
+												fore+
 												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+')">'+(currentPage-3)+'</a></li>'+
 												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+')">'+(currentPage-2)+'</a></li>'+
 												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
 												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
 												'<li><a><font color="#808080">下页</font></a></li>'+
 												'<li><a><font color="#808080">尾页</font></a></li>');
-									}else{
-										$("#userdeviceList01").append('<ul>'+
-												'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
-												fore+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-4)+')">'+(currentPage-4)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+')">'+(currentPage-3)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+')">'+(currentPage-2)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
-												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');	
-									}
-								}else if(currentPage % 5 == 1){
-									if(currentPage == 1){
-										$("#userdeviceList01").append('<ul>'+
-												'<li><a><font color="#808080">首页</font></a></li>'+
-	        									'<li><a><font color="#808080">上页</font></a></li>'+
-	        									'<li><a><font color="#808080">1</font></a></li>'+
-	        									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
-	        									'<li style="cursor:pointer;"><a onclick="find(3)">3</a></li>'+
-	        									'<li style="cursor:pointer;"><a onclick="find(4)">4</a></li>'+
-	        									'<li style="cursor:pointer;"><a onclick="find(5)">5</a></li>'+
-	        									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
-	        									'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
-									}else{	
+									}else if(currentPage == totalPages - 1){
 										$("#userdeviceList01").append('<ul>'+
 												'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
 												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+')">'+(currentPage-2)+'</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
+												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
+									}else if(currentPage == totalPages - 2){
+										$("#userdeviceList01").append('<ul>'+
+												'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
+												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
+									}else if(currentPage == totalPages - 3){
+										if(currentPage == 1){
+											$("#userdeviceList01").append('<ul>'+
+													'<li><a><font color="#808080">首页</font></a></li>'+
+													'<li><a><font color="#808080">上页</font></a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+')">'+(currentPage+3)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
+										}else{
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+')">'+(currentPage+3)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
+										}
+									}
+								}else{//取整 totalPages % 5 = 0   (总页数：5,10,15...)
+									if(currentPage % 5 == 0){
+										if(currentPage == totalPages){
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
+													fore+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-4)+')">'+(currentPage-4)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+')">'+(currentPage-3)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+')">'+(currentPage-2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li><a><font color="#808080">下页</font></a></li>'+
+													'<li><a><font color="#808080">尾页</font></a></li>');
+										}else{
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
+													fore+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-4)+')">'+(currentPage-4)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+')">'+(currentPage-3)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+')">'+(currentPage-2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');	
+										}
+									}else if(currentPage % 5 == 1){
+										if(currentPage == 1){
+											$("#userdeviceList01").append('<ul>'+
+													'<li><a><font color="#808080">首页</font></a></li>'+
+		        									'<li><a><font color="#808080">上页</font></a></li>'+
+		        									'<li><a><font color="#808080">1</font></a></li>'+
+		        									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
+		        									'<li style="cursor:pointer;"><a onclick="find(3)">3</a></li>'+
+		        									'<li style="cursor:pointer;"><a onclick="find(4)">4</a></li>'+
+		        									'<li style="cursor:pointer;"><a onclick="find(5)">5</a></li>'+
+		        									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
+		        									'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
+										}else{	
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+')">'+(currentPage+3)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+4)+')">'+(currentPage+4)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
+										}
+									}else if(currentPage % 5 ==  2){
+										/* alert("2") */
+										$("#userdeviceList01").append('<ul>'+
+												'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
 												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
 												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
 												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
 												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+')">'+(currentPage+3)+'</a></li>'+
-												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+4)+')">'+(currentPage+4)+'</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
+									}else if(currentPage % 5 == 3){
+										$("#userdeviceList01").append('<ul>'+
+												'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+')">'+(currentPage-2)+'</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
+												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
+									}else if(currentPage % 5 == 4){
+										$("#userdeviceList01").append('<ul>'+
+												'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+')">'+(currentPage-3)+'</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+')">'+(currentPage-2)+'</a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
+												'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
 												'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
 												'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
 									}
-								}else if(currentPage % 5 ==  2){
-									/* alert("2") */
-									$("#userdeviceList01").append('<ul>'+
-											'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
-											'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+')">'+(currentPage+3)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
-								}else if(currentPage % 5 == 3){
-									$("#userdeviceList01").append('<ul>'+
-											'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+')">'+(currentPage-2)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
-											'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+')">'+(currentPage+2)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
-								}else if(currentPage % 5 == 4){
-									$("#userdeviceList01").append('<ul>'+
-											'<li style="cursor:pointer;"><a onclick="find(1)">首页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+')">'+(currentPage-3)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+')">'+(currentPage-2)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">'+(currentPage-1)+'</a></li>'+
-											'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">'+(currentPage+1)+'</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+')">下页</a></li>'+
-											'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>');
 								}
+								
+							}else{
+								if(role == "admin"){
+									$("#userDevicelist").append('<tr>'+
+											'<td class="center" style="width: 30px;">'+
+		        	    					'<label>'+
+		        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		        	    					'<span class="lbl">'+
+		        	    					'</span>'+
+		        	    					'</label>'+
+		        	    					'</td>'+
+		        	    					'<td class="center">'+(i+1)+'</td>'+
+		        	    					'<td class="center">'+item.userPhone+'</td>'+
+		        	    					'<td class="center">'+item.deviceCode+'</td>'+
+		        	    					'<td class="center">'+item.nick_name+'</td>'+
+		        	    					'<shiro:hasRole name="admin">'+
+		        	    					'<td style="width: 30px;" class="center">'+
+		        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+		        	    					'</td>'+
+		        	    					'</shiro:hasRole>'+
+		        	    					'</tr>');
+								}else if(role == "buyer"){
+									$("#userDevicelist").append('<tr>'+
+											'<td class="center" style="width: 30px;">'+
+		        	    					'<label>'+
+		        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		        	    					'<span class="lbl">'+
+		        	    					'</span>'+
+		        	    					'</label>'+
+		        	    					'</td>'+
+		        	    					'<td class="center">'+(i+1)+'</td>'+
+		        	    					'<td class="center">'+item.userPhone+'</td>'+
+		        	    					'<td class="center">'+item.deviceCode+'</td>'+
+		        	    					'<td class="center">'+item.nick_name+'</td>'+
+		        	    					'<shiro:hasRole name="buyer">'+
+		        	    					'<td style="width: 30px;" class="center">'+
+		        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+		        	    					'</td>'+
+		        	    					'</shiro:hasRole>'+
+		        	    					'</tr>');
+								}else{
+									$("#userDevicelist").append('<tr>'+
+											'<td class="center" style="width: 30px;">'+
+		        	    					'<label>'+
+		        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		        	    					'<span class="lbl">'+
+		        	    					'</span>'+
+		        	    					'</label>'+
+		        	    					'</td>'+
+		        	    					'<td class="center">'+(i+1)+'</td>'+
+		        	    					'<td class="center">'+item.userPhone+'</td>'+
+		        	    					'<td class="center">'+item.deviceCode+'</td>'+
+		        	    					'<td class="center">'+item.nick_name+'</td>'+
+		        	    					'<td style="width: 30px;" class="center">'+
+		        	    					'</td>'+
+		        	    					'</tr>');
+								}
+		    				}
+						})								    					
+				}, 
+				error: function(e){
+	           	    /* alert(e) */
+				}
+			});
+			}else{
+				$.ajax({
+					url:"findUDsByDevicecode.do",
+			    	data: {"deviceCode":deviceCode ,"index":index}, 
+			    	type: "POST",
+					dataType:"json",
+					async: true,
+					success: function(data){
+							/* alert("success:"+data) */
+							//清空标签内 [子标签及内容]，再添加
+							$("#userDevicelist").empty();
+							$("#userdeviceList01").empty();
+							if(data == ""){
+								$("#userDevicelist").append('<tr class="main_info">'+
+				    					'<td colspan="100" class="center" >没有相关数据</td>'+
+		    					'</tr>');	
+							}else{
+								$.each(data,function(i,item){//i是key,item是value
+									var currentPage=item.currentPage;
+									var totalPages=item.totalPages;
+									if(item.id == null){
+										//如果是page实体类  处理一
+										
+										//根据 totalPages 和 currentPage 分成 5 种情况
+										if(totalPages > 5  || currentPage != 1){//这里处理 currentPage未最左边一页   时的上一页问题
+											var fore='<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>';
+										}else{//首页时 上页不能再选择
+											var fore='<li><a><font color="#808080">上页</font></a></li>';
+										}
+										
+										//先处理最后一页的分页信息
+										if( (totalPages % 5 == 1) && (currentPage == totalPages) ){//第一种情况：总条数     除 5    余1
+											if(currentPage == totalPages && currentPage !=1){
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														fore+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li><a><font color="#808080">下页</font></a></li>'+
+														'<li><a><font color="#808080">尾页</font></a></li>');
+											}else{
+												$("#userdeviceList01").append('<ul>'+
+														'<li><a><font color="#808080">首页</font></a></li>'+
+														fore+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li><a><font color="#808080">下页</font></a></li>'+
+														'<li><a><font color="#808080">尾页</font></a></li>');
+											}	
+										}else if( (totalPages % 5 == 2) && ((currentPage == totalPages) || (currentPage == totalPages - 1)) ){
+											if(currentPage == totalPages){
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														fore+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li><a><font color="#808080">下页</font></a></li>'+
+														'<li><a><font color="#808080">尾页</font></a></li>');
+											}else if(currentPage == totalPages - 1){
+												if(currentPage == 1){
+													$("#userdeviceList01").append('<ul>'+
+															'<li><a><font color="#808080">首页</font></a></li>'+
+				        									'<li><a><font color="#808080">上页</font></a></li>'+
+				        									'<li><a><font color="#808080">1</font></a></li>'+
+				        									'<li style="cursor:pointer;"><a onclick="find(2);">2</a></li>'+
+				        									'<li style="cursor:pointer;"><a onclick="find(2);">下页</a></li>'+
+				        									'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+												}else{
+													$("#userdeviceList01").append('<ul>'+
+															'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+															'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');	
+												}
+											}
+										}else if( (totalPages%5==3) && ((currentPage==totalPages) || (currentPage==totalPages-1)|| (currentPage==totalPages-2)) ){
+											if(currentPage == totalPages){
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														fore+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+');">'+(currentPage-2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li><a><font color="#808080">下页</font></a></li>'+
+														'<li><a><font color="#808080">尾页</font></a></li>');
+											}else if(currentPage == totalPages - 1){
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+											}else if(currentPage == totalPages - 2){
+												if(currentPage == 1){
+													$("#userdeviceList01").append('<ul>'+
+															'<li><a><font color="#808080">首页</font></a></li>'+
+															'<li><a><font color="#808080">上页</font></a></li>'+
+															'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+												}else{
+													$("#userdeviceList01").append('<ul>'+
+															'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+															'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+												}
+											}
+										}else if( (totalPages%5==4) && ((currentPage==totalPages) || (currentPage==totalPages-1)|| (currentPage==totalPages-2)|| (currentPage==totalPages-3)) ){
+											if(currentPage == totalPages){
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														fore+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+');">'+(currentPage-3)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+');">'+(currentPage-2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li><a><font color="#808080">下页</font></a></li>'+
+														'<li><a><font color="#808080">尾页</font></a></li>');
+											}else if(currentPage == totalPages - 1){
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+');">'+(currentPage-2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+											}else if(currentPage == totalPages - 2){
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+											}else if(currentPage == totalPages - 3){
+												if(currentPage == 1){
+													$("#userdeviceList01").append('<ul>'+
+															'<li><a><font color="#808080">首页</font></a></li>'+
+															'<li><a><font color="#808080">上页</font></a></li>'+
+															'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+');">'+(currentPage+3)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+												}else{
+													$("#userdeviceList01").append('<ul>'+
+															'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+															'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+');">'+(currentPage+3)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+												}
+											}
+										}else{//取整 totalPages % 5 = 0   (总页数：5,10,15...)
+											if(currentPage % 5 == 0){
+												if(currentPage == totalPages){
+													$("#userdeviceList01").append('<ul>'+
+															'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+															fore+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage-4)+');">'+(currentPage-4)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+');">'+(currentPage-3)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+');">'+(currentPage-2)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+															'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+															'<li><a><font color="#808080">下页</font></a></li>'+
+															'<li><a><font color="#808080">尾页</font></a></li>');
+												}else{
+													$("#userdeviceList01").append('<ul>'+
+															'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+															fore+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage-4)+');">'+(currentPage-4)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+');">'+(currentPage-3)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+');">'+(currentPage-2)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+															'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');	
+												}
+											}else if(currentPage % 5 == 1){
+												if(currentPage == 1){
+													$("#userdeviceList01").append('<ul>'+
+															'<li><a><font color="#808080">首页</font></a></li>'+
+				        									'<li><a><font color="#808080">上页</font></a></li>'+
+				        									'<li><a><font color="#808080">1</font></a></li>'+
+				        									'<li style="cursor:pointer;"><a onclick="find(2);">2</a></li>'+
+				        									'<li style="cursor:pointer;"><a onclick="find(3);">3</a></li>'+
+				        									'<li style="cursor:pointer;"><a onclick="find(4);">4</a></li>'+
+				        									'<li style="cursor:pointer;"><a onclick="find(5);">5</a></li>'+
+				        									'<li style="cursor:pointer;"><a onclick="find(2);">下页</a></li>'+
+				        									'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+												}else{	
+													$("#userdeviceList01").append('<ul>'+
+															'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+															'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+');">'+(currentPage+3)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+4)+');">'+(currentPage+4)+'</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+															'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+												}
+											}else if(currentPage % 5 ==  2){
+												/* alert("2") */
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+');">'+(currentPage+3)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+											}else if(currentPage % 5 == 3){
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+');">'+(currentPage-2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+											}else if(currentPage % 5 == 4){
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+');">'+(currentPage-3)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+');">'+(currentPage-2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+											}
+										}
+										
+									}else{
+										if(role == "admin"){
+											$("#userDevicelist").append('<tr>'+
+													'<td class="center" style="width: 30px;">'+
+				        	    					'<label>'+
+				        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+				        	    					'<span class="lbl">'+
+				        	    					'</span>'+
+				        	    					'</label>'+
+				        	    					'</td>'+
+				        	    					'<td class="center">'+(i+1)+'</td>'+
+				        	    					'<td class="center">'+item.userPhone+'</td>'+
+				        	    					'<td class="center">'+item.deviceCode+'</td>'+
+				        	    					'<td class="center">'+item.nick_name+'</td>'+
+				        	    					'<shiro:hasRole name="admin">'+
+				        	    					'<td style="width: 30px;" class="center">'+
+				        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+				        	    					'</td>'+
+				        	    					'</shiro:hasRole>'+
+				        	    					'</tr>');
+										}else if(role == "buyer"){
+											$("#userDevicelist").append('<tr>'+
+													'<td class="center" style="width: 30px;">'+
+				        	    					'<label>'+
+				        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+				        	    					'<span class="lbl">'+
+				        	    					'</span>'+
+				        	    					'</label>'+
+				        	    					'</td>'+
+				        	    					'<td class="center">'+(i+1)+'</td>'+
+				        	    					'<td class="center">'+item.userPhone+'</td>'+
+				        	    					'<td class="center">'+item.deviceCode+'</td>'+
+				        	    					'<td class="center">'+item.nick_name+'</td>'+
+				        	    					'<shiro:hasRole name="buyer">'+
+				        	    					'<td style="width: 30px;" class="center">'+
+				        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+				        	    					'</td>'+
+				        	    					'</shiro:hasRole>'+
+				        	    					'</tr>');
+										}else{
+											$("#userDevicelist").append('<tr>'+
+													'<td class="center" style="width: 30px;">'+
+				        	    					'<label>'+
+				        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+				        	    					'<span class="lbl">'+
+				        	    					'</span>'+
+				        	    					'</label>'+
+				        	    					'</td>'+
+				        	    					'<td class="center">'+(i+1)+'</td>'+
+				        	    					'<td class="center">'+item.userPhone+'</td>'+
+				        	    					'<td class="center">'+item.deviceCode+'</td>'+
+				        	    					'<td class="center">'+item.nick_name+'</td>'+
+				        	    					'<td style="width: 30px;" class="center">'+
+				        	    					'</td>'+
+				        	    					'</tr>');
+										}
+				    				}
+								})								    					
 							}
-							
-						}else{
-							$("#userDevicelist").append('<tr>'+
-									'<td class="center" style="width: 30px;">'+
-        	    					'<label>'+
-        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
-        	    					'<span class="lbl">'+
-        	    					'</span>'+
-        	    					'</label>'+
-        	    					'</td>'+
-        	    					'<td class="center">'+(i+1)+'</td>'+
-        	    					'<td class="center">'+item.userPhone+'</td>'+
-        	    					'<td class="center">'+item.deviceCode+'</td>'+
-        	    					'<td class="center">'+item.nick_name+'</td>'+
-        	    					'<shiro:hasRole name="admin">'+
-        	    					'<td style="width: 30px;" class="center">'+
-        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
-        	    					'</td>'+
-        	    					'</shiro:hasRole>'+
-        	    					'</tr>');
-	    				}
-					})								    					
-			}, 
-			error: function(e){
-           	    /* alert(e) */
+					}, 
+					error: function(e){
+		           	    /* alert(e) */
+					}
+				});
 			}
-		});
 		}
 		
 		//检索
-		function search(){
+		function search(index){
+			var role= '<%= session.getAttribute("role")%>'; 
+			/* alert("search"); */
 			/* top.jzts();
 			$("#Form").submit(); */
 			var deviceCode=$("#nav-search-input").val();
 			$.ajax({
-				url:"findHostByDevicecode.do",
-		    	data: {"deviceCode":deviceCode }, 
+				url:"findUDsByDevicecode.do",
+		    	data: {"deviceCode":deviceCode ,"index":index}, 
 		    	type: "POST",
 				dataType:"json",
 				async: true,
 				success: function(data){
-					if(data == ""){
-    					$("#userDevicelist").empty();
-    					$("#userDevicelist").append('<tr class="main_info">'+
-    					'<td colspan="100" class="center" >没有相关数据</td>'+
-    					'</tr>');					
-    				}else{
-    					/* alert("success") */	
-    					$.each(data,function(i,item){//i是key,item是value
-    						$("#userDevicelist").empty();
-      						 $("#userDevicelist").append('<tr>'+
-      								'<td class="center" style="width: 30px;">'+
-        	    					'<label>'+
-        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
-        	    					'<span class="lbl">'+
-        	    					'</span>'+
-        	    					'</label>'+
-        	    					'</td>'+
-        	    					'<td class="center">'+(i+1)+'</td>'+
-        	    					'<td class="center">'+item.userPhone+'</td>'+
-        	    					'<td class="center">'+item.deviceCode+'</td>'+
-        	    					'<td class="center">'+item.nick_name+'</td>'+
-        	    					'<shiro:hasRole name="admin">'+
-        	    					'<td style="width: 30px;" class="center">'+
-        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
-        	    					'</td>'+
-        	    					'</shiro:hasRole>'+
-        	    					'</tr>');
-        				}) 
-        				
-    				}
+						/* alert("success:"+data) */
+						//清空标签内 [子标签及内容]，再添加
+						$("#userDevicelist").empty();
+						$("#userdeviceList01").empty();
+						if(data == ""){
+							$("#userDevicelist").append('<tr class="main_info">'+
+			    					'<td colspan="100" class="center" >没有相关数据</td>'+
+	    					'</tr>');	
+						}else{
+							$.each(data,function(i,item){//i是key,item是value
+								var currentPage=item.currentPage;
+								var totalPages=item.totalPages;
+								if(item.id == null){
+									//如果是page实体类  处理一
+									$("#userdeviceList01").empty();
+									
+									
+									//根据 totalPages 和 currentPage 分成 5 种情况
+									if(totalPages > 5  || currentPage != 1){//这里处理 currentPage未最左边一页   时的上一页问题
+										var fore='<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>';
+									}else{//首页时 上页不能再选择
+										var fore='<li><a><font color="#808080">上页</font></a></li>';
+									}
+									
+									//先处理最后一页的分页信息
+									if( (totalPages % 5 == 1) && (currentPage == totalPages) ){//第一种情况：总条数     除 5    余1
+										if(currentPage == totalPages && currentPage !=1){
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+													fore+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li><a><font color="#808080">下页</font></a></li>'+
+													'<li><a><font color="#808080">尾页</font></a></li>');
+										}else{
+											$("#userdeviceList01").append('<ul>'+
+													'<li><a><font color="#808080">首页</font></a></li>'+
+													fore+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li><a><font color="#808080">下页</font></a></li>'+
+													'<li><a><font color="#808080">尾页</font></a></li>');
+										}	
+									}else if( (totalPages % 5 == 2) && ((currentPage == totalPages) || (currentPage == totalPages - 1)) ){
+										if(currentPage == totalPages){
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+													fore+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li><a><font color="#808080">下页</font></a></li>'+
+													'<li><a><font color="#808080">尾页</font></a></li>');
+										}else if(currentPage == totalPages - 1){
+											if(currentPage == 1){
+												$("#userdeviceList01").append('<ul>'+
+														'<li><a><font color="#808080">首页</font></a></li>'+
+			        									'<li><a><font color="#808080">上页</font></a></li>'+
+			        									'<li><a><font color="#808080">1</font></a></li>'+
+			        									'<li style="cursor:pointer;"><a onclick="find(2);">2</a></li>'+
+			        									'<li style="cursor:pointer;"><a onclick="find(2);">下页</a></li>'+
+			        									'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+											}else{
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');	
+											}
+										}
+									}else if( (totalPages%5==3) && ((currentPage==totalPages) || (currentPage==totalPages-1)|| (currentPage==totalPages-2)) ){
+										if(currentPage == totalPages){
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+													fore+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+');">'+(currentPage-2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li><a><font color="#808080">下页</font></a></li>'+
+													'<li><a><font color="#808080">尾页</font></a></li>');
+										}else if(currentPage == totalPages - 1){
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+										}else if(currentPage == totalPages - 2){
+											if(currentPage == 1){
+												$("#userdeviceList01").append('<ul>'+
+														'<li><a><font color="#808080">首页</font></a></li>'+
+														'<li><a><font color="#808080">上页</font></a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+											}else{
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+											}
+										}
+									}else if( (totalPages%5==4) && ((currentPage==totalPages) || (currentPage==totalPages-1)|| (currentPage==totalPages-2)|| (currentPage==totalPages-3)) ){
+										if(currentPage == totalPages){
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+													fore+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+');">'+(currentPage-3)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+');">'+(currentPage-2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li><a><font color="#808080">下页</font></a></li>'+
+													'<li><a><font color="#808080">尾页</font></a></li>');
+										}else if(currentPage == totalPages - 1){
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+');">'+(currentPage-2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+										}else if(currentPage == totalPages - 2){
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+										}else if(currentPage == totalPages - 3){
+											if(currentPage == 1){
+												$("#userdeviceList01").append('<ul>'+
+														'<li><a><font color="#808080">首页</font></a></li>'+
+														'<li><a><font color="#808080">上页</font></a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+');">'+(currentPage+3)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+											}else{
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+');">'+(currentPage+3)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+											}
+										}
+									}else{//取整 totalPages % 5 = 0   (总页数：5,10,15...)
+										if(currentPage % 5 == 0){
+											if(currentPage == totalPages){
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														fore+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-4)+');">'+(currentPage-4)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+');">'+(currentPage-3)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+');">'+(currentPage-2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li><a><font color="#808080">下页</font></a></li>'+
+														'<li><a><font color="#808080">尾页</font></a></li>');
+											}else{
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														fore+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-4)+');">'+(currentPage-4)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+');">'+(currentPage-3)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+');">'+(currentPage-2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');	
+											}
+										}else if(currentPage % 5 == 1){
+											if(currentPage == 1){
+												$("#userdeviceList01").append('<ul>'+
+														'<li><a><font color="#808080">首页</font></a></li>'+
+			        									'<li><a><font color="#808080">上页</font></a></li>'+
+			        									'<li><a><font color="#808080">1</font></a></li>'+
+			        									'<li style="cursor:pointer;"><a onclick="find(2);">2</a></li>'+
+			        									'<li style="cursor:pointer;"><a onclick="find(3);">3</a></li>'+
+			        									'<li style="cursor:pointer;"><a onclick="find(4);">4</a></li>'+
+			        									'<li style="cursor:pointer;"><a onclick="find(5);">5</a></li>'+
+			        									'<li style="cursor:pointer;"><a onclick="find(2);">下页</a></li>'+
+			        									'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+											}else{	
+												$("#userdeviceList01").append('<ul>'+
+														'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+														'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+');">'+(currentPage+3)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+4)+');">'+(currentPage+4)+'</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+														'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+											}
+										}else if(currentPage % 5 ==  2){
+											/* alert("2") */
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+3)+');">'+(currentPage+3)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+										}else if(currentPage % 5 == 3){
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+');">'+(currentPage-2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+2)+');">'+(currentPage+2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+										}else if(currentPage % 5 == 4){
+											$("#userdeviceList01").append('<ul>'+
+													'<li style="cursor:pointer;"><a onclick="find(1);">首页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">上页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-3)+');">'+(currentPage-3)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-2)+');">'+(currentPage-2)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+');">'+(currentPage-1)+'</a></li>'+
+													'<li><a><font color="#808080">'+currentPage+'</font></a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">'+(currentPage+1)+'</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+(currentPage+1)+');">下页</a></li>'+
+													'<li style="cursor:pointer;"><a onclick="find('+totalPages+');">尾页</a></li>');
+										}
+									}
+									
+								}else{
+									if(role=="admin"){
+										$("#userDevicelist").append('<tr>'+
+												'<td class="center" style="width: 30px;">'+
+			        	    					'<label>'+
+			        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+			        	    					'<span class="lbl">'+
+			        	    					'</span>'+
+			        	    					'</label>'+
+			        	    					'</td>'+
+			        	    					'<td class="center">'+(i+1)+'</td>'+
+			        	    					'<td class="center">'+item.userPhone+'</td>'+
+			        	    					'<td class="center">'+item.deviceCode+'</td>'+
+			        	    					'<td class="center">'+item.nick_name+'</td>'+
+			        	    					'<shiro:hasRole name="admin">'+
+			        	    					'<td style="width: 30px;" class="center">'+
+			        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+			        	    					'</td>'+
+			        	    					'</shiro:hasRole>'+
+			        	    					'</tr>');
+									}else if(role=="buyer"){
+										$("#userDevicelist").append('<tr>'+
+												'<td class="center" style="width: 30px;">'+
+			        	    					'<label>'+
+			        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+			        	    					'<span class="lbl">'+
+			        	    					'</span>'+
+			        	    					'</label>'+
+			        	    					'</td>'+
+			        	    					'<td class="center">'+(i+1)+'</td>'+
+			        	    					'<td class="center">'+item.userPhone+'</td>'+
+			        	    					'<td class="center">'+item.deviceCode+'</td>'+
+			        	    					'<td class="center">'+item.nick_name+'</td>'+
+			        	    					'<shiro:hasRole name="buyer">'+
+			        	    					'<td style="width: 30px;" class="center">'+
+			        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+			        	    					'</td>'+
+			        	    					'</shiro:hasRole>'+
+			        	    					'</tr>');
+									}else{
+										$("#userDevicelist").append('<tr>'+
+												'<td class="center" style="width: 30px;">'+
+			        	    					'<label>'+
+			        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+			        	    					'<span class="lbl">'+
+			        	    					'</span>'+
+			        	    					'</label>'+
+			        	    					'</td>'+
+			        	    					'<td class="center">'+(i+1)+'</td>'+
+			        	    					'<td class="center">'+item.userPhone+'</td>'+
+			        	    					'<td class="center">'+item.deviceCode+'</td>'+
+			        	    					'<td class="center">'+item.nick_name+'</td>'+
+			        	    					'<td style="width: 30px;" class="center">'+
+			        	    					'</td>'+
+			        	    					'</tr>');
+									}
+									
+			    				}
+							})								    					
+						}
 				}, 
 				error: function(e){
-               	    /* alert(e) */
+	           	    /* alert(e) */
 				}
 			});
 		}
 		
-		//新增
-		function add(){
-			 top.jzts();
-			 var diag = new top.Dialog();
-			 diag.Drag=true;
-			 diag.Title ="新增";
-			 diag.URL = '<%=basePath%>user_devices/goAdd.do';
-			 diag.Width = 450;
-			 diag.Height = 355;
-			 diag.CancelEvent = function(){ //关闭事件
-				 if(diag.innerFrame.contentWindow.document.getElementById('zhongxin').style.display == 'none'){
-					 if('${page.currentPage}' == '0'){
-						 top.jzts();
-						 setTimeout("self.location=self.location",100);
-					 }else{
-						 nextPage(${page.currentPage});
-					 }
-				}
-				diag.close();
-			 };
-			 diag.show();
-		}
 		
 		//删除
 		function del(Id,DEVICE_ID,USER_ID){
@@ -619,25 +1367,7 @@
 				}
 			})
 		}
-		
-		//修改
-		function edit(Id){
-			 /* alert(Id); */
-			 top.jzts();
-			 var diag = new top.Dialog();
-			 diag.Drag=true;
-			 diag.Title ="编辑";
-			 diag.URL = '<%=basePath%>user_devices/goEdit.do?USER_DEVICE_ID='+Id;
-			 diag.Width = 450;
-			 diag.Height = 355;
-			 diag.CancelEvent = function(){ //关闭事件
-				 if(diag.innerFrame.contentWindow.document.getElementById('zhongxin').style.display == 'none'){
-					 nextPage(${page.currentPage});
-				}
-				diag.close();
-			 };
-			 diag.show();
-		}
+			
 		</script>
 		
 		<script type="text/javascript">

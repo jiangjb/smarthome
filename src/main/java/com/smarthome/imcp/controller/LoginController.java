@@ -7,7 +7,9 @@
 		 import com.smarthome.imcp.dao.model.bo.BoDevice;
 		 import com.smarthome.imcp.dao.model.bo.BoHostDevice;
          import com.smarthome.imcp.dao.model.bo.BoInfraredPart;
-		 import com.smarthome.imcp.dao.model.bo.BoUserDevices;
+import com.smarthome.imcp.dao.model.bo.BoModel;
+import com.smarthome.imcp.dao.model.bo.BoModelInfo;
+import com.smarthome.imcp.dao.model.bo.BoUserDevices;
 		 import com.smarthome.imcp.dao.model.bo.BoUsers;
 		 import com.smarthome.imcp.dao.model.bo.BoUsersValidation;
 /*    */ import com.smarthome.imcp.dao.model.system.SysUser;
@@ -15,7 +17,9 @@
 		 import com.smarthome.imcp.service.bo.BoDeviceServiceIface;
 		 import com.smarthome.imcp.service.bo.BoHostDeviceServiceIface;
 		 import com.smarthome.imcp.service.bo.BoInfraredPartServiceIface;
-		 import com.smarthome.imcp.service.bo.BoUserDevicesServiceIface;
+import com.smarthome.imcp.service.bo.BoModelInfoServiceIface;
+import com.smarthome.imcp.service.bo.BoModelServiceIface;
+import com.smarthome.imcp.service.bo.BoUserDevicesServiceIface;
 		 import com.smarthome.imcp.service.bo.BoUsersValidationServiceIface;
 		 import com.smarthome.imcp.service.bo.BoUserssServiceIface;
 /*    */ import com.smarthome.imcp.service.secur.SecurServiceIface;
@@ -29,6 +33,8 @@
 		 import java.util.Map;
 		 import javax.mail.MessagingException;
 /*    */ import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 /*    */ import org.springframework.beans.factory.annotation.Autowired;
 /*    */ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -84,6 +90,12 @@ import org.springframework.ui.ModelMap;
 		  @Autowired
 		  private BoUserDevicesServiceIface<BoUserDevices, Serializable> BoUserDevicesService;
 		  
+		  @Autowired
+		  private BoModelServiceIface<BoModel, Serializable> boModelService;
+		  
+		  @Autowired
+		  private BoModelInfoServiceIface<BoModelInfo, Serializable> boModelInfoServicess;
+		  
 //           private RequestJson requestJson;
            //new 短信验证码
            private static String Url = "http://106.ihuyi.com/webservice/sms.php?method=Submit";  
@@ -96,40 +108,33 @@ import org.springframework.ui.ModelMap;
 		   @ResponseBody
 		   public int login(@RequestParam("loginName") String loginName, @RequestParam("loginPwd") String loginPwd, HttpServletRequest request)
    		{   
+			HttpSession session = request.getSession();//4-27
+
 		    int UserID=0;
 //			 System.out.println("loginName="+loginName+",loginPwd="+loginPwd);
-			//先给输入的明文密码加密，然后再与数据库表取出来的数据比较
-//		    String hashAlgorithmName = "MD5";
-//			Object credentials = loginPwd;
-////			Object salt = ByteSource.Util.bytes(loginName);
-//			Object salt = ByteSource.Util.bytes("username");
-//			int hashIterations = 1024;
-//			Object result = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
-//			String userPwd=result.toString();
 			String userPwd=shiroEncryption(loginPwd);
 			////////////////////////////////shiro加密结束/////////////////////////////////////////////////
 			//认证
 			Subject currentUser = SecurityUtils.getSubject();
 			System.out.println("currentUser:"+currentUser);
-			if (!currentUser.isAuthenticated()) {//判断是不是已经认证的
+			if (!currentUser.isAuthenticated()) {//判断是不是已经认证的,没验证过的执行如下的操作
+				System.out.println("111111111没被授权");
 		    	// 把用户名和密码封装为 UsernamePasswordToken 对象
-//				System.out.println("userPwd:"+userPwd);
 		        UsernamePasswordToken token = new UsernamePasswordToken(loginName, loginPwd);//明文密码
-		        System.out.println("token:"+token);
+//		        System.out.println("token:"+token);
 		        // rememberme
 		        token.setRememberMe(true);
 		        try {
 		        	System.out.println("1. " + token.hashCode());
 		        	// 执行登录. 
 		            currentUser.login(token);// Argument for byte conversion cannot be null.
-//		            return 1;
 		        } 
 		        // ... catch more exceptions here (maybe custom ones specific to your application?
 		        // 所有认证时异常的父类. 
 		        catch (AuthenticationException ae) {
 		            //unexpected condition?  error?
 		        	System.out.println("登录失败: " + ae.getMessage());
-		        	return -1;
+		        	return 0;
 		        }
 		    }
 			//授权  1)设计用户表、角色表、用户角色中间表、权限表和角色权限中间表； 2）实体类的映射表 ； 3）修改注册密码的加密方式（shiro加密）
@@ -137,12 +142,18 @@ import org.springframework.ui.ModelMap;
 	        //print their identifying principal (in this case, a username):
 			System.out.println("----> User [" + currentUser.getPrincipal() + "] logged in successfully.");//null
 
+			
 	        //test a role:
 	        // 测试是否有某一个角色. 调用 Subject 的 hasRole 方法. 
-	        if (currentUser.hasRole("admin")) {
+	        if (currentUser.hasRole("admin")) {//管理员
+	        	session.setAttribute("role", "admin");
 	        	System.out.println("----> You have the admin role !");
-	        } else {
-	        	System.out.println("----> You just have user role.");//here
+	        } else if(currentUser.hasRole("user")){//一般用户
+	        	session.setAttribute("role", "user");
+	        	System.out.println("----> You just have user role.");
+	        }else {//房东、经销商或代理商
+	        	session.setAttribute("role", "buyer");
+	        	System.out.println("----> 你可能是一个代理商、经销商或房东.");
 	        }
 
 	        // 测试用户是否具备某一个行为. 
@@ -168,7 +179,6 @@ import org.springframework.ui.ModelMap;
 			 }
              if (GlobalMethod.isNullorEmpty(sysUser)) {
 	           System.out.println("登录名或密码不正确......");
-//       	   return new ResultJson("登陆名或密码不对！", "300");
 	           return 0;
              }
              String errorCode = this.securService.doCheckUser(sysUser);
@@ -176,15 +186,12 @@ import org.springframework.ui.ModelMap;
              if (errorCode != null) {
             	 if ("NO_POLIT".equals(errorCode))
             		 System.out.println("未配置栏目权限......");
-//         		return new ResultJson("未配置栏目权限，请与管理员联系！", "300");
 				return -1;
              }else {
             	 System.out.println("sysUser:"+sysUser);
             	 CurrentUser currentUser01 = this.securService.createCurrentUser(sysUser);
  
             	 request.getSession().setAttribute("USER_INFO", currentUser01);
-//              System.out.println(new ResultJson("登陆成功！"));//com.smarthome.imcp.controller.ResultJson@3893a0e7
-//      		return new ResultJson("登陆成功！");
                	return UserID;
              }
    		 }
@@ -192,6 +199,8 @@ import org.springframework.ui.ModelMap;
            @RequestMapping({"logout.do"})
            public String logout(HttpServletRequest request) {
 	         System.out.println("行，我退出！");
+	         request.getSession().removeAttribute("role");//清空session信息  
+	         request.getSession().removeAttribute("userPhone");//清空session信息
 	         request.getSession().removeAttribute("USER_INFO");
 	         request.getSession().removeAttribute("SESSION_ID");
 	         return "../login";          //==login.do
@@ -349,7 +358,9 @@ import org.springframework.ui.ModelMap;
 			}	      
 		   
 		   
-		   //2018/2/26 build
+		   /*
+		    * 2018/2/26 
+		    */
 		   @RequestMapping({"homePage.do"})
 		   @ResponseBody
 		   public List<BoUserDevices> homePage(HttpServletRequest request) {
@@ -406,10 +417,83 @@ import org.springframework.ui.ModelMap;
 			   varList.add(page);
 			   return varList;
 		   }
+		   /*
+		    * 通过手机号查找房东的主页,包含分页操作  2018-5-2
+		    * */
+		   @RequestMapping({"buyerHomePage.do"})
+		   @ResponseBody
+		   public List<BoUserDevices> buyerHomePage(HttpServletRequest request,@RequestParam("userPhone") String userPhone) {
+			   System.out.println("房东获取初始化的数据!");   
+			   HttpSession session = request.getSession();
+//			   String result="0";//失败用0表示
+			   List varList=new ArrayList();
+			   
+			   List<BoUserDevices> boUserDevices=(List<BoUserDevices>)this.BoUserDevicesService.find();
+			 //Page类
+			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+			   int totalCount=boUserDevices.size();
+			   int pageSize=page.getPageSize();
+			   int totalPages=1;
+			   if(totalCount%pageSize !=0){
+				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = totalCount/pageSize;
+			   }
+			   int j=0,count=0;
+			   for(int i=0;i<boUserDevices.size();i++) {
+				   int id=boUserDevices.get(i).getUserDeviceId();
+//					   System.out.println("id:"+id);
+				   String USER_NAME=boUserDevices.get(i).getBoUsers().getUserName();
+//					   System.out.println("USER_NAME:"+USER_NAME);
+				   String USER_PHONE=boUserDevices.get(i).getBoUsers().getUserPhone();
+				   String DEVICE_CODE=boUserDevices.get(i).getBoDevice().getDeviceCode();
+//					   System.out.println("DEVICE_CODE:"+DEVICE_CODE);
+				   Date MNT_CREATOR_DATE=boUserDevices.get(i).getBoDevice().getMntCreatorDate();
+//					   System.out.println("MNT_CREATOR_DATE:"+MNT_CREATOR_DATE);
+				   Date MNT_UPDATED_DATE=boUserDevices.get(i).getBoDevice().getMntUpdatedDate();
+//					   System.out.println("MNT_UPDATED_DATE:"+MNT_UPDATED_DATE);
+				   String HOST_STATUS=boUserDevices.get(i).getBoDevice().getHostStatus();
+				   String SIGNATURE=boUserDevices.get(i).getBoUsers().getSignature();
+				   //计算符合条件的总条数，然后得出总页数
+				   if(userPhone.equals(USER_PHONE)) {
+					   count++;
+				   }
+				   
+				   if(userPhone.equals(USER_PHONE)) {
+					   session.setAttribute("userPhone", userPhone);
+					   j++;
+					   Map map=new HashMap();
+					   map.put("id", id);
+					   map.put("USER_NAME", USER_NAME);
+					   map.put("USER_PHONE",USER_PHONE);
+//					   System.out.println("DEVICE_CODE:"+DEVICE_CODE);
+					   map.put("DEVICE_CODE",DEVICE_CODE);
+					   map.put("MNT_CREATOR_DATE",MNT_CREATOR_DATE);
+					   map.put("MNT_UPDATED_DATE", MNT_UPDATED_DATE);
+					   map.put("HOST_STATUS", HOST_STATUS);
+					   map.put("SIGNATURE", SIGNATURE);
+					   varList.add(map);
+					   if(j>10) {
+						   break;
+					   }
+				   }
+			   }
+			   if(count%pageSize!=0) {
+				   totalPages=count/pageSize+1;
+			   }else {
+				   totalPages=count/pageSize;
+			   }
+			   page.setCurrentPage(1);
+			   page.setTotalPages(totalPages);
+			   varList.add(page);
+			   System.out.println("varList:"+varList);
+			   return varList;
+		   }
+		   
+		   
 		   @RequestMapping({"findUserDevicesByIndex.do"})
 		   @ResponseBody
 		   public List<BoUserDevices> findUserDevicesByIndex(@RequestParam("index") int index) { 			  			 
-			   System.out.println("分页操作");
 			   List varList=new ArrayList<BoUsers>();
 			   List<BoUserDevices> boUserDevices=(List<BoUserDevices>)this.BoUserDevicesService.find();
 			   //Page类
@@ -491,38 +575,153 @@ import org.springframework.ui.ModelMap;
 			   }
 			   return result;
 		   }
-		   
-		   @RequestMapping({"OneToUnbind.do"})
+		   /*
+		    * 模糊查找：通过昵称、手机号或用户名查找
+		    * */
+		   @RequestMapping({"findhomePageByNPC.do"})
 		   @ResponseBody
-		   public String OneToUnbind(@RequestParam("deviceCode") String deviceCode,ModelMap map1) {//List<BoHostDevice>
-			   System.out.println("跳转到解绑页面的函数");
-			   List list=new ArrayList();
-//		       List<BoHostDevice> boHosts = this.boHostDeviceService.getDeviceByAddress(deviceAddress); 
-			   List<BoHostDevice> boHosts = this.boHostDeviceService.getAllHostD();
-	    	   for(BoHostDevice bohost:boHosts) {//
-//	    		   System.out.println(bohost.getBoDevice().getDeviceCode().equals(deviceCode));
-	    		   if(bohost.getBoDevice().getDeviceCode().equals(deviceCode)) {//解决从BoUsers表  查询  BoHostDevice表 的问题,,此处不能用等号比较
-//	    			   System.out.println("进");
-	    			   Map map=new HashMap();
-			        	int id=bohost.getId();
-			        	String deviceCode1=bohost.getBoDevice().getDeviceCode();
-			        	String userPhone=bohost.getBoUsers().getUserPhone();
-			        	String nick_name=bohost.getNickName();
-			        	
-			        	int DEVICE_ID=bohost.getBoDevice().getDeviceId();
-			        	int USER_ID=bohost.getBoUsers().getUserId();
-			        	map.put("id", id);
-			        	map.put("deviceCode",deviceCode1);
-			        	map.put("userPhone",userPhone);
-			        	map.put("nick_name",nick_name);
-			        	map.put("DEVICE_ID", DEVICE_ID);
-			        	map.put("USER_ID", USER_ID);
-			        	list.add(map);
-	    		   }
-		        } 
-	    	   map1.addAttribute("list",list);
-		       return "暂未实现跳转";
-		    }
+		   public List<BoUserDevices> findhomePageByNPC(@RequestParam("npc") String npc,@RequestParam("status") int status,@RequestParam("index") int index){//ntc=userName+userPhone+deviceCode
+			   List varList=new ArrayList<BoUsers>();
+			   List<BoUserDevices> boUserDevices=(List<BoUserDevices>)this.BoUserDevicesService.find();
+			   List<BoUserDevices> boUserDevicess=new ArrayList<BoUserDevices>();//用于存放满足条件的结果集
+			   //Page类
+			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+			   int pageSize=page.getPageSize();
+			   int totalPages=1;		   		   
+			   int j=0;
+			   //这个用来计算符合条件的数目 4-25
+			   int count=0;
+			   for(int i=0;i<boUserDevices.size();i++) {
+				   String USER_NAME=boUserDevices.get(i).getBoUsers().getUserName();
+				   String USER_PHONE=boUserDevices.get(i).getBoUsers().getUserPhone();
+				   System.out.println(USER_PHONE);
+				   String DEVICE_CODE=boUserDevices.get(i).getBoDevice().getDeviceCode();
+				   if(npc.equals(USER_NAME) || npc.equals(USER_PHONE) || npc.equals(DEVICE_CODE)) {
+					   boUserDevicess.add(boUserDevices.get(i));
+					   count++;
+				   }
+			   }
+//			   System.out.println("count:"+count);
+			   int totalCount=count;
+			   if(totalCount%pageSize !=0){
+				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = totalCount/pageSize;
+			   }
+			   System.out.println("totalPages:"+totalPages);
+			   int startRow=(index-1)*pageSize;//数据库表中的行数 （从0开始）
+			   int endRow;
+			   if(index == totalPages) {
+				   endRow=totalCount-1;
+			   }else {
+				   endRow=index*pageSize - 1;
+			   }
+			   //END
+			   if(count > 0) {
+				   for(int i=startRow;i<=endRow;i++) {
+					   int id=boUserDevicess.get(i).getUserDeviceId();
+					   String USER_NAME=boUserDevicess.get(i).getBoUsers().getUserName();
+					   String USER_PHONE=boUserDevicess.get(i).getBoUsers().getUserPhone();
+					   String DEVICE_CODE=boUserDevicess.get(i).getBoDevice().getDeviceCode();
+//				   System.out.println("DEVICE_CODE:"+DEVICE_CODE);
+					   Date MNT_CREATOR_DATE=boUserDevicess.get(i).getBoDevice().getMntCreatorDate();
+					   Date MNT_UPDATED_DATE=boUserDevicess.get(i).getBoDevice().getMntUpdatedDate();
+					   String HOST_STATUS=boUserDevicess.get(i).getBoDevice().getHostStatus();
+					   String SIGNATURE=boUserDevicess.get(i).getBoUsers().getSignature();
+					   
+//				   if(npc.equals(USER_NAME) || npc.equals(USER_PHONE) || npc.equals(DEVICE_CODE)) {//关键：这里模糊匹配昵称、手机号或者主机序列号
+					   j++;
+					   Map map=new HashMap();
+					   map.put("id", id);
+					   map.put("USER_NAME", USER_NAME);
+					   map.put("USER_PHONE",USER_PHONE);
+					   System.out.println(USER_PHONE);
+					   map.put("DEVICE_CODE",DEVICE_CODE);
+					   map.put("MNT_CREATOR_DATE",MNT_CREATOR_DATE);
+					   map.put("MNT_UPDATED_DATE", MNT_UPDATED_DATE);
+					   map.put("HOST_STATUS", HOST_STATUS);
+					   map.put("SIGNATURE", SIGNATURE);
+					   varList.add(map);
+					   
+					   //存在数据时输入,且在第一次时执行
+					   if(j==1) {
+						   page.setCurrentPage(index);
+						   page.setTotalPages(totalPages);
+						   varList.add(page);
+					   }
+//				   }
+				   }
+			   }
+//			   System.out.println("varList:"+varList);
+			   return varList;
+		   }
+		   /*
+		    * 通过状态查找,包含分页操作  2018-4-25
+		    * */
+		   @RequestMapping({"findhomePageByStatus.do"})
+		   @ResponseBody
+		   public List<BoUserDevices> findhomePageByStatus(@RequestParam("status") int status,@RequestParam("index") int index) {//status》主机》特定状态的首页数据    
+			   List varList=new ArrayList<BoUsers>();
+			   List<BoUserDevices> boUserDevices=null;
+			   if(status == 2) {
+				   boUserDevices=(List<BoUserDevices>)this.BoUserDevicesService.find();
+			   }else {
+				   boUserDevices=(List<BoUserDevices>)this.BoUserDevicesService.findByStatus(status);
+			   }
+			   //Page类
+			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+			   int totalCount=boUserDevices.size();//这个也是符合条件的数据总条数
+			   System.out.println("totalCount:"+totalCount);
+			   int pageSize=page.getPageSize();
+			   int totalPages=1;
+			   if(totalCount%pageSize !=0){
+				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = totalCount/pageSize;
+			   }
+			   System.out.println("totalPages:"+totalPages);
+			   int startRow=(index-1)*pageSize;//数据库表中的行数 （从0开始）
+			   int endRow;
+			   if(index == totalPages) {
+				   endRow=totalCount-1;
+			   }else {
+				   endRow=index*pageSize - 1;
+			   }
+			   System.out.println("startRow:"+startRow);
+			   System.out.println("endRow:"+endRow);
+			   int j=0;//用于判断是不是第一次，第一次设置Page对象，其余的就省略该操作
+			   for(int i=startRow;i<=endRow;i++) {//无论是“全部”、“在线”或者“离线”都可以用这个
+				   int id=boUserDevices.get(i).getUserDeviceId();
+				   String USER_NAME=boUserDevices.get(i).getBoUsers().getUserName();
+				   String USER_PHONE=boUserDevices.get(i).getBoUsers().getUserPhone();
+				   String DEVICE_CODE=boUserDevices.get(i).getBoDevice().getDeviceCode();
+//					   System.out.println("DEVICE_CODE:"+DEVICE_CODE);
+				   Date MNT_CREATOR_DATE=boUserDevices.get(i).getBoDevice().getMntCreatorDate();
+				   Date MNT_UPDATED_DATE=boUserDevices.get(i).getBoDevice().getMntUpdatedDate();
+				   String HOST_STATUS=boUserDevices.get(i).getBoDevice().getHostStatus();
+				   String SIGNATURE=boUserDevices.get(i).getBoUsers().getSignature();
+				   j++;
+				   Map map=new HashMap();
+				   map.put("id", id);
+				   map.put("USER_NAME", USER_NAME);
+				   map.put("USER_PHONE",USER_PHONE);
+//				   System.out.println("1或0:"+USER_PHONE);
+				   map.put("DEVICE_CODE",DEVICE_CODE);
+				   map.put("MNT_CREATOR_DATE",MNT_CREATOR_DATE);
+				   map.put("MNT_UPDATED_DATE", MNT_UPDATED_DATE);
+				   map.put("HOST_STATUS", HOST_STATUS);
+				   map.put("SIGNATURE", SIGNATURE);
+				   varList.add(map);
+				 //存在数据时输入,且在第一次时执行
+				   if(j==1) {
+					   page.setCurrentPage(index);
+					   page.setTotalPages(totalPages);
+					   varList.add(page);
+				   }
+			   }
+//			   System.out.println("varList:"+varList);
+			   return varList;
+		   }
 		   
 		   @RequestMapping({"getSysUser.do"})
 		   @ResponseBody
@@ -643,33 +842,9 @@ import org.springframework.ui.ModelMap;
 			   return result;		   
 		   }
 		   
-		   //用户管理模块-全部用户
-//		   @RequestMapping({"showUsers.do"})
-//		   public String showUsers(Model model) {
-////		        ModelAndView mad = new ModelAndView("redirect:index.jsp");
-////		        List<BoUsers> varList = this.boUserssService.findAllBoUsers();//[Ljava.lang.Object; cannot be cast to com.smarthome.imcp.dao.model.bo.BoUsers
-//		        List<BoUsers> varList = this.boUserssService.getAllList();
-//			   //用于测试的增强for语句
-//			   for (BoUsers list : varList) {
-//				   System.out.println("phoneType:"+list.getPhoneType());
-//		        }	
-//			   model.addAttribute("varList", varList);
-//		       return "../index";
-//		    } 
-//		   @RequestMapping({"showUsers.do"})
-//		   @ResponseBody
-//		   public Map<String,Object> showUsers() {
-////		        ModelAndView mad = new ModelAndView("index.jsp");
-////		        List<BoUsers> varList = this.boUserssService.findAllBoUsers();//[Ljava.lang.Object; cannot be cast to com.smarthome.imcp.dao.model.bo.BoUsers
-//		       Map<String,Object> map=new HashMap<String,Object>() ;
-//			   List<BoUsers> varList = this.boUserssService.getAllList();
-//			   //用于测试的增强for语句
-//			   for (BoUsers list : varList) {
-//				   System.out.println("phoneType:"+list.getPhoneType());
-//		        }	
-//			   map.put("varList", varList);
-//		       return map;
-//		    }
+		   /*
+		    * 用户管理模块-全部用户【管理员】
+		    */
 		   @RequestMapping({"showUsers.do"})
 		   @ResponseBody
 		   public List<BoUsers> showUsers() {
@@ -708,61 +883,102 @@ import org.springframework.ui.ModelMap;
 			   varList.add(page);
 		       return varList;
 		    }
-
 		   
-		   @RequestMapping({"findByTel.do"})//再页面上是以json的形式显示
+		   /*
+		    * 用户管理模块-全部用户【房东】 5-3
+		    */
+		   @RequestMapping({"findUsersByPhone.do"})
 		   @ResponseBody
-		   public List<BoUsers> findByTel(@RequestParam("userPhone") String userPhone) {
-			   List<BoUsers> varList=new ArrayList<BoUsers>();
-			   BoUsers bousers = this.boUserssService.findByUserPhone(userPhone);
-			   System.out.println("bousers:"+bousers);
-			   
-			   BoUsers user=new BoUsers();
-			   user.setUserId(bousers.getUserId());//空指针
-			   System.out.println(bousers.getUserId());
-			   user.setUserName(bousers.getUserName());
-			   user.setUserSex(bousers.getUserSex());
-			   user.setUserPhone(bousers.getUserPhone());
-			   user.setPhoneType(bousers.getPhoneType());
-			   user.setVersionType(bousers.getVersionType());
-			   user.setSignature(bousers.getSignature());
-			   user.setCity(bousers.getCity());
-			   varList.add(user);
-			   
-		       return varList;
-//		                    下面只能取一个
-//			   List<BoUsers> varList=new ArrayList<BoUsers>();
-//			   BoUsers bouser = this.boUserssService.findByUserPhone(userPhone); 
-//			   BoUsers user=new BoUsers();
-//			   user.setUserName(bouser.getUserName());
-//			   user.setUserSex(bouser.getUserSex());
-//			   user.setUserPhone(bouser.getUserPhone());
-//			   user.setPhoneType(bouser.getPhoneType());
-//			   user.setVersionType(bouser.getVersionType());
-//			   user.setSignature(bouser.getSignature());
-//			   user.setCity(bouser.getCity());
-//			   varList.add(user);
-//		       return varList;
-		    }
-		   
-		   //分页
-		   
-		   @RequestMapping({"findByIndex.do"})//再页面上是以json的形式显示
-		   @ResponseBody
-		   public List<BoUsers> findByIndex(@RequestParam("index") int index) {
-			   System.out.println("分页操作");
+		   public List<BoUsers> findUsersByPhone(@RequestParam("userPhone") String userPhone) {
 			   List varList=new ArrayList<BoUsers>();
-			   List<BoUsers> bousers = this.boUserssService.getAllList();
+			   BoUsers bouser = this.boUserssService.findByUserPhone(userPhone);//找到主账户
+			   String userCode=bouser.getUserCode();
+			   List<BoUsers> bousers=this.boUserssService.getAllList();
 			   //Page类
 			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
 			   int totalCount=bousers.size();
 			   int pageSize=page.getPageSize();
 			   int totalPages=1;
+			   int count=0;
+			   for(int i=0;i<bousers.size();i++) {
+				   if(userCode.equals(bousers.get(i).getAuthorizationUserCode())) {
+					   count++;
+				   }
+			   }
+			   System.out.println("count:"+count);
+			   if(count%pageSize !=0){
+				   totalPages = count/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = count/pageSize;
+			   }
+			   int j=0;
+			   for(int i=0;i<bousers.size();i++) {
+				   if(userCode.equals(bousers.get(i).getAuthorizationUserCode())) {
+					   j++;
+					   BoUsers user=new BoUsers();
+					   user.setUserId(bousers.get(i).getUserId());
+//					   System.out.println(bousers.get(i).getUserId());
+					   user.setUserName(bousers.get(i).getUserName());
+					   user.setUserSex(bousers.get(i).getUserSex());
+					   user.setUserPhone(bousers.get(i).getUserPhone());
+					   user.setPhoneType(bousers.get(i).getPhoneType());
+					   user.setVersionType(bousers.get(i).getVersionType());
+					   user.setSignature(bousers.get(i).getSignature());
+					   user.setCity(bousers.get(i).getCity());
+					   varList.add(user);
+					   if(j>10) {
+						   break;
+					   }
+				   }
+			   }
+			   //用于向前台传递的数据  for分页
+			   page.setCurrentPage(1);
+			   page.setTotalPages(totalPages);
+			   varList.add(page);
+		       return varList;
+		    }
+		   
+		   @RequestMapping({"findByTel.do"})//再页面上是以json的形式显示                     4-26针对没有找到时的情况做了处理
+		   @ResponseBody
+		   public List<BoUsers> findByTel(@RequestParam("userPhone") String userPhone) {
+			   List<BoUsers> varList=new ArrayList<BoUsers>();
+			   BoUsers bousers = this.boUserssService.findByUserPhone(userPhone);
+			   if(bousers != null) {
+				   BoUsers user=new BoUsers();
+				   user.setUserId(bousers.getUserId());
+				   System.out.println(bousers.getUserId());
+				   user.setUserName(bousers.getUserName());
+				   user.setUserSex(bousers.getUserSex());
+				   user.setUserPhone(bousers.getUserPhone());
+				   user.setPhoneType(bousers.getPhoneType());
+				   user.setVersionType(bousers.getVersionType());
+				   user.setSignature(bousers.getSignature());
+				   user.setCity(bousers.getCity());
+				   varList.add(user);
+			   }
+			   System.out.println("varList:"+varList);
+		       return varList;
+		    }
+		   
+		   
+		   /*
+		    * 分页显示全部用户
+		    */
+		   @RequestMapping({"findByIndex.do"})//再页面上是以json的形式显示
+		   @ResponseBody
+		   public List<BoUsers> findByIndex(@RequestParam("index") int index) {
+			   List varList=new ArrayList<BoUsers>();
+			   List<BoUsers> bousers=this.boUserssService.getAllList();
+			   
+			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+			   int pageSize=page.getPageSize();
+			   int totalPages=1;
+			   int totalCount=bousers.size();
 			   if(totalCount%pageSize !=0){
 				   totalPages = totalCount/pageSize+1;//只要有小数都+1
 			   }else {
 				   totalPages = totalCount/pageSize;
-			   }					
+			   }	
 			   int startRow=(index-1)*pageSize;//数据库表中的行数 （从0开始）
 			   int endRow;
 			   if(index == totalPages) {
@@ -770,7 +986,7 @@ import org.springframework.ui.ModelMap;
 			   }else {
 				   endRow=index*pageSize - 1;
 			   }
-			   System.out.println("totalPages:"+totalPages);
+//			   System.out.println("totalPages:"+totalPages);
 			   for(int i=0;i<bousers.size();i++) {
 				   if(i>=startRow && i<=endRow) {
 					   System.out.println("现在的i是 "+i);
@@ -794,7 +1010,62 @@ import org.springframework.ui.ModelMap;
 		       return varList;
 		    }
 		   
-		 //用户管理模块-登录验证码
+		   @RequestMapping({"changeAccount.do"})
+		   @ResponseBody
+		   public String changeAccount(@RequestParam("oldPhone") String oldPhone,@RequestParam("newPhone") String newPhone) {
+			   String result="success";
+			   //找到新号码对应的用户，取出密码
+			   BoUsers newTel=this.boUserssService.findByUserPhone(newPhone);
+			   if(newTel != null) {
+				   int userId=newTel.getUserId();
+				   String pwd=newTel.getUserPwd();
+				   String userCode=newTel.getUserCode();
+				   //找到旧号码对应的用户,将该用户的号码和密码换成新用户的
+				   BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
+				   String oldPWD=oldTel.getUserPwd();
+				   if(oldTel != null) {
+					   oldTel.setUserPhone(newPhone);
+					   oldTel.setUserPwd(pwd);
+				   }
+				   BoUsers update=this.boUserssService.update(oldTel);//此时新旧两个账号的号码都是新的号码，新账号应该初始化（存放旧号码）==最终目的：老账号-新号码，新|初始账号-老号码 
+				   BoUsers newTel01=this.boUserssService.findByKey(userId);
+				   if(update != null) {
+					   //不过不排除新用户加了情景模式  得先检查是否有情景模式，然后删除新用户
+					   List<BoModel> boModels=this.boModelService.getListBy(userCode);
+					   for(BoModel boModel:boModels) {
+						   List<BoModelInfo> boModelInfos=this.boModelInfoServicess.getBy(userCode, boModel.getModelId());
+						   for(BoModelInfo boModelInfo:boModelInfos) {
+							   this.boModelInfoServicess.delete(boModelInfo);
+						   }
+						   this.boModelService.delete(boModel);
+					   }
+					   newTel01.setUserPhone(oldPhone);
+					   newTel01.setUserPwd(oldPWD);
+					   newTel01.setAuthorizationUserCode("");
+					   newTel01.setLogoAccountType("1");
+					   BoUsers update1=this.boUserssService.update(newTel01);
+					   if(update1 == null) {
+						   result="fail"; 
+					   }
+//					   BoUsers del=this.boUserssService.delete(newTel);
+				   }
+			   }else {//新用户未注册
+				 //找到旧号码对应的用户,将该用户的号码和密码换成新用户的
+				   BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
+				   oldTel.setUserPhone(newPhone);
+				   oldTel.setUserPwd("E10ADC3949BA59ABBE56E057F20F883E");//初始密码：123456
+				   BoUsers update=this.boUserssService.update(oldTel);
+				   if(update == null) {
+					   result="fail"; 
+				   }
+			   }
+			   
+			   return result;
+		   }
+		   
+		   /*
+		    * 用户管理模块-登录验证码
+		    */
 		   @RequestMapping({"showTelValidations.do"})
 		   @ResponseBody
 		   public List<BoUsersValidation> showTelValidations() {//id，userPhone，verificationCode
@@ -888,7 +1159,10 @@ import org.springframework.ui.ModelMap;
 			   }
 		        return result;
 		    }
-		   //修改
+		   
+		   /*
+		    * 修改
+		    */
 		   @RequestMapping({"modifyTelValidation.do"})
 		   @ResponseBody
 		   public String modifyTelValidation(@RequestParam("id") int id,@RequestParam("userPhone") String userPhone,@RequestParam("verificationCode") String verificationCode) {
@@ -904,22 +1178,10 @@ import org.springframework.ui.ModelMap;
 					   return "success";
 				   }
 		    }
-//		   public ModelAndView modifyTelValidation(@RequestParam("id") int id,@RequestParam("userPhone") String userPhone,@RequestParam("verificationCode") String verificationCode) {
-//			    BoUsersValidation boV=this.boUsersValidationService.findByKey(id);//找到该条记录
-////		        String result = this.sysUserService.modifyValidation(userPhone,verificationCode); 
-//		        if (boV == null) {
-//					   return null;
-//				   }else {
-//					   ModelAndView mav=new ModelAndView();
-//					   boV.setUserPhone(userPhone);
-//					   boV.setVerificationCode(verificationCode);
-//					   this.boUsersValidationService.update(boV);
-//					   BoUsersValidation boV1=new BoUsersValidation();
-//					   mav.addObject("boV",boV1);
-//					   return mav;
-//				   }
-//		    }
-		 //删除
+
+	   /*
+	    * 删除
+	    */
 		 @RequestMapping({"delTelValidation.do"})
 		 @ResponseBody
 		 public String delTelValidation(@RequestParam("id") int id) {
@@ -931,7 +1193,10 @@ import org.springframework.ui.ModelMap;
 			}
               return "success";
 		}
-		   //登录验证码 导出到Excel
+		 
+		 /*
+		  * 登录验证码 导出到Excel
+		  */
 		   @RequestMapping({"ValidationtoExcel.do"})
 		   @ResponseBody
 		   public String ValidationtoExcel() {
@@ -940,26 +1205,21 @@ import org.springframework.ui.ModelMap;
 		        String result = this.boUsersValidationService.toExcel(num,list); 
 		        return result;
 		    }
+		   
 		   @RequestMapping({"findValidationByTel.do"})
 		   @ResponseBody
 		   public List<BoUsersValidation> findValidationByTel(@RequestParam("userPhone") String userPhone) {
 			   List<BoUsersValidation> list=new ArrayList<BoUsersValidation>();
 		        BoUsersValidation validation = this.boUsersValidationService.findByUserPhone(userPhone); 
-//		        System.out.println("validations:"+validations);
-		        BoUsersValidation user=new BoUsersValidation();
-			    user.setId(validation.getId());
-//				    System.out.println(validation.getId());
-			    user.setUserPhone(validation.getUserPhone());
-//				    System.out.println(validation.getUserPhone());
-			    user.setVerificationCode(validation.getVerificationCode());
-			    list.add(user);
-			    
+		        if(validation != null) {
+		        	list.add(validation);
+		        }
 		        return list;
-//			   BoUsersValidation varList = this.boUsersValidationService.findByUserPhone(userPhone); 
-//		       return varList;
 		    }
 		   
-		 //主机管理模块-全部主机
+		   /*
+		    * 主机管理模块-全部主机[管理员]
+		    */
 		   @RequestMapping({"showHostDevices.do"})
 		   @ResponseBody
 		   public List<BoDevice> showHostDevices() {//deviceCode,status,type
@@ -998,7 +1258,46 @@ import org.springframework.ui.ModelMap;
 		       return list;
 		    }
 		   
-		   //取出在线人数和总人数
+		   /*
+		    * 主机管理模块-全部主机[房东]
+		    */
+		   
+		   @RequestMapping({"findHostDevicesByPhone.do"})
+		   @ResponseBody
+		   public List<BoDevice> findHostDevicesByPhone(@RequestParam("userPhone") String userPhone) {//deviceCode,status,type
+			   List list=new ArrayList<BoDevice>();
+			   BoUsers bouser = this.boUserssService.findByUserPhone(userPhone);//找到主账户
+			   String userCode=bouser.getUserCode();
+			   List<BoUserDevices> buds=this.BoUserDevicesService.getListByDeviceCodes(userCode);
+			   //Page类
+			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+			   int totalCount=buds.size();
+			   int pageSize=page.getPageSize();
+			   int totalPages=1;
+			   if(totalCount%pageSize !=0){
+				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = totalCount/pageSize;
+			   }	
+			   System.out.println("totalPages:"+totalPages+",totalCount:"+totalCount);
+			   for(BoUserDevices boUserDevice:buds) {
+					   BoDevice user=new BoDevice();
+			        	user.setDeviceId(boUserDevice.getBoDevice().getDeviceId());
+					    user.setDeviceCode(boUserDevice.getBoDevice().getDeviceCode());
+					    System.out.println("deviceCode:"+boUserDevice.getBoDevice().getDeviceCode());
+					    user.setStatus(boUserDevice.getBoDevice().getStatus());
+					    user.setType(boUserDevice.getBoDevice().getType());
+					    list.add(user);
+			   }
+			   //用于向前台传递的数据  for分页
+			   page.setCurrentPage(1);
+			   page.setTotalPages(totalPages);
+			   list.add(page);
+		       return list;
+		    }
+		   /*
+		    * 取出在线人数和总人数
+		    */
 		   @RequestMapping({"showNum.do"})
 		   @ResponseBody
 		   public Map<String,String> showNum() {//deviceCode,status,type
@@ -1020,51 +1319,108 @@ import org.springframework.ui.ModelMap;
 		        return map;
 		    } 
 		   
+		   /*
+		    * 分页操作 应和status有关
+		    */
 		   @RequestMapping({"findDevicesByIndex.do"})
 		   @ResponseBody
-		   public List<BoDevice> findDevicesByIndex(@RequestParam("index") int index,@RequestParam("status") int status) {//index+status
-			   System.out.println("分页操作 应和status有关 ");
+		   public List<BoDevice> findDevicesByIndex(@RequestParam("index") int index,@RequestParam("status") int status,HttpServletRequest request) {//index+status
 			   List list=new ArrayList<BoDevice>();
-			   List<BoDevice> bodevices=null;
-			   if(status == 2) {
-				   bodevices = this.boDeviceService.getAllHostDevices();  
-			   }else {
-				   bodevices = this.boDeviceService.findByStatus(status); 
-			   }
-			   //Page类
-			   Page page=new Page();
-			   int totalCount=bodevices.size();
+			   HttpSession session = request.getSession();
+			   String phone=(String) session.getAttribute("userPhone");
+			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
 			   int pageSize=page.getPageSize();
-			   int totalPages=1;
-			   if(totalCount%pageSize !=0){
-				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
-			   }else {
-				   totalPages = totalCount/pageSize;
-			   }	
+			   int totalPages=1,totalCount=0;
 			   int startRow=(index-1)*pageSize;//数据库表中的行数 （从0开始）
 			   int endRow;
-			   if(index == totalPages) {
-				   endRow=totalCount-1;
-			   }else {
-				   endRow=index*pageSize - 1;
-			   }
-			   System.out.println("totalCount:"+totalCount);
-			   System.out.println("totalPages:"+totalPages);
-//			   System.out.println("startRow:"+startRow);
-//			   System.out.println("endRow:"+endRow);
-			   for(int i=0;i<bodevices.size();i++) {
-				   if(i>=startRow && i<=endRow) {
-					   BoDevice user=new BoDevice();
-			        	user.setDeviceId(bodevices.get(i).getDeviceId());
-					    user.setDeviceCode(bodevices.get(i).getDeviceCode());
-//					    System.out.println("deviceCode:"+bodevices.get(i).getDeviceCode());
-					    user.setStatus(bodevices.get(i).getStatus());
-//					    System.out.println("status:"+bodevices.get(i).getStatus());
-					    user.setType(bodevices.get(i).getType());
-//					    System.out.println("type:"+bodevice.getType());
-					    list.add(user);
+			   
+			   if(phone == null) {//管理员
+				   List<BoDevice> bodevices=new ArrayList();
+				   if(status == 2) {
+					   bodevices = this.boDeviceService.getAllHostDevices();  
+				   }else {
+					   bodevices = this.boDeviceService.findByStatus(status); 
+				   }
+				   totalCount=bodevices.size();
+				   if(totalCount%pageSize !=0){
+					   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+				   }else {
+					   totalPages = totalCount/pageSize;
+				   }	
+				   if(index == totalPages) {
+					   endRow=totalCount-1;
+				   }else {
+					   endRow=index*pageSize - 1;
+				   }
+				   for(int i=0;i<bodevices.size();i++) {
+					   if(i>=startRow && i<=endRow) {
+						   BoDevice user=new BoDevice();
+						   user.setDeviceId(bodevices.get(i).getDeviceId());
+						   user.setDeviceCode(bodevices.get(i).getDeviceCode());
+						   user.setStatus(bodevices.get(i).getStatus());
+						   user.setType(bodevices.get(i).getType());
+						   list.add(user);
+					   }
+				   }
+			   }else{//房东
+				   BoUsers bouser = this.boUserssService.findByUserPhone(phone);
+				   String userCode=bouser.getUserCode();
+				   if(status == 2) {
+					   List<BoUserDevices> bodevices = this.BoUserDevicesService.getListByDeviceCodes(userCode);
+					   totalCount=bodevices.size();
+					   if(totalCount%pageSize !=0){
+						   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+					   }else {
+						   totalPages = totalCount/pageSize;
+					   }	
+					   System.out.println("totalPages:"+totalPages+",totalCount:"+totalCount);
+					   if(index == totalPages) {
+						   endRow=totalCount-1;
+					   }else {
+						   endRow=index*pageSize - 1;
+					   }
+					   for(int i=0;i<bodevices.size();i++) {
+						   if(i>=startRow && i<=endRow) {
+							   BoDevice user=new BoDevice();
+							   user.setDeviceId(bodevices.get(i).getBoDevice().getDeviceId());
+							   user.setDeviceCode(bodevices.get(i).getBoDevice().getDeviceCode());
+//						    System.out.println("deviceCode:"+bodevices.get(i).getBoDevice().getDeviceCode());
+							   user.setStatus(bodevices.get(i).getBoDevice().getStatus());
+							   user.setType(bodevices.get(i).getBoDevice().getType());
+							   list.add(user);
+						   }
+					   }
+				   }else {
+					   List<BoDevice> bodevicess = this.boDeviceService.findByStatus(status); 
+					   totalCount=bodevicess.size();
+					   if(totalCount%pageSize !=0){
+						   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+					   }else {
+						   totalPages = totalCount/pageSize;
+					   }	
+					   System.out.println("totalPages:"+totalPages+",totalCount:"+totalCount);
+					   if(index == totalPages) {
+						   endRow=totalCount-1;
+					   }else {
+						   endRow=index*pageSize - 1;
+					   }
+					   for(int i=0;i<bodevicess.size();i++) {
+						   if(i>=startRow && i<=endRow) {
+							   BoDevice user=new BoDevice();
+							   user.setDeviceId(bodevicess.get(i).getDeviceId());
+							   user.setDeviceCode(bodevicess.get(i).getDeviceCode());
+//						    System.out.println("deviceCode:"+bodevicess.getBoDevice().getDeviceCode());
+							   user.setStatus(bodevicess.get(i).getStatus());
+							   user.setType(bodevicess.get(i).getType());
+							   list.add(user);
+						   }
+					   }
 				   }
 			   }
+//			   System.out.println("totalCount:"+totalCount);
+//			   System.out.println("totalPages:"+totalPages);
+//			   System.out.println("startRow:"+startRow);
+//			   System.out.println("endRow:"+endRow);
 			   //用于向前台传递的数据  for分页
 			   page.setCurrentPage(index);
 			   page.setTotalPages(totalPages);
@@ -1077,17 +1433,17 @@ import org.springframework.ui.ModelMap;
 		   public List<BoDevice> findByDevicecode(@RequestParam("deviceCode") String deviceCode) {
 			   List<BoDevice> list=new ArrayList<BoDevice>();
 		       List<BoDevice> bodevices = this.boDeviceService.findByDCode(deviceCode); 
-		        for(BoDevice bodevice:bodevices) {//
-		        	BoDevice user=new BoDevice();
-		        	user.setDeviceId(bodevice.getDeviceId());
-				    user.setDeviceCode(bodevice.getDeviceCode());
-				    System.out.println("deviceCode:"+bodevice.getDeviceCode());
-				    user.setStatus(bodevice.getStatus());
-				    System.out.println("status:"+bodevice.getStatus());
-				    user.setType(bodevice.getType());
-				    System.out.println("type:"+bodevice.getType());
-				    list.add(user);
-				   }
+		       if(bodevices != null) {
+		    	   for(BoDevice bodevice:bodevices) {
+		    		   BoDevice user=new BoDevice();
+			        	user.setDeviceId(bodevice.getDeviceId());
+					    user.setDeviceCode(bodevice.getDeviceCode());
+					    user.setStatus(bodevice.getStatus());
+					    user.setType(bodevice.getType());
+					    list.add(user);
+		    	   }
+		       }
+		       System.out.println("list:"+list);
 		        return list;
 		    }
 		   @RequestMapping({"findByStatus.do"})
@@ -1176,13 +1532,59 @@ import org.springframework.ui.ModelMap;
 		       } 
 		       return result;
 		    }
-		 //主机管理模块-用户绑定与主机解绑
-		   @RequestMapping({"showHostD.do"})
+		 //主机管理模块-用户绑定与主机解绑【管理员】    关联bo_user_devices表
+		   @RequestMapping({"showUserDevices.do"})
 		   @ResponseBody
-		   public List<BoHostDevice> showHostD() {
-			   System.out.println("分页操作 -首页");
+		   public List<BoUserDevices> showUserDevices() {
 			   List list=new ArrayList();
-		       List<BoHostDevice> boHosts = this.boHostDeviceService.getAllHostD();		  //直接把这结果传给前台 出现Cannot call sendError() after the response has been committed     
+		       List<BoUserDevices> boUserDevices = this.BoUserDevicesService.find();//找到所有主机
+			   //Page类
+			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+			   int totalCount=boUserDevices.size();
+			   int pageSize=page.getPageSize();
+			   int totalPages=1;
+			   if(totalCount%pageSize !=0){
+				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = totalCount/pageSize;
+			   }	
+//			   System.out.println("totalPages:"+totalPages);
+			   
+			   for(int i=0;i<boUserDevices.size();i++) {
+				   if(i>=0 && i<=9) {
+					   Map map=new HashMap();
+			        	int id=boUserDevices.get(i).getUserDeviceId();
+			        	String deviceCode=boUserDevices.get(i).getBoDevice().getDeviceCode();
+			        	String userPhone=boUserDevices.get(i).getBoUsers().getUserPhone();
+			        	String nick_name=boUserDevices.get(i).getNickName();
+			        	
+			        	int DEVICE_ID=boUserDevices.get(i).getBoDevice().getDeviceId();
+			        	int USER_ID=boUserDevices.get(i).getBoUsers().getUserId();
+			        	map.put("id", id);
+			        	map.put("deviceCode",deviceCode);
+			        	map.put("userPhone",userPhone);
+			        	map.put("nick_name",nick_name);
+			        	map.put("DEVICE_ID", DEVICE_ID);
+			        	map.put("USER_ID", USER_ID);
+			        	list.add(map);
+				   }
+			   }
+			   //用于向前台传递的数据  for分页
+			   page.setCurrentPage(1);
+			   page.setTotalPages(totalPages);
+			   list.add(page);
+		       return list;
+		    }
+		   
+		 //主机管理模块-用户绑定与主机解绑【房东】
+		   @RequestMapping({"findHostDByPhone.do"})
+		   @ResponseBody
+		   public List<BoHostDevice> findHostDByPhone(@RequestParam("userPhone") String userPhone) {
+			   List list=new ArrayList();
+			   BoUsers bouser = this.boUserssService.findByUserPhone(userPhone);//找到主账户
+			   String userCode=bouser.getUserCode();
+			   List<BoHostDevice> boHosts=this.boHostDeviceService.getUserCode(userCode);
+			   
 			   //Page类
 			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
 			   int totalCount=boHosts.size();
@@ -1200,16 +1602,17 @@ import org.springframework.ui.ModelMap;
 					   Map map=new HashMap();
 			        	int id=boHosts.get(i).getId();
 			        	String deviceCode=boHosts.get(i).getBoDevice().getDeviceCode();
-			        	String userPhone=boHosts.get(i).getBoUsers().getUserPhone();
 			        	String nick_name=boHosts.get(i).getNickName();
 			        	
 			        	int DEVICE_ID=boHosts.get(i).getBoDevice().getDeviceId();
 			        	int USER_ID=boHosts.get(i).getBoUsers().getUserId();
+			        	String deviceAddress=boHosts.get(i).getDeviceAddress();
 			        	map.put("id", id);
 			        	map.put("deviceCode",deviceCode);
 			        	map.put("userPhone",userPhone);
 			        	map.put("nick_name",nick_name);
 			        	map.put("DEVICE_ID", DEVICE_ID);
+			        	map.put("deviceAddress",deviceAddress);
 			        	map.put("USER_ID", USER_ID);
 			        	list.add(map);
 				   }
@@ -1223,20 +1626,39 @@ import org.springframework.ui.ModelMap;
 		   
 		   @RequestMapping({"findudeviceByIndex.do"})
 		   @ResponseBody
-		   public List<BoHostDevice> findudeviceByIndex(@RequestParam("index") int index) {
-			   System.out.println("分页操作 -by index");
+		   public List<BoUserDevices> findudeviceByIndex(@RequestParam("index") int index,HttpServletRequest request) {//分页考虑是管理员还是房东
+			   HttpSession session = request.getSession();
+			   String phone=(String) session.getAttribute("userPhone");
+//			   System.out.println("userPhone:"+phone);
 			   List list=new ArrayList();
-		       List<BoHostDevice> boHosts = this.boHostDeviceService.getAllHostD();		  //直接把这结果传给前台 出现Cannot call sendError() after the response has been committed     
-			   //Page类
+			   
 			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
-			   int totalCount=boHosts.size();
 			   int pageSize=page.getPageSize();
-			   int totalPages=1;
-			   if(totalCount%pageSize !=0){
-				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   int totalPages=1,totalCount=0;
+			   List<BoUserDevices> boUserDevices=new ArrayList();
+			   if(phone == null) {
+//				   System.out.println("null");
+				   boUserDevices = this.BoUserDevicesService.find();		  //直接把这结果传给前台 出现Cannot call sendError() after the response has been committed     
+				   //Page类
+				   totalCount=boUserDevices.size();
+				   if(totalCount%pageSize !=0){
+					   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+				   }else {
+					   totalPages = totalCount/pageSize;
+				   }	
 			   }else {
-				   totalPages = totalCount/pageSize;
-			   }	
+//				   System.out.println("not null");
+				   BoUsers bouser = this.boUserssService.findByUserPhone(phone);
+				   String userCode=bouser.getUserCode();
+				   boUserDevices=this.BoUserDevicesService.getBy(userCode);
+				   totalCount=boUserDevices.size();
+				   if(totalCount%pageSize !=0){
+					   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+				   }else {
+					   totalPages = totalCount/pageSize;
+				   }
+			   }
+			   
 			   int startRow=(index-1)*pageSize;//数据库表中的行数 （从0开始）
 			   int endRow;
 			   if(index == totalPages) {
@@ -1244,21 +1666,21 @@ import org.springframework.ui.ModelMap;
 			   }else {
 				   endRow=index*pageSize - 1;
 			   }
-			   System.out.println("startRow:"+startRow);
-			   System.out.println("endRow:"+endRow);
+//			   System.out.println("startRow:"+startRow);
+//			   System.out.println("endRow:"+endRow);
 //			   System.out.println("totalCount:"+totalCount);
 //			   System.out.println("totalPages:"+totalPages);
 			   
-			   for(int i=0;i<boHosts.size();i++) {
+			   for(int i=0;i<boUserDevices.size();i++) {
 				   if(i>=startRow && i<=endRow) {
 					   Map map=new HashMap();
-			        	int id=boHosts.get(i).getId();
-			        	String deviceCode=boHosts.get(i).getBoDevice().getDeviceCode();
-			        	String userPhone=boHosts.get(i).getBoUsers().getUserPhone();
-			        	String nick_name=boHosts.get(i).getNickName();
+			        	int id=boUserDevices.get(i).getUserDeviceId();
+			        	String deviceCode=boUserDevices.get(i).getBoDevice().getDeviceCode();
+			        	String userPhone=boUserDevices.get(i).getBoUsers().getUserPhone();
+			        	String nick_name=boUserDevices.get(i).getNickName();
 			        	
-			        	int DEVICE_ID=boHosts.get(i).getBoDevice().getDeviceId();
-			        	int USER_ID=boHosts.get(i).getBoUsers().getUserId();
+			        	int DEVICE_ID=boUserDevices.get(i).getBoDevice().getDeviceId();
+			        	int USER_ID=boUserDevices.get(i).getBoUsers().getUserId();
 			        	map.put("id", id);
 			        	map.put("deviceCode",deviceCode);
 			        	map.put("userPhone",userPhone);
@@ -1274,36 +1696,143 @@ import org.springframework.ui.ModelMap;
 			   list.add(page);
 		       return list;
 		    }
-		   
-		   @RequestMapping({"findHostByDevicecode.do"})
+		   /*
+		    * new 5-7 根据deviceCode找到主机
+		    */
+		   @RequestMapping({"findUDsByDevicecode.do"})
 		   @ResponseBody
-		   public List<BoHostDevice> findHostByDevicecode(@RequestParam("deviceCode") String deviceCode) {
+		   public List<BoUserDevices> findUDsByDevicecode(@RequestParam("deviceCode") String deviceCode,@RequestParam("index") int index) {
 			   List list=new ArrayList();
-//		       List<BoHostDevice> boHosts = this.boHostDeviceService.getDeviceByAddress(deviceAddress); 
-			   List<BoHostDevice> boHosts = this.boHostDeviceService.getAllHostD();
-	    	   for(BoHostDevice bohost:boHosts) {//
-	    		   System.out.println(bohost.getBoDevice().getDeviceCode().equals(deviceCode));
-	    		   if(bohost.getBoDevice().getDeviceCode().equals(deviceCode)) {//解决从BoUsers表  查询  BoHostDevice表 的问题,,此处不能用等号比较
-	    			   Map map=new HashMap();
-			        	int id=bohost.getId();
-			        	String deviceCode1=bohost.getBoDevice().getDeviceCode();
-			        	String userPhone=bohost.getBoUsers().getUserPhone();
-			        	String nick_name=bohost.getNickName();
-			        	
-			        	int DEVICE_ID=bohost.getBoDevice().getDeviceId();
-			        	int USER_ID=bohost.getBoUsers().getUserId();
-			        	map.put("id", id);
-			        	map.put("deviceCode",deviceCode1);
-			        	map.put("userPhone",userPhone);
-			        	map.put("nick_name",nick_name);
-			        	map.put("DEVICE_ID", DEVICE_ID);
-			        	map.put("USER_ID", USER_ID);
-			        	list.add(map);
-	    		   }
-		        } 
+			   List<BoUserDevices> boUserDevices=new ArrayList();
+			   if("".equals(deviceCode)) {
+				   boUserDevices = this.BoUserDevicesService.find();
+			   }else {
+				   boUserDevices = this.BoUserDevicesService.getListByDeviceCode(deviceCode);	
+			   }
+			   //Page类
+			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+			   int totalCount=boUserDevices.size();
+			   int pageSize=page.getPageSize();
+			   int totalPages=1;
+			   if(totalCount%pageSize !=0){
+				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = totalCount/pageSize;
+			   }
+			   int startRow=(index-1)*pageSize;//数据库表中的行数 （从0开始）
+			   int endRow;
+			   if(index == totalPages) {
+				   endRow=totalCount-1;
+			   }else {
+				   endRow=index*pageSize - 1;
+			   }
+//			   System.out.println("totalCount:"+totalCount);
+//			   System.out.println("startRow:"+startRow);
+//			   System.out.println("endRow:"+endRow);
+//			   System.out.println("totalPages:"+totalPages);
+			   int j=0;
+			   if(boUserDevices.size() > 0) {
+				   for(int i=startRow;i<=endRow;i++) {
+					   j++;
+					   int id=boUserDevices.get(i).getUserDeviceId();
+					   String deviceCode01=boUserDevices.get(i).getBoDevice().getDeviceCode();
+					   String userPhone=boUserDevices.get(i).getBoUsers().getUserPhone();
+					   String nick_name=boUserDevices.get(i).getNickName();
+					   int DEVICE_ID=boUserDevices.get(i).getBoDevice().getDeviceId();
+					   int USER_ID=boUserDevices.get(i).getBoUsers().getUserId();
+					   Map map=new HashMap();
+					   map.put("id", id);
+					   map.put("deviceCode",deviceCode);
+					   map.put("userPhone",userPhone);
+					   System.out.println("userPhone:"+userPhone);
+					   map.put("nick_name",nick_name);
+					   System.out.println("nick_name:"+nick_name);
+					   map.put("DEVICE_ID", DEVICE_ID);
+					   map.put("USER_ID", USER_ID);
+					   list.add(map);
+					   //存在数据时输入,且在第一次时执行
+					   if(j==1) {
+						   page.setCurrentPage(index);
+						   page.setTotalPages(totalPages);
+						   list.add(page);
+					   }
+				   }
+			   }
 		        return list;
 		    }
-		   //删除主机（解绑） 和device和boUsers解绑
+		   
+		   /*
+		    * 根据deviceCode查找设备
+		    */
+//		   @RequestMapping({"findHostByDevicecode.do"})
+//		   @ResponseBody
+//		   public List<BoHostDevice> findHostByDevicecode(@RequestParam("deviceCode") String deviceCode,@RequestParam("index") int index) {
+//			   List list=new ArrayList();
+//			   List<BoHostDevice> boHosts=null;
+//			   if("".equals(deviceCode)) {
+//				   boHosts = this.boHostDeviceService.getAllHostD();
+//			   }else {
+//				   boHosts = this.boHostDeviceService.getListBy(deviceCode);	
+//			   }
+//			   //Page类
+//			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+//			   int totalCount=boHosts.size();
+//			   int pageSize=page.getPageSize();
+//			   int totalPages=1;
+//			   if(totalCount%pageSize !=0){
+//				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+//			   }else {
+//				   totalPages = totalCount/pageSize;
+//			   }
+//			   int startRow=(index-1)*pageSize;//数据库表中的行数 （从0开始）
+//			   int endRow;
+//			   if(index == totalPages) {
+//				   endRow=totalCount-1;
+//			   }else {
+//				   endRow=index*pageSize - 1;
+//			   }
+////			   System.out.println("totalCount:"+totalCount);
+////			   System.out.println("startRow:"+startRow);
+////			   System.out.println("endRow:"+endRow);
+////			   System.out.println("totalPages:"+totalPages);
+//			   int j=0;
+//			   if(boHosts.size() > 0) {
+//				   for(int i=startRow;i<=endRow;i++) {
+//					   j++;
+//					   int id=boHosts.get(i).getId();
+//					   String deviceCode01=boHosts.get(i).getBoDevice().getDeviceCode();
+//					   String userPhone=boHosts.get(i).getBoUsers().getUserPhone();
+//					   String nick_name=boHosts.get(i).getNickName();
+//					   int DEVICE_ID=boHosts.get(i).getBoDevice().getDeviceId();
+//					   int USER_ID=boHosts.get(i).getBoUsers().getUserId();
+//					   Map map=new HashMap();
+//					   map.put("id", id);
+//					   map.put("deviceCode",deviceCode);
+//					   map.put("userPhone",userPhone);
+//					   System.out.println("userPhone:"+userPhone);
+//					   map.put("nick_name",nick_name);
+//					   System.out.println("nick_name:"+nick_name);
+//					   map.put("DEVICE_ID", DEVICE_ID);
+//					   map.put("USER_ID", USER_ID);
+//					   list.add(map);
+//					   //存在数据时输入,且在第一次时执行
+//					   if(j==1) {
+//						   page.setCurrentPage(index);
+//						   page.setTotalPages(totalPages);
+//						   list.add(page);
+//					   }
+//				   }
+//			   }
+//		        return list;
+//		    }
+		   
+		   /**
+		    * 删除主机（解绑） 和device和boUsers解绑
+		    * @param id
+		    * @param DEVICE_ID
+		    * @param USER_ID
+		    * @return
+		    */
 		   @RequestMapping({"delHost.do"})
 		   @ResponseBody
 		   public String delHost(@RequestParam("id") int id,@RequestParam("DEVICE_ID") int DEVICE_ID,@RequestParam("USER_ID") int USER_ID) {
@@ -1320,7 +1849,6 @@ import org.springframework.ui.ModelMap;
 		   @RequestMapping({"showDevices.do"})
 		   @ResponseBody
 		   public List<BoHostDevice> showDevices() {//有问题   deviceCode,userPhone,deviceAddress
-			   System.out.println("分页操作 -首页");
 			   List list=new ArrayList();
 		       List<BoHostDevice> boHosts = this.boHostDeviceService.getAllHostD();		  //直接把这结果传给前台 出现Cannot call sendError() after the response has been committed
 			   //Page类
@@ -1342,11 +1870,13 @@ import org.springframework.ui.ModelMap;
 			        	String deviceCode=boHosts.get(i).getBoDevice().getDeviceCode();
 			        	String userPhone=boHosts.get(i).getBoUsers().getUserPhone();
 			        	String deviceAddress=boHosts.get(i).getDeviceAddress();
+			        	String nickName=boHosts.get(i).getNickName();
 //			        	System.out.println("id:"+id);
 			        	map.put("id", id);
 			        	map.put("deviceCode",deviceCode);
 			        	map.put("userPhone",userPhone);
 			        	map.put("deviceAddress",deviceAddress);
+			        	map.put("nickName",nickName);
 			        	list.add(map);
 				   }
 			   }
@@ -1356,13 +1886,34 @@ import org.springframework.ui.ModelMap;
 			   list.add(page);
 		       return list;
 		    }
-		   
+		   /*
+		    * 分页查找设备
+		    */
 		   @RequestMapping({"findHostByIndex.do"})
 		   @ResponseBody
-		   public List<BoHostDevice> findHostByIndex(@RequestParam("index") int index) {
-			   System.out.println("分页操作 ");
+		   public List<BoHostDevice> findHostByIndex(@RequestParam("index") int index,@RequestParam("addrOtel") String addrOtel,HttpServletRequest request) {
 			   List list=new ArrayList();
-		       List<BoHostDevice> boHosts = this.boHostDeviceService.getAllHostD();		  //直接把这结果传给前台 出现Cannot call sendError() after the response has been committed
+			   List<BoHostDevice> boHosts=new ArrayList();
+			   HttpSession session = request.getSession();
+			   String phone=(String) session.getAttribute("userPhone");
+			   if(phone == null) {
+				   if("".equals(addrOtel)) {//搜索框中不为空，此时执行的分页是基于搜索的
+					   boHosts = this.boHostDeviceService.getAllHostD();		  //直接把这结果传给前台 出现Cannot call sendError() after the response has been committed
+				   }else {
+					   List<BoHostDevice> boHostss=this.boHostDeviceService.getAllHostD();
+					   for(int i=0;i<boHostss.size();i++) {
+						   if(addrOtel.equals(boHostss.get(i).getBoDevice().getDeviceCode()) || addrOtel.equals(boHostss.get(i).getDeviceAddress()) || addrOtel.equals(boHostss.get(i).getBoUsers().getUserPhone())) {
+							   boHosts.add(boHostss.get(i));
+						   }
+					   }
+				   }
+				   
+			   }else{
+				   BoUsers bouser = this.boUserssService.findByUserPhone(phone);
+				   String userCode=bouser.getUserCode();
+				   boHosts=this.boHostDeviceService.getUserCode(userCode);
+			   }
+//			   System.out.println("boHost:"+boHosts);
 			   //Page类
 			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
 			   int totalCount=boHosts.size();
@@ -1380,9 +1931,8 @@ import org.springframework.ui.ModelMap;
 			   }else {
 				   endRow=index*pageSize - 1;
 			   }
-			   System.out.println("totalCount:"+totalCount);
-			   System.out.println("totalPages:"+totalPages);
-			   
+//			   System.out.println("totalCount:"+totalCount);
+//			   System.out.println("totalPages:"+totalPages);
 			   for(int i=0;i<boHosts.size();i++) {
 				   if(i>=startRow && i<=endRow) {
 					   Map map=new HashMap();
@@ -1390,11 +1940,13 @@ import org.springframework.ui.ModelMap;
 			        	String deviceCode=boHosts.get(i).getBoDevice().getDeviceCode();
 			        	String userPhone=boHosts.get(i).getBoUsers().getUserPhone();
 			        	String deviceAddress=boHosts.get(i).getDeviceAddress();
+			        	String nickName=boHosts.get(i).getNickName();
 //			        	System.out.println("id:"+id);
 			        	map.put("id", id);
 			        	map.put("deviceCode",deviceCode);
 			        	map.put("userPhone",userPhone);
 			        	map.put("deviceAddress",deviceAddress);
+			        	map.put("nickName",nickName);
 			        	list.add(map);
 				   }
 			   }
@@ -1405,59 +1957,56 @@ import org.springframework.ui.ModelMap;
 		       return list;
 		    }
 		   
-		   @RequestMapping({"findHostByAddr.do"})
+		   /*
+		    * 通过地址码或手机号 模糊查询
+		    */
+		   @RequestMapping({"findHostByAddrOrTel.do"})
 		   @ResponseBody
-		   public List<BoHostDevice> findHostByAddr(@RequestParam("deviceAddress") String deviceAddress) {
+		   public List<BoHostDevice> findHostByAddrOrTel(@RequestParam("AddrOrTel") String AddrOrTel) {
 			   List list=new ArrayList();
-//		       List<BoHostDevice> boHosts = this.boHostDeviceService.getDeviceByAddress(deviceAddress); 
 			   List<BoHostDevice> boHosts = this.boHostDeviceService.getAllHostD();
-	    	   for(BoHostDevice bohost:boHosts) {//
-	    		   if(bohost.getDeviceAddress().equals(deviceAddress)) {//解决从BoUsers表  查询  BoHostDevice表 的问题,,此处不能用等号比较
-//	    			   System.out.println("coming...");
-	    			   Map map=new HashMap();
-			        	int id=bohost.getId();
-			        	String deviceCode=bohost.getBoDevice().getDeviceCode();
-			        	String userPhone1=bohost.getBoUsers().getUserPhone();
-			        	String deviceAddress1=bohost.getDeviceAddress();
+			 //Page类
+			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+			   int totalCount=boHosts.size();
+			   int pageSize=page.getPageSize();
+			   int totalPages=1;
+			   if(totalCount%pageSize !=0){
+				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = totalCount/pageSize;
+			   }	
+//			   System.out.println("totalPages:"+totalPages);
+			   int j=0;
+			   for(int i=0;i<boHosts.size();i++) {
+				   if(AddrOrTel.equals(boHosts.get(i).getBoDevice().getDeviceCode()) || AddrOrTel.equals(boHosts.get(i).getDeviceAddress()) || AddrOrTel.equals(boHosts.get(i).getBoUsers().getUserPhone())) {
+					   j++;
+					   Map map=new HashMap();
+			        	int id=boHosts.get(i).getId();
+			        	String deviceCode=boHosts.get(i).getBoDevice().getDeviceCode();
+			        	String userPhone1=boHosts.get(i).getBoUsers().getUserPhone();
+			        	String deviceAddress1=boHosts.get(i).getDeviceAddress();
+			        	String nickName=boHosts.get(i).getNickName();
 //				        	System.out.println("id:"+id);
 			        	map.put("id", id);
 			        	map.put("deviceCode",deviceCode);
 			        	map.put("userPhone",userPhone1);
 			        	map.put("deviceAddress",deviceAddress1);
+			        	map.put("nickName",nickName);
 			        	list.add(map);
-	    		   }
-		        } 
+			        	if(j>=10) {break;}
+				   }
+			   }
+//	    	   System.out.println("list:"+list);
+	    	 //用于向前台传递的数据  for分页
+			   page.setCurrentPage(1);
+			   page.setTotalPages(totalPages);
+			   list.add(page);
 		        return list;
 		    }
-		   @RequestMapping({"findHostByTel.do"})//从BoUsers表 到 BoHostDevice表
-		   @ResponseBody
-		   public List<BoHostDevice> findHostByTel(@RequestParam("userPhone") String userPhone) {
-			   List list=new ArrayList();
-//		       List<BoHostDevice> boHosts = this.boHostDeviceService.findHostByUserPhone(userPhone);//BoHostDevice中不存在userPhone字段
-			   List<BoHostDevice> boHosts = this.boHostDeviceService.getAllHostD();
-//               System.out.println("userPhone:"+userPhone);
-	    	   for(BoHostDevice bohost:boHosts) {//
-//	    		   System.out.println("bohost.getBoUsers().getUserPhone():"+bohost.getBoUsers().getUserPhone());
-//	    		   System.out.println(bohost.getBoUsers().getUserPhone().equals(userPhone));
-	    		   if(bohost.getBoUsers().getUserPhone().equals(userPhone)) {//解决从BoUsers表  查询  BoHostDevice表 的问题,,此处不能用等号比较
-//	    			   System.out.println("coming...");
-	    			   Map map=new HashMap();
-			        	int id=bohost.getId();
-			        	String deviceCode=bohost.getBoDevice().getDeviceCode();
-			        	String userPhone1=bohost.getBoUsers().getUserPhone();
-			        	String deviceAddress=bohost.getDeviceAddress();
-//				        	System.out.println("id:"+id);
-			        	map.put("id", id);
-			        	map.put("deviceCode",deviceCode);
-			        	map.put("userPhone",userPhone1);
-			        	map.put("deviceAddress",deviceAddress);
-			        	list.add(map);
-	    		   }
-		        } 
-//	    	   System.out.println("list:"+list); 
-		        return list;
-		    }
-		   //删除设备
+		   
+		   /*
+		    * 删除设备
+		    */
 		   @RequestMapping({"delDevices.do"})
 		   @ResponseBody
 		   public String delDevices(@RequestParam("id") int id) {
@@ -1471,7 +2020,9 @@ import org.springframework.ui.ModelMap;
 	              return "success";
 			}
 		   
-		 //设备管理模块-红外转发器参数
+		   /*
+		    * 设备管理模块-红外转发器参数
+		    */
 		   @RequestMapping({"showDevicesRed.do"})
 		   @ResponseBody
 		   public List<BoInfraredPart> showDevicesRed() {
@@ -1650,8 +2201,8 @@ import org.springframework.ui.ModelMap;
          }
          public static void main(String[] args) {
         	 LoginController lg=new LoginController();
-        	 lg.shiroEncryption("SZ2018mb168");//4c65ed253b74c54922c87081af54375d
-        	 System.out.println("密码》"+lg.shiroEncryption("SZ2018mb168"));
+        	 lg.shiroEncryption("guest");//94c47c216d1ff3410de83390d437d1f1
+        	 System.out.println("密码》"+lg.shiroEncryption("guest"));
 		}
 	}
 

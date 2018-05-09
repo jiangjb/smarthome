@@ -24,7 +24,7 @@
 </style> -->
 </head>
 <body>
-
+	
 	<div
 		style="width:100%;text-align: center;margin: 0 auto;position: absolute;">
 		<div id="loginbox">
@@ -39,8 +39,8 @@
 					<div class="controls">
 						<div class="main_input_box">
 							<span class="add-on bg_lg">
-							<i><img height="37" src="<%=WEBPATH %>/static/images/user.png" /></i>
-							</span><input type="text" name="loginname" id="loginname" value="" placeholder="请输入账号" />
+							<i><img height="36" src="<%=WEBPATH %>/static/images/user.png" /></i>
+							</span><input type="text" name="loginname" id="loginname" value="" placeholder="请输入账号" /><%-- <%=username%> --%>
 						</div>
 					</div>
 				</div>
@@ -48,18 +48,16 @@
 					<div class="controls">
 						<div class="main_input_box">
 							<span class="add-on bg_ly">
-							<i><img height="37" src="<%=WEBPATH %>/static/images/suo.png" /></i>
-							</span><input type="password" name="password" id="password" placeholder="请输入密码" value="" />
+							<i><img height="36" src="<%=WEBPATH %>/static/images/suo.png" /></i>
+							</span><input type="password" name="password" id="password" placeholder="请输入密码" value="" /><%-- <%=password%> --%>
 						</div>
 					</div>
 				</div>
 				<div style="float:right;padding-right:10%;">
-					<div style="float: left;margin-top:3px;margin-right:2px;">
-						<font color="white">记住密码</font>
-					</div>
-					<div style="float: left;">
-						<input name="form-field-checkbox" id="saveid" type="checkbox"
-							onclick="savePaw();" style="padding-top:0px;" />
+					<div style="float: left;margin-top:3px;">
+						<td><font color="white">记住密码</font>：<input id="remember"  style="margin-top:-2px;" type="checkbox" name="passcookies"  
+	                        value=""/>  
+	                    </td>
 					</div>
 				</div>
 				<div style="float:left;padding-left:10%;">
@@ -92,7 +90,7 @@
 			<div class="controls">
 				<div class="main_input_box">
 					<font color="white"><span id="nameerr">Copyright © 
-							2016</span></font>
+							2018-2028 ZNHOMES All Rights Reserved.</span></font>
 				</div>
 			</div>
 		</div>
@@ -110,13 +108,18 @@
 		$(document).ready(function() {
 			changeCode();
 			$("#codeImg").bind("click", changeCode);
+			//alert("是否已经记住了密码："+$.cookie("rmbUser"));  //没有存储该cookie时，显示undefine
+			//alert($.cookie('username'));//没有存储该cookie时，显示undefine
 			//初始化页面时验证是否记住了密码
-			if ($.cookie("rmbUser") == "true") {
-			    $("#saveid").attr("checked", true);
-				$("#loginname").val($.cookie("loginname"));
+			if ($.cookie("rmbUser") == "true") {//cookie保存的是字符串 
+			    $("#remember").prop("checked", true);
+				$("#loginname").val($.cookie("username"));
 				$("#password").val($.cookie("password"));
+			}else{
+				$("#remember").prop("checked", false);
 			}
 		});
+		
 		//服务器校验
 		function severCheck(){
 			if(check()){
@@ -134,8 +137,21 @@
 					async: true,
 					success: function(data){
 						/* alert("success:"+data) */
-						if(data !=0){
+						if(data > 0){
 							/* alert("success") */
+							//验证正确了，保存username、password和rmUser的cookie值 4-26
+							/* alert("username:"+username+",password:"+password); */
+							var checkbox=$("#remember").prop('checked');//true or false
+							//alert("是否选择记住密码："+checkbox);
+							 if(checkbox){
+				                $.cookie('username', loginname,{ expires: 7 }); //cookie 保存用户名，有效期：7天
+								$.cookie('password', password,{ expires: 7 }); //cookie 保存密码，有效期：7天
+								$.cookie('rmbUser',true,{ expires: 7 })
+							}else{
+								$.cookie('username', '', { expires: -1 });//删除cookie 【jQuery方式】
+								$.cookie('password', '', { expires: -1 });//删除cookie 【jQuery方式】
+								$.cookie('rmbUser',false)
+							}
 							<%-- window.location.href="<%=WEBPATH %>/static/jsp/index.jsp"+"?loginName="+loginname+"&loginPwd="+password; //js中路径 --%>
 							window.location.href="<%=WEBPATH %>/static/jsp/index.jsp?UserID="+data;
 						}else if(data == 0){
@@ -215,50 +231,6 @@
 			return true;
 		};
 
-		function savePaw() {
-			/* 勾选“记住密码”，点击登录，保存cookie，下次登录不需输入；
-			不勾“记住密码”，点击登录，不保存cookie，下次登录需输入； */
-			if ($("#saveid").attr("checked") == true) {
-				        var userName = $("#loginname").val();
-				        var passWord = $("#password").val();
-				        $.cookie("saveid", "true", { expires: 7 }); // 存储一个带7天期限的 cookie
-				        $.cookie("loginname", userName, { expires: 7 }); // 存储一个带7天期限的 cookie
-				        $.cookie("password", passWord, { expires: 7 }); // 存储一个带7天期限的 cookie
-				    }
-				    else {
-				        $.cookie("saveid", "false", { expires: -1 });        // 删除 cookie
-				        $.cookie("loginname", '', { expires: -1 });
-				        $.cookie("password", '', { expires: -1 });
-				    }
-			
-		}
-
-		/* function saveCookie() {
-			if ($("#saveid").attr("checked")) {
-				$.cookie('loginname', $("#loginname").val(), {
-					expires : 7
-				});
-				$.cookie('password', $("#password").val(), {
-					expires : 7
-				});
-			}
-		} */
-		function cancel() {/* 取消   即将用户名和密码清空 */
-			$("#loginname").val('');
-			$("#password").val('');
-		}
-		
-		jQuery(function() {
-			var loginname = $.cookie('loginname');
-			var password = $.cookie('password');
-			if (typeof(loginname) != "undefined"
-					&& typeof(password) != "undefined") {
-				$("#loginname").val(loginname);
-				$("#password").val(password);
-				$("#saveid").attr("checked", true);
-				$("#code").focus();
-			}
-		});
 	</script>
 	<script>
 		//TOCMAT重启之后 点击左侧列表跳转登录首页 

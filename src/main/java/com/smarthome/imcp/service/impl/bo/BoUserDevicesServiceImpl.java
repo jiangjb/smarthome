@@ -2,10 +2,8 @@
 /*     */ 
 /*     */ import com.smarthome.imcp.dao.bo.BoUserDevicesDaoIface;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoUserDevices;
-import com.smarthome.imcp.dao.model.system.SysUser;
 /*     */ import com.smarthome.imcp.service.AbstractBasicService;
 /*     */ import com.smarthome.imcp.service.bo.BoUserDevicesServiceIface;
-/*     */ import java.io.PrintStream;
 /*     */ import java.io.Serializable;
 /*     */ import java.util.List;
 /*     */ import java.util.StringTokenizer;
@@ -155,25 +153,23 @@ import com.smarthome.imcp.dao.model.system.SysUser;
 /*     */
 			@Override
 			public List<BoUserDevices> find() {
-//				StringBuffer sql = new StringBuffer();
-//				sql.append("SELECT ");
-//				sql.append("bu.USER_NAME,");
-//				sql.append("bu.USER_PHONE,");
-//				sql.append("bd.DEVICE_CODE,");
-//				sql.append("bd.MNT_CREATOR_DATE,");
-//				sql.append("bd.MNT_UPDATED_DATE,");
-//				sql.append("bd.HOST_STATUS,");
-//				sql.append("bu.SIGNATURE ");
-//				sql.append("FROM ");
-//				sql.append("bo_users bu,bo_user_devices bud,bo_device bd ");
-//				sql.append("WHERE ");
-//				sql.append("bu.USER_ID=bud.USER_ID AND bd.DEVICE_ID=bud.DEVICE_ID ");
-//				sql.append(" ORDER BY");
-//				sql.append(" bd.MNT_CREATOR_DATE asc");
-//				System.err.println(sql.toString());
-//				List<BoUserDevices> list = (List<BoUserDevices>)this.BoUserDevicesDao.findByNSQL(sql.toString());
-//				return list;
-				return this.BoUserDevicesDao.find();
+				DetachedCriteria criteria = DetachedCriteria.forClass(BoUserDevices.class);
+				List<BoUserDevices> list = this.BoUserDevicesDao.findByCriteria(criteria);
+				if ((list == null) || (list.isEmpty())) {
+					return null;
+					}
+				return list;
+			}
+			@Override
+			public List<BoUserDevices> findByStatus(int status) {
+				DetachedCriteria criteria = DetachedCriteria.forClass(BoUserDevices.class);
+				criteria.createAlias("boDevice", "boDevice");
+				criteria.add(Restrictions.eq("boDevice.status", status));
+				List<BoUserDevices> list = this.BoUserDevicesDao.findByCriteria(criteria);
+				if ((list == null) || (list.isEmpty())) {
+					return null;
+					}
+				return list;
 			}
 
 		}

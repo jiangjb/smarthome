@@ -42,14 +42,6 @@
 					<li id="fhindex"  class="active">
 					  <a onclick="toIndex()"><i class="icon-dashboard"></i><span>后台首页</span></a>
 					</li>																																																												
-					<!-- <li id="lm24" class="active open">
-						<a style="cursor:pointer;" class="dropdown-toggle">
-					    	<i class="icon-list"></i>  该句是icon显示的语句
-							<span>用户管理</span>
-							<b class="arrow icon-angle-down"></b>
-					  </a>
-					</li> -->
-					<!-- 显示用户管理、主机管理和设备管理 （固定，写死）-->
 					<li id="lm24">
 					  <a style="cursor:pointer;" class="dropdown-toggle">
 						<i class="icon-list"></i>
@@ -79,12 +71,12 @@
 								<a style="cursor:pointer;" target="mainFrame" onclick="siMenu('z23','lm22','全部主机','/showHostDevices.do')">
 									<i class="icon-double-angle-right"></i>全部主机</a></li>
 									<li id="z30">
-										<a style="cursor:pointer;" target="mainFrame" onclick="siMenu('z30','lm22','用户绑定主机解绑','/showHostD.do')">
-											<i class="icon-double-angle-right"></i>用户绑定主机解绑</a></li>			
+										<a style="cursor:pointer;" target="mainFrame" onclick="siMenu('z30','lm22','用户绑定主机解绑','/showUserDevices.do')">
+											<i class="icon-double-angle-right"></i>主机解绑</a></li>	<!-- 用户绑定主机解绑		 -->
 				  	  </ul>
 				  </li>
 				
-				<li id="lm26">
+				  <li id="lm26">
 					  <a style="cursor:pointer;" class="dropdown-toggle">
 						<i class="icon-list"></i>
 						<span>设备管理</span>
@@ -98,40 +90,9 @@
 									<a style="cursor:pointer;" target="mainFrame" onclick="siMenu('z27','lm26','红外转发器参数','/showDevicesRed.do')">
 										<i class="icon-double-angle-right"></i>红外转发器参数</a></li>						
 				  	  </ul>
-				</li>
-
-				<!-- 显示用户管理、主机管理和设备管理 （灵活）-->
-				<%-- <c:forEach items="${menuList}" var="menu">
-					<c:if test="${menu.hasMenu}">
-					<li id="lm${menu.MENU_ID }">
-						  <a style="cursor:pointer;" class="dropdown-toggle" >
-							<i class="${menu.MENU_ICON == null ? 'icon-desktop' : menu.MENU_ICON}"></i>
-							<span>${menu.MENU_NAME }</span>
-							<b class="arrow icon-angle-down"></b>
-						  </a>
-						  <ul class="submenu">
-								<c:forEach items="${menu.subMenu}" var="sub">
-									<c:if test="${sub.hasMenu}">
-									<c:choose>
-										<c:when test="${not empty sub.MENU_URL}">
-										<li id="z${sub.MENU_ID }">
-										<a style="cursor:pointer;" target="mainFrame"  onclick="siMenu('z${sub.MENU_ID }','lm${menu.MENU_ID }','${sub.MENU_NAME }','${sub.MENU_URL }')"><i class="icon-double-angle-right"></i>${sub.MENU_NAME }</a></li>
-										</c:when>
-										<c:otherwise>
-										<li><a href="javascript:void(0);"><i class="icon-double-angle-right"></i>${sub.MENU_NAME }</a></li>
-										</c:otherwise>
-									</c:choose>
-									</c:if>
-								</c:forEach>
-					  		</ul>
-					</li>
-					</c:if>
-				</c:forEach>
-
-				</ul> --%><!--/.nav-list-->
-
+				  </li>
+				</ul> <!--/.nav-list-->
 				<div id="sidebar-collapse"><i class="icon-double-angle-left"></i></div>
-
 			</div><!--/#sidebar-->
 			
 			

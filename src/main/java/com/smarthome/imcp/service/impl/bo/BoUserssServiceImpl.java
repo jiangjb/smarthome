@@ -4,7 +4,6 @@
 /*     */ import com.smarthome.imcp.dao.bo.BoUserssDaoIface;
 /*     */ import com.smarthome.imcp.dao.criteria.SearchCriteria;
 /*     */ import com.smarthome.imcp.dao.criteria.smarthome.SearchCriteriaUsers;
-import com.smarthome.imcp.dao.model.bo.BoUserDevices;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoUsers;
 /*     */ import com.smarthome.imcp.service.AbstractBasicService;
 /*     */ import com.smarthome.imcp.service.bo.BoUserssServiceIface;
@@ -136,8 +135,14 @@ import com.smarthome.imcp.dao.model.bo.BoUserDevices;
 /*     */
 			@Override
 			public List<BoUsers> findAllBoUsers() {
-				// TODO Auto-generated method stub
 				return this.boUserDao.findAllBoUsers();
+			}
+			@Override
+			public BoUsers delete(BoUsers boUser) {
+				if (chkUpdateValid(boUser)) {
+					this.boUserDao.delete(boUser);
+				}
+				return boUser;
 			}
 		}
 

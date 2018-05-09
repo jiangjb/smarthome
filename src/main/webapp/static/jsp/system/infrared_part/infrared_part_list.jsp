@@ -44,7 +44,7 @@
 					  	</select>
 					</td> --%>
 					<!-- <td style="vertical-align:top;"><button class="btn btn-mini btn-light" onclick="search();"  title="检索"><i id="nav-search-icon" class="icon-search"></i></button></td> -->
-					<td style="vertical-align:top;"><input type="button" value="搜索"  onclick="search();"  title="检索"></input></td>
+					<td style="vertical-align:top;"><input type="button" style="border:none;height:28px;" value="搜索"  onclick="search();"  title="检索"></input></td>
 					<!-- <td style="vertical-align:top;"><a class="btn btn-mini btn-light" onclick="fromExcel();" title="从EXCEL导入"><i id="nav-search-icon" class="icon-cloud-upload"></i></a></td> -->
 					<shiro:hasRole name="admin">
 						<td style="vertical-align:top;"><input id="filepath" type="file" class="btn btn-mini btn-light " ></input><button id="nav-search-icon" vallue="导入" class="icon-cloud-upload" style="border:none;" onclick="fromExcel();"></button></td>
@@ -604,6 +604,7 @@
     			async: true,
     			success: function(data){
     				/* alert(data) */
+    				$("#redlist").empty();
     				if(data == ""){
     					$("#infraredlist").empty();
     					$("#infraredlist").append('<tr class="main_info">'+

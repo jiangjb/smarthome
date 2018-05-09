@@ -116,19 +116,32 @@
 				//alert($("#fhindex a").text().replace(/\s+/g,""));//去掉所有空格
 				var id=$("#fhindex a").text();
 				if(id == "后台首页"){
-					$("#mainFrame").attr("src","<%=WEBPATH %>/static/jsp/FisrtPage.jsp")
+					$("#mainFrame").attr("src","<%=WEBPATH %>/static/jsp/FisrtPage.jsp");
 				}
 			})
 		</script>
 		<script type="text/javascript">
+				$(function(){
+					//登录验证码页面和红外转发器参数页面没有有用，暂且隐藏
+					/* $("#z29").hide();
+					$("#z27").hide(); */
+					<%-- var role= '<%= session.getAttribute("role")%>';
+					if(role == "buyer"){
+						$("#z29").hide();
+						$("#z27").hide();
+					}  --%>
+				})
 				function toIndex(){
 					/* alert($("#mainFrame").text()); */
-					$("#mainFrame").attr("src","<%=WEBPATH %>/static/jsp/FisrtPage.jsp")
+					$("#mainFrame").attr("src","<%=WEBPATH %>/static/jsp/FisrtPage.jsp");
 				}
 				//菜单状态切换(用户管理、主机管理和设备管理)
 				var fmid = "fhindex";
 				var mid = "fhindex";
+				 
 				function siMenu(id,fid,MENU_NAME,MENU_URL){//四个参数缺一不可，id是子标签的，fid是父标签的 两个都要设置class属性
+					var session= '<%= session.getAttribute("role")%>';
+					/* alert("session:"+session); */
 					if(MENU_NAME == "全部用户"){
 						<%-- window.location.href ="<%=WEBPATH%>/showUsers.do"; --%>
 						$("#mainFrame").attr("src","<%=WEBPATH %>/static/jsp/system/users/users_list.jsp")

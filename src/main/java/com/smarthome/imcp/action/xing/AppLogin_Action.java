@@ -2,7 +2,6 @@
 /*     */ 
 /*     */ import com.smarthome.dock.server.util.StaticUtil;
 /*     */ import com.smarthome.imcp.action.AbstractAction;
-import com.smarthome.imcp.common.MailUtil;
 /*     */ import com.smarthome.imcp.common.Md5;
 /*     */ import com.smarthome.imcp.controller.RequestJson;
 		  import com.smarthome.imcp.dao.model.bo.BoFloor;
@@ -31,8 +30,6 @@ import com.smarthome.imcp.common.MailUtil;
 /*     */ import java.util.Properties;
 /*     */ import java.util.Timer;
 /*     */ import java.util.TimerTask;
-
-import javax.mail.MessagingException;
 /*     */ import javax.servlet.http.HttpServletRequest;
 /*     */ import org.apache.commons.lang3.StringUtils;
 /*     */ import org.apache.struts2.ServletActionContext;

@@ -25,6 +25,10 @@ import com.smarthome.imcp.dao.model.bo.BoDevice;
 //			 int a = Integer.parseInt(str);
 //			 Integer i=new Integer(a);
 //			 System.out.println(Integer.parseInt(str));
+			List list=new ArrayList();
+			if(list.size() == 0) {
+				System.out.println("kong");
+			}
 /*    */   }
 /*    */ }
 

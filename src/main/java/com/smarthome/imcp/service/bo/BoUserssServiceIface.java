@@ -20,6 +20,7 @@ public abstract interface BoUserssServiceIface<T, PK extends Serializable> exten
   public abstract BoUsers findByUserUserCode(String paramString);
 
   public abstract List<BoUsers> findAllBoUsers();
+  public abstract BoUsers delete(T paramT);//4-26
 }
 
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\

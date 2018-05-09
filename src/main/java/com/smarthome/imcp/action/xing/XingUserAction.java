@@ -85,12 +85,15 @@
 /*       */ import com.smarthome.imcp.service.bo.BoUserssServiceIface;
 /*       */ import com.smarthome.imcp.service.impl.push.PushService;
 /*       */ import com.smarthome.imcp.service.system.FileServiceIface;
+import com.smarthome.imcp.util.FloorUtil;
 /*       */ import com.smarthome.imcp.util.MySecureProtocolSocketFactory;
 /*       */ import com.smarthome.imcp.util.NumComparator;
+import com.smarthome.imcp.util.RoomUtil;
 /*       */ import com.smarthome.imcp.util.SendMsgUtil;
 			import com.smarthome.imcp.util.SimulateHTTPRequestUtil;
 /*       */ import com.smarthome.imcp.util.StaticUtils;
 /*       */ import com.smarthome.imcp.util.TokeUtil;
+import com.smarthome.imcp.util.UserUtil;
 /*       */ import com.smarthome.imcp.util.UuidUtil;
 /*       */ import com.smarthome.imcp.util.YZUitl;
 			import com.smarthome.imcp.util.androidAndIOS.Demo;
@@ -137,7 +140,10 @@
 /*       */ import org.slf4j.Logger;
 /*       */ import org.slf4j.LoggerFactory;
 /*       */ import org.springframework.beans.factory.annotation.Autowired;
-			import org.apache.commons.codec.binary.Base64;//2-9
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.apache.commons.codec.binary.Base64;//2-9
 
 /*       */ @ParentPackage("auth-check-package")
 /*       */ @Namespace("/xingUser")
@@ -266,6 +272,10 @@
 /*       */ 
 /*       */   @Autowired
 /*       */   private PacketProcessHelper packetProcessHelper;
+
+			  @Autowired
+/*    */   	  private BoUserssServiceIface<BoUsers, Serializable> boUserssService;
+			  
 
 /*       */   private File fileupload;//成员变量 这个怎么获取？
 /*       */   private String fileuploadFileName;
@@ -8578,7 +8588,158 @@
 /*       */     }
 /*  7593 */     return "success";
 /*       */   }
-/*       */ 
+			/*
+			 * 5-8 移交账号权限  流程：老账号-新用户名、新密码、新头像，新账号-删除，注册
+			 */
+			@Action(value="changeAccount", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			public String changeAccount() {
+				logger.info("---------------------changeAccount.action-----------------------------");
+				Md5 md5 = new Md5();
+				this.requestJson = new RequestJson();
+				Map map = new HashMap();
+				HttpServletRequest request = ServletActionContext.getRequest();
+				String newPhone="";
+				String oldPhone="";
+				Enumeration pNames=request.getParameterNames();
+				while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+					String name=(String)pNames.nextElement();
+//					  logger.info("name:"+name);
+					String value=request.getParameter(name);
+//					  logger.info("value:"+value);
+					if("newPhone".equals(name)) {
+						newPhone=value;
+					}else if("oldPhone".equals(name)) {
+						oldPhone=value;
+					}
+				}
+				//找到新号码对应的用户，取出密码
+				BoUsers newTel=this.boUserssService.findByUserPhone(newPhone);
+				String pwd="";
+				String userCode="";
+				String headPic="";
+				if(newTel != null) {
+					pwd=newTel.getUserPwd();
+					userCode=newTel.getUserCode();
+					headPic=newTel.getHeadPic();
+				}
+				if(newTel != null) {
+//					logger.info("newTel!=null");
+					int userId=newTel.getUserId();
+					//找到旧号码对应的用户,将该用户的号码和密码换成新用户的
+					BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
+					String oldPWD=oldTel.getUserPwd();
+					String oldHeadPic=oldTel.getHeadPic();
+					if(oldTel != null) {
+//						logger.info("oldTel != null");
+						oldTel.setUserPhone(newPhone);
+						oldTel.setUserPwd(pwd);
+						oldTel.setHeadPic(headPic);
+					}
+					BoUsers update=this.boUserssService.update(oldTel);//此时新旧两个账号的号码都是新的号码，新账号应该初始化（存放旧号码）==最终目的：老账号-新号码，删除旧账号，注册账号
+					BoUsers newTel01=this.boUserssService.findByKey(userId);
+					if(update != null) {
+//						logger.info("update!=null");
+						//不过不排除新用户加了情景模式  得先检查是否有情景模式，然后删除新用户
+						List<BoModel> boModels=this.boModelService.getListBy(userCode);
+						   for(BoModel boModel:boModels) {
+							   List<BoModelInfo> boModelInfos=this.boModelInfoServicess.getBy(userCode, boModel.getModelId());
+							   for(BoModelInfo boModelInfo:boModelInfos) {
+								   this.boModelInfoServicess.delete(boModelInfo);
+							   }
+							   this.boModelService.delete(boModel);
+						   }
+						   //删除新账号
+						   BoUsers del=this.boUserssService.delete(newTel01);
+						   //注册新账号（放入老账号的手机号、密码以及头像）
+						   BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
+						   user.setHeadPic(oldHeadPic);
+//						   this.boUserServicess.update(save);
+						   BoUsers save = (BoUsers)this.boUserServicess.save(user);
+						   if(save != null) {
+								//注册成功时 默认添加一个楼层和四个房间
+								BoFloor floor=FloorUtil.save(save.getUserCode());
+								BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
+								//String userCode,String floorName,String floorCode,String roomName	
+//								System.out.println("楼层名称："+saveF.getFloorName());
+								String uCode=saveF.getUserCode();
+								String floorName=saveF.getFloorName();
+//								String floorName="我的家";
+								String floorCode=saveF.getFloorCode();
+								BoRoom room1=RoomUtil.save(uCode,floorName,floorCode,"客厅");
+								BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
+								BoRoom room2=RoomUtil.save(uCode,floorName,floorCode,"卧室");
+								BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
+								BoRoom room3=RoomUtil.save(uCode,floorName,floorCode,"厨房");
+								BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
+								BoRoom room4=RoomUtil.save(uCode,floorName,floorCode,"卫生间");
+								BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
+								this.requestJson.setData(map);
+								this.requestJson.setMessage("移交成功");
+								this.requestJson.setSuccess(true);
+							}else {
+								this.requestJson.setData(map);
+								this.requestJson.setMessage("移交账号失败");
+								this.requestJson.setSuccess(false);
+							}
+					}else {
+//						logger.info("update==null");
+						this.requestJson.setData(map);
+						this.requestJson.setMessage("移交账号失败");
+						this.requestJson.setSuccess(false);
+					}
+				}else {//新用户未注册
+//					logger.info("newTe==null");
+					//找到旧号码对应的用户,将该用户的号码和密码换成新用户的
+					BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
+					String oldPWD=oldTel.getUserPwd();
+					String oldHeadPic=oldTel.getHeadPic();
+					oldTel.setUserPhone(newPhone);
+					oldTel.setUserPwd(md5.getMD5ofStr("888888"));//初始密码：888888
+					oldTel.setHeadPic(headPic);
+					BoUsers update=this.boUserssService.update(oldTel);
+//					logger.info("update=="+update);
+					if(update==null) {
+//						logger.info("update==null");
+						this.requestJson.setData(map);
+						this.requestJson.setMessage("移交账号失败");
+						this.requestJson.setSuccess(false);
+					}else {
+						//注册（把旧账号的号码、密码和头像放进去）
+						BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
+						user.setHeadPic(oldHeadPic);
+//						this.boUserServicess.update(save);
+						BoUsers save = (BoUsers)this.boUserServicess.save(user);
+						if(save != null) {
+							//注册成功时 默认添加一个楼层和四个房间
+							BoFloor floor=FloorUtil.save(save.getUserCode());
+							BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
+							//String userCode,String floorName,String floorCode,String roomName	
+							System.out.println("楼层名称："+saveF.getFloorName());
+							String uCode=saveF.getUserCode();
+							String floorName=saveF.getFloorName();
+//						String floorName="我的家";
+							String floorCode=saveF.getFloorCode();
+							BoRoom room1=RoomUtil.save(uCode,floorName,floorCode,"客厅");
+							BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
+							BoRoom room2=RoomUtil.save(uCode,floorName,floorCode,"卧室");
+							BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
+							BoRoom room3=RoomUtil.save(uCode,floorName,floorCode,"厨房");
+							BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
+							BoRoom room4=RoomUtil.save(uCode,floorName,floorCode,"卫生间");
+							BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
+							this.requestJson.setData(map);
+							this.requestJson.setMessage("移交成功");
+							this.requestJson.setSuccess(true);
+						}else {
+							this.requestJson.setData(map);
+							this.requestJson.setMessage("移交账号失败");
+							this.requestJson.setSuccess(false);
+						}
+					}
+				}
+				return "success";
+			}
+			
 /*       */   @Action(value="addmodelinfo", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String addModelInfo()
 /*       */   {

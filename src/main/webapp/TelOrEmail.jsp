@@ -20,6 +20,12 @@
 <script type="text/javascript" src="<%=WEBPATH %>/static/js/jquery-1.9.1.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" >  
 </head>
+<style type="text/css">      
+     body{      
+        background-image: url(<%=WEBPATH %>/static/images/banner_slide_01.jpg);      
+        background-size:cover;    
+     }      
+ </style>  
 <body>
 
 	<div
@@ -29,39 +35,30 @@
 				id="loginForm">
 				<div class="control-group normal_text">
 					<h3>
-						<img src="" alt="选择找回密码的方式" />
+						<!-- <img src="" alt="选择找回密码的方式" /> -->选择找回密码的方式
 					</h>
 				
 				<div>
-					<span style="margin-right:20px;">
-						<div style="float: left;margin-top:3px;margin-right:2px;">
+					<span>
+						<div style="float: left;margin-top:3px;margin-right:20px;">
+							<a href="javascript:history.back(1);">返回</a>
+						</div>
+					</span>
+					
+					<span style="margin-right:100px;">
+						<div style="float: left;margin-top:3px;margin-right:20px;">
 							<font color="white"><a href="<%=WEBPATH %>/findPwdByEmail.jsp" style="color:white;font-size:13px;margin-right:20px;" onmouseover="this.style.cssText='color:green;font-size:18px; text-decoration:none;'" onmouseout="this.style.cssText='color:white;font-size:13px;text-decoration:none'">邮箱找回</a></font>
 						</div>
 					</span>
 					<span>
-						<div style="float: left;margin-top:3px;margin-right:2px;">
+						<div style="float: left;margin-top:3px;margin-right:20px;">
 							<font color="white"><a href="<%=WEBPATH %>/findPwdByTel.jsp" style="color:white;font-size:13px;margin-right:10px;" onmouseover="this.style.cssText='color:green;font-size:18px; text-decoration:none;'" onmouseout="this.style.cssText='color:white;font-size:13px;text-decoration:none'">手机号找回</a></font>
 						</div>
 					</span>
 					
 				</div>
-				
-				
-				
-
 			</form>
-
-
-			<div class="controls">
-				<div class="main_input_box">
-					<font color="white"><span id="nameerr">Copyright © 
-							2016</span></font>
-				</div>
-			</div>
-		</div>
 	</div>
-	
-
 	<script type="text/javascript">
 	
 		

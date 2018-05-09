@@ -1,8 +1,6 @@
 ﻿<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%
 	String WEBPATH2 = request.getContextPath();
-   /*  String loginName=request.getParameter("loginName");
-    String loginPwd=request.getParameter("loginPwd"); */
     String UserID=request.getParameter("UserID");
 %>
 <head>			
@@ -15,26 +13,10 @@
 			  <a class="brand"><small><i class="icon-leaf"></i> 深圳-智能屋</small> </a>
 			  
 			  <ul class="nav ace-nav pull-right">
-			  
-			  
 					<li class="grey">
-						
 					</li>
-					
-					
-					
 					<li class="green">
-						
 					</li>
-					
-					
-					<li class="purple" onclick="creatw();">
-						<!-- <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
-							<i class="icon-bell-alt icon-animated-bell icon-only"></i>
-						</a> -->
-					</li>
-					
-					
 					<li class="light-blue user-profile">
 						<a class="user-menu dropdown-toggle" href="javascript:;" data-toggle="dropdown">
 							<img alt="FH" src="<%=WEBPATH2 %>/static/images/avatars/user.jpg" class="nav-user-photo" />
@@ -79,25 +61,10 @@
     			//beforeSend: validateData,
     			cache: false,
     			success: function(data){
-    				/* alert(data); */
-    				 /* $.each(data.list, function(i, list){ */
-    					 //登陆者资料
-    					 $("#user_info").html('<small>Welcome</small> '+data+'');
-    					 /* user = list.USERNAME; */
-    					 /* USER_ID = list.USER_ID;//用户ID */
-//    					 hf(list.SKIN);//皮肤
-    					 /* if(list.USERNAME != 'admin'){
-    						 $("#adminmenu").hide();	//隐藏菜单设置
-    						 $("#adminzidian").hide();	//隐藏数据字典
-//    						 $("#systemset").hide();	//隐藏系统设置
-//    						 $("#productCode").hide();	//隐藏代码生成
-    					 }
-    					 online();//连接在线管理 */
-    				/*  }); */
+   					 $("#user_info").html('<small>Welcome</small> '+data+'');
     			}
     		});
     	});
-   /*  }) */
     
     //修改个人资料(不包括密码)
 	function editUserH(){
@@ -106,7 +73,7 @@
 	 	var diag = new top.Dialog();
 	 	diag.Drag=true;
 	 	diag.Title ="个人资料";
-	 	diag.URL ="<%=WEBPATH2 %>/modifyUserInfo.do?USER_ID=<%=UserID %>";/*通过显示当前用户，找到用户ID*/
+	 	diag.URL ="<%=WEBPATH2 %>/modifyUserInfo.do?USER_ID=<%=UserID %>";
 	 	diag.Width = 225;
 	 	diag.Height = 389;
 	 	diag.CancelEvent = function(){ //关闭事件

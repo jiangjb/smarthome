@@ -20,6 +20,12 @@
 <script type="text/javascript" src="<%=WEBPATH %>/static/js/jquery-1.9.1.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" >  
 </head>
+<style type="text/css">      
+     body{      
+        background-image: url(<%=WEBPATH %>/static/images/banner_slide_01.jpg);      
+        background-size:cover;    
+     }      
+ </style> 
 <body>
 
 	<div
@@ -29,7 +35,7 @@
 				id="loginForm">
 				<div class="control-group normal_text">
 					<h3>
-						<img src="" alt="输入邮箱" />
+						<!-- <img src="" alt="输入邮箱" /> -->输入邮箱
 					</h>
 				
 				<div class="control-group">
@@ -38,6 +44,8 @@
 							<span>
 								<input type="text" name="email" id="email" placeholder="请输入邮箱" value="" />
 							</span>
+						</div>
+						<div class="main_input_box" style="margin-right:60px;">
 							<span
 								class="pull-right"><a onclick="findVerificationCode();" style="width:70px;" class="flip-link btn btn-info" id="to-recover">发送验证码</a>
 						 	</span>
@@ -46,7 +54,7 @@
 				</div>
 				<input type="hidden" name="VCodeFromBack" id="VCodeFromBack" value="这是个隐藏的input" />
 				<input type="hidden" name="UserID" id="UserID" value="这是个隐藏的input" />
-				<div class="control-group">
+				<div class="control-group" style="margin-top:3px;">
 					<div class="controls">
 						<div class="main_input_box">
 							<input type="text" name="VerificationCode" id="VerificationCode" placeholder="请输入验证码" value="" />
@@ -70,8 +78,11 @@
 					</div>
 				</div>
 				
-				<div class="form-actions">
+				<div class="form-actions" style="margin-right:230px;">
 					<div style="width:86%;padding-left:8%;">
+						 <span
+							class="pull-left"><a href="javascript:history.back(1);">返回</a>
+						 </span>
 						 <span
 							class="pull-right"><a onclick="findPwd();" class="flip-link btn btn-info" id="to-recover"> 提 交 </a>
 						 </span>
@@ -84,7 +95,7 @@
 			<div class="controls">
 				<div class="main_input_box">
 					<font color="white"><span id="nameerr">Copyright © 
-							2016</span></font>
+							2018-2028 ZNHOMES All Rights Reserved.</span></font>
 				</div>
 			</div>
 		</div>

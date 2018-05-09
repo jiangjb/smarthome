@@ -57,12 +57,10 @@
 				</div>
 
 			</form>
-
-
 			<div class="controls">
 				<div class="main_input_box">
 					<font color="white"><span id="nameerr">Copyright © 
-							2016</span></font>
+							2018-2028 ZNHOMES All Rights Reserved.</span></font>
 				</div>
 			</div>
 		</div>

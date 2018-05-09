@@ -72,6 +72,9 @@
 						 <span
 							class="pull-right"><a onclick="excel();" class="flip-link btn btn-info" id="to-recover"> 取消 </a>
 						 </span>
+						 <span 
+							class="pull-left"><input type="button" class="flip-link btn btn-info" value="返回" onclick="javascript:history.back(1);">
+						</span>
 					</div>
 				</div>
 				
@@ -82,7 +85,7 @@
 			<div class="controls">
 				<div class="main_input_box">
 					<font color="white"><span id="nameerr">Copyright © 
-							2016</span></font>
+							2018-2028 ZNHOMES All Rights Reserved.</span></font>
 				</div>
 			</div>
 		</div>

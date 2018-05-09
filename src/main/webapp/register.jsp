@@ -21,7 +21,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" >  
 </head>
 <body>
-
 	<div
 		style="width:100%;text-align: center;margin: 0 auto;position: absolute;">
 		<div id="loginbox">
@@ -29,7 +28,7 @@
 				id="loginForm">
 				<div class="control-group normal_text">
 					<h3>
-						<img src="" alt="用户注册" />
+						<!-- <img src="" alt="用户注册" /> -->用户注册
 					</h3>
 				</div>
 				<div class="control-group">
@@ -39,11 +38,10 @@
 						</div>
 					</div>
 				</div>
-				
 				<div class="control-group">
 					<div class="controls">
 						<div class="main_input_box">
-							<input type="userPhone" name="userPhone" id="userPhone" placeholder="请输入手机号" value="" />
+							<input type="text" name="userPhone" id="userPhone" value="" placeholder="请输入手机号" />
 						</div>
 					</div>
 				</div>
@@ -79,7 +77,11 @@
 					<div style="width:86%;padding-left:8%;">
 						 <span
 							class="pull-right"><a onclick="register();"
-							class="flip-link btn btn-info" id="to-recover">注册</a></span>
+							class="flip-link btn btn-info" id="to-recover">注册</a>
+						 </span>
+						 <span 
+							class="pull-left"><input type="button" class="flip-link btn btn-info" value="返回" onclick="javascript:history.back(1);">
+						 </span>
 
 					</div>
 				</div>
@@ -90,7 +92,7 @@
 			<div class="controls">
 				<div class="main_input_box">
 					<font color="white"><span id="nameerr">Copyright © 
-							2016</span></font>
+							2018-2028 ZNHOMES All Rights Reserved.</span></font>
 				</div>
 			</div>
 		</div>
