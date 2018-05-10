@@ -270,6 +270,13 @@ import java.io.FileNotFoundException;
 					}
 				return list;
 			}
+			@Override
+			public BoDevice delete(BoDevice boDevice) {
+				if (chkUpdateValid(boDevice)) {
+					this.boDeviceDao.delete(boDevice);
+				}
+				return boDevice;
+			}
 		
 }
 

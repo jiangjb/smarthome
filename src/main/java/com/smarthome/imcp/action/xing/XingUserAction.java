@@ -8617,10 +8617,19 @@ import org.apache.commons.codec.binary.Base64;//2-9
 				String pwd="";
 				String userCode="";
 				String headPic="";
+				String userName="";
+				String signature="";
+				String sex="";
+				String mail="";
 				if(newTel != null) {
+//					logger.info("newTel!=null");
 					pwd=newTel.getUserPwd();
 					userCode=newTel.getUserCode();
 					headPic=newTel.getHeadPic();
+					userName=newTel.getUserName();
+					signature=newTel.getSignature();
+					sex=newTel.getUserSex();
+					mail=newTel.getUserEmail();
 				}
 				BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
 				String oldPWD=oldTel.getUserPwd();
@@ -8639,6 +8648,10 @@ import org.apache.commons.codec.binary.Base64;//2-9
 						oldTel.setUserPhone(newPhone);
 						oldTel.setUserPwd(pwd);
 						oldTel.setHeadPic(headPic);
+						oldTel.setUserName(userName);
+						oldTel.setSignature(signature);
+						oldTel.setUserSex(sex);
+						oldTel.setUserEmail(mail);
 					}
 					BoUsers update=this.boUserssService.update(oldTel);//此时新旧两个账号的号码都是新的号码，新账号应该初始化（存放旧号码）==最终目的：老账号-新号码，删除旧账号，注册账号
 					BoUsers newTel01=this.boUserssService.findByKey(userId);
@@ -8646,6 +8659,7 @@ import org.apache.commons.codec.binary.Base64;//2-9
 //						logger.info("update!=null");
 						//不过不排除新用户加了情景模式  得先检查是否有情景模式，然后删除新用户
 						List<BoModel> boModels=this.boModelService.getListBy(userCode);
+//						logger.info("boModels:"+boModels);
 						   for(BoModel boModel:boModels) {
 							   List<BoModelInfo> boModelInfos=this.boModelInfoServicess.getBy(userCode, boModel.getModelId());
 							   for(BoModelInfo boModelInfo:boModelInfos) {
@@ -8653,8 +8667,44 @@ import org.apache.commons.codec.binary.Base64;//2-9
 							   }
 							   this.boModelService.delete(boModel);
 						   }
-						   //删除新账号
-						   BoUsers del=this.boUserssService.delete(newTel01);
+						//若新账号已经绑定主机等（有关联表）>删除设备及主机
+						if(! "".equals(newTel.getAuthorizationUserCode())) {//次账户
+//							logger.info("此账户设备删除");
+							List<BoRoom> borooms=this.boRoomService.getAllListByUserCode(newTel.getAuthorizationUserCode());//找到授权者对应的所有房间
+							for(BoRoom boroom:borooms) {
+								String rCode=boroom.getRoomCode();
+//								logger.info("要删除设备的房间："+boroom.getRoomName());
+								List<BoHostDevice> bhs=this.boHostDeviceService.getroomCode(userCode,rCode);//被授权者userCode+授权者的房间roomCode
+								if(bhs.size()>0) {
+									for(BoHostDevice bh:bhs) {
+										this.boHostDeviceService.delete(bh);
+									}				
+								}
+							}
+						}else {//主账号
+//							logger.info("主账户设备删除");
+							List<BoRoom> borooms=this.boRoomService.getAllListByUserCode(userCode);//找到授权者对应的所有房间
+							for(BoRoom boroom:borooms) {
+								String rCode=boroom.getRoomCode();
+//								logger.info("要删除设备的房间："+boroom.getRoomName());
+								List<BoHostDevice> bhs=this.boHostDeviceService.getroomCode(userCode,rCode);//被授权者userCode+授权者的房间roomCode
+								if(bhs.size()>0) {
+									for(BoHostDevice bh:bhs) {
+										this.boHostDeviceService.delete(bh);
+									}				
+								}
+							}
+						}  
+						//删除用户和主机的关联表
+						List<BoUserDevices> boUserDevices=this.boUserDevicesServicess.getBy(userCode);
+//						logger.info("boUserDevices:"+boUserDevices);
+						if(boUserDevices.size() > 0) {
+							for(BoUserDevices boUserDevice:boUserDevices) {
+								this.boUserDevicesServicess.delete(boUserDevice);
+							}
+						}
+						//删除新账号
+						BoUsers del=this.boUserssService.delete(newTel01);
 						   //注册新账号（放入老账号的手机号、密码以及头像等信息）
 						   BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
 						   user.setHeadPic(oldHeadPic);
@@ -8702,6 +8752,10 @@ import org.apache.commons.codec.binary.Base64;//2-9
 					oldTel.setUserPhone(newPhone);
 					oldTel.setUserPwd(md5.getMD5ofStr("888888"));//初始密码：888888
 					oldTel.setHeadPic(headPic);
+					oldTel.setUserName(userName);
+					oldTel.setSignature(signature);
+					oldTel.setUserSex(sex);
+					oldTel.setUserEmail(mail);
 					BoUsers update=this.boUserssService.update(oldTel);
 //					logger.info("update=="+update);
 					if(update==null) {

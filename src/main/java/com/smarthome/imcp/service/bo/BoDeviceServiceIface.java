@@ -39,6 +39,8 @@ public abstract interface BoDeviceServiceIface<T, PK extends Serializable> exten
 
  public abstract List<BoDevice> findByStatus(int status);
 
+ public abstract BoDevice delete(T paramT);
+
 }
 
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\

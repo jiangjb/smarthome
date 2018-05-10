@@ -17,7 +17,7 @@
 	  	<style>
 		    body { font-size: 62.5%; }
 		    label, input { display:block; }
-		    /* input.text { margin-bottom:12px; width:95%; padding: .4em; } */
+		    input.text { margin-bottom:12px; width:95%; padding: .4em; } 
 		    fieldset { padding:0; border:0; margin-top:25px; }
 		    h1 { font-size: 1.2em; margin: .6em 0; }
 		    div#users-contain { width: 350px; margin: 20px 0; }
@@ -33,11 +33,22 @@
 
 <div id="page-content" class="clearfix">
 						
-  <div class="row-fluid">
-	
+<div id="dialog-form" title="创建新用户">
+  <p class="validateTips">所有的表单字段都是必填的。</p>
+  <form>
+	  <fieldset>
+	      <label for="name">名字</label>
+	      <input type="text" name="name" id="name" class="text ui-widget-content ui-corner-all">
+	      <label for="email">邮箱</label>
+	      <input type="text" name="email" id="email" value="" class="text ui-widget-content ui-corner-all">
+	      <label for="password">密码</label>
+	      <input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all">
+	  </fieldset>
+  </form>
+</div>
 	<div class="row-fluid">
 			<!-- 检索  -->
-			<form action="findByTel.do" method="post" name="Form" id="Form">
+			<form action="" method="post" name="Form" id="Form">
 			<table>
 				<tr>
 					<td>
@@ -138,7 +149,8 @@
 				</tbody>
 			</table>
 		<div class="page-header position-relative">
-			<span><a class="btn btn-small btn-success"  onclick="add();">新增</a></span>
+			<span><button id="create-user" class="btn btn-small btn-success">新增</button></span>
+			<!-- <span><a class="btn btn-small btn-success"  onclick="add();">新增</a></span> -->
 			<span><a class="btn btn-small btn-danger"  onclick="delSelected();" title="批量删除" ><i class="icon-trash"></i></a></span>
 			<table style="width:100%;">
 				<tr>
@@ -168,6 +180,7 @@
 		</a> -->
 		
 		<!-- 引入 -->
+		<link rel="stylesheet" href="http://jqueryui.com/resources/demos/style.css">
 		<link rel="stylesheet" href="<%=WEBPATH11 %>/static/css/jquery-ui-1.9.2.custom.css" />
 		<script type="text/javascript">window.jQuery || document.write("<script src='<%=WEBPATH11 %>/static/js/jquery-1.9.1.min.js'>\x3C/script>");</script>
 		<script src="<%=WEBPATH11 %>/static/js/jquery-ui-1.9.2.custom.min.js"></script>
@@ -183,86 +196,6 @@
 		<script type="text/javascript">
 		
 		$(top.hangge());
-		/* $(function() {
-		    var name = $( "#name" ),
-		      email = $( "#email" ),
-		      password = $( "#password" ),
-		      allFields = $( [] ).add( name ).add( email ).add( password ),
-		      tips = $( ".validateTips" );
-		 
-		    function updateTips( t ) {
-		      tips
-		        .text( t )
-		        .addClass( "ui-state-highlight" );
-		      setTimeout(function() {
-		        tips.removeClass( "ui-state-highlight", 1500 );
-		      }, 500 );
-		    }
-		 
-		    function checkLength( o, n, min, max ) {
-		      if ( o.val().length > max || o.val().length < min ) {
-		        o.addClass( "ui-state-error" );
-		        updateTips( "" + n + " 的长度必须在 " +
-		          min + " 和 " + max + " 之间。" );
-		        return false;
-		      } else {
-		        return true;
-		      }
-		    }
-		 
-		    function checkRegexp( o, regexp, n ) {
-		      if ( !( regexp.test( o.val() ) ) ) {
-		        o.addClass( "ui-state-error" );
-		        updateTips( n );
-		        return false;
-		      } else {
-		        return true;
-		      }
-		    }
-		 
-		    $( "#dialog-form" ).dialog({
-		      autoOpen: false,
-		      height: 300,
-		      width: 350,
-		      modal: true,
-		      buttons: {
-		        "创建一个帐户": function() {
-		          var bValid = true;
-		          allFields.removeClass( "ui-state-error" );
-		 
-		          bValid = bValid && checkLength( name, "username", 3, 16 );
-		          bValid = bValid && checkLength( email, "email", 6, 80 );
-		          bValid = bValid && checkLength( password, "password", 5, 16 );
-		 
-		          bValid = bValid && checkRegexp( name, /^[a-z]([0-9a-z_])+$/i, "用户名必须由 a-z、0-9、下划线组成，且必须以字母开头。" );
-		          // From jquery.validate.js (by joern), contributed by Scott Gonzalez: http://projects.scottsplayground.com/email_address_validation/
-		          bValid = bValid && checkRegexp( email, /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i, "eg. ui@jquery.com" );
-		          bValid = bValid && checkRegexp( password, /^([0-9a-zA-Z])+$/, "密码字段只允许： a-z 0-9" );
-		 
-		          if ( bValid ) {
-		            $( "#users tbody" ).append( "<tr>" +
-		              "<td>" + name.val() + "</td>" +
-		              "<td>" + email.val() + "</td>" +
-		              "<td>" + password.val() + "</td>" +
-		            "</tr>" );
-		            $( this ).dialog( "close" );
-		          }
-		        },
-		        Cancel: function() {
-		          $( this ).dialog( "close" );
-		        }
-		      },
-		      close: function() {
-		        allFields.val( "" ).removeClass( "ui-state-error" );
-		      }
-		    });
-		 
-		    $( "#create-user" )
-		      .button()
-		      .click(function() {
-		        $( "#dialog-form" ).dialog( "open" );
-		      });
-		  }); */
 		$(function(){
 			var role= '<%= session.getAttribute("role")%>';
 			var tel='<%= session.getAttribute("userPhone")%>';
@@ -536,7 +469,89 @@
 	    			}
 	    		});
 			}
-		})
+		});
+		
+		//模态表单
+		$(function(){
+		    var name = $( "#name" ),
+		      email = $( "#email" ),
+		      password = $( "#password" ),
+		      allFields = $( [] ).add( name ).add( email ).add( password ),
+		      tips = $( ".validateTips" );
+		 
+		    function updateTips( t ) {
+		      tips
+		        .text( t )
+		        .addClass( "ui-state-highlight" );
+		      setTimeout(function() {
+		        tips.removeClass( "ui-state-highlight", 1500 );
+		      }, 500 );
+		    }
+		 
+		    function checkLength( o, n, min, max ) {
+		      if ( o.val().length > max || o.val().length < min ) {
+		        o.addClass( "ui-state-error" );
+		        updateTips( "" + n + " 的长度必须在 " +
+		          min + " 和 " + max + " 之间。" );
+		        return false;
+		      } else {
+		        return true;
+		      }
+		    }
+		 
+		    function checkRegexp( o, regexp, n ) {
+		      if ( !( regexp.test( o.val() ) ) ) {
+		        o.addClass( "ui-state-error" );
+		        updateTips( n );
+		        return false;
+		      } else {
+		        return true;
+		      }
+		    }
+		 
+		    $( "#dialog-form" ).dialog({
+		      autoOpen: false,
+		      height: 300,
+		      width: 350,
+		      modal: true,
+		      buttons: {
+		    	  "创建一个帐户": function() {
+		              var bValid = true;
+		              allFields.removeClass( "ui-state-error" );
+		     
+		              bValid = bValid && checkLength( name, "username", 3, 16 );
+		              bValid = bValid && checkLength( email, "email", 6, 80 );
+		              bValid = bValid && checkLength( password, "password", 5, 16 );
+		     
+		              bValid = bValid && checkRegexp( name, /^[a-z]([0-9a-z_])+$/i, "用户名必须由 a-z、0-9、下划线组成，且必须以字母开头。" );
+		              // From jquery.validate.js (by joern), contributed by Scott Gonzalez: http://projects.scottsplayground.com/email_address_validation/
+		              bValid = bValid && checkRegexp( email, /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i, "eg. ui@jquery.com" );
+		              bValid = bValid && checkRegexp( password, /^([0-9a-zA-Z])+$/, "密码字段只允许： a-z 0-9" );
+		     
+		              if ( bValid ) {
+		                $( "#users tbody" ).append( "<tr>" +
+		                  "<td>" + name.val() + "</td>" +
+		                  "<td>" + email.val() + "</td>" +
+		                  "<td>" + password.val() + "</td>" +
+		                "</tr>" );
+		                $( this ).dialog( "close" );
+		              }
+		            },
+		            Cancel: function() {
+		              $( this ).dialog( "close" );
+		            }
+		      },
+		      close: function() {
+		        allFields.val( "" ).removeClass( "ui-state-error" );
+		      }
+		    });
+		 
+		    $( "#create-user" )
+		      .button()
+		      .click(function() {
+		        $( "#dialog-form" ).dialog( "open" );
+		      });
+		  });
 		//检索
 		function search(){
 			/* top.jzts();
