@@ -5,26 +5,34 @@
 /*    */ import com.smarthome.imcp.common.Md5;
 		 import com.smarthome.imcp.common.Page;
 		 import com.smarthome.imcp.dao.model.bo.BoDevice;
-		 import com.smarthome.imcp.dao.model.bo.BoHostDevice;
+import com.smarthome.imcp.dao.model.bo.BoFloor;
+import com.smarthome.imcp.dao.model.bo.BoHostDevice;
          import com.smarthome.imcp.dao.model.bo.BoInfraredPart;
 import com.smarthome.imcp.dao.model.bo.BoModel;
 import com.smarthome.imcp.dao.model.bo.BoModelInfo;
+import com.smarthome.imcp.dao.model.bo.BoRoom;
 import com.smarthome.imcp.dao.model.bo.BoUserDevices;
 		 import com.smarthome.imcp.dao.model.bo.BoUsers;
 		 import com.smarthome.imcp.dao.model.bo.BoUsersValidation;
 /*    */ import com.smarthome.imcp.dao.model.system.SysUser;
 /*    */ import com.smarthome.imcp.secur.CurrentUser;
 		 import com.smarthome.imcp.service.bo.BoDeviceServiceIface;
-		 import com.smarthome.imcp.service.bo.BoHostDeviceServiceIface;
+import com.smarthome.imcp.service.bo.BoFloorServiceIface;
+import com.smarthome.imcp.service.bo.BoHostDeviceServiceIface;
 		 import com.smarthome.imcp.service.bo.BoInfraredPartServiceIface;
 import com.smarthome.imcp.service.bo.BoModelInfoServiceIface;
 import com.smarthome.imcp.service.bo.BoModelServiceIface;
+import com.smarthome.imcp.service.bo.BoRoomServiceIface;
 import com.smarthome.imcp.service.bo.BoUserDevicesServiceIface;
 		 import com.smarthome.imcp.service.bo.BoUsersValidationServiceIface;
 		 import com.smarthome.imcp.service.bo.BoUserssServiceIface;
 /*    */ import com.smarthome.imcp.service.secur.SecurServiceIface;
 /*    */ import com.smarthome.imcp.service.system.SysUserServiceIface;
-		 import java.io.IOException;
+import com.smarthome.imcp.util.FloorUtil;
+import com.smarthome.imcp.util.RoomUtil;
+import com.smarthome.imcp.util.UserUtil;
+
+import java.io.IOException;
 /*    */ import java.io.Serializable;
 		 import java.util.ArrayList;
 		 import java.util.Date;
@@ -95,6 +103,18 @@ import org.springframework.ui.ModelMap;
 		  
 		  @Autowired
 		  private BoModelInfoServiceIface<BoModelInfo, Serializable> boModelInfoServicess;
+		  
+		  @Autowired
+		  private BoRoomServiceIface<BoRoom, Serializable> boRoomService;//5-11
+		  
+		  @Autowired
+		  private BoUserDevicesServiceIface<BoUserDevices, Serializable> boUserDevicesServicess;//5-11
+		  
+		  @Autowired
+		  private BoUserssServiceIface<BoUsers, Serializable> boUserServicess;//5-11
+		  
+		  @Autowired
+		   private BoFloorServiceIface<BoFloor, Serializable> boFloorService;//5-11
 		  
 //           private RequestJson requestJson;
            //new 短信验证码
@@ -884,6 +904,21 @@ import org.springframework.ui.ModelMap;
 		       return varList;
 		    }
 		   
+		   @RequestMapping({"addUser.do"})
+		   @ResponseBody
+		   public String addUser(@RequestParam("name") String name,@RequestParam("userPhone") String userPhone,@RequestParam("email") String email,@RequestParam("password") String password) {
+//			   System.out.println("name:"+name+",email:"+email+",password:"+password+",userPhone:"+userPhone);
+			   String result="success";
+			   Md5 md5=new Md5();
+			   BoUsers user = UserUtil.save(userPhone, md5.getMD5ofStr(password), email);
+			   user.setUserName(name);
+			   BoUsers save=this.boUserssService.save(user);//save可以用于更新bo_users表
+			   if(save == null) {
+				   result="fail";
+			   }
+		       return result;
+		    }
+		   
 		   /*
 		    * 用户管理模块-全部用户【房东】 5-3
 		    */
@@ -1014,50 +1049,174 @@ import org.springframework.ui.ModelMap;
 		   @ResponseBody
 		   public String changeAccount(@RequestParam("oldPhone") String oldPhone,@RequestParam("newPhone") String newPhone) {
 			   String result="success";
+			   Md5 md5 = new Md5();
 			   //找到新号码对应的用户，取出密码
 			   BoUsers newTel=this.boUserssService.findByUserPhone(newPhone);
+			   String pwd="";
+			   String userCode="";
+			   String headPic="";
+			   String userName="";
+			   String signature="";
+			   String sex="";
+			   String mail="";
+			   if(newTel != null) {
+//					logger.info("newTel!=null");
+					pwd=newTel.getUserPwd();
+					userCode=newTel.getUserCode();
+					headPic=newTel.getHeadPic();
+					userName=newTel.getUserName();
+					signature=newTel.getSignature();
+					sex=newTel.getUserSex();
+					mail=newTel.getUserEmail();
+				}
+			   BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
+			   String oldPWD=oldTel.getUserPwd();
+			   String oldHeadPic=oldTel.getHeadPic();
+			   String oldUserName=oldTel.getUserName();
+			   String oldSignature=oldTel.getSignature();
+			   String oldSex=oldTel.getUserSex();
+			   String oldMail=oldTel.getUserEmail();
 			   if(newTel != null) {
 				   int userId=newTel.getUserId();
-				   String pwd=newTel.getUserPwd();
-				   String userCode=newTel.getUserCode();
 				   //找到旧号码对应的用户,将该用户的号码和密码换成新用户的
-				   BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
-				   String oldPWD=oldTel.getUserPwd();
 				   if(oldTel != null) {
 					   oldTel.setUserPhone(newPhone);
 					   oldTel.setUserPwd(pwd);
+					   oldTel.setHeadPic(headPic);
+					   oldTel.setUserName(userName);
+					   oldTel.setSignature(signature);
+					   oldTel.setUserSex(sex);
+					   oldTel.setUserEmail(mail);
 				   }
-				   BoUsers update=this.boUserssService.update(oldTel);//此时新旧两个账号的号码都是新的号码，新账号应该初始化（存放旧号码）==最终目的：老账号-新号码，新|初始账号-老号码 
-				   BoUsers newTel01=this.boUserssService.findByKey(userId);
-				   if(update != null) {
-					   //不过不排除新用户加了情景模式  得先检查是否有情景模式，然后删除新用户
-					   List<BoModel> boModels=this.boModelService.getListBy(userCode);
-					   for(BoModel boModel:boModels) {
-						   List<BoModelInfo> boModelInfos=this.boModelInfoServicess.getBy(userCode, boModel.getModelId());
-						   for(BoModelInfo boModelInfo:boModelInfos) {
-							   this.boModelInfoServicess.delete(boModelInfo);
+				   BoUsers update=this.boUserssService.update(oldTel);//此时新旧两个账号的号码都是新的号码，新账号应该初始化（存放旧号码）==最终目的：老账号-新号码，删除旧账号，注册账号
+					BoUsers newTel01=this.boUserssService.findByKey(userId);
+					if(update != null) {
+//						logger.info("update!=null");
+						//不过不排除新用户加了情景模式  得先检查是否有情景模式，然后删除新用户
+						List<BoModel> boModels=this.boModelService.getListBy(userCode);
+//						logger.info("boModels:"+boModels);
+						   for(BoModel boModel:boModels) {
+							   List<BoModelInfo> boModelInfos=this.boModelInfoServicess.getBy(userCode, boModel.getModelId());
+							   for(BoModelInfo boModelInfo:boModelInfos) {
+								   this.boModelInfoServicess.delete(boModelInfo);
+							   }
+							   this.boModelService.delete(boModel);
 						   }
-						   this.boModelService.delete(boModel);
-					   }
-					   newTel01.setUserPhone(oldPhone);
-					   newTel01.setUserPwd(oldPWD);
-					   newTel01.setAuthorizationUserCode("");
-					   newTel01.setLogoAccountType("1");
-					   BoUsers update1=this.boUserssService.update(newTel01);
-					   if(update1 == null) {
-						   result="fail"; 
-					   }
-//					   BoUsers del=this.boUserssService.delete(newTel);
-				   }
+						//若新账号已经绑定主机等（有关联表）>删除设备及主机
+						if(! "".equals(newTel.getAuthorizationUserCode())) {//次账户
+//							logger.info("此账户设备删除");
+							List<BoRoom> borooms=this.boRoomService.getAllListByUserCode(newTel.getAuthorizationUserCode());//找到授权者对应的所有房间
+							for(BoRoom boroom:borooms) {
+								String rCode=boroom.getRoomCode();
+//								logger.info("要删除设备的房间："+boroom.getRoomName());
+								List<BoHostDevice> bhs=this.boHostDeviceService.getroomCode(userCode,rCode);//被授权者userCode+授权者的房间roomCode
+								if(bhs.size()>0) {
+									for(BoHostDevice bh:bhs) {
+										this.boHostDeviceService.delete(bh);
+									}				
+								}
+							}
+						}else {//主账号
+//							logger.info("主账户设备删除");
+							List<BoRoom> borooms=this.boRoomService.getAllListByUserCode(userCode);//找到授权者对应的所有房间
+							for(BoRoom boroom:borooms) {
+								String rCode=boroom.getRoomCode();
+//								logger.info("要删除设备的房间："+boroom.getRoomName());
+								List<BoHostDevice> bhs=this.boHostDeviceService.getroomCode(userCode,rCode);//被授权者userCode+授权者的房间roomCode
+								if(bhs.size()>0) {
+									for(BoHostDevice bh:bhs) {
+										this.boHostDeviceService.delete(bh);
+									}				
+								}
+							}
+						}  
+						//删除用户和主机的关联表
+						List<BoUserDevices> boUserDevices=this.boUserDevicesServicess.getBy(userCode);
+//						logger.info("boUserDevices:"+boUserDevices);
+						if(boUserDevices.size() > 0) {
+							for(BoUserDevices boUserDevice:boUserDevices) {
+								this.boUserDevicesServicess.delete(boUserDevice);
+							}
+						}
+						//删除新账号
+						BoUsers del=this.boUserssService.delete(newTel01);
+						   //注册新账号（放入老账号的手机号、密码以及头像等信息）
+						   BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
+						   user.setHeadPic(oldHeadPic);
+						   user.setUserName(oldUserName);
+						   user.setSignature(oldSignature);
+						   user.setUserSex(oldSex);
+						   user.setUserEmail(oldMail);
+//					        this.boUserServicess.update(save);
+						   BoUsers save = (BoUsers)this.boUserServicess.save(user);
+						   if(save != null) {
+								//注册成功时 默认添加一个楼层和四个房间
+								BoFloor floor=FloorUtil.save(save.getUserCode());
+								BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
+								//String userCode,String floorName,String floorCode,String roomName	
+//								System.out.println("楼层名称："+saveF.getFloorName());
+								String uCode=saveF.getUserCode();
+								String floorName=saveF.getFloorName();
+//								String floorName="我的家";
+								String floorCode=saveF.getFloorCode();
+								BoRoom room1=RoomUtil.save(uCode,floorName,floorCode,"客厅");
+								BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
+								BoRoom room2=RoomUtil.save(uCode,floorName,floorCode,"卧室");
+								BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
+								BoRoom room3=RoomUtil.save(uCode,floorName,floorCode,"厨房");
+								BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
+								BoRoom room4=RoomUtil.save(uCode,floorName,floorCode,"卫生间");
+								BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
+							}else {
+								result="fail";
+							}
+					}else {
+						result="fail";
+					}
 			   }else {//新用户未注册
-				 //找到旧号码对应的用户,将该用户的号码和密码换成新用户的
-				   BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
-				   oldTel.setUserPhone(newPhone);
-				   oldTel.setUserPwd("E10ADC3949BA59ABBE56E057F20F883E");//初始密码：123456
-				   BoUsers update=this.boUserssService.update(oldTel);
-				   if(update == null) {
-					   result="fail"; 
-				   }
+				 //将该用户的号码和密码换成新用户的
+					oldTel.setUserPhone(newPhone);
+					oldTel.setUserPwd(md5.getMD5ofStr("888888"));//初始密码：888888
+					oldTel.setHeadPic(headPic);
+					oldTel.setUserName(userName);
+					oldTel.setSignature(signature);
+					oldTel.setUserSex(sex);
+					oldTel.setUserEmail(mail);
+					BoUsers update=this.boUserssService.update(oldTel);
+//					logger.info("update=="+update);
+					if(update==null) {
+						result="fail";
+					}else {
+						//注册（把旧账号的号码、密码和头像放进去）
+						BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
+						user.setHeadPic(oldHeadPic);
+						user.setUserName(oldUserName);
+						user.setSignature(oldSignature);
+						user.setUserSex(oldSex);
+						user.setUserEmail(oldMail);
+						BoUsers save = (BoUsers)this.boUserServicess.save(user);
+						if(save != null) {
+							//注册成功时 默认添加一个楼层和四个房间
+							BoFloor floor=FloorUtil.save(save.getUserCode());
+							BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
+							//String userCode,String floorName,String floorCode,String roomName	
+							System.out.println("楼层名称："+saveF.getFloorName());
+							String uCode=saveF.getUserCode();
+							String floorName=saveF.getFloorName();
+//						String floorName="我的家";
+							String floorCode=saveF.getFloorCode();
+							BoRoom room1=RoomUtil.save(uCode,floorName,floorCode,"客厅");
+							BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
+							BoRoom room2=RoomUtil.save(uCode,floorName,floorCode,"卧室");
+							BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
+							BoRoom room3=RoomUtil.save(uCode,floorName,floorCode,"厨房");
+							BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
+							BoRoom room4=RoomUtil.save(uCode,floorName,floorCode,"卫生间");
+							BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
+						}else {
+							result="fail";
+						}
+					}
 			   }
 			   
 			   return result;
