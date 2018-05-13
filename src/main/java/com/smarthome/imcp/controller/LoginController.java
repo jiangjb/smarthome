@@ -5,24 +5,33 @@
 /*    */ import com.smarthome.imcp.common.Md5;
 		 import com.smarthome.imcp.common.Page;
 		 import com.smarthome.imcp.dao.model.bo.BoDevice;
+import com.smarthome.imcp.dao.model.bo.BoDeviceState;
 import com.smarthome.imcp.dao.model.bo.BoFloor;
 import com.smarthome.imcp.dao.model.bo.BoHostDevice;
-         import com.smarthome.imcp.dao.model.bo.BoInfraredPart;
+import com.smarthome.imcp.dao.model.bo.BoInfraredButtons;
+import com.smarthome.imcp.dao.model.bo.BoInfraredLearnControlMap;
+import com.smarthome.imcp.dao.model.bo.BoInfraredPart;
 import com.smarthome.imcp.dao.model.bo.BoModel;
 import com.smarthome.imcp.dao.model.bo.BoModelInfo;
 import com.smarthome.imcp.dao.model.bo.BoRoom;
+import com.smarthome.imcp.dao.model.bo.BoSensor;
+import com.smarthome.imcp.dao.model.bo.BoUser;
 import com.smarthome.imcp.dao.model.bo.BoUserDevices;
 		 import com.smarthome.imcp.dao.model.bo.BoUsers;
 		 import com.smarthome.imcp.dao.model.bo.BoUsersValidation;
 /*    */ import com.smarthome.imcp.dao.model.system.SysUser;
 /*    */ import com.smarthome.imcp.secur.CurrentUser;
 		 import com.smarthome.imcp.service.bo.BoDeviceServiceIface;
+import com.smarthome.imcp.service.bo.BoDeviceStateServiceIface;
 import com.smarthome.imcp.service.bo.BoFloorServiceIface;
 import com.smarthome.imcp.service.bo.BoHostDeviceServiceIface;
-		 import com.smarthome.imcp.service.bo.BoInfraredPartServiceIface;
+import com.smarthome.imcp.service.bo.BoInfraredButtonsServiceIface;
+import com.smarthome.imcp.service.bo.BoInfraredLearnControlMapServiceIface;
+import com.smarthome.imcp.service.bo.BoInfraredPartServiceIface;
 import com.smarthome.imcp.service.bo.BoModelInfoServiceIface;
 import com.smarthome.imcp.service.bo.BoModelServiceIface;
 import com.smarthome.imcp.service.bo.BoRoomServiceIface;
+import com.smarthome.imcp.service.bo.BoSensorServiceIface;
 import com.smarthome.imcp.service.bo.BoUserDevicesServiceIface;
 		 import com.smarthome.imcp.service.bo.BoUsersValidationServiceIface;
 		 import com.smarthome.imcp.service.bo.BoUserssServiceIface;
@@ -115,6 +124,18 @@ import org.springframework.ui.ModelMap;
 		  
 		  @Autowired
 		   private BoFloorServiceIface<BoFloor, Serializable> boFloorService;//5-11
+		  
+		  @Autowired
+		  private BoInfraredButtonsServiceIface<BoInfraredButtons, Serializable> boInfraredButtonsService;//5-12
+		  
+		  @Autowired
+		  private BoDeviceStateServiceIface<BoDeviceState, Serializable> boDeviceStateService;//5-13
+		  
+		  @Autowired
+		  private BoSensorServiceIface<BoSensor, Serializable> boSensorService;//5-13
+		  
+		  @Autowired
+		  private BoInfraredLearnControlMapServiceIface<BoInfraredLearnControlMap, Serializable> boInfraredLearnControlMapService;//5-13
 		  
 //           private RequestJson requestJson;
            //new 短信验证码
@@ -1219,6 +1240,154 @@ import org.springframework.ui.ModelMap;
 					}
 			   }
 			   
+			   return result;
+		   }
+		   /*
+		    * 删除用户
+		    */
+		   @RequestMapping({"delUser.do"})
+		   @ResponseBody
+		   public String delUser(@RequestParam("id") String id) {
+			   String result="success";
+			   int ID=Integer.parseInt(id);
+			   BoUsers boUser=this.boUserssService.findByKey(ID);
+			   if(boUser != null) {
+				   //若是有外键关联，先清除那些数据
+				 //1) 得先检查是否有情景模式以及情景模式下是否有设备，有则删除（先删除BoModelInfo,然后是BoModel）
+					List<BoModel> boModels=this.boModelService.getListBy(boUser.getUserCode());
+					if("".equals(boUser.getAuthorizationUserCode())) {//主账户
+						for(BoModel boModel:boModels) {
+							List<BoModelInfo> boModelInfos=this.boModelInfoServicess.getBy(boUser.getUserCode(), boModel.getModelId());
+							for(BoModelInfo boModelInfo:boModelInfos) {
+								this.boModelInfoServicess.delete(boModelInfo);
+							}
+							this.boModelService.delete(boModel);
+						}
+						//2)删除主账户下的设备
+						List<BoRoom> borooms=this.boRoomService.getAllListByUserCode(boUser.getUserCode());//找到授权者对应的所有房间
+						for(BoRoom boroom:borooms) {
+							String rCode=boroom.getRoomCode();
+							List<BoHostDevice> bhs=this.boHostDeviceService.getroomCode(boUser.getUserCode(),rCode);//被授权者userCode+授权者的房间roomCode
+							if(bhs.size()>0) {
+								for(BoHostDevice bh:bhs) {
+									this.boHostDeviceService.delete(bh);
+								}				
+							}
+						}
+						//3）删除没有room的设备 这方法属于异常处理
+						List<BoHostDevice> bhs=this.boHostDeviceService.getUserCode(boUser.getUserCode());
+						for(BoHostDevice bh:bhs) {
+							this.boHostDeviceService.delete(bh);
+						}
+						//4）删除bo_device_state关联数据
+						List<BoDeviceState> boDeviceStates=this.boDeviceStateService.getByuserCode(boUser.getUserCode());
+						for(BoDeviceState boDeviceState:boDeviceStates) {
+							this.boDeviceStateService.delete(boDeviceState);
+						}
+						//5)删除用户和主机的关联表（bo_user_devices）
+						
+						List<BoUserDevices> boUserDevices=this.boUserDevicesServicess.getBy(boUser.getUserCode());
+						if(boUserDevices.size() > 0) {
+							for(BoUserDevices boUserDevice:boUserDevices) {
+								//清理bo_device_state关联表数据,删除用户和主机的关联表
+								List<BoDeviceState> boDeviceStates1=this.boDeviceStateService.getListBy(boUser.getUserCode(), boUserDevice.getBoDevice().getDeviceCode());
+								for(BoDeviceState boDeviceState:boDeviceStates1) {
+									this.boDeviceStateService.delete(boDeviceState);
+								}
+								//清理bo_infrared_buttons表格的关联数据
+								List<BoInfraredButtons> boInfraredButtons=this.boInfraredButtonsService.getListBys(boUser.getUserCode(), boUserDevice.getBoDevice().getDeviceCode());
+								for(BoInfraredButtons boInfraredButton:boInfraredButtons) {
+									this.boInfraredButtonsService.delete(boInfraredButton);
+								}
+								//清理bo_infrared_learn_control_map
+								List<BoInfraredLearnControlMap> boInfraredLearnControlMaps=this.boInfraredLearnControlMapService.infraredLearnControlMapList(boUser.getUserCode(), boUserDevice.getBoDevice().getDeviceCode());
+								for(BoInfraredLearnControlMap boInfraredLearnControlMap:boInfraredLearnControlMaps) {
+									this.boInfraredLearnControlMapService.delete(boInfraredLearnControlMap);
+								}
+								//清理bo_sensor关联数据
+								List<BoSensor> boSensors=this.boSensorService.gets(boUser.getUserCode(), boUserDevice.getBoDevice().getDeviceCode());
+								for(BoSensor boSensor:boSensors) {
+									this.boSensorService.delete(boSensor);
+								}
+								this.boUserDevicesServicess.delete(boUserDevice);
+							}
+						}
+					}else {
+						//次账户
+						for(BoModel boModel:boModels) {
+							List<BoModelInfo> boModelInfos=this.boModelInfoServicess.getBy(boUser.getAuthorizationUserCode(), boModel.getModelId());
+							for(BoModelInfo boModelInfo:boModelInfos) {
+								this.boModelInfoServicess.delete(boModelInfo);
+							}
+							this.boModelService.delete(boModel);
+						}
+						//2)删除次账户下的设备
+						List<BoRoom> borooms=this.boRoomService.getAllListByUserCode(boUser.getAuthorizationUserCode());//找到授权者对应的所有房间
+						for(BoRoom boroom:borooms) {
+							String rCode=boroom.getRoomCode();
+//							logger.info("要删除设备的房间："+boroom.getRoomName());
+							List<BoHostDevice> bhs=this.boHostDeviceService.getroomCode(boUser.getUserCode(),rCode);//被授权者userCode+授权者的房间roomCode
+							if(bhs.size()>0) {
+								for(BoHostDevice bh:bhs) {
+									this.boHostDeviceService.delete(bh);
+								}				
+							}
+						}
+						//3)次账户自己的设备（次账户解绑后也有可能有自己的设备）
+						List<BoRoom> borooms1=this.boRoomService.getAllListByUserCode(boUser.getUserCode());//找到授权者对应的所有房间
+						for(BoRoom boroom:borooms1) {
+							String rCode=boroom.getRoomCode();
+//							logger.info("要删除设备的房间："+boroom.getRoomName());
+							List<BoHostDevice> bhs=this.boHostDeviceService.getroomCode(boUser.getUserCode(),rCode);//被授权者userCode+授权者的房间roomCode
+							if(bhs.size()>0) {
+								for(BoHostDevice bh:bhs) {
+									this.boHostDeviceService.delete(bh);
+								}				
+							}
+						}
+						//4）删除没有room的设备 这方法属于异常处理
+						List<BoHostDevice> bhs=this.boHostDeviceService.getUserCode(boUser.getUserCode());
+						for(BoHostDevice bh:bhs) {
+							this.boHostDeviceService.delete(bh);
+						}
+						//5）清理bo_device_state关联表数据,删除用户和主机的关联表
+						List<BoDeviceState> boDeviceStates=this.boDeviceStateService.getByuserCode(boUser.getUserCode());
+						for(BoDeviceState boDeviceState:boDeviceStates) {
+							this.boDeviceStateService.delete(boDeviceState);
+						}
+						
+						List<BoUserDevices> boUserDevices=this.boUserDevicesServicess.getBy(boUser.getUserCode());
+						if(boUserDevices.size() > 0) {
+							for(BoUserDevices boUserDevice:boUserDevices) {
+								//清理bo_device_state关联表数据,删除用户和主机的关联表
+								List<BoDeviceState> boDeviceStates1=this.boDeviceStateService.getListBy(boUser.getUserCode(), boUserDevice.getBoDevice().getDeviceCode());
+								for(BoDeviceState boDeviceState:boDeviceStates1) {
+									this.boDeviceStateService.delete(boDeviceState);
+								}
+								//清理bo_infrared_buttons表格的关联数据
+								List<BoInfraredButtons> boInfraredButtons=this.boInfraredButtonsService.getListBys(boUser.getUserCode(), boUserDevice.getBoDevice().getDeviceCode());
+								for(BoInfraredButtons boInfraredButton:boInfraredButtons) {
+									this.boInfraredButtonsService.delete(boInfraredButton);
+								}
+								//清理bo_infrared_learn_control_map
+								List<BoInfraredLearnControlMap> boInfraredLearnControlMaps=this.boInfraredLearnControlMapService.infraredLearnControlMapList(boUser.getUserCode(), boUserDevice.getBoDevice().getDeviceCode());
+								for(BoInfraredLearnControlMap boInfraredLearnControlMap:boInfraredLearnControlMaps) {
+									this.boInfraredLearnControlMapService.delete(boInfraredLearnControlMap);
+								}
+								//清理bo_sensor关联数据
+								List<BoSensor> boSensors=this.boSensorService.gets(boUser.getUserCode(), boUserDevice.getBoDevice().getDeviceCode());
+								for(BoSensor boSensor:boSensors) {
+									this.boSensorService.delete(boSensor);
+								}
+								this.boUserDevicesServicess.delete(boUserDevice);
+							}
+						}
+					}
+				   //删除该用户
+				   this.boUserssService.delete(boUser);
+			   }else {
+				   result="fail";
+			   }
 			   return result;
 		   }
 		   

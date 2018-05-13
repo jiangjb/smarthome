@@ -22,6 +22,26 @@
 		
 <div class="container-fluid" id="main-container">
 
+<!-- jquery ui dialog -->
+<div id="dialog-form" title="编辑主机">
+  <p class="validateTips"></p>
+  <form action="" method="post">
+	  <fieldset>
+	  	<input type="text" name="deviceCode0" id="deviceCode0" value="" class="text ui-widget-content ui-corner-all">
+	  	<input type="text" name="type0" id="type0" value="" class="text ui-widget-content ui-corner-all" >
+	  </fieldset>
+  </form>
+</div>
+
+<div id="dialog-add" title="添加主机">
+  <p class="validateTips"></p>
+  <form action="" method="post">
+	  <fieldset>
+	  	<input type="text" name="deviceCode1" id="deviceCode1" value="" class="text ui-widget-content ui-corner-all" placeholder="请输入主机序列号">
+	  	<input type="text" name="type1" id="type1" value="" class="text ui-widget-content ui-corner-all" placeholder="请输入主机类型">
+	  </fieldset>
+  </form>
+</div>
 
 <div id="page-content" class="clearfix">
 						
@@ -152,7 +172,7 @@
 		    <tr>
 		    	<shiro:hasRole name="admin">
 		    		<td style="vertical-align:top;">
-		    			<a class="btn btn-small btn-success" href="<%=WEBPATH21 %>/static/jsp/system/device/add.jsp">新增</a>
+		    			<a class="btn btn-small btn-success" onclick="clickOn();">新增</a>
 		    		</td>
 		    	</shiro:hasRole>
 		    	<td style="vertical-align:top;">
@@ -179,7 +199,11 @@
 		</a> -->
 		
 		<!-- 引入 -->
+		<link rel="stylesheet" href="http://jqueryui.com/resources/demos/style.css">
+		<link rel="stylesheet" href="<%=WEBPATH21 %>/static/css/jquery-ui-1.9.2.custom.css" />
 		<script type="text/javascript">window.jQuery || document.write("<script src='<%=WEBPATH21 %>/static/js/jquery-1.9.1.min.js'>\x3C/script>");</script>
+		<script src="<%=WEBPATH21 %>/static/js/jquery.cookie.js"></script>
+		<script src="<%=WEBPATH21 %>/static/js/jquery-ui-1.9.2.custom.min.js"></script>
 		<script src="<%=WEBPATH21 %>/static/js/bootstrap.min.js"></script>
 		<script src="<%=WEBPATH21 %>/static/js/ace-elements.min.js"></script>
 		<script src="<%=WEBPATH21 %>/static/js/ace.min.js"></script>
@@ -312,12 +336,14 @@
 		           				     }else{
 		           				    	 alert("error");
 		           				     }
+		           				    var deviceCodee=JSON.stringify(item.deviceCode).replace(/\"/g,"'");
+		           				    var typee=JSON.stringify(item.type).replace(/\"/g,"'");
 		         					$("#devicelist").append('<tr>'+
 		       	    					col+
 		       	    					status+
 		       	    					type+
 		       	    					'<shiro:hasRole name="buyer">'+
-		       	    						'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+		       	    						'<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
 		       	    					'</shiro:hasRole>'+
 		       	    					'</tr>');  
 		        					}
@@ -428,13 +454,15 @@
 		           				     }else{
 		           				    	 alert("error");
 		           				     }
+		           				     var deviceCodee=JSON.stringify(item.deviceCode).replace(/\"/g,"'");
+		           				     var typee=JSON.stringify(item.type).replace(/\"/g,"'");
 		           				     if(role == "admin"){
 		           				    	$("#devicelist").append('<tr>'+
 				       	    					col+
 				       	    					status+
 				       	    					type+
 				       	    					'<shiro:hasRole name="admin">'+
-				       	    						'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+				       	    						 '<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
 				       	    					'</shiro:hasRole>'+
 				       	    					'</tr>'); 
 		           				     }else{
@@ -453,6 +481,136 @@
 				})
 			}
 		});
+		
+		
+		//jquery ui dialog
+		$(function() {
+		    var deviceCode = $( "#deviceCode0" ),
+		    type = $( "#type0" ),
+		    deviceCode1=$( "#deviceCode1" ),
+		    type1 = $( "#type1" ),
+		    allFields = $( [] ).add( deviceCode ).add( type ).add(deviceCode1).add(type1),
+		    tips = $( ".validateTips" );
+		 
+		    function updateTips( t ) {
+		      tips
+		        .text( t )
+		        .addClass( "ui-state-highlight" );
+		      setTimeout(function() {
+		        tips.removeClass( "ui-state-highlight", 1500 );
+		      }, 500 );
+		    }
+		 
+		     function checkLength( o, n, min, max ) {//对输入字段信息进行 长度判断
+		      if ( o.val().length > max || o.val().length < min ) {
+		        o.addClass( "ui-state-error" );
+		        updateTips( "" + n + " 的长度必须在 " +
+		          min + " 和 " + max + " 之间。" );
+		        return false;
+		      } else {
+		        return true;
+		      }
+		    } 
+		 
+		    function checkRegexp( o, regexp, n ) {//对输入字段信息进行 正则判断
+		      if ( !( regexp.test( o.val() ) ) ) {
+		        o.addClass( "ui-state-error" );
+		        updateTips( n );
+		        return false;
+		      } else {
+		        return true;
+		      }
+		    } 
+		 
+		    $( "#dialog-form" ).dialog({
+		      autoOpen: false,
+		      height: 300,
+		      width: 350,
+		      modal: true,
+		      buttons: {
+		        "编辑主机": function() {
+		          /* alert(id); */
+		          var bValid = true;
+		          allFields.removeClass( "ui-state-error" );
+		          bValid = bValid && checkRegexp( deviceCode, /^([0-9a-zA-Z])+$/, "主机序列号字段只允许： a-z 0-9" );
+		          bValid = type.val()=="" || checkRegexp( type, /^([8]|[G]|[3][2]){1}$/, "主机类型的字段值只能是空格、8、32或G。" );
+		          if ( bValid ) {
+		            $( "#users tbody" ).append( "<tr>" +
+		              "<td>" + deviceCode.val() + "</td>" +
+		              "<td>" + type.val() + "</td>" +
+		            "</tr>" );
+		            $.ajax({
+		            	url:"<%=WEBPATH21 %>/modifyHostDevice.do",
+				    	data: {"deviceCode":deviceCode.val(),"type":type.val()}, 
+				    	type: "POST",
+						dataType:"json",
+						async: true,
+						success: function(data){
+							alert(data);
+						}
+		            });
+		            
+		            $( this ).dialog( "close" );
+		          }
+		        },
+		        Cancel: function() {
+		          $( this ).dialog( "close" );
+		        }
+		      },
+		      close: function() {
+		        allFields.val( "" ).removeClass( "ui-state-error" );
+		      }
+		    });
+		    
+		    $( "#dialog-add" ).dialog({
+			      autoOpen: false,
+			      height: 300,
+			      width: 350,
+			      modal: true,
+			      buttons: {
+			        "添加主机": function() {
+			          /* alert(id); */
+			          var bValid = true;
+			          allFields.removeClass( "ui-state-error" );
+			          bValid = bValid && checkRegexp( deviceCode1, /^([0-9a-zA-Z])+$/, "主机序列号字段只允许： a-z 0-9" );
+			          bValid = type1.val()=="" || checkRegexp( type1, /^([8]|[G]|[3][2]){1}$/, "主机类型的字段值只能是空格、8、32或G。" );
+			          if ( bValid ) {
+			            $( "#users tbody" ).append( "<tr>" +
+			              "<td>" + deviceCode1.val() + "</td>" +
+			              "<td>" + type1.val() + "</td>" +
+			            "</tr>" );
+			            $.ajax({
+			            	url:"<%=WEBPATH21 %>/addHostDevice.do",
+					    	data: {"deviceCode":deviceCode1.val(),"type":type1.val()}, 
+					    	type: "POST",
+							dataType:"json",
+							async: true,
+							success: function(data){
+								alert(data);
+							}
+			            });
+			            
+			            $( this ).dialog( "close" );
+			          }
+			        },
+			        Cancel: function() {
+			          $( this ).dialog( "close" );
+			        }
+			      },
+			      close: function() {
+			        allFields.val( "" ).removeClass( "ui-state-error" );
+			      }
+			    });
+		 
+		  });
+		function clickOnMe(deviceCode,type){
+			$("#deviceCode0").val(deviceCode);
+			$("#type0").val(type);
+			$( "#dialog-form" ).dialog( "open" );
+		};
+		function clickOn(){
+			$( "#dialog-add" ).dialog( "open" );
+		}
 		//打开上传excel页面
 		function fromExcel(){
 			/* alert("被点击") */
@@ -785,13 +943,15 @@
 	           				     }else{
 	           				    	 alert("error");
 	           				     }
+	           				     var deviceCodee=JSON.stringify(item.deviceCode).replace(/\"/g,"'");
+	           				     var typee=JSON.stringify(item.type).replace(/\"/g,"'");
 	           				     if(role =="admin"){
 	           				    	$("#devicelist").append('<tr>'+
 			       	    					col+
 			       	    					status+
 			       	    					type+
 			       	    					'<shiro:hasRole name="admin">'+
-			       	    						'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+			       	    						'<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
 			       	    					'</shiro:hasRole>'+
 			       	    					'</tr>');  
 	           				     }else if(role =="buyer"){
@@ -800,7 +960,7 @@
 			       	    					status+
 			       	    					type+
 			       	    					'<shiro:hasRole name="buyer">'+
-			       	    						'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+			       	    						'<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
 			       	    					'</shiro:hasRole>'+
 			       	    					'</tr>');  
 	           				     }else{
@@ -889,13 +1049,15 @@
 	        				     }else{
 	        				    	 alert("error");
 	        				     }
+	        				     var deviceCodee=JSON.stringify(item.deviceCode).replace(/\"/g,"'");
+		           				 var typee=JSON.stringify(item.type).replace(/\"/g,"'");
 	        				     if(role =="admin"){
 	        				    	 $("#devicelist").append('<tr>'+
 	 	 	       	    					col+
 	 	 	       	    					status+
 	 	 	       	    					type+
 	 	 	       	    					'<shiro:hasRole name="admin">'+
-	 	 	       	    						'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+	 	 	       	    						'<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
 	 	 	       	    					'</shiro:hasRole>'+
 	 	 	       	    					'</tr>'); 
 	        				     }else if(role =="buyer"){
@@ -904,7 +1066,7 @@
 	 	 	       	    					status+
 	 	 	       	    					type+
 	 	 	       	    					'<shiro:hasRole name="buyer">'+
-	 	 	       	    						'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+	 	 	       	    						'<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
 	 	 	       	    					'</shiro:hasRole>'+
 	 	 	       	    					'</tr>'); 
 	        				     }else{
@@ -1206,13 +1368,15 @@
 		           				     }else{
 		           				    	 alert("error");
 		           				     }
+		           				     var deviceCodee=JSON.stringify(item.deviceCode).replace(/\"/g,"'");
+		           				     var typee=JSON.stringify(item.type).replace(/\"/g,"'");
 		           				     if(role=="admin"){
 		           				    	$("#devicelist").append('<tr>'+
 				       	    					col+
 				       	    					status+
 				       	    					type+
 				       	    					'<shiro:hasRole name="admin">'+
-				       	    						'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+				       	    						'<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
 				       	    					'</shiro:hasRole>'+
 				       	    					'</tr>'); 
 		           				     }else if(role=="buyer"){
@@ -1221,7 +1385,7 @@
 				       	    					status+
 				       	    					type+
 				       	    					'<shiro:hasRole name="buyer">'+
-				       	    						'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+				       	    						'<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
 				       	    					'</shiro:hasRole>'+
 				       	    					'</tr>'); 
 		           				     }else{
@@ -1349,13 +1513,15 @@
 		           				     }else{
 		           				    	 alert("error");
 		           				     }
+		           				     var deviceCodee=JSON.stringify(item.deviceCode).replace(/\"/g,"'");
+		           				     var typee=JSON.stringify(item.type).replace(/\"/g,"'");
 		           				     if(role=="admin"){
 		           				    	$("#devicelist").append('<tr>'+
 				       	    					col+
 				       	    					status+
 				       	    					type+
 				       	    					'<shiro:hasRole name="admin">'+
-				       	    						'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+				       	    						'<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
 				       	    					'</shiro:hasRole>'+
 				       	    					'</tr>');   
 		           				     }else if(role=="buyer"){
@@ -1364,7 +1530,7 @@
 				       	    					status+
 				       	    					type+
 				       	    					'<shiro:hasRole name="buyer">'+
-				       	    						'<td class="center"><a href="<%=WEBPATH21 %>/static/jsp/system/device/edit.jsp?deviceCode='+item.deviceCode+'&type='+item.type+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+				       	    						'<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
 				       	    					'</shiro:hasRole>'+
 				       	    					'</tr>');  
 		           				     }else{

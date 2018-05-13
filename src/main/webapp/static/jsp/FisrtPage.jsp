@@ -31,6 +31,18 @@
 	
 <div class="container-fluid" id="main-container">
 
+<!-- jquery ui dialog -->
+<div id="dialog-form" title="编辑备注">
+  <p class="validateTips"></p>
+  <form action="" method="post">
+	  <fieldset>
+	  	<input type="text" name="signature0" id="signature0" value="" class="text ui-widget-content ui-corner-all" readonly="true">
+	  	<input type="hidden" name="signatureId" id="signatureId" value="" class="text ui-widget-content ui-corner-all" >
+	    <input type="text" name="signature" id="signature" value="" class="text ui-widget-content ui-corner-all" placeholder="这里输入要修改的备注">
+	  </fieldset>
+  </form>
+</div>
+
 <div id="page-content" class="clearfix">
 						
   <div class="row-fluid">
@@ -303,6 +315,7 @@
 		        						
 		        						$("#userdeviceslist").append(table);
 		        					}else{
+		        						var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
 		        						var deviceCode=JSON.stringify(item.DEVICE_CODE).replace(/\"/g,"'");
 		        						var col="";
 										var creator_date="";
@@ -366,7 +379,7 @@
 			       	    						status+
 			       	    						signature+
 			         							'<shiro:hasRole name="buyer">'+
-				       	    						'<td class="center"><a href="<%=WEBPATH3 %>/static/jsp/editBZ.jsp?signature='+item.SIGNATURE+'&id='+item.id+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+			         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
 				       	    					'</shiro:hasRole>'+
 			       	    					'</tr>'); 
 			        					}
@@ -505,6 +518,8 @@
 			           				     }
 		   							 }
 		           				     if(session == "admin"){
+		           				    	 var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
+		           				    	 /* alert(item.id); */
 		           				    	$("#userdeviceslist0").append('<tr>'+
 			         							'<td class="center" style="width: 30px;">'+
 		   	    	    					'<label>'+
@@ -521,7 +536,7 @@
 			       	    						status+
 			       	    						signature+
 			         							'<shiro:hasRole name="admin">'+
-				       	    						'<td class="center"><a href="<%=WEBPATH3 %>/static/jsp/editBZ.jsp?signature='+item.SIGNATURE+'&id='+item.id+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+				       	    						'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
 				       	    					'</shiro:hasRole>'+
 			       	    					'</tr>'); 
 		           				     }else{
@@ -553,7 +568,91 @@
 			}
 			
 		});
-		
+		//jquery ui dialog
+		$(function() {
+		    var signature = $( "#signature" ),
+		      allFields = $( [] ).add( signature ),
+		      tips = $( ".validateTips" );
+		 
+		    function updateTips( t ) {
+		      tips
+		        .text( t )
+		        .addClass( "ui-state-highlight" );
+		      setTimeout(function() {
+		        tips.removeClass( "ui-state-highlight", 1500 );
+		      }, 500 );
+		    }
+		 
+		     function checkLength( o, n, min, max ) {//对输入字段信息进行 长度判断
+		      if ( o.val().length > max || o.val().length < min ) {
+		        o.addClass( "ui-state-error" );
+		        updateTips( "" + n + " 的长度必须在 " +
+		          min + " 和 " + max + " 之间。" );
+		        return false;
+		      } else {
+		        return true;
+		      }
+		    } 
+		 
+		    function checkRegexp( o, regexp, n ) {//对输入字段信息进行 正则判断
+		      if ( !( regexp.test( o.val() ) ) ) {
+		        o.addClass( "ui-state-error" );
+		        updateTips( n );
+		        return false;
+		      } else {
+		        return true;
+		      }
+		    } 
+		 
+		    $( "#dialog-form" ).dialog({
+		      autoOpen: false,
+		      height: 300,
+		      width: 350,
+		      modal: true,
+		      buttons: {
+		        "编辑备注": function() {
+		          var id=$("#signatureId").val();
+		          /* alert(id); */
+		          var bValid = true;
+		          //var sign=$("#signature0").val() != $("#signature0").val();//相等的时候不让通过
+		          allFields.removeClass( "ui-state-error" );
+		          bValid = bValid && checkLength( signature, "signature", 1, 16 );
+		          bValid = bValid && checkRegexp( signature, /^[A-Za-z0-9_\u4e00-\u9fa5]{1,16}$/, "用户名必须是1-16位。" );
+		          if ( bValid ) {
+		            $( "#users tbody" ).append( "<tr>" +
+		              "<td>" + signature.val() + "</td>" +
+		            "</tr>" );
+		            $.ajax({
+		            	url:"<%=WEBPATH3 %>/modifyBZ.do",
+				    	data: {"signature":signature.val(),"id":id}, 
+				    	type: "POST",
+						dataType:"json",
+						async: true,
+						success: function(data){
+							alert(data);
+						}
+		            });
+		            
+		            $( this ).dialog( "close" );
+		          }
+		        },
+		        Cancel: function() {
+		          $( this ).dialog( "close" );
+		        }
+		      },
+		      close: function() {
+		        allFields.val( "" ).removeClass( "ui-state-error" );
+		      }
+		    });
+		 
+		  });
+		function clickOnMe(signature,id){
+			/* var id="create-user"+Id; */
+			/* html中     id="create-user'+item.id+'" */
+			$("#signature0").val(signature);
+			$("#signatureId").val(id);
+		    $( "#dialog-form" ).dialog( "open" );
+		}
 		
 		</script>
 		<script type="text/javascript">
@@ -879,6 +978,7 @@
 	   		           				     }
 	   	   							 }
 	   	           				     if(role == "admin"){
+	   	           				   	   var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
 		   	           				   $("#userdeviceslist0").append('<tr>'+
 		   	         							'<td class="center" style="width: 30px;">'+
 		      	    	    						'<label>'+
@@ -895,10 +995,11 @@
 		   	       	    						status+
 		   	       	    						signature+
 		   	         							'<shiro:hasRole name="admin">'+
-		   		       	    					'<td class="center"><a href="<%=WEBPATH3 %>/static/jsp/editBZ.jsp?signature='+item.SIGNATURE+'&id='+item.id+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+		   	         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
 		   		       	    					'</shiro:hasRole>'+
 		   	       	    					'</tr>'); 
 	   	           				     }else if(role == "buyer"){
+	   	           				       var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
 		   	           				   $("#userdeviceslist0").append('<tr>'+
 		   	         							'<td class="center" style="width: 30px;">'+
 		      	    	    						'<label>'+
@@ -915,7 +1016,7 @@
 		   	       	    						status+
 		   	       	    						signature+
 		   	         							'<shiro:hasRole name="buyer">'+
-		   		       	    					'<td class="center"><a href="<%=WEBPATH3 %>/static/jsp/editBZ.jsp?signature='+item.SIGNATURE+'&id='+item.id+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+		   	         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
 		   		       	    					'</shiro:hasRole>'+
 		   	       	    					'</tr>'); 
 	   	           				     }else{
@@ -1254,6 +1355,7 @@
 	    		           				     }
 	    	   							 }
 	    	   							if(role == "admin"){
+	    	   							   var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
 	 		   	           				   $("#userdeviceslist0").append('<tr>'+
 	 		   	         							'<td class="center" style="width: 30px;">'+
 	 		      	    	    						'<label>'+
@@ -1270,10 +1372,11 @@
 	 		   	       	    						status+
 	 		   	       	    						signature+
 	 		   	         							'<shiro:hasRole name="admin">'+
-	 		   		       	    					'<td class="center"><a href="<%=WEBPATH3 %>/static/jsp/editBZ.jsp?signature='+item.SIGNATURE+'&id='+item.id+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+	 		   	         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
 	 		   		       	    					'</shiro:hasRole>'+
 	 		   	       	    					'</tr>'); 
 	 	   	           				     }else if(role == "buyer"){
+	 	   	           				       var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
 	 		   	           				   $("#userdeviceslist0").append('<tr>'+
 	 		   	         							'<td class="center" style="width: 30px;">'+
 	 		      	    	    						'<label>'+
@@ -1290,7 +1393,7 @@
 	 		   	       	    						status+
 	 		   	       	    						signature+
 	 		   	         							'<shiro:hasRole name="buyer">'+
-	 		   		       	    					'<td class="center"><a href="<%=WEBPATH3 %>/static/jsp/editBZ.jsp?signature='+item.SIGNATURE+'&id='+item.id+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+	 		   	         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
 	 		   		       	    					'</shiro:hasRole>'+
 	 		   	       	    					'</tr>'); 
 	 	   	           				     }else{
@@ -2100,6 +2203,7 @@
 	   							 }
 	           				     
 	   							if(role == "admin"){
+	   							    var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
 	   								$("#userdeviceslist0").append('<tr>'+
 		         							'<td class="center" style="width: 30px;">'+
 	   	    	    					'<label>'+
@@ -2116,10 +2220,11 @@
 		       	    						status+
 		       	    						signature+
 		         							'<shiro:hasRole name="admin">'+
-			       	    						'<td class="center"><a href="<%=WEBPATH3 %>/static/jsp/editBZ.jsp?signature='+item.SIGNATURE+'&id='+item.id+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+		         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
 			       	    					'</shiro:hasRole>'+
 		       	    					'</tr>'); 
 	   							}else if(role == "buyer"){
+	   							    var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
 	   								$("#userdeviceslist0").append('<tr>'+
 		         							'<td class="center" style="width: 30px;">'+
 	   	    	    					'<label>'+
@@ -2136,7 +2241,7 @@
 		       	    						status+
 		       	    						signature+
 		         							'<shiro:hasRole name="buyer">'+
-			       	    						'<td class="center"><a href="<%=WEBPATH3 %>/static/jsp/editBZ.jsp?signature='+item.SIGNATURE+'&id='+item.id+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+		         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
 			       	    					'</shiro:hasRole>'+
 		       	    					'</tr>'); 
 	   							}else{
@@ -2312,6 +2417,7 @@
 	   		           				     }
 	   	   							 }
 	   	           				     if(role == "admin"){
+	   	           				       var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
 		   	           				   $("#userdeviceslist0").append('<tr>'+
 		   	         							'<td class="center" style="width: 30px;">'+
 		      	    	    						'<label>'+
@@ -2328,10 +2434,11 @@
 		   	       	    						status+
 		   	       	    						signature+
 		   	         							'<shiro:hasRole name="admin">'+
-		   		       	    						'<td class="center"><a href="<%=WEBPATH3 %>/static/jsp/editBZ.jsp?signature='+item.SIGNATURE+'&id='+item.id+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+		   	         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
 		   		       	    					'</shiro:hasRole>'+
 		   	       	    					'</tr>'); 
 	   	           				     }else if(role == "buyer"){
+	   	           				       var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
 		   	           				   $("#userdeviceslist0").append('<tr>'+
 		   	         							'<td class="center" style="width: 30px;">'+
 		      	    	    						'<label>'+
@@ -2348,7 +2455,7 @@
 		   	       	    						status+
 		   	       	    						signature+
 		   	         							'<shiro:hasRole name="buyer">'+
-		   		       	    						'<td class="center"><a href="<%=WEBPATH3 %>/static/jsp/editBZ.jsp?signature='+item.SIGNATURE+'&id='+item.id+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+		   	         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
 		   		       	    					'</shiro:hasRole>'+
 		   	       	    					'</tr>'); 
 	   	           				     }else{
@@ -2458,6 +2565,7 @@
             						
             						$("#userdeviceslist").append(table);
             					}else{
+            						var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
             						var deviceCode=JSON.stringify(item.DEVICE_CODE).replace(/\"/g,"'");
             						var col="";
     								var creator_date="";
@@ -2519,7 +2627,7 @@
     	       	    						status+
     	       	    						signature+
     	         							'<shiro:hasRole name="admin">'+
-    		       	    						'<td class="center"><a href="<%=WEBPATH3 %>/static/jsp/editBZ.jsp?signature='+item.SIGNATURE+'&id='+item.id+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+    	         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
     		       	    					'</shiro:hasRole>'+
     	       	    					'</tr>'); 
     	        					}

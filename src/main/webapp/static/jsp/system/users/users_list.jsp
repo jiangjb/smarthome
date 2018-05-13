@@ -32,10 +32,6 @@
 <body>
 <div class="container-fluid" id="main-container">
 
-<!-- <div id="dialog" title="Basic dialog">
-    <p>这是一个动画显示的对话框，用于显示信息。对话框窗口可以移动，调整尺寸，默认可通过 'x' 图标关闭。</p>
-</div>
-<button id="opener">打开对话框</button> -->
 <!-- jquery ui dialog -->
 <div id="dialog-form" title="创建新用户">
   <p class="validateTips">请完善下面的字段信息,<font color="red">*</font>修饰的为必填项</p>
@@ -46,6 +42,16 @@
 	    <label for="userPhone"><font color="red">*</font>手机号</label><input type="text" name="userPhone" id="userPhone" value="" class="text ui-widget-content ui-corner-all" placeholder="这里输入手机号">
 	    <label for="password"><font color="red">*</font>密码</label><input type="password" name="password" id="password" value="" class="text ui-widget-content ui-corner-all" placeholder="这里输入密码">
 	    <label for="email">邮箱</label><input type="text" name="email" id="email" value="" class="text ui-widget-content ui-corner-all" placeholder="这里输入邮箱">
+	  </fieldset>
+  </form>
+</div>
+
+<div id="changeAccount" title="移交账户">
+  <p class="validateTips"></p>
+  <form action="" method="post">
+	  <fieldset>
+	  	<input type="text" name="userPhone0" id="userPhone0" value="" class="text ui-widget-content ui-corner-all" readonly="true">
+	    <input type="text" name="userPhone1" id="userPhone1" value="" class="text ui-widget-content ui-corner-all" placeholder="这里输入要移交的手机号">
 	  </fieldset>
   </form>
 </div>
@@ -82,7 +88,6 @@
 						<th class="center">最后登录手机</th>
 						<th class="center">账号使用的软件</th>
 						<th class="center">签名</th>
-						<th class="center">城市</th>
 						<th class="center">操作</th>
 						<%-- <shiro:hasRole name="admin"><th class="center">操作</th></shiro:hasRole> --%>
 					</tr>
@@ -313,10 +318,11 @@
 			    				    }else if(item.versionType == 7){
 			    				    	versionType="乐沃智能";
 			    				    }
+			    				    var userPhone0=JSON.stringify(item.userPhone).replace(/\"/g,"'");
 			  						 $("#userslist").append('<tr>'+
 				    					'<td class="center" style="width: 30px;">'+
 				    					'<label>'+
-				    					'<input type="checkbox" name="ids" value="checkbox" />'+
+				    					'<input type="checkbox" name="ids" value="'+item.userId+'" />'+
 				    					'<span class="lbl">'+
 				    					'</span>'+
 				    					'</label>'+
@@ -327,9 +333,16 @@
 				    					'<td class="center">'+phoneType +'</td>'+
 				    					'<td class="center">'+versionType+'</td>'+
 				    					'<td class="center">'+item.signature+'</td>'+
-				    					'<td class="center">'+item.city+'</td>'+
 				    					'<shiro:hasRole name="buyer">'+
-		       	    						'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/editPhone.jsp?userPhone='+item.userPhone+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+					    					'<td style="width: 30px;" class="center">'+
+    											'<div class="inline position-relative">'+
+    												'<button class="btn btn-mini btn-info" data-toggle="dropdown"><i class="icon-cog icon-only"></i></button>'+
+    												'<ul class="dropdown-menu dropdown-icon-only dropdown-light pull-right dropdown-caret dropdown-close">'+
+    													'<li><a onclick="clickOnMe('+userPhone0+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></li>'+
+    													'<li><a style="cursor:pointer;" title="删除" onclick="delMe('+item.userId+');" class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></li>'+
+    												'</ul>'+
+    											'</div>'+
+	    									'</td>'+
 		       	    					'</shiro:hasRole>'+
 				    					'</tr>'); 
 								}
@@ -434,11 +447,13 @@
 		    				    }else if(item.versionType == 7){
 		    				    	versionType="乐沃智能";
 		    				    }
+		    				    var userPhone0=JSON.stringify(item.userPhone).replace(/\"/g,"'");
 		    				    if(role == "admin"){
+		    				    	var userPhone0=JSON.stringify(item.userPhone).replace(/\"/g,"'");
 		    				    	$("#userslist").append('<tr>'+
 					    					'<td class="center" style="width: 30px;">'+
 					    					'<label>'+
-					    					'<input type="checkbox" name="ids" value="checkbox" />'+
+					    					'<input type="checkbox" name="ids" value="'+item.userId+'" />'+
 					    					'<span class="lbl">'+
 					    					'</span>'+
 					    					'</label>'+
@@ -449,16 +464,23 @@
 					    					'<td class="center">'+phoneType +'</td>'+
 					    					'<td class="center">'+versionType+'</td>'+
 					    					'<td class="center">'+item.signature+'</td>'+
-					    					'<td class="center">'+item.city+'</td>'+
 					    					'<shiro:hasRole name="admin">'+
-			       	    						'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/editPhone.jsp?userPhone='+item.userPhone+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+					    						'<td style="width: 30px;" class="center">'+
+   													'<div class="inline position-relative">'+
+   														'<button class="btn btn-mini btn-info" data-toggle="dropdown"><i class="icon-cog icon-only"></i></button>'+
+   														'<ul class="dropdown-menu dropdown-icon-only dropdown-light pull-right dropdown-caret dropdown-close">'+
+   															'<li><a onclick="clickOnMe('+userPhone0+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></li>'+
+   															'<li><a onclick="delMe('+item.userId+')" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></li>'+
+   														'</ul>'+
+   													'</div>'+
+    											'</td>'+
 			       	    					'</shiro:hasRole>'+
 					    					'</tr>'); 
 		    				    }else{
 		    				    	$("#userslist").append('<tr>'+
 					    					'<td class="center" style="width: 30px;">'+
 					    					'<label>'+
-					    					'<input type="checkbox" name="ids" value="checkbox" />'+
+					    					'<input type="checkbox" name="ids" value="'+item.userId+'" />'+
 					    					'<span class="lbl">'+
 					    					'</span>'+
 					    					'</label>'+
@@ -469,7 +491,6 @@
 					    					'<td class="center">'+phoneType +'</td>'+
 					    					'<td class="center">'+versionType+'</td>'+
 					    					'<td class="center">'+item.signature+'</td>'+
-					    					'<td class="center">'+item.city+'</td>'+
 			       	    					'<td class="center"></td>'+
 					    					'</tr>'); 
 		    				    }
@@ -479,33 +500,16 @@
 	    			}
 	    		});
 			}
-			
-			$.cookie('firstTime', 'no', { expires: 7 });
+			/* $.cookie('firstTime', 'no', { expires: 7 }); */
 		});
 		
-		/* $(function() {
-		    $( "#dialog" ).dialog({
-		      autoOpen: false,
-		      show: {
-		        effect: "blind",
-		        duration: 1000
-		      },
-		      hide: {
-		        effect: "explode",
-		        duration: 1000
-		      }
-		    });
-		 
-		    $( "#opener" ).click(function() {
-		      $( "#dialog" ).dialog( "open" );
-		    });
-		  }); */
 		  $(function() {
 			    var name = $( "#name" ),
 			      userPhone=$("#userPhone"),
+			      userPhone1=$("#userPhone1"),
 			      password = $( "#password" ),
 			      email = $( "#email" ),
-			      allFields = $( [] ).add( name ).add(userPhone).add( password ).add( email ),
+			      allFields = $( [] ).add( name ).add(userPhone).add( password ).add( email ).add(userPhone1),
 			      tips = $( ".validateTips" );
 			 
 			    function updateTips( t ) {
@@ -548,15 +552,15 @@
 			          var bValid = true;
 			          allFields.removeClass( "ui-state-error" );
 			 
-			          bValid = bValid && checkLength( name, "username", 3, 16 );
+			          bValid = bValid && checkLength( name, "username", 1, 16 );
 			          bValid = bValid && checkLength( password, "password", 5, 16 );
 			          bValid = bValid && checkLength( email, "email", 6, 80 );
 			 
-			          bValid = bValid && checkRegexp( name, /^[a-z]([0-9a-z_])+$/i, "用户名必须由 a-z、0-9、下划线组成，且必须以字母开头。" );
+			          bValid = bValid || checkRegexp( name, /^[A-Za-z0-9_\u4e00-\u9fa5]{1,16}$/, "用户名必须是1-16位。" );// ||标识该字段可为空
 			          // From jquery.validate.js (by joern), contributed by Scott Gonzalez: http://projects.scottsplayground.com/email_address_validation/
 			          bValid = bValid && checkRegexp( userPhone, /^[1][3,4,5,7,8][0-9]{9}$/, "手机号字段以1为开头；第二位可为3,4,5,7,8,中的任意一位；最后以0-9的9个整数结尾。" );
 			          bValid = bValid && checkRegexp( password, /^([0-9a-zA-Z])+$/, "密码字段只允许： a-z 0-9" );
-			          bValid = bValid && checkRegexp( email, /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i, "eg. ui@jquery.com" );
+			          bValid = bValid || checkRegexp( email, /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i, "eg. ui@jquery.com" );
 			 
 			          if ( bValid ) {
 			            $( "#users tbody" ).append( "<tr>" +
@@ -573,7 +577,12 @@
 							dataType:"json",
 							async: true,
 							success: function(data){
-								alert(data);
+								if(data == "success"){
+									/* console.log("操作成功"); */
+									alert("操作成功");
+								}else{
+									alert("操作失败，请重试！");
+								}
 							}
 			            });
 			            
@@ -588,6 +597,52 @@
 			        allFields.val( "" ).removeClass( "ui-state-error" );
 			      }
 			    });
+			    
+			    $( "#changeAccount" ).dialog({
+				      autoOpen: false,
+				      height: 300,
+				      width: 350,
+				      modal: true,
+				      buttons: {
+				        "移交账户": function() {
+				          var bValid = true;
+				          allFields.removeClass( "ui-state-error" );
+				 
+				          bValid = bValid && checkRegexp( userPhone1, /^[1][3,4,5,7,8][0-9]{9}$/, "手机号字段以1为开头；第二位可为3,4,5,7,8,中的任意一位；最后以0-9的9个整数结尾。" );
+				          if ( bValid ) {
+				            $( "#users tbody" ).append( "<tr>" +
+				              "<td>" + userPhone1.val() + "</td>" +
+				            "</tr>" );
+				            /* alert(name.val()); */
+				            var oldPhone=$("#userPhone0").val();
+				           /*  alert("userPhone1:"+userPhone1.val()); */
+				            $.ajax({
+				            	url:"<%=WEBPATH11 %>/changeAccount.do",
+						    	data: {"oldPhone":oldPhone, "newPhone":userPhone1.val()}, 
+						    	type: "POST",
+								dataType:"json",
+								async: true,
+								success: function(data){
+									if(data == "success"){
+										/* console.log("操作成功"); */
+										alert("操作成功");
+									}else{
+										alert("操作失败，请重试！");
+									}
+								}
+				            });
+				            
+				            $( this ).dialog( "close" );
+				          }
+				        },
+				        Cancel: function() {
+				          $( this ).dialog( "close" );
+				        }
+				      },
+				      close: function() {
+				        allFields.val( "" ).removeClass( "ui-state-error" );
+				      }
+				    });
 			 
 			    $( "#create-user" )
 			      .button()
@@ -595,6 +650,38 @@
 			        $( "#dialog-form" ).dialog( "open" );
 			      });
 			  });
+		  function clickOnMe(userPhone0){
+				/* var id="create-user"+Id; */
+				/* html中     id="create-user'+item.id+'" */
+				$("#userPhone0").val(userPhone0);
+			    $( "#changeAccount" ).dialog( "open" );
+			};
+		function delMe(id){
+			$.ajax({
+            	url:"<%=WEBPATH11 %>/delUser.do",
+		    	data: {"id":id}, 
+		    	type: "POST",
+				dataType:"json",
+				async: true,
+				success: function(data){
+					if(data == "success"){
+						/* console.log("操作成功"); */
+						alert("删除成功");
+						window.location.reload();
+					}else{
+						alert("删除失败，请重试！");
+					}
+				}
+            });
+		};
+		//批量操作
+		function delSelected(){
+			$('input:checkbox:checked').each(function (index, item) {
+				//逐个取出id
+				/* alert($(this).val());   */
+				delMe($(this).val());//通过input标签value值来传递delMe方法需要的参数
+			});
+		};
 		//检索
 		function search(){
 			/* top.jzts();
@@ -644,10 +731,11 @@
 		    				    }else if(item.versionType == 7){
 		    				    	versionType="乐沃智能";
 		    				    }
+		    				    var userPhone0=JSON.stringify(item.userPhone).replace(/\"/g,"'");
 		  						 $("#userslist").append('<tr>'+
 			    					'<td class="center" style="width: 30px;">'+
 			    					'<label>'+
-			    					'<input type="checkbox" name="ids" value="checkbox" />'+
+			    					'<input type="checkbox" name="ids" value="'+item.userId+'" />'+
 			    					'<span class="lbl">'+
 			    					'</span>'+
 			    					'</label>'+
@@ -658,9 +746,16 @@
 			    					'<td class="center">'+phoneType +'</td>'+
 			    					'<td class="center">'+versionType+'</td>'+
 			    					'<td class="center">'+item.signature+'</td>'+
-			    					'<td class="center">'+item.city+'</td>'+
 			    					'<shiro:hasRole name="admin">'+
-	       	    						'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/editPhone.jsp?userPhone='+item.userPhone+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+			    						'<td style="width: 30px;" class="center">'+
+											'<div class="inline position-relative">'+
+												'<button class="btn btn-mini btn-info" data-toggle="dropdown"><i class="icon-cog icon-only"></i></button>'+
+													'<ul class="dropdown-menu dropdown-icon-only dropdown-light pull-right dropdown-caret dropdown-close">'+
+														'<li><a onclick="clickOnMe('+userPhone0+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></li>'+
+														'<li><a onclick="delMe('+item.userId+')" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></li>'+
+													'</ul>'+
+											'</div>'+
+										'</td>'+
 	       	    					'</shiro:hasRole>'+
 			    					'</tr>');  
 		    				}) 
@@ -681,7 +776,7 @@
 		function find(index){
 				/* alert(index); */
 				var role= '<%= session.getAttribute("role")%>';
-				alert(role);
+				/* alert(role); */
 				$.ajax({
 					url:"findByIndex.do",
 			    	data: {"index":index }, 
@@ -959,11 +1054,12 @@
 		    				    }else if(item.versionType == 7){
 		    				    	versionType="乐沃智能";
 		    				    }
+		    				    var userPhone0=JSON.stringify(item.userPhone).replace(/\"/g,"'");
 		    				    if(role == "admin"){
 		    				    	$("#userslist").append('<tr>'+
 					    					'<td class="center" style="width: 30px;">'+
 					    					'<label>'+
-					    					'<input type="checkbox" name="ids" value="checkbox" />'+
+					    					'<input type="checkbox" name="ids" value="'+item.userId+'" />'+
 					    					'<span class="lbl">'+
 					    					'</span>'+
 					    					'</label>'+
@@ -974,16 +1070,23 @@
 					    					'<td class="center">'+phoneType +'</td>'+
 					    					'<td class="center">'+versionType+'</td>'+
 					    					'<td class="center">'+item.signature+'</td>'+
-					    					'<td class="center">'+item.city+'</td>'+
 					    					'<shiro:hasRole name="admin">'+
-				       	    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/editPhone.jsp?userPhone='+item.userPhone+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+						    					'<td style="width: 30px;" class="center">'+
+													'<div class="inline position-relative">'+
+														'<button class="btn btn-mini btn-info" data-toggle="dropdown"><i class="icon-cog icon-only"></i></button>'+
+															'<ul class="dropdown-menu dropdown-icon-only dropdown-light pull-right dropdown-caret dropdown-close">'+
+																'<li><a onclick="clickOnMe('+userPhone0+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></li>'+
+																'<li><a onclick="delMe('+item.userId+')" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></li>'+
+															'</ul>'+
+													'</div>'+
+												'</td>'+
 				       	    				'</shiro:hasRole>'+
 					    					'</tr>'); 
 		    				    }else if(role == "buyer"){
 		    				    	$("#userslist").append('<tr>'+
 					    					'<td class="center" style="width: 30px;">'+
 					    					'<label>'+
-					    					'<input type="checkbox" name="ids" value="checkbox" />'+
+					    					'<input type="checkbox" name="ids" value="'+item.userId+'" />'+
 					    					'<span class="lbl">'+
 					    					'</span>'+
 					    					'</label>'+
@@ -994,16 +1097,23 @@
 					    					'<td class="center">'+phoneType +'</td>'+
 					    					'<td class="center">'+versionType+'</td>'+
 					    					'<td class="center">'+item.signature+'</td>'+
-					    					'<td class="center">'+item.city+'</td>'+
 					    					'<shiro:hasRole name="buyer">'+
-				       	    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/editPhone.jsp?userPhone='+item.userPhone+'" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+					    						'<td style="width: 30px;" class="center">'+
+													'<div class="inline position-relative">'+
+														'<button class="btn btn-mini btn-info" data-toggle="dropdown"><i class="icon-cog icon-only"></i></button>'+
+															'<ul class="dropdown-menu dropdown-icon-only dropdown-light pull-right dropdown-caret dropdown-close">'+
+																'<li><a onclick="clickOnMe('+userPhone0+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></li>'+
+																'<li><a onclick="delMe('+item.userId+')" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></li>'+
+															'</ul>'+
+													'</div>'+
+												'</td>'+
 				       	    				'</shiro:hasRole>'+
 					    					'</tr>'); 
 		    				    }else{
 		    				    	$("#userslist").append('<tr>'+
 					    					'<td class="center" style="width: 30px;">'+
 					    					'<label>'+
-					    					'<input type="checkbox" name="ids" value="checkbox" />'+
+					    					'<input type="checkbox" name="ids" value="'+item.userId+'" />'+
 					    					'<span class="lbl">'+
 					    					'</span>'+
 					    					'</label>'+
@@ -1014,7 +1124,6 @@
 					    					'<td class="center">'+phoneType +'</td>'+
 					    					'<td class="center">'+versionType+'</td>'+
 					    					'<td class="center">'+item.signature+'</td>'+
-					    					'<td class="center">'+item.city+'</td>'+
 				       	    				'<td class="center"></td>'+
 					    					'</tr>'); 
 		    				    }
@@ -1056,35 +1165,7 @@
 		function toExcel(){
 			window.location.href='<%=basePath%>users/excel.do';
 		};
-		//删除
-		function del(Id){
-			/* alert(typeof(Id)); String */
-			/* int id=2; */
-			/* alert(typeof(parseInt(Id))); */
-			var id=parseInt(Id);
-			/* alert(typeof(id)) */
-			/* alert(id); */
-			$.ajax({
-    			url: "delUser.do",
-    	    	data: {"id":id},
-    			type: "POST",
-    			dataType:"json",
-    			success: function(data){
-    				alert("删除成功");
-    				window.history.back();
-    				//跳回原来的页面或移除该行  （未完成）
-				}
-			})
-		};
-		//批量操作
-		function delSelected(){
-			$('input:checkbox:checked').each(function (index, item) {
-				//逐个取出id
-				/* alert($(this).val()); */
-				del($(this).val());
-				window.history.back();
-			});
-		}
+		
 		
 		</script>
 		
