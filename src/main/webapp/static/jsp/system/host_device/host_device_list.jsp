@@ -51,6 +51,7 @@
 						<th class="center">绑定主机序列号</th>
 						<th class="center">绑定手机号</th>
 						<th class="center">设备名</th>
+						<th class="center">操作</th>
 						<%-- <shiro:hasRole name="admin"><th class="center">操作</th></shiro:hasRole> --%>
 					</tr>
 				</thead>
@@ -141,6 +142,7 @@
 		$(top.hangge());
 		$(function(){
 			var tel='<%= session.getAttribute("userPhone")%>';
+			var role= '<%= session.getAttribute("role")%>'; 
 			/* alert(tel); */
 			/* alert(tel!="null"); */
 			if(tel!="null"){
@@ -220,7 +222,24 @@
 	        						
 	        						$("#hostdevicelist01").append(table);
 	        					}else{
-	        						 $("#hostDevices").append('<tr>'+
+	        						if(role == "admin"){
+		        						 $("#hostDevices").append('<tr>'+
+		        	    	    					'<td class="center" style="width: 30px;">'+
+		        	    	    					'<label>'+
+		        	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		        	    	    					'<span class="lbl">'+
+		        	    	    					'</span>'+
+		        	    	    					'</label>'+
+		        	    	    					'</td>'+
+		        	    	    					'<td class="center">'+item.deviceCode+'</td>'+
+		        	    	    					'<td class="center">'+item.userPhone+'</td>'+
+		        	    	    					'<td class="center">'+item.nickName+'</td>'+
+		        	    	    					'<shiro:hasRole name="admin">'+
+				       	    							'<td class="center"><a onclick="del('+item.id+');" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></td>'+ 
+				       	    						'</shiro:hasRole>'+
+		        	    	    					'</tr>');  
+	        						}else if(role == "buyer"){
+	        							$("#hostDevices").append('<tr>'+
 	        	    	    					'<td class="center" style="width: 30px;">'+
 	        	    	    					'<label>'+
 	        	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
@@ -231,7 +250,26 @@
 	        	    	    					'<td class="center">'+item.deviceCode+'</td>'+
 	        	    	    					'<td class="center">'+item.userPhone+'</td>'+
 	        	    	    					'<td class="center">'+item.nickName+'</td>'+
+	        	    	    					'<shiro:hasRole name="buyer">'+
+			       	    							'<td class="center"><a onclick="del('+item.id+');" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></td>'+ 
+			       	    						'</shiro:hasRole>'+
 	        	    	    					'</tr>');  
+	        						}else{
+	        							$("#hostDevices").append('<tr>'+
+	        	    	    					'<td class="center" style="width: 30px;">'+
+	        	    	    					'<label>'+
+	        	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+	        	    	    					'<span class="lbl">'+
+	        	    	    					'</span>'+
+	        	    	    					'</label>'+
+	        	    	    					'</td>'+
+	        	    	    					'<td class="center">'+item.deviceCode+'</td>'+
+	        	    	    					'<td class="center">'+item.userPhone+'</td>'+
+	        	    	    					'<td class="center">'+item.nickName+'</td>'+
+	        	    	    					'<td>'+
+			       	    						'</td>'+
+	        	    	    					'</tr>');  
+	        						}
 	        					}	
 	        				}) 
 	    				}
@@ -316,7 +354,24 @@
 	        						
 	        						$("#hostdevicelist01").append(table);
 	        					}else{
-	        						 $("#hostDevices").append('<tr>'+
+	        						if(role == "admin"){
+		        						 $("#hostDevices").append('<tr>'+
+		        	    	    					'<td class="center" style="width: 30px;">'+
+		        	    	    					'<label>'+
+		        	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		        	    	    					'<span class="lbl">'+
+		        	    	    					'</span>'+
+		        	    	    					'</label>'+
+		        	    	    					'</td>'+
+		        	    	    					'<td class="center">'+item.deviceCode+'</td>'+
+		        	    	    					'<td class="center">'+item.userPhone+'</td>'+
+		        	    	    					'<td class="center">'+item.nickName+'</td>'+
+		        	    	    					'<shiro:hasRole name="admin">'+
+				       	    							'<td class="center"><a onclick="del('+item.id+');" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></td>'+ 
+				       	    						'</shiro:hasRole>'+
+		        	    	    					'</tr>');  
+	        						}else if(role == "buyer"){
+	        							$("#hostDevices").append('<tr>'+
 	        	    	    					'<td class="center" style="width: 30px;">'+
 	        	    	    					'<label>'+
 	        	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
@@ -327,7 +382,26 @@
 	        	    	    					'<td class="center">'+item.deviceCode+'</td>'+
 	        	    	    					'<td class="center">'+item.userPhone+'</td>'+
 	        	    	    					'<td class="center">'+item.nickName+'</td>'+
+	        	    	    					'<shiro:hasRole name="buyer">'+
+			       	    							'<td class="center"><a onclick="del('+item.id+');" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></td>'+ 
+			       	    						'</shiro:hasRole>'+
 	        	    	    					'</tr>');  
+	        						}else{
+	        							$("#hostDevices").append('<tr>'+
+	        	    	    					'<td class="center" style="width: 30px;">'+
+	        	    	    					'<label>'+
+	        	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+	        	    	    					'<span class="lbl">'+
+	        	    	    					'</span>'+
+	        	    	    					'</label>'+
+	        	    	    					'</td>'+
+	        	    	    					'<td class="center">'+item.deviceCode+'</td>'+
+	        	    	    					'<td class="center">'+item.userPhone+'</td>'+
+	        	    	    					'<td class="center">'+item.nickName+'</td>'+
+	        	    	    					'<td>'+
+			       	    						'</td>'+
+	        	    	    					'</tr>');  
+	        						}
 	        					}	
 	        				}) 
 	    				}
@@ -341,6 +415,7 @@
 		//分页 find（index）
 		function find(index){
 			/* alert(index); */
+			var role= '<%= session.getAttribute("role")%>'; 
 			var AddrOrTel=$("#ADDRESS_PHONE").val();
 			$.ajax({
 				url:"findHostByIndex.do",
@@ -592,19 +667,54 @@
 							}
 							
 						}else{
-							/* alert("coming") */
-							$("#hostDevices").append('<tr>'+
-	    	    					'<td class="center" style="width: 30px;">'+
-	    	    					'<label>'+
-	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
-	    	    					'<span class="lbl">'+
-	    	    					'</span>'+
-	    	    					'</label>'+
-	    	    					'</td>'+
-	    	    					'<td class="center">'+item.deviceCode+'</td>'+
-	    	    					'<td class="center">'+item.userPhone+'</td>'+
-	    	    					'<td class="center">'+item.nickName+'</td>'+
-	    	    					'</tr>');   
+							if(role == "admin"){
+       						 $("#hostDevices").append('<tr>'+
+       	    	    					'<td class="center" style="width: 30px;">'+
+       	    	    					'<label>'+
+       	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+       	    	    					'<span class="lbl">'+
+       	    	    					'</span>'+
+       	    	    					'</label>'+
+       	    	    					'</td>'+
+       	    	    					'<td class="center">'+item.deviceCode+'</td>'+
+       	    	    					'<td class="center">'+item.userPhone+'</td>'+
+       	    	    					'<td class="center">'+item.nickName+'</td>'+
+       	    	    					'<shiro:hasRole name="admin">'+
+		       	    							'<td class="center"><a onclick="del('+item.id+');" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></td>'+ 
+		       	    						'</shiro:hasRole>'+
+       	    	    					'</tr>');  
+	   						}else if(role == "buyer"){
+	   							$("#hostDevices").append('<tr>'+
+	   	    	    					'<td class="center" style="width: 30px;">'+
+	   	    	    					'<label>'+
+	   	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+	   	    	    					'<span class="lbl">'+
+	   	    	    					'</span>'+
+	   	    	    					'</label>'+
+	   	    	    					'</td>'+
+	   	    	    					'<td class="center">'+item.deviceCode+'</td>'+
+	   	    	    					'<td class="center">'+item.userPhone+'</td>'+
+	   	    	    					'<td class="center">'+item.nickName+'</td>'+
+	   	    	    					'<shiro:hasRole name="buyer">'+
+		       	    							'<td class="center"><a onclick="del('+item.id+');" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></td>'+ 
+		       	    						'</shiro:hasRole>'+
+	   	    	    					'</tr>');  
+	   						}else{
+	   							$("#hostDevices").append('<tr>'+
+	   	    	    					'<td class="center" style="width: 30px;">'+
+	   	    	    					'<label>'+
+	   	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+	   	    	    					'<span class="lbl">'+
+	   	    	    					'</span>'+
+	   	    	    					'</label>'+
+	   	    	    					'</td>'+
+	   	    	    					'<td class="center">'+item.deviceCode+'</td>'+
+	   	    	    					'<td class="center">'+item.userPhone+'</td>'+
+	   	    	    					'<td class="center">'+item.nickName+'</td>'+
+	   	    	    					'<td>'+
+		       	    						'</td>'+
+	   	    	    					'</tr>');  
+	   						}
 	    				}
 					})								    					
 			}, 
@@ -616,6 +726,7 @@
 		
 		//检索
 		function search(){
+			var role= '<%= session.getAttribute("role")%>'; 
 			/* top.jzts();
 			$("#Form").submit(); */
 			var AddrOrTel=$("#ADDRESS_PHONE").val();
@@ -868,19 +979,54 @@
 								}
 								
 							}else{
-								/* alert("coming") */
-								$("#hostDevices").append('<tr>'+
-		    	    					'<td class="center" style="width: 30px;">'+
-		    	    					'<label>'+
-		    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
-		    	    					'<span class="lbl">'+
-		    	    					'</span>'+
-		    	    					'</label>'+
-		    	    					'</td>'+
-		    	    					'<td class="center">'+item.deviceCode+'</td>'+
-		    	    					'<td class="center">'+item.userPhone+'</td>'+
-		    	    					'<td class="center">'+item.nickName+'</td>'+
-		    	    					'</tr>');   
+								if(role == "admin"){
+	        						 $("#hostDevices").append('<tr>'+
+	        	    	    					'<td class="center" style="width: 30px;">'+
+	        	    	    					'<label>'+
+	        	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+	        	    	    					'<span class="lbl">'+
+	        	    	    					'</span>'+
+	        	    	    					'</label>'+
+	        	    	    					'</td>'+
+	        	    	    					'<td class="center">'+item.deviceCode+'</td>'+
+	        	    	    					'<td class="center">'+item.userPhone+'</td>'+
+	        	    	    					'<td class="center">'+item.nickName+'</td>'+
+	        	    	    					'<shiro:hasRole name="admin">'+
+			       	    							'<td class="center"><a onclick="del('+item.id+');" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></td>'+ 
+			       	    						'</shiro:hasRole>'+
+	        	    	    					'</tr>');  
+	       						}else if(role == "buyer"){
+	       							$("#hostDevices").append('<tr>'+
+	       	    	    					'<td class="center" style="width: 30px;">'+
+	       	    	    					'<label>'+
+	       	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+	       	    	    					'<span class="lbl">'+
+	       	    	    					'</span>'+
+	       	    	    					'</label>'+
+	       	    	    					'</td>'+
+	       	    	    					'<td class="center">'+item.deviceCode+'</td>'+
+	       	    	    					'<td class="center">'+item.userPhone+'</td>'+
+	       	    	    					'<td class="center">'+item.nickName+'</td>'+
+	       	    	    					'<shiro:hasRole name="buyer">'+
+			       	    							'<td class="center"><a onclick="del('+item.id+');" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></td>'+ 
+			       	    						'</shiro:hasRole>'+
+	       	    	    					'</tr>');  
+	       						}else{
+	       							$("#hostDevices").append('<tr>'+
+	       	    	    					'<td class="center" style="width: 30px;">'+
+	       	    	    					'<label>'+
+	       	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+	       	    	    					'<span class="lbl">'+
+	       	    	    					'</span>'+
+	       	    	    					'</label>'+
+	       	    	    					'</td>'+
+	       	    	    					'<td class="center">'+item.deviceCode+'</td>'+
+	       	    	    					'<td class="center">'+item.userPhone+'</td>'+
+	       	    	    					'<td class="center">'+item.nickName+'</td>'+
+	       	    	    					'<td>'+
+			       	    						'</td>'+
+	       	    	    					'</tr>');  
+	       						}
 		    				}
 						})								    					
 				}
@@ -913,21 +1059,8 @@
 		
 		//删除
 		function del(Id){
-			<%-- bootbox.confirm("确定要删除吗?", function(result) {
-				if(result) {
-					top.jzts();
-					var url = "<%=basePath%>host_device/delete.do?ID="+Id+"&tm="+new Date().getTime();
-					$.get(url,function(data){
-						nextPage(${page.currentPage});
-					});
-				}
-			}); --%>
 			/* alert(typeof(Id)); String */
-			/* int id=2; */
-			/* alert(typeof(parseInt(Id))); */
 			var id=parseInt(Id);
-			/* alert(typeof(id)) */
-			/* alert(id); */
 			$.ajax({
     			url: "delDevices.do",
     	    	data: {"id":id},
@@ -935,121 +1068,51 @@
     			dataType:"json",
     			success: function(data){
     				alert("删除成功");
-    				window.history.back();
+    				window.location.reload();
     				//跳回原来的页面或移除该行  （未完成）
 				}
 			})
 		}
-		
-		//修改
-		function edit(Id){
-			 top.jzts();
-			 var diag = new top.Dialog();
-			 diag.Drag=true;
-			 diag.Title ="编辑";
-			 diag.URL = '<%=basePath%>host_device/goEdit.do?ID='+Id;
-			 diag.Width = 450;
-			 diag.Height = 355;
-			 diag.CancelEvent = function(){ //关闭事件
-				 if(diag.innerFrame.contentWindow.document.getElementById('zhongxin').style.display == 'none'){
-					 nextPage(${page.currentPage});
-				}
-				diag.close();
-			 };
-			 diag.show();
-		}
 		</script>
 		
 		<script type="text/javascript">
-		
-		$(function() {
-			
-			//下拉框
-			$(".chzn-select").chosen(); 
-			$(".chzn-select-deselect").chosen({allow_single_deselect:true}); 
-			
-			//日期框
-			$('.date-picker').datepicker();
-			
-			//复选框
-			$('table th input:checkbox').on('click' , function(){
-				var that = this;
-				$(this).closest('table').find('tr > td:first-child input:checkbox')
-				.each(function(){
-					this.checked = that.checked;
-					$(this).closest('tr').toggleClass('selected');
+			$(function() {
+				
+				//下拉框
+				$(".chzn-select").chosen(); 
+				$(".chzn-select-deselect").chosen({allow_single_deselect:true}); 
+				
+				//日期框
+				$('.date-picker').datepicker();
+				
+				//复选框
+				$('table th input:checkbox').on('click' , function(){
+					var that = this;
+					$(this).closest('table').find('tr > td:first-child input:checkbox')
+					.each(function(){
+						this.checked = that.checked;
+						$(this).closest('tr').toggleClass('selected');
+					});
+						
 				});
-					
+				
 			});
-			
-		});
 		
 		
-		//批量操作
-		function makeAll(){
-			$('input:checkbox:checked').each(function (index, item) {
-				//逐个取出id
-				/* alert($(this).val()); */
-				del($(this).val());
-				window.history.back();
-			});
-			<%-- bootbox.confirm(msg, function(result) {
-				if(result) {
-					var str = '';
-					for(var i=0;i < document.getElementsByName('ids').length;i++)
-					{
-						  if(document.getElementsByName('ids')[i].checked){
-						  	if(str=='') str += document.getElementsByName('ids')[i].value;
-						  	else str += ',' + document.getElementsByName('ids')[i].value;
-						  }
-					}
-					if(str==''){
-						bootbox.dialog("您没有选择任何内容!", 
-							[
-							  {
-								"label" : "关闭",
-								"class" : "btn-small btn-success",
-								"callback": function() {
-									//Example.show("great success");
-									}
-								}
-							 ]
-						);
-						
-						$("#zcheckbox").tips({
-							side:3,
-				            msg:'点这里全选',
-				            bg:'#AE81FF',
-				            time:8
-				        });
-						
-						return;
-					}else{
-						if(msg == '确定要删除选中的数据吗?'){
-							top.jzts();
-							$.ajax({
-								type: "POST",
-								url: '<%=basePath%>host_device/deleteAll.do?tm='+new Date().getTime(),
-						    	data: {DATA_IDS:str},
-								dataType:'json',
-								//beforeSend: validateData,
-								cache: false,
-								success: function(data){
-									 $.each(data.list, function(i, list){
-											nextPage(${page.currentPage});
-									 });
-								}
-							});
-						}
-					}
-				}
-			}); --%>
-		}
+			//批量操作
+			function makeAll(){
+				$('input:checkbox:checked').each(function (index, item) {
+					//逐个取出id
+					/* alert($(this).val()); */
+					del($(this).val());
+					window.history.back();
+				});
+			}
 		
-		//导出excel
-		function toExcel(){
-			window.location.href='<%=basePath%>host_device/excel.do';
-		}
+			//导出excel
+			function toExcel(){
+				window.location.href='<%=basePath%>host_device/excel.do';
+			}
 		</script>
 		
 	</body>

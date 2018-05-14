@@ -2164,10 +2164,9 @@ import org.springframework.ui.ModelMap;
 		   @RequestMapping({"delHost.do"})
 		   @ResponseBody
 		   public String delHost(@RequestParam("id") int id,@RequestParam("DEVICE_ID") int DEVICE_ID,@RequestParam("USER_ID") int USER_ID) {
-				System.out.println("ssssssssssssss");  
 			   String id1=id+"";
 				  try {
-					  this.boHostDeviceService.deleteByKey(id1);//删除该条记录
+					  this.BoUserDevicesService.deleteByKey(id1);//删除该条记录
 				} catch (Exception e) {
 					return "fail";
 				}

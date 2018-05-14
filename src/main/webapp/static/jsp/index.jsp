@@ -123,8 +123,8 @@
 		<script type="text/javascript">
 				$(function(){
 					//登录验证码页面和红外转发器参数页面没有有用，暂且隐藏
-					/* $("#z29").hide();
-					$("#z27").hide(); */
+					$("#z29").hide();
+					$("#z27").hide(); 
 					<%-- var role= '<%= session.getAttribute("role")%>';
 					if(role == "buyer"){
 						$("#z29").hide();

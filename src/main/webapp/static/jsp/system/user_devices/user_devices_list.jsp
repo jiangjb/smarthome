@@ -1346,15 +1346,7 @@
 		
 		//删除
 		function del(Id,DEVICE_ID,USER_ID){
-			<%-- bootbox.confirm("确定解绑吗?", function(result) {
-				if(result) {
-					top.jzts();
-					var url = "<%=basePath%>user_devices/delete.do?USER_DEVICE_ID="+Id+"&DEVICE_ID="+DEVICE_ID+"&USER_ID="+USER_ID;
-					$.get(url,function(data){
-						nextPage(${page.currentPage});
-					});
-				}
-			}); --%>
+			/* alert("id:"+Id+",deviceId:"+DEVICE_ID+",userId:"+USER_ID); */
 			$.ajax({
     			url: "delHost.do",
     	    	data: {"id":Id,"DEVICE_ID":DEVICE_ID,"USER_ID":USER_ID},
@@ -1363,7 +1355,7 @@
     			success: function(data){
     				alert("解绑成功");
     				//跳回原来的页面或移除该行  （未完成）
-    				window.history.back();
+    				window.location.reload();
 				}
 			})
 		}
@@ -1373,7 +1365,6 @@
 		<script type="text/javascript">
 		
 		$(function() {
-			
 			//下拉框
 			$(".chzn-select").chosen(); 
 			$(".chzn-select-deselect").chosen({allow_single_deselect:true}); 
