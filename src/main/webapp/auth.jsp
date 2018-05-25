@@ -94,7 +94,7 @@
 	<script type="text/javascript">
 	 	$(document).ready(function(){
 	 		var role= '<%= session.getAttribute("role")%>';
-	 		alert(role); 
+	 		/* alert(role);  */
 	 		/* 根据用户的类型，所能分配的权限也不同 */
 	 		if(role == "superadmin"){
 	 			$("#hello").html("hello,超级管理员");

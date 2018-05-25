@@ -209,7 +209,7 @@
 		$(top.hangge());
 		$(function(){
 			var role= '<%= session.getAttribute("role")%>';
-			alert(role);
+			/* alert(role); */
 			var tel='<%= session.getAttribute("userPhone")%>';
 			if(tel!="null"){
 				//显示房东或经销商
@@ -316,6 +316,12 @@
 			    				    	versionType="乐沃智能";
 			    				    }
 			    				    var userPhone0=JSON.stringify(item.userPhone).replace(/\"/g,"'");
+			    				    var userPhone="";
+			    				    if(role == "user"){
+			    				    	userPhone='<td class="center">'+item.userPhone+'</td>';
+			    				    }else{
+			    				    	userPhone='<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>';
+			    				    }
 			  						 $("#userslist").append('<tr>'+
 				    					'<td class="center" style="width: 30px;">'+
 				    					'<label>'+
@@ -326,7 +332,7 @@
 				    					'</td>'+
 				    					'<td class="center">'+item.userName+'</td>'+
 				    					'<td class="center">'+item.userSex+'</td>'+
-				    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>'+
+				    					userPhone+
 				    					'<td class="center">'+phoneType +'</td>'+
 				    					'<td class="center">'+versionType+'</td>'+
 				    					'<td class="center">'+item.signature+'</td>'+
@@ -511,7 +517,7 @@
 					    					'</td>'+
 					    					'<td class="center">'+item.userName+'</td>'+
 					    					'<td class="center">'+item.userSex+'</td>'+
-					    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>'+
+					    					'<td class="center">'+item.userPhone+'</td>'+
 					    					'<td class="center">'+phoneType +'</td>'+
 					    					'<td class="center">'+versionType+'</td>'+
 					    					'<td class="center">'+item.signature+'</td>'+
@@ -795,7 +801,7 @@
 					    					'</td>'+
 					    					'<td class="center">'+item.userName+'</td>'+
 					    					'<td class="center">'+item.userSex+'</td>'+
-					    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>'+
+					    					'<td class="center">'+item.userPhone+'</td>'+
 					    					'<td class="center">'+phoneType +'</td>'+
 					    					'<td class="center">'+versionType+'</td>'+
 					    					'<td class="center">'+item.signature+'</td>'+
@@ -1192,7 +1198,7 @@
 					    					'</td>'+
 					    					'<td class="center">'+item.userName+'</td>'+
 					    					'<td class="center">'+item.userSex+'</td>'+
-					    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>'+
+					    					'<td class="center">'+item.userPhone+'</td>'+
 					    					'<td class="center">'+phoneType +'</td>'+
 					    					'<td class="center">'+versionType+'</td>'+
 					    					'<td class="center">'+item.signature+'</td>'+

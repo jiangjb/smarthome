@@ -344,6 +344,7 @@
 		$(function(){
 			<%-- alert("<%=userPhone%>"); --%>
 			var role= '<%= session.getAttribute("role")%>';
+			/* alert(role); */
 			//显示次账户
 			$.ajax({
 				url:"${pageContext.request.contextPath}/findUsersByPhone.do",
@@ -500,61 +501,61 @@
 				error: function(e){  	 
 				}
 			});
-		});
 		//显示设备
-		$.ajax({
-			url:"${pageContext.request.contextPath}/showRDbyPhone.do",
-	    	data: {"userPhone":"<%=userPhone %>"},
-			type: "POST",
-			dataType:"json",
-			async: false,	
-			/* cache: false, */
-			success: function(data){
-				/* alert(data) */
-				if(data[0].id==null){
-					$("#hostDevicesList").append('<tr class="main_info">'+
-					'<td colspan="100" class="center" >没有相关数据</td>'+
-					'</tr>');
-				}else{
-					$.each(data,function(i,item){
-						var floorName=JSON.stringify(item.floorName).replace(/\"/g,"'");
-						var roomName=JSON.stringify(item.roomName).replace(/\"/g,"'");
-						var nickName=JSON.stringify(item.nickName).replace(/\"/g,"'");
-						var floorCode=JSON.stringify(item.floorCode).replace(/\"/g,"'");
-						var roomCode=JSON.stringify(item.roomCode).replace(/\"/g,"'");
-						/* alert("nickName:"+nickName); */
-						if(item.nickName!=""){
-							if(role != "user"){
-								$("#hostDevicesList").append('<tr>'+
-										'<td class="center" style="width: 30px;">'+
-				    					'<label>'+
-				    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
-				    					'<span class="lbl">'+
-				    					'</span>'+
-				    					'</label>'+
-				    					'</td>'+
-				    					'<td class="center" style="width: 30px;">'+item.floorName+'</td>'+
-				    					'<td class="center" style="width: 30px;">'+item.roomName+'</td>'+
-				    					'<td class="center" style="width: 30px;">'+item.nickName+'</td>'+
-		    							'<td style="width: 30px;" class="center">'+
-											'<div class="inline position-relative">'+
-												'<button class="btn btn-mini btn-info" data-toggle="dropdown"><i class="icon-cog icon-only"></i></button>'+
-													'<ul class="dropdown-menu dropdown-icon-only dropdown-light pull-right dropdown-caret dropdown-close">'+
-														'<li><a onclick="editHD('+item.id+','+floorCode+','+floorName+','+roomName+','+nickName+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></li>'+
-														'<li><a onclick="delFloor('+floorCode+')" style="cursor:pointer;" title="删除楼层"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span></a></li>'+
-														'<li><a onclick="delRoom('+roomCode+')" style="cursor:pointer;" title="删除房间"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span></a></li>'+
-														'<li><a onclick="delHD('+item.id+')" style="cursor:pointer;" title="删除设备"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span></a></li>'+
-													'</ul>'+
-											'</div>'+
-										'</td>'+
-				    					'</tr>'); 
+			$.ajax({
+				url:"${pageContext.request.contextPath}/showRDbyPhone.do",
+		    	data: {"userPhone":"<%=userPhone %>"},
+				type: "POST",
+				dataType:"json",
+				async: false,	
+				/* cache: false, */
+				success: function(data){
+					/* alert(data) */
+					if(data[0].id==null){
+						$("#hostDevicesList").append('<tr class="main_info">'+
+						'<td colspan="100" class="center" >没有相关数据</td>'+
+						'</tr>');
+					}else{
+						$.each(data,function(i,item){
+							var floorName=JSON.stringify(item.floorName).replace(/\"/g,"'");
+							var roomName=JSON.stringify(item.roomName).replace(/\"/g,"'");
+							var nickName=JSON.stringify(item.nickName).replace(/\"/g,"'");
+							var floorCode=JSON.stringify(item.floorCode).replace(/\"/g,"'");
+							var roomCode=JSON.stringify(item.roomCode).replace(/\"/g,"'");
+							/* alert("nickName:"+nickName); */
+							if(item.nickName!=""){
+								if(role != "user"){
+									$("#hostDevicesList").append('<tr>'+
+											'<td class="center" style="width: 30px;">'+
+					    					'<label>'+
+					    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+					    					'<span class="lbl">'+
+					    					'</span>'+
+					    					'</label>'+
+					    					'</td>'+
+					    					'<td class="center" style="width: 30px;">'+item.floorName+'</td>'+
+					    					'<td class="center" style="width: 30px;">'+item.roomName+'</td>'+
+					    					'<td class="center" style="width: 30px;">'+item.nickName+'</td>'+
+			    							'<td style="width: 30px;" class="center">'+
+												'<div class="inline position-relative">'+
+													'<button class="btn btn-mini btn-info" data-toggle="dropdown"><i class="icon-cog icon-only"></i></button>'+
+														'<ul class="dropdown-menu dropdown-icon-only dropdown-light pull-right dropdown-caret dropdown-close">'+
+															'<li><a onclick="editHD('+item.id+','+floorCode+','+floorName+','+roomName+','+nickName+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></li>'+
+															'<li><a onclick="delFloor('+floorCode+')" style="cursor:pointer;" title="删除楼层"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span></a></li>'+
+															'<li><a onclick="delRoom('+roomCode+')" style="cursor:pointer;" title="删除房间"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span></a></li>'+
+															'<li><a onclick="delHD('+item.id+')" style="cursor:pointer;" title="删除设备"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span></a></li>'+
+														'</ul>'+
+												'</div>'+
+											'</td>'+
+					    					'</tr>'); 
+								}
 							}
-						}
-					});
+						});
+					}
+				},
+				error: function(e){  	 
 				}
-			},
-			error: function(e){  	 
-			}
+			});
 		});
 		  $(function() {
 			    var name = $( "#nickName" ),

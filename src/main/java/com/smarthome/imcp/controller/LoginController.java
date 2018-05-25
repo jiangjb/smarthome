@@ -79,7 +79,8 @@
 		 import org.dom4j.DocumentException;  
 		 import org.dom4j.DocumentHelper;  
 		 import org.dom4j.Element;
-		 import org.slf4j.Logger;
+import org.hibernate.Session;
+import org.slf4j.Logger;
 		 import org.slf4j.LoggerFactory; 
 /*    */ 
 		@Controller
@@ -278,7 +279,7 @@
    		
         @RequestMapping({"logout.do"})
         public String logout(HttpServletRequest request) {
-            System.out.println("行，我退出！");
+//            System.out.println("行，我退出！");
             request.getSession().removeAttribute("role");//清空session信息  
             request.getSession().removeAttribute("userPhone");//清空session信息
             request.getSession().removeAttribute("USER_INFO");
