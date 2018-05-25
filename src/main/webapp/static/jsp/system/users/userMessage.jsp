@@ -465,8 +465,7 @@
 				async: false,	
 				/* cache: false, */
 				success: function(data){
-					/* alert(data) */
-					if(data[0].name==null){
+					if(data[0].name== null){
     					$("#modelList").append('<tr class="main_info">'+
     					'<td colspan="100" class="center" >没有相关数据</td>'+
     					'</tr>');
@@ -510,8 +509,7 @@
 				async: false,	
 				/* cache: false, */
 				success: function(data){
-					/* alert(data) */
-					if(data[0].id==null){
+					if(data == ""){
 						$("#hostDevicesList").append('<tr class="main_info">'+
 						'<td colspan="100" class="center" >没有相关数据</td>'+
 						'</tr>');
