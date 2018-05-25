@@ -222,7 +222,7 @@
 	        						
 	        						$("#hostdevicelist01").append(table);
 	        					}else{
-	        						if(role == "admin"){
+	        						if(role == "superadmin"){
 		        						 $("#hostDevices").append('<tr>'+
 		        	    	    					'<td class="center" style="width: 30px;">'+
 		        	    	    					'<label>'+
@@ -233,7 +233,23 @@
 		        	    	    					'</td>'+
 		        	    	    					'<td class="center">'+item.deviceCode+'</td>'+
 		        	    	    					'<td class="center">'+item.userPhone+'</td>'+
-		        	    	    					'<td class="center">'+item.nickName+'</td>'+
+		        	    	    					'<td class="center">'+item.nick_name+'</td>'+
+		        	    	    					'<shiro:hasRole name="superadmin">'+
+				       	    							'<td class="center"><a onclick="del('+item.id+');" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></td>'+ 
+				       	    						'</shiro:hasRole>'+
+		        	    	    					'</tr>');  
+	        						}else if(role == "admin"){
+		        						 $("#hostDevices").append('<tr>'+
+		        	    	    					'<td class="center" style="width: 30px;">'+
+		        	    	    					'<label>'+
+		        	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		        	    	    					'<span class="lbl">'+
+		        	    	    					'</span>'+
+		        	    	    					'</label>'+
+		        	    	    					'</td>'+
+		        	    	    					'<td class="center">'+item.deviceCode+'</td>'+
+		        	    	    					'<td class="center">'+item.userPhone+'</td>'+
+		        	    	    					'<td class="center">'+item.nick_name+'</td>'+
 		        	    	    					'<shiro:hasRole name="admin">'+
 				       	    							'<td class="center"><a onclick="del('+item.id+');" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></td>'+ 
 				       	    						'</shiro:hasRole>'+
@@ -249,7 +265,7 @@
 	        	    	    					'</td>'+
 	        	    	    					'<td class="center">'+item.deviceCode+'</td>'+
 	        	    	    					'<td class="center">'+item.userPhone+'</td>'+
-	        	    	    					'<td class="center">'+item.nickName+'</td>'+
+	        	    	    					'<td class="center">'+item.nick_name+'</td>'+
 	        	    	    					'<shiro:hasRole name="buyer">'+
 			       	    							'<td class="center"><a onclick="del('+item.id+');" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></td>'+ 
 			       	    						'</shiro:hasRole>'+
@@ -265,7 +281,7 @@
 	        	    	    					'</td>'+
 	        	    	    					'<td class="center">'+item.deviceCode+'</td>'+
 	        	    	    					'<td class="center">'+item.userPhone+'</td>'+
-	        	    	    					'<td class="center">'+item.nickName+'</td>'+
+	        	    	    					'<td class="center">'+item.nick_name+'</td>'+
 	        	    	    					'<td>'+
 			       	    						'</td>'+
 	        	    	    					'</tr>');  
@@ -354,7 +370,23 @@
 	        						
 	        						$("#hostdevicelist01").append(table);
 	        					}else{
-	        						if(role == "admin"){
+	        						if(role == "superadmin"){
+		        						 $("#hostDevices").append('<tr>'+
+		        	    	    					'<td class="center" style="width: 30px;">'+
+		        	    	    					'<label>'+
+		        	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		        	    	    					'<span class="lbl">'+
+		        	    	    					'</span>'+
+		        	    	    					'</label>'+
+		        	    	    					'</td>'+
+		        	    	    					'<td class="center">'+item.deviceCode+'</td>'+
+		        	    	    					'<td class="center">'+item.userPhone+'</td>'+
+		        	    	    					'<td class="center">'+item.nickName+'</td>'+
+		        	    	    					'<shiro:hasRole name="superadmin">'+
+				       	    							'<td class="center"><a onclick="del('+item.id+');" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></td>'+ 
+				       	    						'</shiro:hasRole>'+
+		        	    	    					'</tr>');  
+	        						}else if(role == "admin"){
 		        						 $("#hostDevices").append('<tr>'+
 		        	    	    					'<td class="center" style="width: 30px;">'+
 		        	    	    					'<label>'+
@@ -414,7 +446,6 @@
 		
 		//分页 find（index）
 		function find(index){
-			/* alert(index); */
 			var role= '<%= session.getAttribute("role")%>'; 
 			var AddrOrTel=$("#ADDRESS_PHONE").val();
 			$.ajax({
@@ -667,7 +698,23 @@
 							}
 							
 						}else{
-							if(role == "admin"){
+							if(role == "superadmin"){
+	       						 $("#hostDevices").append('<tr>'+
+	       	    	    					'<td class="center" style="width: 30px;">'+
+	       	    	    					'<label>'+
+	       	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+	       	    	    					'<span class="lbl">'+
+	       	    	    					'</span>'+
+	       	    	    					'</label>'+
+	       	    	    					'</td>'+
+	       	    	    					'<td class="center">'+item.deviceCode+'</td>'+
+	       	    	    					'<td class="center">'+item.userPhone+'</td>'+
+	       	    	    					'<td class="center">'+item.nickName+'</td>'+
+	       	    	    					'<shiro:hasRole name="superadmin">'+
+			       	    							'<td class="center"><a onclick="del('+item.id+');" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></td>'+ 
+			       	    						'</shiro:hasRole>'+
+	       	    	    					'</tr>');  
+		   						}else if(role == "admin"){
        						 $("#hostDevices").append('<tr>'+
        	    	    					'<td class="center" style="width: 30px;">'+
        	    	    					'<label>'+
@@ -979,7 +1026,23 @@
 								}
 								
 							}else{
-								if(role == "admin"){
+								if(role == "superadmin"){
+	        						 $("#hostDevices").append('<tr>'+
+	        	    	    					'<td class="center" style="width: 30px;">'+
+	        	    	    					'<label>'+
+	        	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+	        	    	    					'<span class="lbl">'+
+	        	    	    					'</span>'+
+	        	    	    					'</label>'+
+	        	    	    					'</td>'+
+	        	    	    					'<td class="center">'+item.deviceCode+'</td>'+
+	        	    	    					'<td class="center">'+item.userPhone+'</td>'+
+	        	    	    					'<td class="center">'+item.nickName+'</td>'+
+	        	    	    					'<shiro:hasRole name="superadmin">'+
+			       	    							'<td class="center"><a onclick="del('+item.id+');" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></td>'+ 
+			       	    						'</shiro:hasRole>'+
+	        	    	    					'</tr>');  
+	       						}else if(role == "admin"){
 	        						 $("#hostDevices").append('<tr>'+
 	        	    	    					'<td class="center" style="width: 30px;">'+
 	        	    	    					'<label>'+

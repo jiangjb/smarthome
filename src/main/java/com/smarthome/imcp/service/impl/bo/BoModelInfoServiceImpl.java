@@ -89,6 +89,16 @@
 /* 112 */     return this.boModelInfoDao.findByCriteria(criteria);
 /*     */   }
 /*     */ 
+/*     */   public BoModelInfo find(String userCode, String modelId)
+/*     */   {
+	/* 130 */     DetachedCriteria criteria = DetachedCriteria.forClass(BoModelInfo.class);
+	/* 107 */     criteria.createAlias("boUsers", "boUsers");
+	/* 108 */     criteria.add(Restrictions.eq("boUsers.userCode", userCode));
+	/* 109 */     criteria.createAlias("boModel", "boModel");
+	/* 110 */     criteria.add(Restrictions.eq("boModel.modelId", modelId));
+	/* 111 */     criteria.addOrder(Order.asc("id"));
+	/* 112 */     return this.boModelInfoDao.findByCriteria(criteria).get(0);
+/*     */   }
 /*     */   public List<BoModelInfo> getBys(String userCode, String deviceCode)
 /*     */   {
 /* 118 */     DetachedCriteria criteria = DetachedCriteria.forClass(BoModelInfo.class);
@@ -100,10 +110,6 @@
 /* 124 */     return this.boModelInfoDao.findByCriteria(criteria);
 /*     */   }
 /*     */ 
-/*     */   public BoModelInfo find(String userCode, String modelId)
-/*     */   {
-/* 130 */     return null;
-/*     */   }
 /*     */ }
 
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\

@@ -371,24 +371,13 @@ import java.util.Map;
 			public List<BoHostDevice> getAllHostD() {
 				return this.boHostDeviceDao.getAllHostD();
 			}
-//			@Override
-//			public List<BoHostDevice> getAllDevices() {
-//				// TODO Auto-generated method stub
-//				return this.boHostDeviceDao.getAllDevices();
-//			}
-//			@Override
-//			public List<BoHostDevice> getAllRed() {
-//				return this.boHostDeviceDao.getAllRed();
-//			}
 			@Override
 			public String addDeviceRed(String deviceAddress, String validationCode) {
-				// TODO Auto-generated method stub
 				return this.boHostDeviceDao.addDeviceRed(deviceAddress,validationCode);
 			}
 	
 			@Override
 			public List<BoHostDevice> findHostByUserPhone(String userPhone) {
-//				return this.boHostDeviceDao.findHostByUserPhone(userPhone);
 				DetachedCriteria criteria = DetachedCriteria.forClass(BoHostDevice.class);
 				criteria.createAlias("boUsers", "boUsers");//3-22
 				criteria.add(Restrictions.eq("boUsers.userPhone", userPhone));//3-22

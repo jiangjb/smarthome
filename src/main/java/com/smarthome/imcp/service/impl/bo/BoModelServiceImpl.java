@@ -2,6 +2,7 @@
 /*     */ 
 /*     */ import com.smarthome.imcp.dao.bo.BoModelDaoIface;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoModel;
+import com.smarthome.imcp.dao.model.bo.BoUsers;
 /*     */ import com.smarthome.imcp.service.AbstractBasicService;
 /*     */ import com.smarthome.imcp.service.bo.BoModelServiceIface;
 /*     */ import java.io.Serializable;
@@ -51,7 +52,10 @@
 /*     */   {
 /*  72 */     return false;
 /*     */   }
-/*     */ 
+/*     */ 	public BoModel findByKey(Serializable id)
+/*     */   {//NEW ADD 2018/5/16
+/*  94 */     return (BoModel)this.boModelDao.findById(id);
+/*     */   }
 /*     */   public BoModel delete(BoModel model)
 /*     */   {
 /*  78 */     if (chkUpdateValid(model)) {

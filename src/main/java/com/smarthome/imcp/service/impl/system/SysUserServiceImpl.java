@@ -183,22 +183,6 @@
 			    }
 				return list.get(0);
 			}
-
-//			@Override
-//			public Set<String> getRoles(String userName) {
-//				//userName > userID > Role
-//				DetachedCriteria criteria = DetachedCriteria.forClass(SysUser.class);
-//				criteria.add(Restrictions.eq("userName", userName));
-//				return this.sysUserDao.findByCriteria(criteria);
-//			}
-//			
-//			@Override
-//			public Set<String> getPermissions(String userName) {
-//				//userName > userID > roleID > Permission
-//				DetachedCriteria criteria = DetachedCriteria.forClass(SysUser.class);
-//				criteria.add(Restrictions.eq("userName", userName));
-//				return this.sysUserDao.findByCriteria(criteria);
-//			}
 		}
 
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\

@@ -1308,7 +1308,7 @@ import org.apache.commons.codec.binary.Base64;//2-9
 								    		String roomCode =list01.get(i).get("roomCode");
 //								    	logger.info("roomCode="+roomCode);
 //								    	logger.info("deviceCode="+deviceCode01);
-								    		BoRoom boroom=this.boRoomService.getAllListByRommCode(roomCode).get(0);//错了
+								    		BoRoom boroom=this.boRoomService.getAllListByRommCode(roomCode).get(0);
 //								    	logger.info("deviceType = "+deviceType);
 								    		String nickName=list01.get(i).get("name");
 //								    		logger.info("nickName = "+nickName);
@@ -8622,7 +8622,6 @@ import org.apache.commons.codec.binary.Base64;//2-9
 				String sex="";
 				String mail="";
 				if(newTel != null) {
-//					logger.info("newTel!=null");
 					pwd=newTel.getUserPwd();
 					userCode=newTel.getUserCode();
 					headPic=newTel.getHeadPic();
@@ -8655,7 +8654,7 @@ import org.apache.commons.codec.binary.Base64;//2-9
 					}
 					BoUsers update=this.boUserssService.update(oldTel);//此时新旧两个账号的号码都是新的号码，新账号应该初始化（存放旧号码）==最终目的：老账号-新号码，删除旧账号，注册账号
 					BoUsers newTel01=this.boUserssService.findByKey(userId);
-					if(update != null) {
+					if(update != null && !oldPhone.equals(newPhone)) {
 //						logger.info("update!=null");
 						//不过不排除新用户加了情景模式  得先检查是否有情景模式，然后删除新用户
 						List<BoModel> boModels=this.boModelService.getListBy(userCode);
@@ -8665,36 +8664,13 @@ import org.apache.commons.codec.binary.Base64;//2-9
 							   for(BoModelInfo boModelInfo:boModelInfos) {
 								   this.boModelInfoServicess.delete(boModelInfo);
 							   }
-							   this.boModelService.delete(boModel);
+							   this.boModelService.delete(boModel);//想要删除boModel数据得先处理它的外键关联表 boModelInfo中相关的数据
 						   }
 						//若新账号已经绑定主机等（有关联表）>删除设备及主机
-						if(! "".equals(newTel.getAuthorizationUserCode())) {//次账户
-//							logger.info("此账户设备删除");
-							List<BoRoom> borooms=this.boRoomService.getAllListByUserCode(newTel.getAuthorizationUserCode());//找到授权者对应的所有房间
-							for(BoRoom boroom:borooms) {
-								String rCode=boroom.getRoomCode();
-//								logger.info("要删除设备的房间："+boroom.getRoomName());
-								List<BoHostDevice> bhs=this.boHostDeviceService.getroomCode(userCode,rCode);//被授权者userCode+授权者的房间roomCode
-								if(bhs.size()>0) {
-									for(BoHostDevice bh:bhs) {
-										this.boHostDeviceService.delete(bh);
-									}				
-								}
-							}
-						}else {//主账号
-//							logger.info("主账户设备删除");
-							List<BoRoom> borooms=this.boRoomService.getAllListByUserCode(userCode);//找到授权者对应的所有房间
-							for(BoRoom boroom:borooms) {
-								String rCode=boroom.getRoomCode();
-//								logger.info("要删除设备的房间："+boroom.getRoomName());
-								List<BoHostDevice> bhs=this.boHostDeviceService.getroomCode(userCode,rCode);//被授权者userCode+授权者的房间roomCode
-								if(bhs.size()>0) {
-									for(BoHostDevice bh:bhs) {
-										this.boHostDeviceService.delete(bh);
-									}				
-								}
-							}
-						}  
+						List<BoHostDevice> boHostDevices=this.boHostDeviceService.getListByUserCode(userCode);
+						for(BoHostDevice boHostDevice:boHostDevices) {
+							this.boHostDeviceService.delete(boHostDevice);
+						}
 						//删除用户和主机的关联表
 						List<BoUserDevices> boUserDevices=this.boUserDevicesServicess.getBy(userCode);
 //						logger.info("boUserDevices:"+boUserDevices);
@@ -8704,42 +8680,42 @@ import org.apache.commons.codec.binary.Base64;//2-9
 							}
 						}
 						//删除新账号
-						BoUsers del=this.boUserssService.delete(newTel01);
-						   //注册新账号（放入老账号的手机号、密码以及头像等信息）
-						   BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
-						   user.setHeadPic(oldHeadPic);
-						   user.setUserName(oldUserName);
-						   user.setSignature(oldSignature);
-						   user.setUserSex(oldSex);
-						   user.setUserEmail(oldMail);
+						BoUsers del=this.boUserssService.delete(newTel01);//删除用户也得删除相关的外键关联
+					    //注册新账号（放入老账号的手机号、密码以及头像等信息）
+					    BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
+					    user.setHeadPic(oldHeadPic);
+					    user.setUserName(oldUserName);
+					    user.setSignature(oldSignature);
+					    user.setUserSex(oldSex);
+					    user.setUserEmail(oldMail);
 //					        this.boUserServicess.update(save);
-						   BoUsers save = (BoUsers)this.boUserServicess.save(user);
-						   if(save != null) {
-								//注册成功时 默认添加一个楼层和四个房间
-								BoFloor floor=FloorUtil.save(save.getUserCode());
-								BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
-								//String userCode,String floorName,String floorCode,String roomName	
-//								System.out.println("楼层名称："+saveF.getFloorName());
-								String uCode=saveF.getUserCode();
-								String floorName=saveF.getFloorName();
-//								String floorName="我的家";
-								String floorCode=saveF.getFloorCode();
-								BoRoom room1=RoomUtil.save(uCode,floorName,floorCode,"客厅");
-								BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
-								BoRoom room2=RoomUtil.save(uCode,floorName,floorCode,"卧室");
-								BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
-								BoRoom room3=RoomUtil.save(uCode,floorName,floorCode,"厨房");
-								BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
-								BoRoom room4=RoomUtil.save(uCode,floorName,floorCode,"卫生间");
-								BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
-								this.requestJson.setData(map);
-								this.requestJson.setMessage("移交成功");
-								this.requestJson.setSuccess(true);
-							}else {
-								this.requestJson.setData(map);
-								this.requestJson.setMessage("移交账号失败");
-								this.requestJson.setSuccess(false);
-							}
+					    BoUsers save = (BoUsers)this.boUserServicess.save(user);
+					    if(save != null) {
+							//注册成功时 默认添加一个楼层和四个房间
+							BoFloor floor=FloorUtil.save(save.getUserCode());
+							BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
+							//String userCode,String floorName,String floorCode,String roomName	
+	//								System.out.println("楼层名称："+saveF.getFloorName());
+							String uCode=saveF.getUserCode();
+							String floorName=saveF.getFloorName();
+	//								String floorName="我的家";
+							String floorCode=saveF.getFloorCode();
+							BoRoom room1=RoomUtil.save(uCode,floorName,floorCode,"客厅");
+							BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
+							BoRoom room2=RoomUtil.save(uCode,floorName,floorCode,"卧室");
+							BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
+							BoRoom room3=RoomUtil.save(uCode,floorName,floorCode,"厨房");
+							BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
+							BoRoom room4=RoomUtil.save(uCode,floorName,floorCode,"卫生间");
+							BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
+							this.requestJson.setData(map);
+							this.requestJson.setMessage("移交成功");
+							this.requestJson.setSuccess(true);
+						}else {
+							this.requestJson.setData(map);
+							this.requestJson.setMessage("移交账号失败");
+							this.requestJson.setSuccess(false);
+						}
 					}else {
 //						logger.info("update==null");
 						this.requestJson.setData(map);
@@ -17632,129 +17608,123 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /*       */   }
 /*       */ 
 /*       */   @Action(value="login", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
-/*       */   public String login()
-/*       */   {
-/* 15785 */     this.requestJson = new RequestJson();
+/*       */   public String login(){
+/* 15785 */       this.requestJson = new RequestJson();
 /*       */ 
-/* 15824 */     Map map = new HashMap();
-				//2-6  两台设备登录账号   登录时会根据下面两个参数做出判断，当不一样时会强制前面的设备退出
-/* 15825 */     String generateTokeCode = TokeUtil.generateTokeCode();
-                logger.info("AccessToken>>>"+generateTokeCode);
-/* 15826 */     String generateTokeCodes = TokeUtil.generateTokeCodes();
-				logger.info("RefreshToken>>>"+generateTokeCodes);
+/* 15824 */       Map map = new HashMap();
+				  //2-6  两台设备登录账号   登录时会根据下面两个参数做出判断，当不一样时会强制前面的设备退出
+/* 15825 */       String generateTokeCode = TokeUtil.generateTokeCode();
+                  logger.info("AccessToken>>>"+generateTokeCode);
+/* 15826 */       String generateTokeCodes = TokeUtil.generateTokeCodes();
+				  logger.info("RefreshToken>>>"+generateTokeCodes);
                 //END
 /*       */ 
-/* 15828 */     BoUsersValidation findByUserPhone = this.boUsersValidationServicess.findByUserPhone(this.userPhone);
-/* 15829 */     if (findByUserPhone != null) {
-/* 15830 */       if (this.verifyCode.equals(findByUserPhone.getVerificationCode())) {
-/* 15831 */         BoUsers phone2 = this.boUserServicess.findByUserPhone(this.userPhone);
-/* 15832 */         Long accessToken = Long.valueOf((int)(System.currentTimeMillis() / 1000L));
+/* 15828 */       BoUsersValidation findByUserPhone = this.boUsersValidationServicess.findByUserPhone(this.userPhone);
+/* 15829 */       if (findByUserPhone != null) {
+/* 15830 */       	if (this.verifyCode.equals(findByUserPhone.getVerificationCode())) {
+/* 15831 */         	BoUsers phone2 = this.boUserServicess.findByUserPhone(this.userPhone);
+/* 15832 */         	Long accessToken = Long.valueOf((int)(System.currentTimeMillis() / 1000L));
 /*       */ 
-/* 15834 */         Long accessTokenTime = Long.valueOf(1800L);
-/* 15835 */         Long refreshTokenTime = Long.valueOf(2592000L);
-/* 15836 */         Long fluoriteAccessTokenTime = Long.valueOf(518400L);
-/* 15837 */         Long accessTokenTime_o = Long.valueOf(accessToken.longValue() + accessTokenTime.longValue());
-/* 15838 */         Long refreshTokenTime_o = Long.valueOf(accessToken.longValue() + refreshTokenTime.longValue());
+/* 15834 */         	Long accessTokenTime = Long.valueOf(1800L);
+/* 15835 */         	Long refreshTokenTime = Long.valueOf(2592000L);
+/* 15836 */         	Long fluoriteAccessTokenTime = Long.valueOf(518400L);
+/* 15837 */         	Long accessTokenTime_o = Long.valueOf(accessToken.longValue() + accessTokenTime.longValue());
+/* 15838 */         	Long refreshTokenTime_o = Long.valueOf(accessToken.longValue() + refreshTokenTime.longValue());
 /*       */ 
-/* 15840 */         Long fluoriteAccessTokenTime_o = Long.valueOf((int)(System.currentTimeMillis() / 1000L) + 
-/* 15841 */           fluoriteAccessTokenTime.longValue());
-/* 15842 */         if (phone2 != null) {
-/* 15843 */           if (phone2.getLogoAccountType().equals("M")) {
-/* 15844 */             phone2.setAccessToken(generateTokeCode);//2-6
-/* 15845 */             phone2.setRefreshToken(generateTokeCodes);//2-6
-/* 15846 */             phone2.setAccessTokenTime(accessTokenTime_o+"");
-/* 15847 */             phone2.setRefreshTokenTime(refreshTokenTime_o+"");
-/* 15848 */             phone2.setCid(this.CID);
-/*       */             String s;
-/* 15850 */             if (this.phoneType == null)
-/* 15851 */               s = "1";
-/*       */             else {
-/* 15853 */               s = this.phoneType;
-/*       */             }
-/* 15855 */             phone2.setPhoneType(Integer.valueOf(s));
-/* 15856 */             phone2.setVersionType(this.versionType);
-/* 15857 */             BoUsers update = (BoUsers)this.boUserServicess.update(phone2);
-/* 15858 */             map.put("accessToken", update.getAccessToken());
-/* 15859 */             map.put("refreshToken", update.getRefreshToken());
-/* 15860 */             map.put("userCode", phone2.getUserCode() + "," + phone2.getUserPhone());
+/* 15840 */         	Long fluoriteAccessTokenTime_o = Long.valueOf((int)(System.currentTimeMillis() / 1000L) + 
+/* 15841 */           	fluoriteAccessTokenTime.longValue());
+/* 15842 */         	if (phone2 != null) {
+/* 15843 */           		if (phone2.getLogoAccountType().equals("M")) {
+/* 15844 */             		phone2.setAccessToken(generateTokeCode);//2-6
+/* 15845 */             		phone2.setRefreshToken(generateTokeCodes);//2-6
+		/* 15846 */             phone2.setAccessTokenTime(accessTokenTime_o+"");
+		/* 15847 */             phone2.setRefreshTokenTime(refreshTokenTime_o+"");
+		/* 15848 */             phone2.setCid(this.CID);
+		/*       */             String s;
+/* 15850 */             		if (this.phoneType == null)
+/* 15851 */               			s = "1";
+/*       */             		else {
+/* 15853 */               			s = this.phoneType;
+/*       */             		}
+/* 15855 */             		phone2.setPhoneType(Integer.valueOf(s));
+/* 15856 */             		phone2.setVersionType(this.versionType);
+/* 15857 */             		BoUsers update = (BoUsers)this.boUserServicess.update(phone2);
+/* 15858 */             		map.put("accessToken", update.getAccessToken());
+/* 15859 */             		map.put("refreshToken", update.getRefreshToken());
+/* 15860 */             		map.put("userCode", phone2.getUserCode() + "," + phone2.getUserPhone());
 /*       */ 
-/* 15862 */             map.put("logoAccountType", phone2.getLogoAccountType());
-/* 15863 */             map.put("userPhone", phone2.getUserPhone());
-/* 15864 */             map.put("accountOperationType", phone2.getAccountOperationType());
-/* 15865 */             map.put("isFirst", phone2.getIsFirst());
-/* 15866 */             map.put("whetherSetPwd", phone2.getWhetherSetPwd());
-/* 15867 */             String fluoriteAccessToken = phone2.getFluoriteAccessToken();
-/*       */             String EZTOKEN;
-///*       */             String EZTOKEN;
-/* 15869 */             if (fluoriteAccessToken.equals(""))
-/* 15870 */               EZTOKEN = "NO_BUNDING";
-/*       */             else {
-/* 15872 */               EZTOKEN = fluoriteAccessToken;
-/*       */             }
-/* 15874 */             map.put("Eztoken", EZTOKEN);
-/* 15875 */             map.put("ez_token", EZTOKEN);
-/* 15876 */             String city2 = phone2.getCity();
-/*       */             String city3;
-///*       */             String city3;
-/* 15878 */             if (city2.equals("")) {
-/* 15879 */               city3 = "杭州市";
-/*       */             } else {
-/* 15881 */               String[] split = city2.split(",");
-/* 15882 */               city3 = split[1];
-/*       */             }
-/* 15884 */             map.put("city", city3);
-/*       */           } else {
-/* 15886 */             BoUsers boUsers = this.boUserServicess.findByUserUserCode(phone2.getAuthorizationUserCode());
-/* 15887 */             if (boUsers != null) {
-/* 15888 */               phone2.setAccessToken(generateTokeCode);
-/* 15889 */               phone2.setRefreshToken(generateTokeCodes);
-/* 15890 */               phone2.setAccessTokenTime(accessTokenTime_o+"");
-/* 15891 */               phone2.setRefreshTokenTime(refreshTokenTime_o+"");
+/* 15862 */             		map.put("logoAccountType", phone2.getLogoAccountType());
+/* 15863 */             		map.put("userPhone", phone2.getUserPhone());
+/* 15864 */             		map.put("accountOperationType", phone2.getAccountOperationType());
+/* 15865 */             		map.put("isFirst", phone2.getIsFirst());
+/* 15866 */             		map.put("whetherSetPwd", phone2.getWhetherSetPwd());
+/* 15867 */             		String fluoriteAccessToken = phone2.getFluoriteAccessToken();
+/*       */             		String EZTOKEN;
+/* 15869 */             		if (fluoriteAccessToken.equals(""))
+/* 15870 */               			EZTOKEN = "NO_BUNDING";
+/*       */             		else {
+/* 15872 */               			EZTOKEN = fluoriteAccessToken;
+/*       */             		}
+/* 15874 */             		map.put("Eztoken", EZTOKEN);
+/* 15875 */             		map.put("ez_token", EZTOKEN);
+/* 15876 */             		String city2 = phone2.getCity();
+/*       */             		String city3;
+/* 15878 */             		if (city2.equals("")) {
+/* 15879 */               			city3 = "杭州市";
+/*       */             		} else {
+/* 15881 */               			String[] split = city2.split(",");
+/* 15882 */               			city3 = split[1];
+/*       */             		}
+/* 15884 */             		map.put("city", city3);
+/*       */           	} else {
+/* 15886 */             	BoUsers boUsers = this.boUserServicess.findByUserUserCode(phone2.getAuthorizationUserCode());
+/* 15887 */             	if (boUsers != null) {
+/* 15888 */               		phone2.setAccessToken(generateTokeCode);
+/* 15889 */               		phone2.setRefreshToken(generateTokeCodes);
+/* 15890 */               		phone2.setAccessTokenTime(accessTokenTime_o+"");
+/* 15891 */               		phone2.setRefreshTokenTime(refreshTokenTime_o+"");
 /*       */ 
-/* 15893 */               phone2.setCid(this.CID);
-/*       */               String s;
-///*       */               String s;
-/* 15895 */               if (this.phoneType == null)
-/* 15896 */                 s = "1";
-/*       */               else {
-/* 15898 */                 s = this.phoneType;
-/*       */               }
-/* 15900 */               phone2.setPhoneType(Integer.valueOf(s));
-/* 15901 */               phone2.setVersionType(this.versionType);
-/* 15902 */               this.boUserServicess.update(phone2);
-/* 15903 */               map.put("accessToken", phone2.getAccessToken());//2-6
+/* 15893 */               		phone2.setCid(this.CID);
+/*       */               		String s;
+/* 15895 */               		if (this.phoneType == null)
+/* 15896 */                 		s = "1";
+/*       */               		else {
+/* 15898 */                 		s = this.phoneType;
+/*       */               		}
+/* 15900 */               		phone2.setPhoneType(Integer.valueOf(s));
+/* 15901 */               		phone2.setVersionType(this.versionType);
+/* 15902 */               		this.boUserServicess.update(phone2);
+/* 15903 */               		map.put("accessToken", phone2.getAccessToken());//2-6
 /*       */ 
-/* 15905 */               map.put("refreshToken", phone2.getRefreshToken());//2-6
+/* 15905 */               		map.put("refreshToken", phone2.getRefreshToken());//2-6
 /*       */ 
-/* 15907 */               map.put("userCode", boUsers.getUserCode() + "," + phone2.getUserPhone());
-/* 15908 */               map.put("userPhone", phone2.getUserPhone());
-/* 15909 */               map.put("accountOperationType", phone2.getAccountOperationType());
-/* 15910 */               map.put("logoAccountType", phone2.getLogoAccountType());
-/* 15911 */               map.put("isFirst", boUsers.getIsFirst());
-/* 15912 */               map.put("whetherSetPwd", phone2.getWhetherSetPwd());
-/* 15913 */               String fluoriteAccessToken = boUsers.getFluoriteAccessToken();
-/*       */               String EZTOKEN;
-///*       */               String EZTOKEN;
-/* 15915 */               if (fluoriteAccessToken.equals(""))
-/* 15916 */                 EZTOKEN = "NO_BUNDING";
-/*       */               else {
-/* 15918 */                 EZTOKEN = fluoriteAccessToken;
-/*       */               }
-/* 15920 */               map.put("Eztoken", EZTOKEN);
-/* 15921 */               map.put("ez_token", EZTOKEN);
-/* 15922 */               String city2 = phone2.getCity();
-/*       */               String city3;
-///*       */               String city3;
-/* 15924 */               if (city2.equals("")) {
-/* 15925 */                 city3 = "杭州市";
-/*       */               } else {
-/* 15927 */                 String[] split = city2.split(",");
-/* 15928 */                 city3 = split[1];
-/*       */               }
-/* 15930 */               map.put("city", city3);
-/*       */             }
+/* 15907 */               		map.put("userCode", boUsers.getUserCode() + "," + phone2.getUserPhone());
+/* 15908 */               		map.put("userPhone", phone2.getUserPhone());
+/* 15909 */               		map.put("accountOperationType", phone2.getAccountOperationType());
+/* 15910 */               		map.put("logoAccountType", phone2.getLogoAccountType());
+/* 15911 */               		map.put("isFirst", boUsers.getIsFirst());
+/* 15912 */               		map.put("whetherSetPwd", phone2.getWhetherSetPwd());
+/* 15913 */               		String fluoriteAccessToken = boUsers.getFluoriteAccessToken();
+/*       */               		String EZTOKEN;
+/* 15915 */               		if (fluoriteAccessToken.equals(""))
+/* 15916 */                 		EZTOKEN = "NO_BUNDING";
+/*       */               		else {
+/* 15918 */                 		EZTOKEN = fluoriteAccessToken;
+/*       */               		}
+/* 15920 */               		map.put("Eztoken", EZTOKEN);
+/* 15921 */               		map.put("ez_token", EZTOKEN);
+/* 15922 */               		String city2 = phone2.getCity();
+/*       */               		String city3;
+/* 15924 */               		if (city2.equals("")) {
+/* 15925 */                 		city3 = "杭州市";
+/*       */               		} else {
+/* 15927 */                 		String[] split = city2.split(",");
+/* 15928 */                 		city3 = split[1];
+/*       */               		}
+/* 15930 */               		map.put("city", city3);
+/*       */             	}
 /*       */ 
-/*       */           }
+/*       */           	}
 /*       */ 
 /* 15935 */           this.requestJson.setData(map);
 /* 15936 */           this.requestJson.setSuccess(true);

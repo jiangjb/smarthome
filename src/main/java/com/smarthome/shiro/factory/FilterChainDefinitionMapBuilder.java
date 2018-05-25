@@ -13,7 +13,6 @@ public class FilterChainDefinitionMapBuilder {
 		map.put("/js/*", "anon");
 		map.put("/plugins/*", "anon");
 		map.put("/UI_new/*", "anon");
-		
 		map.put("/login.jsp", "anon");
 		map.put("/register.jsp", "anon");
 		map.put("/TelOrEmail.jsp", "anon");
@@ -23,9 +22,7 @@ public class FilterChainDefinitionMapBuilder {
 		map.put("/register.do", "anon");
 //		map.put("/index.jsp", "roles[admin]");
 //		map.put("/list.jsp", "user");
-		
 //		map.put("/**", "authc");
-		
 		return map;
 	}
 	

@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 		import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import com.smarthome.imcp.common.MailUtil;
@@ -25,13 +26,15 @@ import com.smarthome.imcp.dao.model.bo.BoDevice;
 //			 int a = Integer.parseInt(str);
 //			 Integer i=new Integer(a);
 //			 System.out.println(Integer.parseInt(str));
-			String str="123";
-			if("".equals(str)) {
-				System.out.println("空");
-			}
-			if(!"".equals(str)) {
-				System.out.println("非空");
-			}
+			String s = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	        Random r = new Random();
+	        String end="";
+		   for (int i =0; i < 6; i++ )
+		   {
+			   int n = r.nextInt(62);
+			   end += s.substring(n, n+1);
+		   }
+		   System.out.println("end:"+end);
 /*    */   }
 /*    */ }
 

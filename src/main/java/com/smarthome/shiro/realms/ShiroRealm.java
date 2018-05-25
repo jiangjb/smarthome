@@ -92,7 +92,7 @@ public class ShiroRealm extends AuthorizingRealm {
 		//1). principal: 认证的实体信息. 可以是 username, 也可以是数据表对应的用户的实体类对象. 
 		Object principal = username;//这里指定是username
 		//2). credentials: shiro加密密码. 
-		Object credentials = null; //
+		Object credentials = null; 
 		
 		//shiro加密密码
 	    String hashAlgorithmName = "MD5";
@@ -149,7 +149,6 @@ public class ShiroRealm extends AuthorizingRealm {
 			PrincipalCollection principals) {
 		//1. 从 PrincipalCollection 中来获取登录用户的信息
 		String userName=(String)principals.getPrimaryPrincipal();  
-//		System.out.println("userName:"+userName);//root
 		
 		//2. 利用登录的用户的信息来用户当前用户的角色或权限(可能需要查询数据库)
         SimpleAuthorizationInfo info=new SimpleAuthorizationInfo();   
@@ -157,12 +156,12 @@ public class ShiroRealm extends AuthorizingRealm {
         	//根据用户名找到角色，然后存入info
         	//1)找到对应的SysUser
         	SysUser sysuser=this.sysUserService.getSysUsersByName(userName);
-//        	System.out.println("sysuser"+sysuser);
         	if(sysuser != null) {	
         		//2）取出userId
         		int userID=sysuser.getUserId();
         		//3）找到对应的Role(User-role中间表--》roleId   》Role     SysUser和Role:一对多关系)
         		List<Integer> roleIds=this.userRoleService.findListByUid(userID);
+        		System.out.println("......roleIds:"+roleIds+",userID:"+userID);
         		List<Role> roles = null;
         		if(roleIds != null) {
         			roles=this.roleService.getListByRID(roleIds);

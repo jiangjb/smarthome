@@ -26,15 +26,10 @@
 							<i class="icon-caret-down"></i>
 						</a>
 						<ul id="user_menu" class="pull-right dropdown-menu dropdown-yellow dropdown-caret dropdown-closer">
-						<!-- 	<li><a onclick="editUserH();" style="cursor:pointer;"><i class="icon-user"></i> 修改资料</a></li>
-							<li id="systemset"><a onclick="editSys();" style="cursor:pointer;"><i class="icon-cog"></i> 系统设置</a></li>
-							<li id="productCode"><a onclick="productCode();" style="cursor:pointer;"><i class="icon-cogs"></i> 代码生成</a></li>
-							<li class="divider"></li> -->
 							<li><a href="<%=WEBPATH2 %>/modifyPwd-in.jsp?User_ID=<%=UserID %>" style="cursor:pointer;"><i class="icon-user"></i> 修改密码</a></li>
-							<!-- <li><a onclick="editUserH();" style="cursor:pointer;"><i class="icon-user"></i> 编辑资料</a></li> -->
 							<li><a href="<%=WEBPATH2 %>/editInfo.jsp?User_ID=<%=UserID %>" style="cursor:pointer;"><i class="icon-user"></i> 编辑资料</a></li>
+							<li><a href="<%=WEBPATH2 %>/auth.jsp?User_ID=<%=UserID %>" style="cursor:pointer;"><i class="icon-user"></i> 授权</a></li>
 							<li class="divider"></li>
-							<%-- <li><a href="<%=WEBPATH2 %>/login.jsp"><i class="icon-off"></i> 退出</a></li> --%>
 							<li><a href="logout.do"><i class="icon-off"></i> 退出</a></li>
 						</ul>
 					</li>
@@ -65,7 +60,6 @@
     			}
     		});
     	});
-    
     //修改个人资料(不包括密码)
 	function editUserH(){
 ////	 alert(locat+'/logout.do')   // http://localhost:8080/smarthomeMavenWebProject/logout.do

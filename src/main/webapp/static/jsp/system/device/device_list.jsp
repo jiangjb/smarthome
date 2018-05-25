@@ -141,7 +141,7 @@
 										</c:if>
 										<c:if test="${QX.edit == 1 }">
 												<a style="cursor:pointer;" title="编辑" onclick="edit('${var.DEVICE_ID}');" class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a>
-											</c:if>
+										</c:if>
 											<%-- <c:if test="${QX.del == 1 }">
 												<a style="cursor:pointer;" title="删除" onclick="del('${var.DEVICE_ID}');" class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a>
 											</c:if> --%>
@@ -456,7 +456,16 @@
 		           				     }
 		           				     var deviceCodee=JSON.stringify(item.deviceCode).replace(/\"/g,"'");
 		           				     var typee=JSON.stringify(item.type).replace(/\"/g,"'");
-		           				     if(role == "admin"){
+		           				  if(role == "superadmin"){
+		           				    	$("#devicelist").append('<tr>'+
+				       	    					col+
+				       	    					status+
+				       	    					type+
+				       	    					'<shiro:hasRole name="superadmin">'+
+				       	    						 '<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
+				       	    					'</shiro:hasRole>'+
+				       	    					'</tr>'); 
+		           				     }else if(role == "admin"){
 		           				    	$("#devicelist").append('<tr>'+
 				       	    					col+
 				       	    					status+
@@ -945,7 +954,16 @@
 	           				     }
 	           				     var deviceCodee=JSON.stringify(item.deviceCode).replace(/\"/g,"'");
 	           				     var typee=JSON.stringify(item.type).replace(/\"/g,"'");
-	           				     if(role =="admin"){
+	           				  if(role =="superadmin"){
+	           				    	$("#devicelist").append('<tr>'+
+			       	    					col+
+			       	    					status+
+			       	    					type+
+			       	    					'<shiro:hasRole name="superadmin">'+
+			       	    						'<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
+			       	    					'</shiro:hasRole>'+
+			       	    					'</tr>');  
+	           				     }else if(role =="admin"){
 	           				    	$("#devicelist").append('<tr>'+
 			       	    					col+
 			       	    					status+
@@ -1051,7 +1069,16 @@
 	        				     }
 	        				     var deviceCodee=JSON.stringify(item.deviceCode).replace(/\"/g,"'");
 		           				 var typee=JSON.stringify(item.type).replace(/\"/g,"'");
-	        				     if(role =="admin"){
+		           				if(role =="superadmin"){
+	        				    	 $("#devicelist").append('<tr>'+
+	 	 	       	    					col+
+	 	 	       	    					status+
+	 	 	       	    					type+
+	 	 	       	    					'<shiro:hasRole name="superadmin">'+
+	 	 	       	    						'<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
+	 	 	       	    					'</shiro:hasRole>'+
+	 	 	       	    					'</tr>'); 
+	        				     }else if(role =="admin"){
 	        				    	 $("#devicelist").append('<tr>'+
 	 	 	       	    					col+
 	 	 	       	    					status+
@@ -1370,7 +1397,16 @@
 		           				     }
 		           				     var deviceCodee=JSON.stringify(item.deviceCode).replace(/\"/g,"'");
 		           				     var typee=JSON.stringify(item.type).replace(/\"/g,"'");
-		           				     if(role=="admin"){
+		           				  if(role=="superadmin"){
+		           				    	$("#devicelist").append('<tr>'+
+				       	    					col+
+				       	    					status+
+				       	    					type+
+				       	    					'<shiro:hasRole name="superadmin">'+
+				       	    						'<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
+				       	    					'</shiro:hasRole>'+
+				       	    					'</tr>'); 
+		           				     }else if(role=="admin"){
 		           				    	$("#devicelist").append('<tr>'+
 				       	    					col+
 				       	    					status+
@@ -1515,7 +1551,16 @@
 		           				     }
 		           				     var deviceCodee=JSON.stringify(item.deviceCode).replace(/\"/g,"'");
 		           				     var typee=JSON.stringify(item.type).replace(/\"/g,"'");
-		           				     if(role=="admin"){
+		           				  if(role=="superadmin"){
+		           				    	$("#devicelist").append('<tr>'+
+				       	    					col+
+				       	    					status+
+				       	    					type+
+				       	    					'<shiro:hasRole name="superadmin">'+
+				       	    						'<td class="center"><a  onclick="clickOnMe('+deviceCodee+','+typee+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+ 
+				       	    					'</shiro:hasRole>'+
+				       	    					'</tr>');   
+		           				     }else if(role=="admin"){
 		           				    	$("#devicelist").append('<tr>'+
 				       	    					col+
 				       	    					status+

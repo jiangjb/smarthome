@@ -1,6 +1,7 @@
 /*    */ package com.smarthome.imcp.service.impl.bo;
  
 		 import com.smarthome.imcp.dao.bo.UserRoleDaoIface;
+		 import com.smarthome.imcp.dao.model.system.SysUser;
 /*    */ import com.smarthome.imcp.service.AbstractBasicService;
 		 import com.smarthome.imcp.service.bo.UserRoleServiceIface;
 		 import com.smarthome.shiro.entity.User_Role;
@@ -38,6 +39,10 @@
 					System.out.println("第"+i+"个是："+list.get(i));
 				}
 				return list;
+			}
+			public User_Role save(User_Role userRole){
+				this.userRoleDao.save(userRole);
+				return userRole;    
 			}
    	
 		}

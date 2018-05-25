@@ -86,13 +86,6 @@
 /*     */   {
 /*  76 */     return (T) getCurrentSession().get(this.persistentClass, id);
 /*     */   }
-
-			//new
-//			public T findByPhone(String userPhone)
-///*     */   {
-///*  76 */     return (T) getCurrentSession().get(this.persistentClass, userPhone);
-///*     */   }
-/*     */ 
 /*     */   public T findByIdWithLock(PK id, LockMode lock)
 /*     */   {
 /*  81 */     Object t = getCurrentSession().get(this.persistentClass, id, lock);

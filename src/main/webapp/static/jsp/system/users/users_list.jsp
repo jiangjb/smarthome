@@ -14,7 +14,7 @@
 	<head>
 		<base href="<%=basePath%>"><!-- jsp文件头和头部 -->
 		<%@ include file="/static/jsp/top.jsp"%> 
-		<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1" name="viewport" />
+		<!-- <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1" name="viewport" /> -->
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	  	<style>
 		    body { font-size: 62.5%; }
@@ -31,7 +31,6 @@
 	</head>
 <body>
 <div class="container-fluid" id="main-container">
-
 <!-- jquery ui dialog -->
 <div id="dialog-form" title="创建新用户">
   <p class="validateTips">请完善下面的字段信息,<font color="red">*</font>修饰的为必填项</p>
@@ -210,10 +209,8 @@
 		$(top.hangge());
 		$(function(){
 			var role= '<%= session.getAttribute("role")%>';
+			alert(role);
 			var tel='<%= session.getAttribute("userPhone")%>';
-			/* var firstTime=$.cookie('firstTime'); */
-			/* alert(firstTime); */
-			/* alert(tel); */
 			if(tel!="null"){
 				//显示房东或经销商
 				$.ajax({
@@ -329,7 +326,7 @@
 				    					'</td>'+
 				    					'<td class="center">'+item.userName+'</td>'+
 				    					'<td class="center">'+item.userSex+'</td>'+
-				    					'<td class="center">'+item.userPhone+'</td>'+
+				    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>'+
 				    					'<td class="center">'+phoneType +'</td>'+
 				    					'<td class="center">'+versionType+'</td>'+
 				    					'<td class="center">'+item.signature+'</td>'+
@@ -351,7 +348,6 @@
 	    			}
 	    		});
 			}else{
-				
 				$.ajax({
 	    			url: "showUsers.do",
 	    	    	data: { },
@@ -448,8 +444,7 @@
 		    				    	versionType="乐沃智能";
 		    				    }
 		    				    var userPhone0=JSON.stringify(item.userPhone).replace(/\"/g,"'");
-		    				    if(role == "admin"){
-		    				    	var userPhone0=JSON.stringify(item.userPhone).replace(/\"/g,"'");
+		    				    if(role == "superadmin"){
 		    				    	$("#userslist").append('<tr>'+
 					    					'<td class="center" style="width: 30px;">'+
 					    					'<label>'+
@@ -460,7 +455,36 @@
 					    					'</td>'+
 					    					'<td class="center">'+item.userName+'</td>'+
 					    					'<td class="center">'+item.userSex+'</td>'+
-					    					'<td class="center">'+item.userPhone+'</td>'+
+					    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>'+
+					    					/* '<td class="center">'+item.userPhone+'</td>'+ */
+					    					'<td class="center">'+phoneType +'</td>'+
+					    					'<td class="center">'+versionType+'</td>'+
+					    					'<td class="center">'+item.signature+'</td>'+
+					    					'<shiro:hasRole name="superadmin">'+
+					    						'<td style="width: 30px;" class="center">'+
+   													'<div class="inline position-relative">'+
+   														'<button class="btn btn-mini btn-info" data-toggle="dropdown"><i class="icon-cog icon-only"></i></button>'+
+   														'<ul class="dropdown-menu dropdown-icon-only dropdown-light pull-right dropdown-caret dropdown-close">'+
+   															'<li><a onclick="clickOnMe('+userPhone0+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></li>'+
+   															'<li><a onclick="delMe('+item.userId+')" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></li>'+
+   														'</ul>'+
+   													'</div>'+
+    											'</td>'+
+			       	    					'</shiro:hasRole>'+
+					    					'</tr>'); 
+		    				    }else if(role == "admin"){
+		    				    	$("#userslist").append('<tr>'+
+					    					'<td class="center" style="width: 30px;">'+
+					    					'<label>'+
+					    					'<input type="checkbox" name="ids" value="'+item.userId+'" />'+
+					    					'<span class="lbl">'+
+					    					'</span>'+
+					    					'</label>'+
+					    					'</td>'+
+					    					'<td class="center">'+item.userName+'</td>'+
+					    					'<td class="center">'+item.userSex+'</td>'+
+					    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>'+
+					    					/* '<td class="center">'+item.userPhone+'</td>'+ */
 					    					'<td class="center">'+phoneType +'</td>'+
 					    					'<td class="center">'+versionType+'</td>'+
 					    					'<td class="center">'+item.signature+'</td>'+
@@ -487,7 +511,7 @@
 					    					'</td>'+
 					    					'<td class="center">'+item.userName+'</td>'+
 					    					'<td class="center">'+item.userSex+'</td>'+
-					    					'<td class="center">'+item.userPhone+'</td>'+
+					    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>'+
 					    					'<td class="center">'+phoneType +'</td>'+
 					    					'<td class="center">'+versionType+'</td>'+
 					    					'<td class="center">'+item.signature+'</td>'+
@@ -686,6 +710,7 @@
 		function search(){
 			/* top.jzts();
 			$("#Form").submit(); */
+			var role= '<%= session.getAttribute("role")%>';
 			var userPhone=$("#nav-search-input").val();
 			if(userPhone != ""){
 				$.ajax({
@@ -732,32 +757,52 @@
 		    				    	versionType="乐沃智能";
 		    				    }
 		    				    var userPhone0=JSON.stringify(item.userPhone).replace(/\"/g,"'");
-		  						 $("#userslist").append('<tr>'+
-			    					'<td class="center" style="width: 30px;">'+
-			    					'<label>'+
-			    					'<input type="checkbox" name="ids" value="'+item.userId+'" />'+
-			    					'<span class="lbl">'+
-			    					'</span>'+
-			    					'</label>'+
-			    					'</td>'+
-			    					'<td class="center">'+item.userName+'</td>'+
-			    					'<td class="center">'+item.userSex+'</td>'+
-			    					'<td class="center">'+item.userPhone+'</td>'+
-			    					'<td class="center">'+phoneType +'</td>'+
-			    					'<td class="center">'+versionType+'</td>'+
-			    					'<td class="center">'+item.signature+'</td>'+
-			    					'<shiro:hasRole name="admin">'+
-			    						'<td style="width: 30px;" class="center">'+
-											'<div class="inline position-relative">'+
-												'<button class="btn btn-mini btn-info" data-toggle="dropdown"><i class="icon-cog icon-only"></i></button>'+
-													'<ul class="dropdown-menu dropdown-icon-only dropdown-light pull-right dropdown-caret dropdown-close">'+
-														'<li><a onclick="clickOnMe('+userPhone0+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></li>'+
-														'<li><a onclick="delMe('+item.userId+')" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></li>'+
-													'</ul>'+
-											'</div>'+
-										'</td>'+
-	       	    					'</shiro:hasRole>'+
-			    					'</tr>');  
+		    				    if(role != "user"){
+			  						 $("#userslist").append('<tr>'+
+				    					'<td class="center" style="width: 30px;">'+
+				    					'<label>'+
+				    					'<input type="checkbox" name="ids" value="'+item.userId+'" />'+
+				    					'<span class="lbl">'+
+				    					'</span>'+
+				    					'</label>'+
+				    					'</td>'+
+				    					'<td class="center">'+item.userName+'</td>'+
+				    					'<td class="center">'+item.userSex+'</td>'+
+				    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>'+
+				    					'<td class="center">'+phoneType +'</td>'+
+				    					'<td class="center">'+versionType+'</td>'+
+				    					'<td class="center">'+item.signature+'</td>'+
+				    					'<shiro:hasRole name="admin">'+
+				    						'<td style="width: 30px;" class="center">'+
+												'<div class="inline position-relative">'+
+													'<button class="btn btn-mini btn-info" data-toggle="dropdown"><i class="icon-cog icon-only"></i></button>'+
+														'<ul class="dropdown-menu dropdown-icon-only dropdown-light pull-right dropdown-caret dropdown-close">'+
+															'<li><a onclick="clickOnMe('+userPhone0+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></li>'+
+															'<li><a onclick="delMe('+item.userId+')" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></li>'+
+														'</ul>'+
+												'</div>'+
+											'</td>'+
+		       	    					'</shiro:hasRole>'+
+				    					'</tr>');  
+		    				    }else{
+		    				    	$("#userslist").append('<tr>'+
+					    					'<td class="center" style="width: 30px;">'+
+					    					'<label>'+
+					    					'<input type="checkbox" name="ids" value="'+item.userId+'" />'+
+					    					'<span class="lbl">'+
+					    					'</span>'+
+					    					'</label>'+
+					    					'</td>'+
+					    					'<td class="center">'+item.userName+'</td>'+
+					    					'<td class="center">'+item.userSex+'</td>'+
+					    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>'+
+					    					'<td class="center">'+phoneType +'</td>'+
+					    					'<td class="center">'+versionType+'</td>'+
+					    					'<td class="center">'+item.signature+'</td>'+
+				    						'<td>'+
+											'</td>'+
+					    					'</tr>'); 
+		    				    }
 		    				}) 
 						}
 			
@@ -1055,7 +1100,7 @@
 		    				    	versionType="乐沃智能";
 		    				    }
 		    				    var userPhone0=JSON.stringify(item.userPhone).replace(/\"/g,"'");
-		    				    if(role == "admin"){
+		    				    if(role == "superadmin"){
 		    				    	$("#userslist").append('<tr>'+
 					    					'<td class="center" style="width: 30px;">'+
 					    					'<label>'+
@@ -1066,7 +1111,34 @@
 					    					'</td>'+
 					    					'<td class="center">'+item.userName+'</td>'+
 					    					'<td class="center">'+item.userSex+'</td>'+
-					    					'<td class="center">'+item.userPhone+'</td>'+
+					    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>'+
+					    					'<td class="center">'+phoneType +'</td>'+
+					    					'<td class="center">'+versionType+'</td>'+
+					    					'<td class="center">'+item.signature+'</td>'+
+					    					'<shiro:hasRole name="superadmin">'+
+						    					'<td style="width: 30px;" class="center">'+
+													'<div class="inline position-relative">'+
+														'<button class="btn btn-mini btn-info" data-toggle="dropdown"><i class="icon-cog icon-only"></i></button>'+
+															'<ul class="dropdown-menu dropdown-icon-only dropdown-light pull-right dropdown-caret dropdown-close">'+
+																'<li><a onclick="clickOnMe('+userPhone0+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></li>'+
+																'<li><a onclick="delMe('+item.userId+')" style="cursor:pointer;" title="删除"  class="tooltip-error" data-rel="tooltip" title="" data-placement="left"><span class="red"><i class="icon-trash"></i></span> </a></li>'+
+															'</ul>'+
+													'</div>'+
+												'</td>'+
+				       	    				'</shiro:hasRole>'+
+					    					'</tr>'); 
+		    				    }else if(role == "admin"){
+		    				    	$("#userslist").append('<tr>'+
+					    					'<td class="center" style="width: 30px;">'+
+					    					'<label>'+
+					    					'<input type="checkbox" name="ids" value="'+item.userId+'" />'+
+					    					'<span class="lbl">'+
+					    					'</span>'+
+					    					'</label>'+
+					    					'</td>'+
+					    					'<td class="center">'+item.userName+'</td>'+
+					    					'<td class="center">'+item.userSex+'</td>'+
+					    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>'+
 					    					'<td class="center">'+phoneType +'</td>'+
 					    					'<td class="center">'+versionType+'</td>'+
 					    					'<td class="center">'+item.signature+'</td>'+
@@ -1093,7 +1165,7 @@
 					    					'</td>'+
 					    					'<td class="center">'+item.userName+'</td>'+
 					    					'<td class="center">'+item.userSex+'</td>'+
-					    					'<td class="center">'+item.userPhone+'</td>'+
+					    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>'+
 					    					'<td class="center">'+phoneType +'</td>'+
 					    					'<td class="center">'+versionType+'</td>'+
 					    					'<td class="center">'+item.signature+'</td>'+
@@ -1120,7 +1192,7 @@
 					    					'</td>'+
 					    					'<td class="center">'+item.userName+'</td>'+
 					    					'<td class="center">'+item.userSex+'</td>'+
-					    					'<td class="center">'+item.userPhone+'</td>'+
+					    					'<td class="center"><a href="<%=WEBPATH11 %>/static/jsp/system/users/userMessage.jsp?userPhone='+item.userPhone+'&userName='+item.userName+'"  style="color: black;">'+item.userPhone+'</a></td>'+
 					    					'<td class="center">'+phoneType +'</td>'+
 					    					'<td class="center">'+versionType+'</td>'+
 					    					'<td class="center">'+item.signature+'</td>'+

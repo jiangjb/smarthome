@@ -145,7 +145,7 @@
 			var tel='<%= session.getAttribute("userPhone")%>';
 			if(tel!="null"){
 				$.ajax({
-	    			url: "findHostDByPhone.do",
+	    			url: "findusersDByPhone.do",
 	    	    	data: {"userPhone":tel },
 	    			type: "POST",
 	    			dataType:"json",
@@ -234,7 +234,7 @@
 	            	    					'<td class="center">'+item.nick_name+'</td>'+
 	            	    					'<shiro:hasRole name="buyer">'+
 	            	    					'<td style="width: 30px;" class="center">'+
-	            	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+	            	    						'<span onclick="del('+item.id+');" style="color: blue;">解绑</span>'+
 	            	    					'</td>'+
 	            	    					'</shiro:hasRole>'+
 	            	    					'</tr>');
@@ -323,7 +323,26 @@
 	        						
 	        						$("#userdeviceList01").append(table);
 	        					}else{
-	        						if(role=="admin"){
+	        						if(role=="superadmin"){
+	        							$("#userDevicelist").append('<tr>'+
+		            	    					'<td class="center" style="width: 30px;">'+
+		            	    					'<label>'+
+		            	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		            	    					'<span class="lbl">'+
+		            	    					'</span>'+
+		            	    					'</label>'+
+		            	    					'</td>'+
+		            	    					'<td class="center">'+(i+1)+'</td>'+
+		            	    					'<td class="center">'+item.userPhone+'</td>'+
+		            	    					'<td class="center">'+item.deviceCode+'</td>'+
+		            	    					'<td class="center">'+item.nick_name+'</td>'+
+		            	    					'<shiro:hasRole name="superadmin">'+
+		            	    					'<td style="width: 30px;" class="center">'+
+		            	    						'<span onclick="del('+item.id+');" style="color: blue;">解绑</span>'+
+		            	    					'</td>'+
+		            	    					'</shiro:hasRole>'+
+		            	    					'</tr>');
+	        						}else if(role=="admin"){
 	        							$("#userDevicelist").append('<tr>'+
 		            	    					'<td class="center" style="width: 30px;">'+
 		            	    					'<label>'+
@@ -338,7 +357,7 @@
 		            	    					'<td class="center">'+item.nick_name+'</td>'+
 		            	    					'<shiro:hasRole name="admin">'+
 		            	    					'<td style="width: 30px;" class="center">'+
-		            	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+		            	    						'<span onclick="del('+item.id+');" style="color: blue;">解绑</span>'+
 		            	    					'</td>'+
 		            	    					'</shiro:hasRole>'+
 		            	    					'</tr>');
@@ -394,8 +413,6 @@
 							if(item.id == null){
 								//如果是page实体类  处理一
 								$("#userdeviceList01").empty();
-								
-								
 								//根据 totalPages 和 currentPage 分成 5 种情况
 								if(totalPages > 5  || currentPage != 1){//这里处理 currentPage未最左边一页   时的上一页问题
 									var fore='<li style="cursor:pointer;"><a onclick="find('+(currentPage-1)+')">上页</a></li>';
@@ -629,7 +646,26 @@
 								}
 								
 							}else{
-								if(role == "admin"){
+								if(role == "superadmin"){
+									$("#userDevicelist").append('<tr>'+
+											'<td class="center" style="width: 30px;">'+
+		        	    					'<label>'+
+		        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		        	    					'<span class="lbl">'+
+		        	    					'</span>'+
+		        	    					'</label>'+
+		        	    					'</td>'+
+		        	    					'<td class="center">'+(i+1)+'</td>'+
+		        	    					'<td class="center">'+item.userPhone+'</td>'+
+		        	    					'<td class="center">'+item.deviceCode+'</td>'+
+		        	    					'<td class="center">'+item.nick_name+'</td>'+
+		        	    					'<shiro:hasRole name="superadmin">'+
+		        	    					'<td style="width: 30px;" class="center">'+
+		        	    						'<span onclick="del('+item.id+');" style="color: blue;">解绑</span>'+
+		        	    					'</td>'+
+		        	    					'</shiro:hasRole>'+
+		        	    					'</tr>');
+								}else if(role == "admin"){
 									$("#userDevicelist").append('<tr>'+
 											'<td class="center" style="width: 30px;">'+
 		        	    					'<label>'+
@@ -644,7 +680,7 @@
 		        	    					'<td class="center">'+item.nick_name+'</td>'+
 		        	    					'<shiro:hasRole name="admin">'+
 		        	    					'<td style="width: 30px;" class="center">'+
-		        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+		        	    						'<span onclick="del('+item.id+');" style="color: blue;">解绑</span>'+
 		        	    					'</td>'+
 		        	    					'</shiro:hasRole>'+
 		        	    					'</tr>');
@@ -663,7 +699,7 @@
 		        	    					'<td class="center">'+item.nick_name+'</td>'+
 		        	    					'<shiro:hasRole name="buyer">'+
 		        	    					'<td style="width: 30px;" class="center">'+
-		        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+		        	    						'<span onclick="del('+item.id+');" style="color: blue;">解绑</span>'+
 		        	    					'</td>'+
 		        	    					'</shiro:hasRole>'+
 		        	    					'</tr>');
@@ -947,7 +983,26 @@
 										}
 										
 									}else{
-										if(role == "admin"){
+										if(role == "superadmin"){
+											$("#userDevicelist").append('<tr>'+
+													'<td class="center" style="width: 30px;">'+
+				        	    					'<label>'+
+				        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+				        	    					'<span class="lbl">'+
+				        	    					'</span>'+
+				        	    					'</label>'+
+				        	    					'</td>'+
+				        	    					'<td class="center">'+(i+1)+'</td>'+
+				        	    					'<td class="center">'+item.userPhone+'</td>'+
+				        	    					'<td class="center">'+item.deviceCode+'</td>'+
+				        	    					'<td class="center">'+item.nick_name+'</td>'+
+				        	    					'<shiro:hasRole name="superadmin">'+
+				        	    					'<td style="width: 30px;" class="center">'+
+				        	    						'<span onclick="del('+item.id+');" style="color: blue;">解绑</span>'+
+				        	    					'</td>'+
+				        	    					'</shiro:hasRole>'+
+				        	    					'</tr>');
+										}else if(role == "admin"){
 											$("#userDevicelist").append('<tr>'+
 													'<td class="center" style="width: 30px;">'+
 				        	    					'<label>'+
@@ -962,7 +1017,7 @@
 				        	    					'<td class="center">'+item.nick_name+'</td>'+
 				        	    					'<shiro:hasRole name="admin">'+
 				        	    					'<td style="width: 30px;" class="center">'+
-				        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+				        	    						'<span onclick="del('+item.id+');" style="color: blue;">解绑</span>'+
 				        	    					'</td>'+
 				        	    					'</shiro:hasRole>'+
 				        	    					'</tr>');
@@ -981,7 +1036,7 @@
 				        	    					'<td class="center">'+item.nick_name+'</td>'+
 				        	    					'<shiro:hasRole name="buyer">'+
 				        	    					'<td style="width: 30px;" class="center">'+
-				        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+				        	    						'<span onclick="del('+item.id+');" style="color: blue;">解绑</span>'+
 				        	    					'</td>'+
 				        	    					'</shiro:hasRole>'+
 				        	    					'</tr>');
@@ -1277,7 +1332,26 @@
 									}
 									
 								}else{
-									if(role=="admin"){
+									if(role=="superadmin"){
+										$("#userDevicelist").append('<tr>'+
+												'<td class="center" style="width: 30px;">'+
+			        	    					'<label>'+
+			        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+			        	    					'<span class="lbl">'+
+			        	    					'</span>'+
+			        	    					'</label>'+
+			        	    					'</td>'+
+			        	    					'<td class="center">'+(i+1)+'</td>'+
+			        	    					'<td class="center">'+item.userPhone+'</td>'+
+			        	    					'<td class="center">'+item.deviceCode+'</td>'+
+			        	    					'<td class="center">'+item.nick_name+'</td>'+
+			        	    					'<shiro:hasRole name="superadmin">'+
+			        	    					'<td style="width: 30px;" class="center">'+
+			        	    						'<span onclick="del('+item.id+');" style="color: blue;">解绑</span>'+
+			        	    					'</td>'+
+			        	    					'</shiro:hasRole>'+
+			        	    					'</tr>');
+									}else if(role=="admin"){
 										$("#userDevicelist").append('<tr>'+
 												'<td class="center" style="width: 30px;">'+
 			        	    					'<label>'+
@@ -1292,7 +1366,7 @@
 			        	    					'<td class="center">'+item.nick_name+'</td>'+
 			        	    					'<shiro:hasRole name="admin">'+
 			        	    					'<td style="width: 30px;" class="center">'+
-			        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+			        	    						'<span onclick="del('+item.id+');" style="color: blue;">解绑</span>'+
 			        	    					'</td>'+
 			        	    					'</shiro:hasRole>'+
 			        	    					'</tr>');
@@ -1311,7 +1385,7 @@
 			        	    					'<td class="center">'+item.nick_name+'</td>'+
 			        	    					'<shiro:hasRole name="buyer">'+
 			        	    					'<td style="width: 30px;" class="center">'+
-			        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+			        	    						'<span onclick="del('+item.id+');" style="color: blue;">解绑</span>'+
 			        	    					'</td>'+
 			        	    					'</shiro:hasRole>'+
 			        	    					'</tr>');
@@ -1345,16 +1419,14 @@
 		
 		
 		//删除
-		function del(Id,DEVICE_ID,USER_ID){
-			/* alert("id:"+Id+",deviceId:"+DEVICE_ID+",userId:"+USER_ID); */
+		function del(id){
 			$.ajax({
     			url: "delHost.do",
-    	    	data: {"id":Id,"DEVICE_ID":DEVICE_ID,"USER_ID":USER_ID},
+    	    	data: {"id":id},
     			type: "POST",
     			dataType:"json",
     			success: function(data){
     				alert("解绑成功");
-    				//跳回原来的页面或移除该行  （未完成）
     				window.location.reload();
 				}
 			})

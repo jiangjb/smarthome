@@ -1,60 +1,63 @@
 /*    */ package com.smarthome.imcp.controller;
 
+		 import com.alibaba.fastjson.JSON;
 		 import com.smarthome.imcp.common.GlobalMethod;
 		 import com.smarthome.imcp.common.MailUtil;
 /*    */ import com.smarthome.imcp.common.Md5;
 		 import com.smarthome.imcp.common.Page;
 		 import com.smarthome.imcp.dao.model.bo.BoDevice;
-import com.smarthome.imcp.dao.model.bo.BoDeviceState;
-import com.smarthome.imcp.dao.model.bo.BoFloor;
-import com.smarthome.imcp.dao.model.bo.BoHostDevice;
-import com.smarthome.imcp.dao.model.bo.BoInfraredButtons;
-import com.smarthome.imcp.dao.model.bo.BoInfraredLearnControlMap;
-import com.smarthome.imcp.dao.model.bo.BoInfraredPart;
-import com.smarthome.imcp.dao.model.bo.BoModel;
-import com.smarthome.imcp.dao.model.bo.BoModelInfo;
-import com.smarthome.imcp.dao.model.bo.BoRoom;
-import com.smarthome.imcp.dao.model.bo.BoSensor;
-import com.smarthome.imcp.dao.model.bo.BoUser;
-import com.smarthome.imcp.dao.model.bo.BoUserDevices;
+		 import com.smarthome.imcp.dao.model.bo.BoDeviceState;
+		 import com.smarthome.imcp.dao.model.bo.BoFloor;
+		 import com.smarthome.imcp.dao.model.bo.BoHostDevice;
+		 import com.smarthome.imcp.dao.model.bo.BoInfraredButtons;
+		 import com.smarthome.imcp.dao.model.bo.BoInfraredLearnControlMap;
+		 import com.smarthome.imcp.dao.model.bo.BoInfraredPart;
+		 import com.smarthome.imcp.dao.model.bo.BoModel;
+		 import com.smarthome.imcp.dao.model.bo.BoModelInfo;
+		 import com.smarthome.imcp.dao.model.bo.BoRoom;
+		 import com.smarthome.imcp.dao.model.bo.BoSensor;
+		 import com.smarthome.imcp.dao.model.bo.BoUser;
+		 import com.smarthome.imcp.dao.model.bo.BoUserDevices;
 		 import com.smarthome.imcp.dao.model.bo.BoUsers;
 		 import com.smarthome.imcp.dao.model.bo.BoUsersValidation;
 /*    */ import com.smarthome.imcp.dao.model.system.SysUser;
 /*    */ import com.smarthome.imcp.secur.CurrentUser;
 		 import com.smarthome.imcp.service.bo.BoDeviceServiceIface;
-import com.smarthome.imcp.service.bo.BoDeviceStateServiceIface;
-import com.smarthome.imcp.service.bo.BoFloorServiceIface;
-import com.smarthome.imcp.service.bo.BoHostDeviceServiceIface;
-import com.smarthome.imcp.service.bo.BoInfraredButtonsServiceIface;
-import com.smarthome.imcp.service.bo.BoInfraredLearnControlMapServiceIface;
-import com.smarthome.imcp.service.bo.BoInfraredPartServiceIface;
-import com.smarthome.imcp.service.bo.BoModelInfoServiceIface;
-import com.smarthome.imcp.service.bo.BoModelServiceIface;
-import com.smarthome.imcp.service.bo.BoRoomServiceIface;
-import com.smarthome.imcp.service.bo.BoSensorServiceIface;
-import com.smarthome.imcp.service.bo.BoUserDevicesServiceIface;
+		 import com.smarthome.imcp.service.bo.BoDeviceStateServiceIface;
+		 import com.smarthome.imcp.service.bo.BoFloorServiceIface;
+		 import com.smarthome.imcp.service.bo.BoHostDeviceServiceIface;
+		 import com.smarthome.imcp.service.bo.BoInfraredButtonsServiceIface;
+		 import com.smarthome.imcp.service.bo.BoInfraredLearnControlMapServiceIface;
+		 import com.smarthome.imcp.service.bo.BoInfraredPartServiceIface;
+		 import com.smarthome.imcp.service.bo.BoModelInfoServiceIface;
+		 import com.smarthome.imcp.service.bo.BoModelServiceIface;
+		 import com.smarthome.imcp.service.bo.BoRoomServiceIface;
+		 import com.smarthome.imcp.service.bo.BoSensorServiceIface;
+		 import com.smarthome.imcp.service.bo.BoUserDevicesServiceIface;
 		 import com.smarthome.imcp.service.bo.BoUsersValidationServiceIface;
 		 import com.smarthome.imcp.service.bo.BoUserssServiceIface;
+		 import com.smarthome.imcp.service.bo.UserRoleServiceIface;
 /*    */ import com.smarthome.imcp.service.secur.SecurServiceIface;
 /*    */ import com.smarthome.imcp.service.system.SysUserServiceIface;
-import com.smarthome.imcp.util.FloorUtil;
-import com.smarthome.imcp.util.RoomUtil;
-import com.smarthome.imcp.util.UserUtil;
-
-import java.io.IOException;
+		 import com.smarthome.imcp.util.FloorUtil;
+		 import com.smarthome.imcp.util.RoomUtil;
+		 import com.smarthome.imcp.util.TokeUtil;
+		 import com.smarthome.imcp.util.UserUtil;
+		 import com.smarthome.shiro.entity.User_Role;
+		 import net.sf.json.JSONArray;
+		 import java.io.IOException;
 /*    */ import java.io.Serializable;
 		 import java.util.ArrayList;
 		 import java.util.Date;
 		 import java.util.HashMap;
 		 import java.util.List;
 		 import java.util.Map;
+		 import java.util.Random;
 		 import javax.mail.MessagingException;
 /*    */ import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
+		 import javax.servlet.http.HttpSession;
 /*    */ import org.springframework.beans.factory.annotation.Autowired;
 /*    */ import org.springframework.stereotype.Controller;
-import org.springframework.ui.ModelMap;
 /*    */ import org.springframework.web.bind.annotation.RequestMapping;
 /*    */ import org.springframework.web.bind.annotation.RequestParam;
 /*    */ import org.springframework.web.bind.annotation.ResponseBody;
@@ -80,8 +83,7 @@ import org.springframework.ui.ModelMap;
 		 import org.slf4j.LoggerFactory; 
 /*    */ 
 		@Controller
-/*    */ public class LoginController
-/*    */ {
+/*    */ public class LoginController{
 /*    */ 
 /*    */   @Autowired
 /*    */   private SecurServiceIface securService;
@@ -137,6 +139,8 @@ import org.springframework.ui.ModelMap;
 		  @Autowired
 		  private BoInfraredLearnControlMapServiceIface<BoInfraredLearnControlMap, Serializable> boInfraredLearnControlMapService;//5-13
 		  
+		  @Autowired
+		  private UserRoleServiceIface<User_Role, Serializable> UserRoleService;//5-23
 //           private RequestJson requestJson;
            //new 短信验证码
            private static String Url = "http://106.ihuyi.com/webservice/sms.php?method=Submit";  
@@ -147,105 +151,140 @@ import org.springframework.ui.ModelMap;
 /*    */   @RequestMapping({"login.do"})
 //           @RequestMapping(value={"login.do"},produces="application/json;charset=UTF-8")
 		   @ResponseBody
-		   public int login(@RequestParam("loginName") String loginName, @RequestParam("loginPwd") String loginPwd, HttpServletRequest request)
-   		{   
-			HttpSession session = request.getSession();//4-27
-
-		    int UserID=0;
-//			 System.out.println("loginName="+loginName+",loginPwd="+loginPwd);
-			String userPwd=shiroEncryption(loginPwd);
-			////////////////////////////////shiro加密结束/////////////////////////////////////////////////
-			//认证
-			Subject currentUser = SecurityUtils.getSubject();
-			System.out.println("currentUser:"+currentUser);
-			if (!currentUser.isAuthenticated()) {//判断是不是已经认证的,没验证过的执行如下的操作
-				System.out.println("111111111没被授权");
-		    	// 把用户名和密码封装为 UsernamePasswordToken 对象
-		        UsernamePasswordToken token = new UsernamePasswordToken(loginName, loginPwd);//明文密码
+		   public int login(@RequestParam("loginName") String loginName, @RequestParam("loginPwd") String loginPwd, HttpServletRequest request){   
+		       HttpSession session = request.getSession();//4-27
+		       int UserID=0;
+//			   System.out.println("loginName="+loginName+",loginPwd="+loginPwd);
+		       String userPwd=shiroEncryption(loginPwd);
+		       ////////////////////////////////shiro加密结束/////////////////////////////////////////////////
+		       //认证
+		       Subject currentUser = SecurityUtils.getSubject();
+		       if (!currentUser.isAuthenticated()) {//判断是不是已经认证的,没验证过的执行如下的操作
+			       System.out.println("111111111没被授权");
+			       // 把用户名和密码封装为 UsernamePasswordToken 对象
+			       UsernamePasswordToken token = new UsernamePasswordToken(loginName, loginPwd);//明文密码
 //		        System.out.println("token:"+token);
-		        // rememberme
-		        token.setRememberMe(true);
-		        try {
-		        	System.out.println("1. " + token.hashCode());
-		        	// 执行登录. 
-		            currentUser.login(token);// Argument for byte conversion cannot be null.
-		        } 
-		        // ... catch more exceptions here (maybe custom ones specific to your application?
-		        // 所有认证时异常的父类. 
-		        catch (AuthenticationException ae) {
-		            //unexpected condition?  error?
-		        	System.out.println("登录失败: " + ae.getMessage());
-		        	return 0;
-		        }
-		    }
-			//授权  1)设计用户表、角色表、用户角色中间表、权限表和角色权限中间表； 2）实体类的映射表 ； 3）修改注册密码的加密方式（shiro加密）
-			//say who they are:
-	        //print their identifying principal (in this case, a username):
-			System.out.println("----> User [" + currentUser.getPrincipal() + "] logged in successfully.");//null
+			       // rememberme
+			       token.setRememberMe(true);
+			       try {
+			    	   System.out.println("1. " + token.hashCode());
+			    	   // 执行登录. 
+			    	   currentUser.login(token);// Argument for byte conversion cannot be null.
+			       } 
+			       catch (AuthenticationException ae) {
+			    	   System.out.println("登录失败: " + ae.getMessage());
+			    	   return 0;
+			       }
+		       }
+			   //授权  1)设计用户表、角色表、用户角色中间表、权限表和角色权限中间表； 2）实体类的映射表 ； 3）修改注册密码的加密方式（shiro加密）
+			   //say who they are:
+	           //print their identifying principal (in this case, a username):
+		       System.out.println("----> User [" + currentUser.getPrincipal() + "] logged in successfully.");//null
 
-			
-	        //test a role:
-	        // 测试是否有某一个角色. 调用 Subject 的 hasRole 方法. 
-	        if (currentUser.hasRole("admin")) {//管理员
-	        	session.setAttribute("role", "admin");
-	        	System.out.println("----> You have the admin role !");
-	        } else if(currentUser.hasRole("user")){//一般用户
-	        	session.setAttribute("role", "user");
-	        	System.out.println("----> You just have user role.");
-	        }else {//房东、经销商或代理商
-	        	session.setAttribute("role", "buyer");
-	        	System.out.println("----> 你可能是一个代理商、经销商或房东.");
-	        }
-
-	        // 测试用户是否具备某一个行为. 
-	        if (currentUser.isPermitted("Create")) {
-	        	System.out.println("----> You are permitted to delete. " +"Here are the keys - have fun!");
-	        } else {
-	        	System.out.println("Sorry, you aren't allowed to delete");//here
-	        }
-
-	        //all done - log out!
-	        // 执行登出. 调用 Subject 的 Logout() 方法. 
-	        System.out.println("---->" + currentUser.isAuthenticated());	//true        
-//	        currentUser.logout();	        
-//	        System.out.println("---->" + currentUser.isAuthenticated());    //false
-//	        System.exit(0);
-
-			SysUser sysUser = (SysUser)this.sysUserService.checkUser(loginName, userPwd);//shiro加密方式 
-            try {
-            	 UserID=sysUser.getUserId();
-            	 System.out.println("UserID:"+UserID);
-			 } catch (Exception e) {
-			    System.out.println("用户不存在！");
-			 }
-             if (GlobalMethod.isNullorEmpty(sysUser)) {
-	           System.out.println("登录名或密码不正确......");
-	           return 0;
-             }
-             String errorCode = this.securService.doCheckUser(sysUser);
-             System.out.println("errorCode:"+errorCode);
-             if (errorCode != null) {
-            	 if ("NO_POLIT".equals(errorCode))
-            		 System.out.println("未配置栏目权限......");
+		       SysUser sysUser = (SysUser)this.sysUserService.checkUser(loginName, userPwd);//shiro加密方式 
+		       try {
+		    	   UserID=sysUser.getUserId();
+		    	   System.out.println("UserID:"+UserID);
+		       } catch (Exception e) {
+		    	   System.out.println("用户不存在！");
+		       }
+		       if (GlobalMethod.isNullorEmpty(sysUser)) {
+		    	   System.out.println("登录名或密码不正确......");
+		    	   return 0;
+		       }
+		       String errorCode = this.securService.doCheckUser(sysUser);
+//		       System.out.println("errorCode:"+errorCode);
+		       if (errorCode != null) {
+		    	   if ("NO_POLIT".equals(errorCode))
+		    		   System.out.println("未配置栏目权限......");
 				return -1;
-             }else {
-            	 System.out.println("sysUser:"+sysUser);
-            	 CurrentUser currentUser01 = this.securService.createCurrentUser(sysUser);
- 
-            	 request.getSession().setAttribute("USER_INFO", currentUser01);
-               	return UserID;
-             }
-   		 }
+		       }else {
+		    	   System.out.println("sysUser:"+sysUser);
+		    	   CurrentUser currentUser01 = this.securService.createCurrentUser(sysUser);
+		    	   //test a role: 5-24
+			       // 测试是否有某一个角色. 调用 Subject 的 hasRole 方法. 
+			       if(currentUser.hasRole("buyer")) {//房东、经销商或代理商
+			    	   session.setAttribute("role", "buyer");
+			    	   System.out.println("----> You are the buyer!"); 
+			    	   session.setAttribute("userPhone", sysUser.getUserPhone());
+			       }else if (currentUser.hasRole("admin")) {//管理员
+			    	   session.setAttribute("role", "admin");
+			    	   System.out.println("----> You are the admin!");
+			       }else if(currentUser.hasRole("user")){//一般用户
+			    	   session.setAttribute("role", "user");
+			    	   System.out.println("----> You are the normal user!");
+			       }else {
+			    	   session.setAttribute("role", "superadmin");
+			    	   System.out.println("----> You are the superadmin!");
+			       }
+			    // 测试用户是否具备某一个行为. 
+//			       if (currentUser.isPermitted("Create")) {
+//			    	   System.out.println("----> You are permitted to delete. " +"Here are the keys - have fun!");
+//			       } else {
+//			    	   System.out.println("Sorry, you aren't allowed to delete");//here
+//			       }
 
-           @RequestMapping({"logout.do"})
-           public String logout(HttpServletRequest request) {
-	         System.out.println("行，我退出！");
-	         request.getSession().removeAttribute("role");//清空session信息  
-	         request.getSession().removeAttribute("userPhone");//清空session信息
-	         request.getSession().removeAttribute("USER_INFO");
-	         request.getSession().removeAttribute("SESSION_ID");
-	         return "../login";          //==login.do
-           }
+			       //all done - log out!
+			       // 执行登出. 调用 Subject 的 Logout() 方法. 
+			       System.out.println("---->" + currentUser.isAuthenticated());	//true        
+//		        currentUser.logout();	        
+//		        System.out.println("---->" + currentUser.isAuthenticated());    //false
+//		        System.exit(0);
+		    	   
+		    	   request.getSession().setAttribute("USER_INFO", currentUser01);
+               		return UserID;
+		       }
+   		 }
+   		/*
+   		 * 权限编辑
+   		 */
+   		@RequestMapping({"permissionAssignment.do"})
+		@ResponseBody
+		public String permissionAssignment(@RequestParam("role") String role,@RequestParam("name") String name,@RequestParam("userPhone") String userPhone) {
+            System.out.println("role:"+role+",name:"+name+",userPhone:"+userPhone);
+            String result="success";
+            int key=this.sysUserService.findByUserPhone(userPhone);
+            if(key <= 0) {//不存在时，新建
+            	SysUser sysUser=new SysUser();
+            	sysUser.setLoginName("guest");//固定
+            	sysUser.setLoginPwd(shiroEncryption("888888"));
+            	sysUser.setUserPhone(userPhone);
+            	sysUser.setUserName(name);
+            	SysUser sysuser01=this.sysUserService.save(sysUser);
+            	System.out.println("sysuser01:"+sysuser01);
+            	if(sysuser01 == null) {
+            		result="fail";
+            	}else {
+            		int userId=sysuser01.getUserId();
+            		User_Role userRole=new User_Role();
+            		userRole.setUserId(userId);
+            		if("admin".equals(role)) {//管理员-公司
+            			userRole.setRole_id(1);
+            		}else if("buyer".equals(role)) {//经销商，房东
+            			userRole.setRole_id(3);
+            		}else {
+            			userRole.setRole_id(2);
+            		}
+            		User_Role save=this.UserRoleService.save(userRole);
+            		if(save == null) {
+            			result="fail";
+            		}
+            	}
+            }else {
+            	result="Exsit";
+            }
+            return result;          
+        }
+   		
+        @RequestMapping({"logout.do"})
+        public String logout(HttpServletRequest request) {
+            System.out.println("行，我退出！");
+            request.getSession().removeAttribute("role");//清空session信息  
+            request.getSession().removeAttribute("userPhone");//清空session信息
+            request.getSession().removeAttribute("USER_INFO");
+            request.getSession().removeAttribute("SESSION_ID");
+            return "../login";          //==login.do
+        }
 
 		   @RequestMapping({"register.do"})
 		   @ResponseBody
@@ -407,6 +446,9 @@ import org.springframework.ui.ModelMap;
 		   public List<BoUserDevices> homePage(HttpServletRequest request) {
 			   System.out.println("获取初始化的数据!");   
 //			   String result="0";//失败用0表示
+			   
+			   HttpSession session = request.getSession();
+			   
 			   List varList=new ArrayList();
 			   
 			   List<BoUserDevices> boUserDevices=(List<BoUserDevices>)this.BoUserDevicesService.find();
@@ -421,6 +463,7 @@ import org.springframework.ui.ModelMap;
 				   totalPages = totalCount/pageSize;
 			   }
 			   for(int i=0;i<boUserDevices.size();i++) {
+				   session.setAttribute("supPhone", boUserDevices.get(i).getBoUsers().getUserPhone());//5-22
 				   if(i>=0 && i<=9) {  
 					   Map map=new HashMap();
 					   int id=boUserDevices.get(i).getUserDeviceId();
@@ -465,7 +508,7 @@ import org.springframework.ui.ModelMap;
 		   @ResponseBody
 		   public List<BoUserDevices> buyerHomePage(HttpServletRequest request,@RequestParam("userPhone") String userPhone) {
 			   System.out.println("房东获取初始化的数据!");   
-			   HttpSession session = request.getSession();
+//			   HttpSession session = request.getSession();
 //			   String result="0";//失败用0表示
 			   List varList=new ArrayList();
 			   
@@ -501,7 +544,7 @@ import org.springframework.ui.ModelMap;
 				   }
 				   
 				   if(userPhone.equals(USER_PHONE)) {
-					   session.setAttribute("userPhone", userPhone);
+//					   session.setAttribute("userPhone", userPhone);
 					   j++;
 					   Map map=new HashMap();
 					   map.put("id", id);
@@ -939,7 +982,602 @@ import org.springframework.ui.ModelMap;
 			   }
 		       return result;
 		    }
-		   
+		   /*
+		    *编辑被授权的用户
+		    */
+		   @RequestMapping({"unbind.do"})
+		   @ResponseBody
+		   public String unbind(@RequestParam("userPhone") String userPhone) {//deviceCode,status,type
+			   String result="success";
+			   System.out.println("userPhone:"+userPhone);
+			   BoUsers bouser = this.boUserssService.findByUserPhone(userPhone);//1）找到该用户
+			   if(bouser != null) {
+				   String userCode=bouser.getUserCode();
+				   String authUserCode=bouser.getAuthorizationUserCode();
+				   List<BoRoom> borooms=this.boRoomService.getAllListByUserCode(authUserCode);
+				   for(BoRoom boroom:borooms) {
+					   String rCode=boroom.getRoomCode();
+					   logger.info("要删除设备的房间："+boroom.getRoomName());
+					   List<BoHostDevice> bhs=this.boHostDeviceService.getroomCode(userCode,rCode);//被授权者userCode+授权者的房间roomCode
+					   if(bhs.size()>0) {
+						   for(BoHostDevice bh:bhs) {
+							   this.boHostDeviceService.delete(bh);
+						   }				
+					   }
+				   }
+				   //删除相应的情景模式 4-10
+				   List<BoModel> boModels0=this.boModelService.getListBy(authUserCode);
+				   for(BoModel boModel0:boModels0) {
+					   String modelId=boModel0.getModelId();
+					   logger.info("解除绑定 授权者modelId:"+modelId);
+					   List<BoModel> boModels=this.boModelService.getListBy(userCode);//一般用户的情景模式        
+					   for(BoModel boModel:boModels) {
+						   logger.info("解除绑定 被授权者modelId:"+boModel.getModelId());
+						   if(modelId.equals(boModel.getModelId())) {//删除授权者赋予的情景模式
+							   List<BoModelInfo> list01 = this.boModelInfoServicess.getBy(userCode, boModel.getModelId());//找到授权者的情景模式下对应的设备
+							   for(BoModelInfo boModelInfo:list01) {
+								   BoModelInfo remove=this.boModelInfoServicess.delete(boModelInfo);
+								   if(remove == null) {
+									   result="fail";
+								   }
+							   }
+							   BoModel remove=this.boModelService.delete(boModel);
+							   if(remove == null) {
+								   result="fail";
+							   }
+						   }
+					   }
+				   }
+				   bouser.setAuthorizationUserCode("");
+				   bouser.setLogoAccountType("M");
+				   bouser.setAccountOperationType("1");
+				   BoUsers update=this.boUserssService.update(bouser);
+				   if(update == null) {
+					   result="fail";
+				   }
+			   }else {
+				   result="fail";
+			   }
+			 return result;
+		    }
+		   /*
+		    * 授权新用户  1)获取该用户（主账户）下的情景模式
+		    */
+		   @RequestMapping({"getRooms.do"})
+		   @ResponseBody
+		   public List<BoRoom> getRooms(@RequestParam("userPhone") String userPhone) {
+			   System.out.println("userPhone:"+userPhone);
+			   List<BoRoom> varList=new ArrayList<BoRoom>();
+			   BoUsers bouser = this.boUserssService.findByUserPhone(userPhone);//1）找到该用户
+			   if(bouser != null) {
+				   String userCode=bouser.getUserCode();
+				   List<BoRoom> borooms = this.boRoomService.getUserCode(userCode);
+				   if(borooms.size() >= 0) {
+					   for(BoRoom boroom:borooms) {
+						   BoRoom room=new BoRoom();
+						   room.setRoomId(boroom.getRoomId());
+						   room.setRoomName(boroom.getRoomName());
+						   varList.add(room);
+					   }
+				   }
+			   }
+			   return varList;
+		    }
+		   /*
+		    * 授权新用户  2)获取该用户（主账户）下的设备
+		    */
+		   @RequestMapping({"getHostDevices.do"})
+		   @ResponseBody
+		   public List<BoHostDevice> getHostDevices(@RequestParam("userPhone") String userPhone) {
+			   System.out.println("userPhone:"+userPhone);
+			   List<BoHostDevice> varList=new ArrayList<BoHostDevice>();
+			   BoUsers bouser = this.boUserssService.findByUserPhone(userPhone);//1）找到该用户
+			   if(bouser != null) {
+				   String userCode=bouser.getUserCode();
+				   List<BoHostDevice> boHosts = this.boHostDeviceService.getListByUserCode(userCode);
+				   if(boHosts.size() >= 0) {
+					   for(BoHostDevice boHost:boHosts) {
+						   BoHostDevice boHostDevice=new BoHostDevice();
+						   boHostDevice.setNickName(boHost.getNickName());
+						   varList.add(boHostDevice);
+					   }
+				   }
+			   }
+			   return varList;
+		    }
+		   /**
+		    * 
+		    *授权新用户  3)获取该用户（主账户）下的情景模式  findBoModelByPhone
+		    * @return
+		    */
+		   /*
+		    *授权用户 
+		    */
+		   @RequestMapping({"addsubUser.do"})
+		   @ResponseBody
+		   public String addsubUser(@RequestParam("userPhone") String userPhone,@RequestParam("role") String role,@RequestParam("rooms") String rooms,@RequestParam("hostDevices") String hostDevices,@RequestParam("boModels") String boModels, HttpServletRequest request) {//deviceCode,status,type
+//			   System.out.println("userPhone:"+userPhone+",role:"+role+",rooms:"+rooms+",hostDevices:"+hostDevices+",boModels:"+boModels);
+			   String result="success";
+			   Md5 md5=new Md5();
+			   //json字符串 转 list
+			   JSONArray jsonArray = JSONArray.fromObject(rooms);
+		       List<String> boRooms = (List)jsonArray;
+		       
+		       JSONArray jsonArray1 = JSONArray.fromObject(hostDevices);
+		       List<String> boHostDs = (List)jsonArray1;
+
+		       JSONArray jsonArray2 = JSONArray.fromObject(boModels);
+		       List<String> bomodels = (List)jsonArray2;
+
+		       String phone=(String) request.getSession().getAttribute("supPhone");
+//		       System.out.println("session中的userPhone:"+phone);
+		       BoUsers supuser=this.boUserssService.findByUserPhone(phone);
+		       BoUsers boUser=this.boUserssService.findByUserPhone(userPhone);
+		       if(boUser == null) {//如果不存在，则新建，初始密码是888888
+		    	   boUser = UserUtil.save(userPhone, md5.getMD5ofStr("888888"), "");
+		    	   BoUsers save = (BoUsers)this.boUserssService.save(boUser);
+//		           System.out.println("userCode:"+boUser.getUserCode());
+		       }
+		       String accountOperation;
+		       System.out.println("true Or false:"+"admin".equals(role));
+		       if("admin".equals(role)) {//授权管理员
+		    	   accountOperation="1";
+		       }else {
+		    	   accountOperation="2";
+		    	   List<BoHostDevice> boHostDevices=this.boHostDeviceService.findHostByUserPhone(phone);
+		    	   System.out.println("boHostDevices:"+boHostDevices);
+		    	   for(BoHostDevice boHostDevice:boHostDevices) {
+		    		   String nickN=boHostDevice.getNickName();
+		    		   String address=boHostDevice.getDeviceAddress();
+		    		   for(int i=0;i<boHostDs.size();i++) {
+		    			   if(nickN.equals(boHostDs.get(i))) {//相同时保存里面的信息   分两种情况：已创建，未创建
+		    				   BoHostDevice bhostD=this.boHostDeviceService.findBydeviceAddress(boUser.getUserCode(),address);
+		    				   if(bhostD == null) {
+		    					   //new
+		    					   BoHostDevice boHostDevice01 = new BoHostDevice();
+		    					   boHostDevice01.setBoDevice(boHostDevice.getBoDevice());
+		    					   boHostDevice01.setBoUsers(boUser);
+		    					   boHostDevice01.setDeviceType(boHostDevice.getDeviceType());
+		    					   boHostDevice01.setDeviceAddress(boHostDevice.getDeviceAddress());
+		    					   boHostDevice01.setNickName(nickN);
+		    					   boHostDevice01.setWhetherQueryStateSign("");
+		    					   boHostDevice01.setIco(boHostDevice.getIco());
+		    					   boHostDevice01.setDeviceNum(Integer.valueOf(1));
+		    					   boHostDevice01.setPushSet("");
+		    					   boHostDevice01.setState("");
+		    					   boHostDevice01.setBoRoom(boHostDevice.getBoRoom());//被授权用户对应的房间
+		    					   boHostDevice01.setDeviceClassify(false);
+		    					   if(boHostDevice.getDeviceType().equals("100")) {//如果是摄像头就存入ValidationCode字段    				
+		    						   boHostDevice01.setValidationCode(boHostDevice.getValidationCode());
+		    						   boHostDevice01.setMntDelete("Y");
+		    					   }else {		
+		    						   boHostDevice01.setMntDelete("N");//这个字段也很关键
+		    					   }
+		    					   boHostDevice01.setIsAuthorized(true);	
+//				    		   this.boHostDeviceService.save(boHostDevice01);
+		    				   }else {
+		    					   bhostD.setIsAuthorized(true);
+		    					   this.boHostDeviceService.update(bhostD);
+		    				   }
+		    			   }else {//如果已经存在，修改设备的isAuthorized
+		    				   BoHostDevice bhostD=this.boHostDeviceService.findBydeviceAddress(boUser.getUserCode(),address);
+		    				   if(bhostD!=null) {
+		    					   bhostD.setIsAuthorized(false);
+		    					   this.boHostDeviceService.update(bhostD);
+		    				   }
+		    			   }
+		    		   }
+		    	   }
+		    	   List<BoModel> models=this.boModelService.getListBys(supuser.getUserCode());
+		    	   System.out.println("models:"+models);
+		    	   for(BoModel model:models) {
+		    		   String modelName=model.getName();
+		    		   String modelId=model.getModelId();
+		    		   for(int i=0;i<bomodels.size();i++) {
+		    			   if(modelName.equals(bomodels.get(i))) {//该模式赋予给被授权者   分为两种情况：已存在，不存在   （编辑和添加放一起考虑了）
+		    				   BoModel bomodell=this.boModelService.find(boUser.getUserCode(), modelId);
+		    				   if(bomodell == null) {
+		    					   BoModel bomodel=new BoModel();
+		    					   bomodel.setBoUsers(boUser);
+		    					   bomodel.setModelId(model.getModelId());
+		    					   bomodel.setName(model.getName());
+		    					   bomodel.setIco(model.getIco());
+		    					   bomodel.setFlag(false);
+		    					   bomodel.setWeek("");
+		    					   bomodel.setTime("");
+						          BoModel save = (BoModel)this.boModelService.save(bomodel);
+		    					   //boModelInfo(情景模式下的关联的设备)
+		    					   List<BoModelInfo> boModelInfos=this.boModelInfoServicess.getBy(supuser.getUserCode(), modelId);
+		    					   for(BoModelInfo boModelInfo:boModelInfos) {
+		    						   BoModelInfo bm=this.boModelInfoServicess.find(boUser.getUserCode(), modelId);
+		    						   if(bm == null) {
+		    							   BoModelInfo bom=new BoModelInfo();
+				    					   bom.setBoModel(save);
+				    					   bom.setBoUsers(boUser);
+				    					   bom.setBoDevice(boModelInfo.getBoDevice());//通过设备找到主机
+				    					   bom.setDeviceAddress(boModelInfo.getDeviceAddress());
+				    					   bom.setDeviceType(boModelInfo.getDeviceType());
+				    					   bom.setControlCommand(boModelInfo.getControlCommand());
+				    					   bom.setDelayValues(boModelInfo.getDelayValues());
+				    					   BoModelInfo save01 = (BoModelInfo)this.boModelInfoServicess.save(bom);
+		    						   }
+		    					   }
+		    				   }
+		    			   }else {//没有相应的bomodel就删除了，连带bomodelInfo的数据
+		    				   BoModel bomodell=this.boModelService.find(boUser.getUserCode(), modelId);
+		    				   if(bomodell != null) {
+		    					   List<BoModelInfo> boModelInfos=this.boModelInfoServicess.getBy(boUser.getUserCode(), modelId); 
+		    					   if(boModelInfos.size() > 0) {
+		    						   for(BoModelInfo boModelInfo:boModelInfos) {
+		    							   this.boModelInfoServicess.delete(boModelInfo);
+		    						   }
+		    					   }
+		    					   this.boModelService.delete(bomodell);
+		    				   }
+		    			   }
+		    		   }
+		    	   }
+		       }
+		       String generateTokeCode = TokeUtil.generateTokeCode();
+		       String generateTokeCodes = TokeUtil.generateTokeCodes();
+		       boUser.setAccountOperationType(accountOperation);
+		       boUser.setAuthorizationUserCode(supuser.getUserCode());
+		       boUser.setLogoAccountType("S");
+		       BoUsers save02=this.boUserssService.save(boUser);
+		       if(save02 == null){
+		    	   result="fail";
+		       }
+			   return result;
+		    }
+		   /*
+		    * 添加情景模式 addBoModel
+		    */
+		   @RequestMapping({"addBoModel.do"})
+		   @ResponseBody
+		   public String addBoModel(@RequestParam("modelName") String modelName,@RequestParam("boHostDevices") String boHostDevices,HttpServletRequest request) {
+			   String  result="success";
+			   //随机生成六位数字 0-9，a-z,A-Z
+			   String s = "1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+			   Random r = new Random();
+			   String end="";
+			   for (int i =0; i < 6; i++ )
+			   {
+				   int n = r.nextInt(62);
+				   end += s.substring(n, n+1);
+			   }
+			   
+			   JSONArray jsonArray = JSONArray.fromObject(boHostDevices);
+		       List<String> bhds = (List)jsonArray; 
+		       String userPhone=(String) request.getSession().getAttribute("supPhone");
+		       BoUsers boUser=this.boUserssService.findByUserPhone(userPhone);
+		       BoModel boModel=this.boModelService.findby(boUser.getUserCode(), modelName);
+		       if(boModel == null) {
+		    	   BoModel bomodel=new BoModel();
+				   bomodel.setBoUsers(boUser);
+				   bomodel.setModelId(end);
+				   bomodel.setName(modelName);
+				   bomodel.setIco("huijia");//这里给了一个固定的值
+				   bomodel.setFlag(false);
+				   bomodel.setWeek("");
+				   bomodel.setTime("");
+				   BoModel save = (BoModel)this.boModelService.save(bomodel);
+				   //boModelInfo(情景模式下的关联的设备)
+				   List<BoHostDevice> boHDevices=this.boHostDeviceService.findHostByUserPhone(userPhone);
+				   for(BoHostDevice boHDevice:boHDevices) {
+					   String nickName=boHDevice.getNickName();
+					   for(int i=0;i<bhds.size();i++) {
+						   if(nickName.equals(bhds.get(i))) {//设备存在，可以添加
+							   BoModelInfo bom=new BoModelInfo();
+							   bom.setBoModel(save);
+							   bom.setBoUsers(boUser);
+							   bom.setBoDevice(boHDevice.getBoDevice());//通过设备找到主机
+							   bom.setDeviceAddress(boHDevice.getDeviceAddress());
+							   bom.setDeviceType(boHDevice.getDeviceType());
+							   bom.setControlCommand("100");//默认打开
+							   bom.setDelayValues(300);
+							   BoModelInfo save01 = (BoModelInfo)this.boModelInfoServicess.save(bom);
+						   }
+					   }
+				   }
+		       }else {
+		    	   result="fail";
+		       }
+			   return result;
+		   }
+		   /*
+		    *编辑被授权用户
+		    */
+		   @RequestMapping({"editsubUser.do"})
+		   @ResponseBody
+		   public String editsubUser(@RequestParam("nickName") String nickName,@RequestParam("userPhone") String userPhone,@RequestParam("userSex") String userSex,@RequestParam("signature") String signature) {//deviceCode,status,type
+//			   System.out.println("nickName:"+nickName+",userPhone:"+userPhone+",userSex:"+userSex+",signature:"+signature);
+			   String result="success";
+			   BoUsers bouser = this.boUserssService.findByUserPhone(userPhone);//1）找到该用户
+			   bouser.setUserName(nickName);
+			   bouser.setUserPhone(userPhone);
+			   bouser.setUserSex(userSex);
+			   bouser.setSignature(signature);
+			   BoUsers update=this.boUserssService.update(bouser);
+			   if(update == null) {
+				   result="fail";
+			   }
+			   return result;
+		    }
+		   /*
+		    * 根据 手机号，找到用户的情景模式
+		    */
+		   @RequestMapping({"findBoModelByPhone.do"})
+		   @ResponseBody
+		   public List<BoDevice> findBoModelByPhone(@RequestParam("userPhone") String userPhone) {//deviceCode,status,type
+			   List list=new ArrayList<BoDevice>();
+			   BoUsers bouser = this.boUserssService.findByUserPhone(userPhone);//1）找到该用户
+			   String userCode=bouser.getUserCode();
+			   List<BoModel> boModels=this.boModelService.getListBy(userCode);//2）找到该用户下的情景模式
+			   //Page类
+			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+			   int totalCount=boModels.size();
+			   int pageSize=page.getPageSize();
+			   int totalPages=1;
+			   if(totalCount%pageSize !=0){
+				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = totalCount/pageSize;
+			   }	
+			   System.out.println("totalPages:"+totalPages+",totalCount:"+totalCount);
+			   for(BoModel boModel:boModels) {
+				   BoModel model=new BoModel();
+				   model.setId(boModel.getId());
+				   model.setName(boModel.getName());//没有
+				   list.add(model);
+			   }
+			   //用于向前台传递的数据  for分页
+			   page.setCurrentPage(1);
+			   page.setTotalPages(totalPages);
+			   list.add(page);
+		       return list;
+		    }
+		   /*
+		    * 删除情景模式
+		    */
+		   @RequestMapping({"delModelBykey.do"})
+		   @ResponseBody
+		   public String delModelBykey(@RequestParam("id") String id,@RequestParam("userPhone") String userPhone) {
+			   String result="success";
+			   int Id=Integer.parseInt(id);
+			   try {
+				   BoUsers boUser=this.boUserssService.findByUserPhone(userPhone);
+				   BoModel boModel=this.boModelService.findByKey(Id);
+				   if(boModel != null) {
+					   String userCode=boUser.getUserCode();
+					   //删除情景模式下的设备
+					   List<BoModelInfo> boModelInfos=this.boModelInfoServicess.getBy(userCode, boModel.getModelId());
+					   for(BoModelInfo boModelInfo:boModelInfos) {
+						   this.boModelInfoServicess.delete(boModelInfo);
+					   }
+					   //删除情景模式
+					   this.boModelService.delete(boModel);
+				   }else {
+					   result="fail";
+				   }
+				} catch (Exception e) {
+					result="fail";
+				}
+			   return result;
+		   }
+		   /*
+		    * 添加主机
+		    */
+		   @RequestMapping({"addUserDevice.do"})
+		   @ResponseBody
+		   public String addUserDevice(@RequestParam("deviceCode") String deviceCode,@RequestParam("nickName") String nickName,@RequestParam("userPhone") String userPhone) {
+			   System.out.println("deviceCode:"+deviceCode+",nickName:"+nickName+",userPhone:"+userPhone);
+			   String result="error";
+			   try {
+				   BoDevice boDevice=this.boDeviceService.findByCode(deviceCode);
+				   if(boDevice != null) {
+					   List<BoUserDevices> oldboUserDevices=this.boUserDevicesServicess.getListByDeviceCode(deviceCode);
+					   if(oldboUserDevices.size() > 0) {
+						   result="fail";
+					   }else {
+						   BoUsers boUser=this.boUserssService.findByUserPhone(userPhone);
+						   BoUserDevices boUserDevice=new  BoUserDevices();
+						   boUserDevice.setBoUsers(boUser);
+						   boUserDevice.setBoDevice(boDevice);
+						   boUserDevice.setNickName(nickName);
+						   BoUserDevices save=this.boUserDevicesServicess.save(boUserDevice);
+						   if(save != null) {
+							   result="success";
+						   }
+					   }
+				   }else {
+					   result="No Such Device"; 
+				   }
+				} catch (Exception e) {
+					System.out.println("出现异常");
+				}
+			   return result;
+		   }
+		   /*
+		    * 编辑主机   
+		    */
+		   @RequestMapping({"editUserDevice.do"})
+		   @ResponseBody
+		   public String editUserDevice(@RequestParam("deviceId") String deviceId,@RequestParam("deviceCode") String deviceCode,@RequestParam("nickName") String nickName,@RequestParam("userPhone") String userPhone) {
+//			   System.out.println("deviceId:"+deviceId+",deviceCode:"+deviceCode+",userPhone:"+userPhone+",nickName:"+nickName);
+			   String result="success";
+			   try {
+				   int device_ID=Integer.parseInt(deviceId);
+				   BoUsers boUser=this.boUserssService.findByUserPhone(userPhone);
+				   String userCode=boUser.getUserCode();
+				   List<BoUserDevices> boUserDevices=this.boUserDevicesServicess.getBy(userCode);
+				   for(BoUserDevices boUserDevice:boUserDevices) {
+					   if(boUserDevice.getBoDevice().getDeviceId() == device_ID) {
+						   boUserDevice.setNickName(nickName);
+						   boUserDevice.getBoDevice().setDeviceCode(deviceCode);
+						   BoUserDevices update=this.boUserDevicesServicess.update(boUserDevice);
+						   if(update == null) {
+							   result="fail";
+						   }
+					   }
+				   }
+				} catch (Exception e) {
+					result="fail";
+				}
+			   return result;
+		   }
+		   /*
+		    * 解绑主机
+		    */
+		   @RequestMapping({"unbindDevice.do"})
+		   @ResponseBody
+		   public String unbindDevice(@RequestParam("deviceCode") String deviceCode,@RequestParam("userPhone") String userPhone) {
+//			   System.out.println("deviceCode:"+deviceCode+",userPhone:"+userPhone);
+			   String result="success";
+			   try {
+				   BoUsers boUser=this.boUserssService.findByUserPhone(userPhone);
+				   String userCode=boUser.getUserCode();
+				   BoUserDevices boUserDevice=this.boUserDevicesServicess.findBy(userCode,deviceCode);
+//				   System.out.println("boUserDevice:"+boUserDevice);
+				   this.boUserDevicesServicess.delete(boUserDevice);
+				} catch (Exception e) {
+					result="fail";
+				}
+			   return result;
+		   }
+		   /*
+		    * 显示房间设备
+		    */
+		   @RequestMapping({"showRDbyPhone.do"})
+		   @ResponseBody
+		   public List<BoHostDevice> showRDbyPhone(@RequestParam("userPhone") String userPhone) {
+			   List list=new ArrayList();
+			   BoUsers boUser=this.boUserssService.findByUserPhone(userPhone);
+			   String userCode=boUser.getUserCode();
+		       List<BoHostDevice> boHosts = this.boHostDeviceService.getListByUserCode(userCode);	
+			   for(int i=0;i<boHosts.size();i++) {
+				   Map map=new HashMap();
+		        	int id=boHosts.get(i).getId();
+		        	String floorName="",floorCode="",roomName="",roomCode="";
+		        	if(boHosts.get(i).getBoRoom() != null) {
+		        		floorCode=boHosts.get(i).getBoRoom().getFloorCode();
+		        		BoFloor boFloor=this.boFloorService.findByFloorCode(floorCode);
+		        		floorName=boFloor.getFloorName();
+		        		roomName=boHosts.get(i).getBoRoom().getRoomName();
+		        		roomCode=boHosts.get(i).getBoRoom().getRoomCode();
+		        	}
+		        	String nickName=boHosts.get(i).getNickName();
+		        	map.put("id", id);
+		        	map.put("floorName",floorName);
+		        	map.put("floorCode",floorCode);
+		        	map.put("roomName",roomName);
+		        	map.put("roomCode",roomCode);
+		        	map.put("nickName",nickName);
+		        	list.add(map);
+			   }
+			   //用于向前台传递的数据  for分页
+		       return list;
+		   }
+		   /*
+		    * 删除楼层
+		    */
+		   @RequestMapping({"delFloor.do"})
+		   @ResponseBody
+		   public String delFloor(@RequestParam("floorCode") String floorCode) {
+			   String result="success";
+			   try {
+				   BoFloor boFloor=this.boFloorService.findByFloorCode(floorCode);
+//				   System.out.println("boFloor:"+boFloor);
+				   this.boFloorService.delete(boFloor);
+				} catch (Exception e) {
+					result="fail";
+				}
+				   return result;
+		   };
+		   /*
+		    * 删除房间
+		    */
+		   @RequestMapping({"delRoom.do"})
+		   @ResponseBody
+		   public String delRoom(@RequestParam("roomCode") String roomCode) {
+			   String result="success";
+			   try {
+				   BoRoom boRoom=this.boRoomService.findByRommCode(roomCode);
+//				   System.out.println("boRoom:"+boRoom);
+				   this.boRoomService.delete(boRoom);
+				} catch (Exception e) {
+					result="fail";
+				}
+				   return result;
+		   };
+		   /*
+		    * 编辑设备        修改房间，设备名称
+		    */
+		   @RequestMapping({"edithostDevice.do"})
+		   @ResponseBody
+		   public String edithostDevice(@RequestParam("id") String id,@RequestParam("floorCode") String floorCode,@RequestParam("floorName") String floorName,@RequestParam("roomName") String roomName,@RequestParam("nickName") String nickName) {
+			   String result="success";
+			   try {
+				   int Id=Integer.parseInt(id);
+				   BoHostDevice boHostDevice=this.boHostDeviceService.findByKey(Id);
+				   if(boHostDevice != null) {
+					   BoFloor boFloor=this.boFloorService.findByFloorCode(floorCode);
+					   if(boFloor != null) {
+						   List<BoRoom> boRooms=this.boRoomService.getAllListByFloorCode(floorCode);
+						   int i=0;//用于作为是否修改设备信息的标识
+						   for(BoRoom boRoom:boRooms) {
+							   if(boRoom.getRoomName().equals(roomName)) {
+								   i++;
+								   boHostDevice.setBoRoom(boRoom);//改变设备的房间
+								   boHostDevice.setNickName(nickName);//修改设备昵称
+								   this.boHostDeviceService.update(boHostDevice);
+								   boFloor.setFloorName(floorName);//修改楼层昵称
+								   this.boFloorService.update(boFloor);
+							   }
+						   }
+						   if(i==0) {
+							   result="RoomNotExsit";
+						   }
+					   }else {
+						   result="fail";
+					   }
+				   }else {
+					   result="fail";
+				   }
+				} catch (Exception e) {
+					result="fail";
+				}
+				   return result;
+		   };
+		   /*
+		    * 添加房间  5-18
+		    */
+		   @RequestMapping({"addRoom.do"})
+		   @ResponseBody
+		   public String addRoom(@RequestParam("userPhone") String userPhone,@RequestParam("floorName") String floorName,@RequestParam("roomName") String roomName) {
+			   String result="success";
+			   BoUsers bouser = this.boUserssService.findByUserPhone(userPhone);
+			   if(bouser != null) {
+				   String userCode=bouser.getUserCode();
+				   BoFloor boFloor=this.boFloorService.findByFloorName(userCode, floorName);
+				   if(boFloor != null) {
+					   String floorCode=boFloor.getFloorCode();
+					   List<BoRoom> exsitedRooms=this.boRoomService.getAllListByFloorCode(floorCode);
+					   for(BoRoom boRoom:exsitedRooms) {
+						   if(boRoom.getRoomName().equals(roomName)) {
+							   result="Exsit";//说明房间已存在
+						   }else {
+							   BoRoom room=RoomUtil.save(userCode,floorName,floorCode,roomName);
+							   this.boRoomService.save(room);
+						   }
+					   }
+				   }else {
+					   result="NotExsit";//不存在该楼层
+				   }
+			   }else {
+				   result="fail";
+			   }
+			   return result;
+		   };
 		   /*
 		    * 用户管理模块-全部用户【房东】 5-3
 		    */
@@ -947,9 +1585,9 @@ import org.springframework.ui.ModelMap;
 		   @ResponseBody
 		   public List<BoUsers> findUsersByPhone(@RequestParam("userPhone") String userPhone) {
 			   List varList=new ArrayList<BoUsers>();
-			   BoUsers bouser = this.boUserssService.findByUserPhone(userPhone);//找到主账户
+			   BoUsers bouser = this.boUserssService.findByUserPhone(userPhone);//1）找到主账户
 			   String userCode=bouser.getUserCode();
-			   List<BoUsers> bousers=this.boUserssService.getAllList();
+			   List<BoUsers> bousers=this.boUserssService.getAllList();//2）找到所有用户
 			   //Page类
 			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
 			   int totalCount=bousers.size();
@@ -957,7 +1595,7 @@ import org.springframework.ui.ModelMap;
 			   int totalPages=1;
 			   int count=0;
 			   for(int i=0;i<bousers.size();i++) {
-				   if(userCode.equals(bousers.get(i).getAuthorizationUserCode())) {
+				   if(userCode.equals(bousers.get(i).getAuthorizationUserCode())) {//3）找到次账户
 					   count++;
 				   }
 			   }
@@ -1072,7 +1710,7 @@ import org.springframework.ui.ModelMap;
 			   String result="success";
 			   Md5 md5 = new Md5();
 			   //找到新号码对应的用户，取出密码
-			   BoUsers newTel=this.boUserssService.findByUserPhone(newPhone);
+			   BoUsers newTel=this.boUserssService.findByUserPhone(newPhone);//新账户
 			   String pwd="";
 			   String userCode="";
 			   String headPic="";
@@ -1090,7 +1728,7 @@ import org.springframework.ui.ModelMap;
 					sex=newTel.getUserSex();
 					mail=newTel.getUserEmail();
 				}
-			   BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
+			   BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);//老账户
 			   String oldPWD=oldTel.getUserPwd();
 			   String oldHeadPic=oldTel.getHeadPic();
 			   String oldUserName=oldTel.getUserName();
@@ -1110,7 +1748,7 @@ import org.springframework.ui.ModelMap;
 					   oldTel.setUserEmail(mail);
 				   }
 				   BoUsers update=this.boUserssService.update(oldTel);//此时新旧两个账号的号码都是新的号码，新账号应该初始化（存放旧号码）==最终目的：老账号-新号码，删除旧账号，注册账号
-					BoUsers newTel01=this.boUserssService.findByKey(userId);
+				   BoUsers newTel01=this.boUserssService.findByKey(userId);
 					if(update != null) {
 //						logger.info("update!=null");
 						//不过不排除新用户加了情景模式  得先检查是否有情景模式，然后删除新用户
@@ -1160,35 +1798,34 @@ import org.springframework.ui.ModelMap;
 							}
 						}
 						//删除新账号
-						BoUsers del=this.boUserssService.delete(newTel01);
-						   //注册新账号（放入老账号的手机号、密码以及头像等信息）
-						   BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
-						   user.setHeadPic(oldHeadPic);
-						   user.setUserName(oldUserName);
-						   user.setSignature(oldSignature);
-						   user.setUserSex(oldSex);
-						   user.setUserEmail(oldMail);
-//					        this.boUserServicess.update(save);
-						   BoUsers save = (BoUsers)this.boUserServicess.save(user);
-						   if(save != null) {
-								//注册成功时 默认添加一个楼层和四个房间
-								BoFloor floor=FloorUtil.save(save.getUserCode());
-								BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
-								//String userCode,String floorName,String floorCode,String roomName	
-//								System.out.println("楼层名称："+saveF.getFloorName());
-								String uCode=saveF.getUserCode();
-								String floorName=saveF.getFloorName();
-//								String floorName="我的家";
-								String floorCode=saveF.getFloorCode();
-								BoRoom room1=RoomUtil.save(uCode,floorName,floorCode,"客厅");
-								BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
-								BoRoom room2=RoomUtil.save(uCode,floorName,floorCode,"卧室");
-								BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
-								BoRoom room3=RoomUtil.save(uCode,floorName,floorCode,"厨房");
-								BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
-								BoRoom room4=RoomUtil.save(uCode,floorName,floorCode,"卫生间");
-								BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
-							}else {
+						BoUsers del=this.boUserssService.delete(newTel01);//有些异常，没走到这步，就会有两个相同号码的用户
+					    //注册新账号（放入老账号的手机号、密码以及头像等信息）
+					    BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
+					    user.setHeadPic(oldHeadPic);
+					    user.setUserName(oldUserName);
+					    user.setSignature(oldSignature);
+					    user.setUserSex(oldSex);
+					    user.setUserEmail(oldMail);
+					    BoUsers save = (BoUsers)this.boUserServicess.save(user);
+					    if(save != null) {
+							//注册成功时 默认添加一个楼层和四个房间
+							BoFloor floor=FloorUtil.save(save.getUserCode());
+							BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
+							//String userCode,String floorName,String floorCode,String roomName	
+	//								System.out.println("楼层名称："+saveF.getFloorName());
+							String uCode=saveF.getUserCode();
+							String floorName=saveF.getFloorName();
+	//								String floorName="我的家";
+							String floorCode=saveF.getFloorCode();
+							BoRoom room1=RoomUtil.save(uCode,floorName,floorCode,"客厅");
+							BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
+							BoRoom room2=RoomUtil.save(uCode,floorName,floorCode,"卧室");
+							BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
+							BoRoom room3=RoomUtil.save(uCode,floorName,floorCode,"厨房");
+							BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
+							BoRoom room4=RoomUtil.save(uCode,floorName,floorCode,"卫生间");
+							BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
+						}else {
 								result="fail";
 							}
 					}else {
@@ -1611,9 +2248,11 @@ import org.springframework.ui.ModelMap;
 			   for(BoUserDevices boUserDevice:buds) {
 					   BoDevice user=new BoDevice();
 			        	user.setDeviceId(boUserDevice.getBoDevice().getDeviceId());
+			        	user.setDeviceName(boUserDevice.getNickName());;
 					    user.setDeviceCode(boUserDevice.getBoDevice().getDeviceCode());
 					    System.out.println("deviceCode:"+boUserDevice.getBoDevice().getDeviceCode());
 					    user.setStatus(boUserDevice.getBoDevice().getStatus());
+					    user.setHostStatus(boUserDevice.getBoDevice().getHostStatus());
 					    user.setType(boUserDevice.getBoDevice().getType());
 					    list.add(user);
 			   }
@@ -1903,8 +2542,9 @@ import org.springframework.ui.ModelMap;
 			   list.add(page);
 		       return list;
 		    }
-		   
-		 //主机管理模块-用户绑定与主机解绑【房东】
+		   /*
+		    * 通过手机号找设备   (设备及设备的删除)
+		    */
 		   @RequestMapping({"findHostDByPhone.do"})
 		   @ResponseBody
 		   public List<BoHostDevice> findHostDByPhone(@RequestParam("userPhone") String userPhone) {
@@ -1951,6 +2591,53 @@ import org.springframework.ui.ModelMap;
 			   list.add(page);
 		       return list;
 		    }
+		 //主机管理模块-用户绑定与主机解绑【房东】
+		   @RequestMapping({"findusersDByPhone.do"})
+		   @ResponseBody
+		   public List<BoUserDevices> findusersDByPhone(@RequestParam("userPhone") String userPhone) {
+			   List list=new ArrayList();
+			   BoUsers bouser = this.boUserssService.findByUserPhone(userPhone);//找到主账户
+			   String userCode=bouser.getUserCode();
+			   List<BoUserDevices> boHosts=this.BoUserDevicesService.getBy(userCode);
+			   
+			   //Page类
+			   Page page=new Page();//假设给定：总条数 11条；总页数 2页；开始行数是 10；结束行是10；
+			   int totalCount=boHosts.size();
+			   int pageSize=page.getPageSize();
+			   int totalPages=1;
+			   if(totalCount%pageSize !=0){
+				   totalPages = totalCount/pageSize+1;           //只要有小数都+1
+			   }else {
+				   totalPages = totalCount/pageSize;
+			   }	
+//			   System.out.println("totalPages:"+totalPages);
+			   
+			   for(int i=0;i<boHosts.size();i++) {
+				   if(i>=0 && i<=9) {
+					   Map map=new HashMap();
+			        	int id=boHosts.get(i).getUserDeviceId();
+			        	String deviceCode=boHosts.get(i).getBoDevice().getDeviceCode();
+			        	String nick_name=boHosts.get(i).getNickName();
+//			        	System.out.println("nickName:"+nick_name);
+			        	int DEVICE_ID=boHosts.get(i).getBoDevice().getDeviceId();
+			        	int USER_ID=boHosts.get(i).getBoUsers().getUserId();
+			        	String deviceAddress=boHosts.get(i).getBoDevice().getAddress();
+			        	map.put("id", id);
+			        	map.put("deviceCode",deviceCode);
+			        	map.put("userPhone",userPhone);
+			        	map.put("nick_name",nick_name);
+			        	map.put("DEVICE_ID", DEVICE_ID);
+			        	map.put("deviceAddress",deviceAddress);
+			        	map.put("USER_ID", USER_ID);
+			        	list.add(map);
+				   }
+			   }
+			   //用于向前台传递的数据  for分页
+			   page.setCurrentPage(1);
+			   page.setTotalPages(totalPages);
+			   list.add(page);
+		       return list;
+		    }
 		   
 		   @RequestMapping({"findudeviceByIndex.do"})
 		   @ResponseBody
@@ -1966,7 +2653,7 @@ import org.springframework.ui.ModelMap;
 			   List<BoUserDevices> boUserDevices=new ArrayList();
 			   if(phone == null) {
 //				   System.out.println("null");
-				   boUserDevices = this.BoUserDevicesService.find();		  //直接把这结果传给前台 出现Cannot call sendError() after the response has been committed     
+				   boUserDevices = this.BoUserDevicesService.find();		  
 				   //Page类
 				   totalCount=boUserDevices.size();
 				   if(totalCount%pageSize !=0){
@@ -2163,7 +2850,7 @@ import org.springframework.ui.ModelMap;
 		    */
 		   @RequestMapping({"delHost.do"})
 		   @ResponseBody
-		   public String delHost(@RequestParam("id") int id,@RequestParam("DEVICE_ID") int DEVICE_ID,@RequestParam("USER_ID") int USER_ID) {
+		   public String delHost(@RequestParam("id") int id) {
 			   String id1=id+"";
 				  try {
 					  this.BoUserDevicesService.deleteByKey(id1);//删除该条记录
@@ -2223,6 +2910,7 @@ import org.springframework.ui.ModelMap;
 			   List<BoHostDevice> boHosts=new ArrayList();
 			   HttpSession session = request.getSession();
 			   String phone=(String) session.getAttribute("userPhone");
+//			   System.out.println("phone:"+phone);
 			   if(phone == null) {
 				   if("".equals(addrOtel)) {//搜索框中不为空，此时执行的分页是基于搜索的
 					   boHosts = this.boHostDeviceService.getAllHostD();		  //直接把这结果传给前台 出现Cannot call sendError() after the response has been committed
@@ -2237,8 +2925,10 @@ import org.springframework.ui.ModelMap;
 				   
 			   }else{
 				   BoUsers bouser = this.boUserssService.findByUserPhone(phone);
+//				   System.out.println("bouser:"+bouser);
 				   String userCode=bouser.getUserCode();
 				   boHosts=this.boHostDeviceService.getUserCode(userCode);
+//				   System.out.println("boHosts:"+boHosts);
 			   }
 //			   System.out.println("boHost:"+boHosts);
 			   //Page类
@@ -2529,7 +3219,7 @@ import org.springframework.ui.ModelMap;
          public static void main(String[] args) {
         	 LoginController lg=new LoginController();
         	 lg.shiroEncryption("guest");//94c47c216d1ff3410de83390d437d1f1
-        	 System.out.println("密码》"+lg.shiroEncryption("guest"));
+        	 System.out.println("密码》"+lg.shiroEncryption("maibao"));
 		}
 	}
 

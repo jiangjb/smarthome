@@ -74,7 +74,6 @@
 /* 84 */       currentUser.setUserType("SUP");
 /*    */     } else {
 ///* 86 */       currentUser.setMenuRole(sysUser.getSysMenuRole().getMenuRoleCode());//可以到这里啦，庆祝
-	             System.out.println("空指针异常");
 /*    */     }
 /*    */ 
 /* 89 */     return currentUser;

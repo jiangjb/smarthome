@@ -88,20 +88,6 @@
 					
 				</tbody>
 			</table>
-			
-			<div class="control-group" id="tel" style="display:none;position:fixed;left:40%;top:30%;margin-left:width/2;margin-top:height/2;">
-					<div class="controls">
-						<div class="main_input_box">
-							<span>
-								<input type="text" name="userPhone" id="userPhone"  value="" placeholder="请输入管理员账号(手机号)"/>
-							</span>
-							<span>
-								<input type="button" style="border:none;height:30px;margin-top:-10px;" value="搜索"  onclick="buyerSearch();"  title="检索"></input>
-							</span>
-						</div>
-					</div>
-			</div>
-			
 			<input type="hidden" id="savedeviceCode" name="savedeviceCode" value="" placeholder="这个隐藏域用于存放deviceCode"> 
 			<table id="table_report" class="table table-striped table-bordered table-hover">
 				<thead>
@@ -218,20 +204,15 @@
 		<script type="text/javascript" src="<%=WEBPATH3 %>/static/js/jquery.tips.js"></script><!--提示框-->
 		<script type="text/javascript">
 		$(function(){
-			var session= '<%= session.getAttribute("role")%>';
+			/* 这个用于判断用户的角色 */
+			var role= '<%= session.getAttribute("role")%>';
+			/* alert("role:"+role); */
 			var tel='<%= session.getAttribute("userPhone")%>';
-			/* alert("tel:"+tel);  */
-			/* alert(tel=="null");  */
-			/* alert("session:"+session); */
-			/* alert(session); */
-			if(session == "buyer"){
-				$("#headdd").hide();
-				$("#table_report").hide();
-				$("#userdeviceslist").hide();
-				$("#tel").show();
-				/* alert("buyer"); */
+			/* alert("tel:"+tel); */
+			/* 如果是buyer,则自动找到它的号码，并显示他的信息 */
+			if(role == "buyer"){
 				if(tel!="null"){
-					$("#tel").hide();
+					/* $("#tel").hide(); */
 					//直接显示管理员信息
 					/* alert("直接显示管理员信息"); */
 					$.ajax({
@@ -241,11 +222,6 @@
 		    			dataType:"json",
 		    			async: true,
 		    			success: function(data){
-		    				$("#tel").hide();
-		    				$("#headdd").show();
-		    				$("#table_report").show();
-		    				$("#userdeviceslist").show();
-		    				/* alert(data[0].DEVICE_CODE==null);  */
 		    				if(data[0].DEVICE_CODE==null){
 		    					$("#userdeviceslist").empty();
 		    					$("#userdeviceslist0").append('<tr class="main_info">'+
@@ -387,17 +363,8 @@
 		    				}
 		    			}
 					})
-				}else{
-					$("#headdd").hide();
-					$("#table_report").hide();
-					$("#userdeviceslist").hide();
-					$("#tel").show();
 				}
 			}else{
-				/* alert("for company"); */
-				/* 如果是管理员或一般用户，直接调出所有数据 */
-				//获取首页初始化所需的数据
-				
 				$.ajax({
 	    			url: "homePage.do",
 	    	    	data: { },
@@ -517,7 +484,29 @@
 			           				    	updated_date='<td></td>';
 			           				     }
 		   							 }
-		           				     if(session == "admin"){
+		   							if(role == "superadmin"){
+		           				    	 var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
+		           				    	 /* alert(item.id); */
+		           				    	$("#userdeviceslist0").append('<tr>'+
+			         							'<td class="center" style="width: 30px;">'+
+		   	    	    					'<label>'+
+		   	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		   	    	    					'<span class="lbl">'+
+		   	    	    					'</span>'+
+		   	    	    					'</label>'+
+		   	    	    					'</td>'+
+		   	    	    						userName+
+		   	    	    						userPhone+
+			       	    						col+
+			       	    						creator_date+
+			       	    						updated_date+
+			       	    						status+
+			       	    						signature+
+			         							'<shiro:hasRole name="superadmin">'+
+				       	    						'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+				       	    					'</shiro:hasRole>'+
+			       	    					'</tr>'); 
+		           				     }else if(role == "admin"){
 		           				    	 var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
 		           				    	 /* alert(item.id); */
 		           				    	$("#userdeviceslist0").append('<tr>'+
@@ -977,7 +966,28 @@
 	   		           				    	updated_date='<td></td>';
 	   		           				     }
 	   	   							 }
-	   	           				     if(role == "admin"){
+	   	   						if(role == "superadmin"){
+	   	           				   	   var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
+		   	           				   $("#userdeviceslist0").append('<tr>'+
+		   	         							'<td class="center" style="width: 30px;">'+
+		      	    	    						'<label>'+
+		      	    	    							'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		      	    	    							'<span class="lbl">'+
+		      	    	    							'</span>'+
+		      	    	    						'</label>'+
+		      	    	    					'</td>'+
+		      	    	    					userName+
+		      	    	    					userPhone+
+		   	       	    						col+
+		   	       	    						creator_date+
+		   	       	    						updated_date+
+		   	       	    						status+
+		   	       	    						signature+
+		   	         							'<shiro:hasRole name="superadmin">'+
+		   	         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+		   		       	    					'</shiro:hasRole>'+
+		   	       	    					'</tr>'); 
+	   	           				     }else if(role == "admin"){
 	   	           				   	   var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
 		   	           				   $("#userdeviceslist0").append('<tr>'+
 		   	         							'<td class="center" style="width: 30px;">'+
@@ -1354,7 +1364,28 @@
 	    		           				    	updated_date='<td></td>';
 	    		           				     }
 	    	   							 }
-	    	   							if(role == "admin"){
+	    	   							if(role == "superadmin"){
+		    	   							   var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
+		 		   	           				   $("#userdeviceslist0").append('<tr>'+
+		 		   	         							'<td class="center" style="width: 30px;">'+
+		 		      	    	    						'<label>'+
+		 		      	    	    							'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		 		      	    	    							'<span class="lbl">'+
+		 		      	    	    							'</span>'+
+		 		      	    	    						'</label>'+
+		 		      	    	    					'</td>'+
+		 		      	    	    					userName+
+		 		      	    	    					userPhone+
+		 		   	       	    						col+
+		 		   	       	    						creator_date+
+		 		   	       	    						updated_date+
+		 		   	       	    						status+
+		 		   	       	    						signature+
+		 		   	         							'<shiro:hasRole name="superadmin">'+
+		 		   	         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+		 		   		       	    					'</shiro:hasRole>'+
+		 		   	       	    					'</tr>'); 
+		 	   	           				     }else if(role == "admin"){
 	    	   							   var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
 	 		   	           				   $("#userdeviceslist0").append('<tr>'+
 	 		   	         							'<td class="center" style="width: 30px;">'+
@@ -1679,7 +1710,26 @@
 			    						
 			    					}else{
 			    						j++;//用于显示数目
-			    						if(role == "buyer"){
+			    						if(role == "superadmin"){
+			    							$("#userDevicelist").append('<tr>'+
+				      								'<td class="center" style="width: 30px;">'+
+				        	    					'<label>'+
+				        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+				        	    					'<span class="lbl">'+
+				        	    					'</span>'+
+				        	    					'</label>'+
+				        	    					'</td>'+
+				        	    					'<td class="center">'+(j)+'</td>'+
+				        	    					'<td class="center">'+item.userPhone+'</td>'+
+				        	    					'<td class="center">'+item.deviceCode+'</td>'+
+				        	    					'<td class="center">'+item.nick_name+'</td>'+
+				        	    					'<shiro:hasRole name="superadmin">'+
+				        	    					'<td style="width: 30px;" class="center">'+
+				        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+				        	    					'</td>'+
+				        	    					'</shiro:hasRole>'+
+				        	    					'</tr>');
+		   	   							}else if(role == "buyer"){
 			    							$("#userDevicelist").append('<tr>'+
 				      								'<td class="center" style="width: 30px;">'+
 				        	    					'<label>'+
@@ -2008,7 +2058,26 @@
 	    						
 	    					}else{
 	    						j++;//用于显示数目
-	    						if(role == "admin"){
+	    						if(role == "superadmin"){
+	    							$("#userDevicelist").append('<tr>'+
+		      								'<td class="center" style="width: 30px;">'+
+		        	    					'<label>'+
+		        	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		        	    					'<span class="lbl">'+
+		        	    					'</span>'+
+		        	    					'</label>'+
+		        	    					'</td>'+
+		        	    					'<td class="center">'+(j)+'</td>'+
+		        	    					'<td class="center">'+item.userPhone+'</td>'+
+		        	    					'<td class="center">'+item.deviceCode+'</td>'+
+		        	    					'<td class="center">'+item.nick_name+'</td>'+
+		        	    					'<shiro:hasRole name="superadmin">'+
+		        	    					'<td style="width: 30px;" class="center">'+
+		        	    						'<span onclick="del('+item.id+','+item.DEVICE_ID+','+item.USER_ID+');" style="color: blue;">解绑</span>'+
+		        	    					'</td>'+
+		        	    					'</shiro:hasRole>'+
+		        	    					'</tr>');
+	    						}else if(role == "admin"){
 	    							$("#userDevicelist").append('<tr>'+
 		      								'<td class="center" style="width: 30px;">'+
 		        	    					'<label>'+
@@ -2068,209 +2137,7 @@
         			}) 
 				}
 			})
-		}
-		
-		function buyerSearch(){
-			var role= '<%= session.getAttribute("role")%>'; 
-			var userPhone=$("#userPhone").val();
-			/* alert("userPhone:"+userPhone); */
-			$.ajax({
-    			url: "buyerHomePage.do",
-    	    	data: {"userPhone":userPhone },
-    			type: "POST",
-    			dataType:"json",
-    			async: true,
-    			success: function(data){
-    				$("#tel").hide();
-    				$("#headdd").show();
-    				$("#table_report").show();
-    				$("#userdeviceslist").show();
-    				/* alert(data[0].DEVICE_CODE==null); */
-    				$("#userdeviceslist0").empty();
-    				if(data[0].DEVICE_CODE==null){
-    					$("#userdeviceslist").empty();
-    					$("#userdeviceslist0").append('<tr class="main_info">'+
-    					'<td colspan="100" class="center" >没有相关数据</td>'+
-    					'</tr>');	
-    				}else{
-        				$.each(data,function(i,item){//i是key,item是value
-        					$("#userdeviceslist").empty();
-        					if(item.DEVICE_CODE == null){
-        						var currentPage=item.currentPage;
-        						var totalPages=item.totalPages;
-        						
-        						/* alert(totalPages)  */
-        						var table="";
-        						if(totalPages ==1){
-       								table='<ul>'+
-               									'<li><a><font color="#808080">首页</font></a></li>'+
-               									'<li><a><font color="#808080">上页</font></a></li>'+
-               									'<li><a><font color="#808080">1</font></a></li>'+
-               									'<li><a><font color="#808080">下页</font></a></li>'+
-               									'<li><a><font color="#808080">尾页</font></a></li>'+
-               								'</ul>';
-       							}else if(totalPages ==2){
-       								/* alert("2"); */
-       								table='<ul>'+
-                								'<li><a><font color="#808080">首页</font></a></li>'+
-            									'<li><a><font color="#808080">上页</font></a></li>'+
-            									'<li><a><font color="#808080">1</font></a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(2)">尾页</a></li>'+
-               								'</ul>';
-       							}else if(totalPages ==3){
-       								table='<ul>'+
-               								'<li><a><font color="#808080">首页</font></a></li>'+
-           									'<li><a><font color="#808080">上页</font></a></li>'+
-           									'<li><a><font color="#808080">1</font></a></li>'+
-           									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
-           									'<li style="cursor:pointer;"><a onclick="find(3)">3</a></li>'+
-           									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
-           									'<li style="cursor:pointer;"><a onclick="find(3)">尾页</a></li>'+
-               								'</ul>';
-       							}else if(totalPages ==4){
-       								table='<ul>'+
-                								'<li><a><font color="#808080">首页</font></a></li>'+
-            									'<li><a><font color="#808080">上页</font></a></li>'+
-            									'<li><a><font color="#808080">1</font></a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(3)">3</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(4)">4</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(4)">尾页</a></li>'+
-               								'</ul>';
-       							}else{//totalPages >= 5 时
-       								table='<ul>'+
-                								'<li><a><font color="#808080">首页</font></a></li>'+
-            									'<li><a><font color="#808080">上页</font></a></li>'+
-            									'<li><a><font color="#808080">1</font></a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(2)">2</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(3)">3</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(4)">4</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(5)">5</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find(2)">下页</a></li>'+
-            									'<li style="cursor:pointer;"><a onclick="find('+totalPages+')">尾页</a></li>'+
-               								'</ul>';
-       							}
-        						
-        						$("#userdeviceslist").append(table);
-        					}else{
-        						var deviceCode=JSON.stringify(item.DEVICE_CODE).replace(/\"/g,"'");
-        						var col="";
-								var creator_date="";
-								var updated_date="";
-								var status="";
-								var userName="";
-								var userPhone="";
-								var signature="";
-								/* json对象 转成 String类型,再转成单引号 */
-								var a=JSON.stringify(item.DEVICE_CODE).replace(/\"/g,"'");
-								/* alert(a);  */
-	           				     /* alert(item.deviceCode); */
-	   							 if(item.HOST_STATUS =="离线"){
-	   								 col='<td class="center"><a onclick="clickMe('+deviceCode+')"  style="color: black;">'+item.DEVICE_CODE+'</a></td>';
-	   								 status='<td class="center"><span style="color: black;">'+item.HOST_STATUS+'</span></td>';
-	   								 userName='<td class="center"><span style="color: black;">'+item.USER_NAME+'</span></td>';
-	   								 userPhone='<td class="center"><span style="color: black;">'+item.USER_PHONE+'</span></td>';
-	   								 signature='<td class="center"><span style="color: black;">'+item.SIGNATURE+'</span></td>';
-	   								 if(item.MNT_CREATOR_DATE !=null){
-		           				    	creator_date='<td class="center"><span style="color: black;">'+item.MNT_CREATOR_DATE+'</span></td>';
-		           				     }else{
-		           				    	creator_date='<td></td>';
-		           				     }
-		           				     if(item.MNT_UPDATED_DATE !=null){
-		           				    	updated_date='<td class="center"><span style="color: black;">'+item.MNT_UPDATED_DATE+'</span></td>';
-		           				     }else{
-		           				    	updated_date='<td></td>';
-		           				     }
-	   							 }else{
-	   								 col='<td class="center"><a onclick="clickMe('+deviceCode+')" style="color: blue;">'+item.DEVICE_CODE+'</a></td>';
-	   								 status='<td class="center"><span style="color: blue;">'+item.HOST_STATUS+'</span></td>';
-	   								 userName='<td class="center"><span style="color: blue;">'+item.USER_NAME+'</span></td>';
-	   								 userPhone='<td class="center"><span style="color: blue;">'+item.USER_PHONE+'</span></td>';
-	   								 signature='<td class="center"><span style="color: blue;">'+item.SIGNATURE+'</span></td>';
-	   								 if(item.MNT_CREATOR_DATE !=null){
-		           				    	creator_date='<td class="center"><span style="color: blue;">'+item.MNT_CREATOR_DATE+'</span></td>';
-		           				     }else{
-		           				    	creator_date='<td></td>';
-		           				     }
-		           				     if(item.MNT_UPDATED_DATE !=null){
-		           				    	updated_date='<td class="center"><span style="color: blue;">'+item.MNT_UPDATED_DATE+'</span></td>';
-		           				     }else{
-		           				    	updated_date='<td></td>';
-		           				     }
-	   							 }
-	           				     
-	   							if(role == "admin"){
-	   							    var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
-	   								$("#userdeviceslist0").append('<tr>'+
-		         							'<td class="center" style="width: 30px;">'+
-	   	    	    					'<label>'+
-	   	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
-	   	    	    					'<span class="lbl">'+
-	   	    	    					'</span>'+
-	   	    	    					'</label>'+
-	   	    	    					'</td>'+
-	   	    	    						userName+
-	   	    	    						userPhone+
-		       	    						col+
-		       	    						creator_date+
-		       	    						updated_date+
-		       	    						status+
-		       	    						signature+
-		         							'<shiro:hasRole name="admin">'+
-		         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
-			       	    					'</shiro:hasRole>'+
-		       	    					'</tr>'); 
-	   							}else if(role == "buyer"){
-	   							    var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
-	   								$("#userdeviceslist0").append('<tr>'+
-		         							'<td class="center" style="width: 30px;">'+
-	   	    	    					'<label>'+
-	   	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
-	   	    	    					'<span class="lbl">'+
-	   	    	    					'</span>'+
-	   	    	    					'</label>'+
-	   	    	    					'</td>'+
-	   	    	    						userName+
-	   	    	    						userPhone+
-		       	    						col+
-		       	    						creator_date+
-		       	    						updated_date+
-		       	    						status+
-		       	    						signature+
-		         							'<shiro:hasRole name="buyer">'+
-		         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
-			       	    					'</shiro:hasRole>'+
-		       	    					'</tr>'); 
-	   							}else{
-	   								$("#userdeviceslist0").append('<tr>'+
-		         							'<td class="center" style="width: 30px;">'+
-	   	    	    					'<label>'+
-	   	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
-	   	    	    					'<span class="lbl">'+
-	   	    	    					'</span>'+
-	   	    	    					'</label>'+
-	   	    	    					'</td>'+
-	   	    	    						userName+
-	   	    	    						userPhone+
-		       	    						col+
-		       	    						creator_date+
-		       	    						updated_date+
-		       	    						status+
-		       	    						signature+
-			       	    					'<td class="center"></td>'+
-		       	    					'</tr>'); 
-	   							}
-	         					
-	        					}
-    					})	
-    				}
-    			}
-			})
 		};
-		
 		
 		//检索
 		function search(){
@@ -2416,7 +2283,28 @@
 	   		           				    	updated_date='<td></td>';
 	   		           				     }
 	   	   							 }
-	   	           				     if(role == "admin"){
+	   	   						if(role == "superadmin"){
+	   	           				       var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
+		   	           				   $("#userdeviceslist0").append('<tr>'+
+		   	         							'<td class="center" style="width: 30px;">'+
+		      	    	    						'<label>'+
+		      	    	    							'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+		      	    	    							'<span class="lbl">'+
+		      	    	    							'</span>'+
+		      	    	    						'</label>'+
+		      	    	    					'</td>'+
+		      	    	    					userName+
+		      	    	    					userPhone+
+		   	       	    						col+
+		   	       	    						creator_date+
+		   	       	    						updated_date+
+		   	       	    						status+
+		   	       	    						signature+
+		   	         							'<shiro:hasRole name="superadmin">'+
+		   	         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+		   		       	    					'</shiro:hasRole>'+
+		   	       	    					'</tr>'); 
+	   	           				     }else if(role == "admin"){
 	   	           				       var sign=JSON.stringify(item.SIGNATURE).replace(/\"/g,"'");
 		   	           				   $("#userdeviceslist0").append('<tr>'+
 		   	         							'<td class="center" style="width: 30px;">'+
@@ -2611,25 +2499,43 @@
     		           				    	updated_date='<td></td>';
     		           				     }
     	   							 }
-    	         					$("#userdeviceslist0").append('<tr>'+
-    	         							'<td class="center" style="width: 30px;">'+
-       	    	    					'<label>'+
-       	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
-       	    	    					'<span class="lbl">'+
-       	    	    					'</span>'+
-       	    	    					'</label>'+
-       	    	    					'</td>'+
-       	    	    						userName+
-       	    	    						userPhone+
-    	       	    						col+
-    	       	    						creator_date+
-    	       	    						updated_date+
-    	       	    						status+
-    	       	    						signature+
-    	         							'<shiro:hasRole name="admin">'+
-    	         								'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
-    		       	    					'</shiro:hasRole>'+
-    	       	    					'</tr>'); 
+    	           				     if(role != "user"){
+	    	         					$("#userdeviceslist0").append('<tr>'+
+	    	         							'<td class="center" style="width: 30px;">'+
+	       	    	    					'<label>'+
+	       	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+	       	    	    					'<span class="lbl">'+
+	       	    	    					'</span>'+
+	       	    	    					'</label>'+
+	       	    	    					'</td>'+
+	       	    	    						userName+
+	       	    	    						userPhone+
+	    	       	    						col+
+	    	       	    						creator_date+
+	    	       	    						updated_date+
+	    	       	    						status+
+	    	       	    						signature+
+	    	         							'<td class="center"><a id="creator-id'+item.id+'" onclick="clickOnMe('+sign+','+item.id+')" style="cursor:pointer;" title="编辑"  class="tooltip-success" data-rel="tooltip" title="" data-placement="left"><span class="green"><i class="icon-edit"></i></span></a></td>'+
+	    	       	    					'</tr>'); 
+    	           				     }else{
+    	           				    	$("#userdeviceslist0").append('<tr>'+
+	    	         							'<td class="center" style="width: 30px;">'+
+	       	    	    					'<label>'+
+	       	    	    					'<input type="checkbox" name="ids" value="'+item.id+'" />'+
+	       	    	    					'<span class="lbl">'+
+	       	    	    					'</span>'+
+	       	    	    					'</label>'+
+	       	    	    					'</td>'+
+	       	    	    						userName+
+	       	    	    						userPhone+
+	    	       	    						col+
+	    	       	    						creator_date+
+	    	       	    						updated_date+
+	    	       	    						status+
+	    	       	    						signature+
+	    	         							'<td></td>'+
+	    	       	    					'</tr>');
+    	           				     }
     	        					}
         					})	
         				}

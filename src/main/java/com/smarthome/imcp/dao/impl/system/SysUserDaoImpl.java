@@ -91,8 +91,6 @@
 				hql.append("select sysUser.userId from SysUser sysUser");
 				hql.append(" where sysUser.userPhone = ?");
 				List list = findByHQL(hql.toString(), values);
-//				SysUser sysUser=findByHQL(hql.toString(), values);
-//				System.out.println("list:"+list);//list:[1]
 				if (GlobalMethod.isNullorEmpty(list)) {
 					return 0;
 				}
