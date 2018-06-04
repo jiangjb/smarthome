@@ -232,7 +232,7 @@ import org.slf4j.Logger;
 //		        System.out.println("---->" + currentUser.isAuthenticated());    //false
 //		        System.exit(0);
 		    	   
-		    	   request.getSession().setAttribute("USER_INFO", currentUser01);
+		    	    request.getSession().setAttribute("USER_INFO", currentUser01);
                		return UserID;
 		       }
    		 }
@@ -242,12 +242,12 @@ import org.slf4j.Logger;
    		@RequestMapping({"permissionAssignment.do"})
 		@ResponseBody
 		public String permissionAssignment(@RequestParam("role") String role,@RequestParam("name") String name,@RequestParam("userPhone") String userPhone) {
-            System.out.println("role:"+role+",name:"+name+",userPhone:"+userPhone);
+//            System.out.println("role:"+role+",name:"+name+",userPhone:"+userPhone);
             String result="success";
             int key=this.sysUserService.findByUserPhone(userPhone);
             if(key <= 0) {//不存在时，新建
             	SysUser sysUser=new SysUser();
-            	sysUser.setLoginName("guest");//固定
+            	sysUser.setLoginName(name);//固定  验证，保证确定不重名
             	sysUser.setLoginPwd(shiroEncryption("888888"));
             	sysUser.setUserPhone(userPhone);
             	sysUser.setUserName(name);
@@ -263,6 +263,8 @@ import org.slf4j.Logger;
             			userRole.setRole_id(1);
             		}else if("buyer".equals(role)) {//经销商，房东
             			userRole.setRole_id(3);
+            		}else if("superadmin".equals(role)) {//经销商，房东
+            			userRole.setRole_id(4);
             		}else {
             			userRole.setRole_id(2);
             		}
@@ -271,7 +273,7 @@ import org.slf4j.Logger;
             			result="fail";
             		}
             	}
-            }else {
+            }else {//存在，则编辑授权
             	result="Exsit";
             }
             return result;          

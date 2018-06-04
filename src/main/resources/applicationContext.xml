@@ -221,7 +221,6 @@ http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 			<ref local="sessionFactory" />
 		</property>
 	</bean>
-	<!-- <import resource="spring\spring-servlet.xml" /> -->
 	<import resource="transaction-manager.xml" />
 	<import resource="spring\dao-application.xml" />
 	<import resource="spring\server-application.xml" />

@@ -105,6 +105,7 @@
         </property>
         
         
+        
         <set name="boLockPasswordManages" inverse="true">
             <key>
                 <column name="USER_ID" not-null="true">

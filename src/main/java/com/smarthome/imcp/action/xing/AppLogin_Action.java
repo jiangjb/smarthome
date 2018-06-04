@@ -483,6 +483,12 @@
                     }else {
                     	userInfoMap.put("isFirst", users.getIsFirst());	
                     }
+                    //5-31
+                    userInfoMap.put("isupdate", users.getIsupdate());
+                    logger.info("isupdate...."+users.getIsupdate());
+                    //6-1
+                    userInfoMap.put("oldPhone", users.getCity());
+                    logger.info("oldPhone...."+users.getCity());
 /* 481 */           userInfoMap.put("whetherSetPwd", users.getWhetherSetPwd());
 					//添加初始的楼层、房间信息  2018/1/3
 					BoFloor floor=this.boFloorService.findByUserCode(users.getUserCode());
@@ -537,16 +543,16 @@
 /*     */           }
 /* 489 */           userInfoMap.put("Eztoken", EZTOKEN);
 /* 490 */           userInfoMap.put("ez_token", EZTOKEN);
-/* 491 */           String city2 = users.getCity();
-/*     */           String city3;
+///* 491 */           String city2 = users.getCity();
 ///*     */           String city3;
-/* 493 */           if (city2.equals("")) {
-/* 494 */             city3 = "杭州市";
-/*     */           } else {
-/* 496 */             String[] split = city2.split(",");
-/* 497 */             city3 = split[1];
-/*     */           }
-/* 499 */           userInfoMap.put("city", city3);
+///*     */           String city3;
+///* 493 */           if (city2.equals("")) {
+///* 494 */             city3 = "杭州市";
+///*     */           } else {
+///* 496 */             String[] split = city2.split(",");
+///* 497 */             city3 = split[1];
+///*     */           }
+///* 499 */           userInfoMap.put("city", city3);
 /* 500 */           this.requestJson.setData(userInfoMap);
 /* 501 */           this.requestJson.setMessage("");
 /* 502 */           this.requestJson.setSuccess(true);
@@ -690,10 +696,6 @@
 /* 603 */                 BoUsers user = UserUtil.save(this.userPhone, md5.getMD5ofStr(this.userPwd), this.userEmail);
 /* 604 */                 BoUsers save = (BoUsers)this.boUserService.save(user);
 /* 605 */                 if (save != null) {	
-///* 606 */                   StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
-///* 607 */                   this.requestJson.setData(map);
-///* 608 */                   this.requestJson.setMessage("注册成功");
-///* 609 */                   this.requestJson.setSuccess(true);
 							count++;
 /* 562 */                   StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
 /* 563 */                   this.requestJson.setData(map);
