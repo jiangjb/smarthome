@@ -38,6 +38,8 @@
 /*     */   private String city;
 /*     */   private String versionType;
 /*     */   private Boolean whetherSetPwd;
+			private String phpPasswd;//6-15
+			private String salt;//6-15
 /*  45 */   private Set boHosts = new HashSet(0);
 /*  46 */   private Set boSimplifies = new HashSet(0);
 /*  47 */   private Set boRepairses = new HashSet(0);
@@ -121,7 +123,20 @@
 /* 137 */     this.boAirBindingPanels = boAirBindingPanels;
 /* 138 */     this.boAirTimingPerforms = boAirTimingPerforms;
 /*     */   }
-/*     */ 
+			//6-15
+			public String getPhpPasswd() {
+				return phpPasswd;
+			}
+			public void setPhpPasswd(String phpPasswd) {
+				this.phpPasswd = phpPasswd;
+			}			
+			public String getSalt() {
+				return salt;
+			}
+			public void setSalt(String salt) {
+				this.salt = salt;
+			}
+			
 /*     */   public Integer getUserId()
 /*     */   {
 /* 147 */     return this.userId;

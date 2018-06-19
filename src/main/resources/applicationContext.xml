@@ -57,6 +57,7 @@ http://www.springframework.org/schema/task/spring-task-3.0.xsd">
     2. 配置 CacheManager. 
     2.1 需要加入 ehcache 的 jar 包及配置文件. 
     -->     
+    <!-- 设置二级缓存的提供类 -->
     <bean id="cacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
         <!-- Set a net.sf.ehcache.CacheManager instance here if you already have one.  If not, a new one
              will be creaed with a default config:

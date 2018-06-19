@@ -2490,14 +2490,42 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /*  1483 */     String header3 = request.getHeader("sign");
 /*  1484 */     String header4 = request.getHeader("access_token");
 /*  1485 */     String userCode = request.getHeader("userCode");
-				
+				//6-15
+				String salt="";
+				Enumeration pNames=request.getParameterNames();
+				while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+				    String name=(String)pNames.nextElement();
+				    if("salt".equals(name)) {
+				    	salt=request.getParameter(name);
+				    }
+				}
+				logger.info("salt:"+salt);
+				//end
 /*  1486 */     Boolean ral = isRal(header, header2, header3, header4, userCode, "设置登录密码");
-/*  1487 */     if (ral.booleanValue()) {
+				if(salt != null) {
+					BoUsers phone = this.boUserServicess.findByUserPhone(this.userPhone);
+					if (phone.getUserPwd().equals(md5.getMD5ofStr(this.oldUserPwd))) {
+						String phpPasswd=md5.getMD5ofStr(this.userPwd+salt).toLowerCase();
+						phone.setPhpPasswd(phpPasswd);
+						phone.setUserPwd(md5.getMD5ofStr(this.userPwd));
+						phone.setSalt(salt);
+						BoUsers update = (BoUsers)this.boUserServicess.update(phone);
+						if (update != null) {
+							this.requestJson.setData(map);
+							this.requestJson.setMessage("设置密码成功");
+							this.requestJson.setSuccess(true);
+						} else {
+							this.requestJson.setData(map);
+							this.requestJson.setMessage("设置密码失败");
+							this.requestJson.setSuccess(false);
+						}
+					}
+//				}else if (ral.booleanValue()) {
+				}else if (salt == null || "".equals(salt)) {//针对与没有合并商城和app数据的时候使用
 /*  1488 */       System.err.println("验证通过");
 /*       */       try {
 /*  1490 */         BoUsers phone = this.boUserServicess.findByUserPhone(this.userPhone);
 /*  1491 */         if (phone == null) 
-//						break label432;
 						return "phone null";
 /*  1492 */         System.err.println(this.userPhone);
 /*  1493 */         System.err.println(this.oldUserPwd);
@@ -2516,7 +2544,7 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /*  1506 */             this.requestJson.setMessage("设置密码失败");
 /*  1507 */             this.requestJson.setSuccess(false);
 /*       */           }
-/*       */         } else {
+/*       */         }else {
 /*  1510 */           this.requestJson.setData(map);
 /*  1511 */           System.err.println(this.oldUserPwd);
 /*  1512 */           this.requestJson.setMessage("旧密码不正确");
@@ -2538,8 +2566,7 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /*  1528 */       this.requestJson.setSuccess(false);
 /*       */     }
 /*       */ 
-///*  1531 */     label432: return "success";
-			return "success";
+				return "success";
 /*       */   }
 /*       */ 
 /*       */   @Action(value="resetPwd", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
@@ -6083,16 +6110,16 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /*       */       }
 /*  5061 */       map.put("Eztoken", EZTOKEN);
 /*  5062 */       map.put("ez_token", EZTOKEN);
-///*  5063 */       String city2 = users.getCity();
+/*  5063 */       String city2 = users.getCity();
+/*       */       String city3;
 ///*       */       String city3;
-/////*       */       String city3;
-///*  5065 */       if (city2.equals("")) {
-///*  5066 */         city3 = "杭州市";
-///*       */       } else {
-///*  5068 */         String[] split = city2.split(",");
-///*  5069 */         city3 = split[1];
-///*       */       }
-///*  5071 */       map.put("city", city3);
+/*  5065 */       if (city2.equals("")) {
+/*  5066 */         city3 = "杭州市";
+/*       */       } else {
+/*  5068 */         String[] split = city2.split(",");
+/*  5069 */         city3 = split[1];
+/*       */       }
+/*  5071 */       map.put("city", city3);
 /*  5072 */       this.requestJson.setData(map);
 /*  5073 */       this.requestJson.setSuccess(true);
 /*       */     } else {
@@ -8711,132 +8738,132 @@ import org.apache.commons.codec.binary.Base64;//2-9
 			  /*
 			   * 移交账号时对方同意移交
 			   */
-			  @Action(value="confirmationOfTransfer", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
-			  public String confirmationOfTransfer() {
-				  Md5 md5 = new Md5();
-				  this.requestJson = new RequestJson();
-				  Map map = new HashMap();
-				  HttpServletRequest request = ServletActionContext.getRequest();
-				  String newPhone="";
-				  String oldPhone="";
-				  String checked="";
-				  Enumeration pNames=request.getParameterNames();
-				  while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
-					  String name=(String)pNames.nextElement();
-//						  logger.info("name:"+name);
-					  String value=request.getParameter(name);
-//						  logger.info("value:"+value);
-					  if("newPhone".equals(name)) {
-						  newPhone=value;
-					  }else if("oldPhone".equals(name)) {
-						  oldPhone=value;
-					  }else if("checked".equals(name)) {
-						  checked=value;
-					  }
-				  }
-				  BoUsers newTel=this.boUserssService.findByUserPhone(newPhone);
-				  if("0".equals(checked)) {//点击了取消按钮，，不需要授予的权限
-					  newTel.setIsupdate(false);
-					  newTel.setCity("");
-					  this.boUserssService.update(newTel);
-					  this.requestJson.setData(map);
-					  this.requestJson.setMessage("移交账号失败");
-					  this.requestJson.setSuccess(false);
-				  }else {
-					  int userId=newTel.getUserId();
-					  String pwd=newTel.getUserPwd();
-					  String userCode=newTel.getUserCode();
-					  String headPic=newTel.getHeadPic();
-					  String userName=newTel.getUserName();
-					  String signature=newTel.getSignature();
-					  String sex=newTel.getUserSex();
-					  String mail=newTel.getUserEmail();
-					  BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
-					  String oldPWD=oldTel.getUserPwd();
-					  String oldHeadPic=oldTel.getHeadPic();
-					  String oldUserName=oldTel.getUserName();
-					  String oldSignature=oldTel.getSignature();
-					  String oldSex=oldTel.getUserSex();
-					  String oldMail=oldTel.getUserEmail();
-					  //将新账号的相关数据存到旧账号
-					  oldTel.setUserPhone(newPhone);
-					  oldTel.setUserPwd(pwd);
-					  oldTel.setHeadPic(headPic);
-					  oldTel.setUserName(userName);
-					  oldTel.setSignature(signature);
-					  oldTel.setUserSex(sex);
-					  oldTel.setUserEmail(mail);
-					  BoUsers update=this.boUserssService.update(oldTel);
-					  if(update == null) {
-						  this.requestJson.setData(map);
-						  this.requestJson.setMessage("移交账号失败");
-						  this.requestJson.setSuccess(false);
-					  }else {
-						  BoUsers newTel01=this.boUserssService.findByKey(userId);
-						  //不过不排除新用户加了情景模式  得先检查是否有情景模式，然后删除新用户
-						  List<BoModel> boModels=this.boModelService.getListBy(userCode);
-//						logger.info("boModels:"+boModels);
-						  for(BoModel boModel:boModels) {
-							  List<BoModelInfo> boModelInfos=this.boModelInfoServicess.getBy(userCode, boModel.getModelId());
-							  for(BoModelInfo boModelInfo:boModelInfos) {
-								  this.boModelInfoServicess.delete(boModelInfo);
-							  }
-							  this.boModelService.delete(boModel);//想要删除boModel数据得先处理它的外键关联表 boModelInfo中相关的数据
-						  }
-						  //若新账号已经绑定主机等（有关联表）>删除设备及主机
-						  List<BoHostDevice> boHostDevices=this.boHostDeviceService.getListByUserCode(userCode);
-						  for(BoHostDevice boHostDevice:boHostDevices) {
-							  this.boHostDeviceService.delete(boHostDevice);
-						  }
-						  //删除用户和主机的关联表
-						  List<BoUserDevices> boUserDevices=this.boUserDevicesServicess.getBy(userCode);
-//						logger.info("boUserDevices:"+boUserDevices);
-						  if(boUserDevices.size() > 0) {
-							  for(BoUserDevices boUserDevice:boUserDevices) {
-								  this.boUserDevicesServicess.delete(boUserDevice);
-							  }
-						  }
-						  //删除新账号
-						  BoUsers del=this.boUserssService.delete(newTel01);//删除用户也得删除相关的外键关联
-						  //注册新账号（放入老账号的手机号、密码以及头像等信息）
-						  BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
-						  user.setHeadPic(oldHeadPic);
-						  user.setUserName(oldUserName);
-						  user.setSignature(oldSignature);
-						  user.setUserSex(oldSex);
-						  user.setUserEmail(oldMail);
-//					        this.boUserServicess.update(save);
-						  BoUsers save = (BoUsers)this.boUserServicess.save(user);
-						  if(save != null) {
-							  //注册成功时 默认添加一个楼层和四个房间
-							  BoFloor floor=FloorUtil.save(save.getUserCode());
-							  BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
-							  //String userCode,String floorName,String floorCode,String roomName	
-							  //								System.out.println("楼层名称："+saveF.getFloorName());
-							  String uCode=saveF.getUserCode();
-							  String floorName=saveF.getFloorName();
-							  //								String floorName="我的家";
-							  String floorCode=saveF.getFloorCode();
-							  BoRoom room1=RoomUtil.save(uCode,floorName,floorCode,"客厅");
-							  BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
-							  BoRoom room2=RoomUtil.save(uCode,floorName,floorCode,"卧室");
-							  BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
-							  BoRoom room3=RoomUtil.save(uCode,floorName,floorCode,"厨房");
-							  BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
-							  BoRoom room4=RoomUtil.save(uCode,floorName,floorCode,"卫生间");
-							  BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
-							  this.requestJson.setData(map);
-							  this.requestJson.setMessage("移交成功");
-							  this.requestJson.setSuccess(true);
-						  }else {
-							  this.requestJson.setData(map);
-							  this.requestJson.setMessage("移交账号失败");
-							  this.requestJson.setSuccess(false);
-						  }
-					  }
-				  }
-				return "success";
-			  }
+//			  @Action(value="confirmationOfTransfer", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+//			  public String confirmationOfTransfer() {
+//				  Md5 md5 = new Md5();
+//				  this.requestJson = new RequestJson();
+//				  Map map = new HashMap();
+//				  HttpServletRequest request = ServletActionContext.getRequest();
+//				  String newPhone="";
+//				  String oldPhone="";
+//				  String checked="";
+//				  Enumeration pNames=request.getParameterNames();
+//				  while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+//					  String name=(String)pNames.nextElement();
+////						  logger.info("name:"+name);
+//					  String value=request.getParameter(name);
+////						  logger.info("value:"+value);
+//					  if("newPhone".equals(name)) {
+//						  newPhone=value;
+//					  }else if("oldPhone".equals(name)) {
+//						  oldPhone=value;
+//					  }else if("checked".equals(name)) {
+//						  checked=value;
+//					  }
+//				  }
+//				  BoUsers newTel=this.boUserssService.findByUserPhone(newPhone);
+//				  if("0".equals(checked)) {//点击了取消按钮，，不需要授予的权限
+//					  newTel.setIsupdate(false);
+//					  newTel.setCity("");
+//					  this.boUserssService.update(newTel);
+//					  this.requestJson.setData(map);
+//					  this.requestJson.setMessage("移交账号失败");
+//					  this.requestJson.setSuccess(false);
+//				  }else {
+//					  int userId=newTel.getUserId();
+//					  String pwd=newTel.getUserPwd();
+//					  String userCode=newTel.getUserCode();
+//					  String headPic=newTel.getHeadPic();
+//					  String userName=newTel.getUserName();
+//					  String signature=newTel.getSignature();
+//					  String sex=newTel.getUserSex();
+//					  String mail=newTel.getUserEmail();
+//					  BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
+//					  String oldPWD=oldTel.getUserPwd();
+//					  String oldHeadPic=oldTel.getHeadPic();
+//					  String oldUserName=oldTel.getUserName();
+//					  String oldSignature=oldTel.getSignature();
+//					  String oldSex=oldTel.getUserSex();
+//					  String oldMail=oldTel.getUserEmail();
+//					  //将新账号的相关数据存到旧账号
+//					  oldTel.setUserPhone(newPhone);
+//					  oldTel.setUserPwd(pwd);
+//					  oldTel.setHeadPic(headPic);
+//					  oldTel.setUserName(userName);
+//					  oldTel.setSignature(signature);
+//					  oldTel.setUserSex(sex);
+//					  oldTel.setUserEmail(mail);
+//					  BoUsers update=this.boUserssService.update(oldTel);
+//					  if(update == null) {
+//						  this.requestJson.setData(map);
+//						  this.requestJson.setMessage("移交账号失败");
+//						  this.requestJson.setSuccess(false);
+//					  }else {
+//						  BoUsers newTel01=this.boUserssService.findByKey(userId);
+//						  //不过不排除新用户加了情景模式  得先检查是否有情景模式，然后删除新用户
+//						  List<BoModel> boModels=this.boModelService.getListBy(userCode);
+////						logger.info("boModels:"+boModels);
+//						  for(BoModel boModel:boModels) {
+//							  List<BoModelInfo> boModelInfos=this.boModelInfoServicess.getBy(userCode, boModel.getModelId());
+//							  for(BoModelInfo boModelInfo:boModelInfos) {
+//								  this.boModelInfoServicess.delete(boModelInfo);
+//							  }
+//							  this.boModelService.delete(boModel);//想要删除boModel数据得先处理它的外键关联表 boModelInfo中相关的数据
+//						  }
+//						  //若新账号已经绑定主机等（有关联表）>删除设备及主机
+//						  List<BoHostDevice> boHostDevices=this.boHostDeviceService.getListByUserCode(userCode);
+//						  for(BoHostDevice boHostDevice:boHostDevices) {
+//							  this.boHostDeviceService.delete(boHostDevice);
+//						  }
+//						  //删除用户和主机的关联表
+//						  List<BoUserDevices> boUserDevices=this.boUserDevicesServicess.getBy(userCode);
+////						logger.info("boUserDevices:"+boUserDevices);
+//						  if(boUserDevices.size() > 0) {
+//							  for(BoUserDevices boUserDevice:boUserDevices) {
+//								  this.boUserDevicesServicess.delete(boUserDevice);
+//							  }
+//						  }
+//						  //删除新账号
+//						  BoUsers del=this.boUserssService.delete(newTel01);//删除用户也得删除相关的外键关联
+//						  //注册新账号（放入老账号的手机号、密码以及头像等信息）
+//						  BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
+//						  user.setHeadPic(oldHeadPic);
+//						  user.setUserName(oldUserName);
+//						  user.setSignature(oldSignature);
+//						  user.setUserSex(oldSex);
+//						  user.setUserEmail(oldMail);
+////					        this.boUserServicess.update(save);
+//						  BoUsers save = (BoUsers)this.boUserServicess.save(user);
+//						  if(save != null) {
+//							  //注册成功时 默认添加一个楼层和四个房间
+//							  BoFloor floor=FloorUtil.save(save.getUserCode());
+//							  BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
+//							  //String userCode,String floorName,String floorCode,String roomName	
+//							  //								System.out.println("楼层名称："+saveF.getFloorName());
+//							  String uCode=saveF.getUserCode();
+//							  String floorName=saveF.getFloorName();
+//							  //								String floorName="我的家";
+//							  String floorCode=saveF.getFloorCode();
+//							  BoRoom room1=RoomUtil.save(uCode,floorName,floorCode,"客厅");
+//							  BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
+//							  BoRoom room2=RoomUtil.save(uCode,floorName,floorCode,"卧室");
+//							  BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
+//							  BoRoom room3=RoomUtil.save(uCode,floorName,floorCode,"厨房");
+//							  BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
+//							  BoRoom room4=RoomUtil.save(uCode,floorName,floorCode,"卫生间");
+//							  BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
+//							  this.requestJson.setData(map);
+//							  this.requestJson.setMessage("移交成功");
+//							  this.requestJson.setSuccess(true);
+//						  }else {
+//							  this.requestJson.setData(map);
+//							  this.requestJson.setMessage("移交账号失败");
+//							  this.requestJson.setSuccess(false);
+//						  }
+//					  }
+//				  }
+//				return "success";
+//			  }
 /*       */   @Action(value="addmodelinfo", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String addModelInfo()
 /*       */   {
@@ -16863,19 +16890,19 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /* 14941 */             if ((this.userPhone == null) || (this.userPhone.equals(""))) {
 /* 14942 */               map.put("userName", boUsers.getUserName().toString());
 /* 14943 */               map.put("userSex", boUsers.getUserSex().toString());
-///* 14944 */               String city = boUsers.getCity().toString();
+/* 14944 */               String city = boUsers.getCity().toString();
 /*       */ 
-///* 14946 */               String[] citySplit = city.split(",");
+/* 14946 */               String[] citySplit = city.split(",");
+/*       */               String c;
 ///*       */               String c;
-/////*       */               String c;
-///* 14947 */               if (city.isEmpty())
-///* 14948 */                 c = "";
-///*       */               else {
-///* 14950 */                 c = citySplit[1] + "-" + citySplit[2];
-///*       */               }
-///*       */ 
-///* 14953 */               map.put("city", c);
-///* 14954 */               map.put("province_city_area", boUsers.getCity().toString());
+/* 14947 */               if (city.isEmpty())
+/* 14948 */                 c = "";
+/*       */               else {
+/* 14950 */                 c = citySplit[1] + "-" + citySplit[2];
+/*       */               }
+/*       */ 
+/* 14953 */               map.put("city", c);
+/* 14954 */               map.put("province_city_area", boUsers.getCity().toString());
 /* 14955 */               map.put("signature", boUsers.getSignature().toString());
 /* 14956 */               map.put("headPic", boUsers.getHeadPic().toString());
 						  logger.info("getuser headPic1>>"+boUsers.getHeadPic().toString());
@@ -16889,19 +16916,19 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /*       */ 
 /* 14964 */               map.put("userName", users.getUserName().toString());
 /* 14965 */               map.put("userSex", users.getUserSex().toString());
-///* 14966 */               String city = users.getCity().toString();
-///*       */ 
-///* 14968 */               String[] citySplit = city.split(",");
+/* 14966 */               String city = users.getCity().toString();
+/*       */ 
+/* 14968 */               String[] citySplit = city.split(",");
+/*       */               String c;
 ///*       */               String c;
-/////*       */               String c;
-///* 14969 */               if (city.isEmpty())
-///* 14970 */                 c = "";
-///*       */               else {
-///* 14972 */                 c = citySplit[1] + "-" + citySplit[2];
-///*       */               }
-///*       */ 
-///* 14975 */               map.put("city", c);
-///* 14976 */               map.put("province_city_area", users.getCity().toString());
+/* 14969 */               if (city.isEmpty())
+/* 14970 */                 c = "";
+/*       */               else {
+/* 14972 */                 c = citySplit[1] + "-" + citySplit[2];
+/*       */               }
+/*       */ 
+/* 14975 */               map.put("city", c);
+/* 14976 */               map.put("province_city_area", users.getCity().toString());
 /* 14977 */               map.put("signature", users.getSignature().toString());
 /* 14978 */               map.put("headPic", users.getHeadPic().toString());
 						  logger.info("getuser headPic2>>"+boUsers.getHeadPic().toString());//授权者的头像。。。。
@@ -16945,19 +16972,19 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /* 15016 */             if ((this.userPhone == null) || (this.userPhone.equals(""))) {
 /* 15017 */               map.put("userName", boUsers.getUserName().toString());
 /* 15018 */               map.put("userSex", boUsers.getUserSex().toString());
-///* 15019 */               String city = boUsers.getCity().toString();
+/* 15019 */               String city = boUsers.getCity().toString();
 /*       */ 
-///* 15021 */               String[] citySplit = city.split(",");
+/* 15021 */               String[] citySplit = city.split(",");
+/*       */               String c;
 ///*       */               String c;
-/////*       */               String c;
-///* 15022 */               if (city.isEmpty())
-///* 15023 */                 c = "";
-///*       */               else {
-///* 15025 */                 c = citySplit[1] + "-" + citySplit[2];
-///*       */               }
-///*       */ 
-///* 15028 */               map.put("city", c);
-///* 15029 */               map.put("province_city_area", boUsers.getCity().toString());
+/* 15022 */               if (city.isEmpty())
+/* 15023 */                 c = "";
+/*       */               else {
+/* 15025 */                 c = citySplit[1] + "-" + citySplit[2];
+/*       */               }
+/*       */ 
+/* 15028 */               map.put("city", c);
+/* 15029 */               map.put("province_city_area", boUsers.getCity().toString());
 /* 15030 */               map.put("signature", boUsers.getSignature().toString());
 /* 15031 */               map.put("headPic", boUsers.getHeadPic().toString());
 						  logger.info("getuser headPic3>>"+boUsers.getHeadPic().toString());
@@ -16970,19 +16997,19 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /*       */ 
 /* 15039 */               map.put("userName", users.getUserName().toString());
 /* 15040 */               map.put("userSex", users.getUserSex().toString());
-///* 15041 */               String city = users.getCity().toString();
-///*       */ 
-///* 15043 */               String[] citySplit = city.split(",");
+/* 15041 */               String city = users.getCity().toString();
+/*       */ 
+/* 15043 */               String[] citySplit = city.split(",");
+/*       */               String c;
 ///*       */               String c;
-/////*       */               String c;
-///* 15044 */               if (city.isEmpty())
-///* 15045 */                 c = "";
-///*       */               else {
-///* 15047 */                 c = citySplit[1] + "-" + citySplit[2];
-///*       */               }
-///*       */ 
-///* 15050 */               map.put("city", c);
-///* 15051 */               map.put("province_city_area", users.getCity().toString());
+/* 15044 */               if (city.isEmpty())
+/* 15045 */                 c = "";
+/*       */               else {
+/* 15047 */                 c = citySplit[1] + "-" + citySplit[2];
+/*       */               }
+/*       */ 
+/* 15050 */               map.put("city", c);
+/* 15051 */               map.put("province_city_area", users.getCity().toString());
 /* 15052 */               map.put("signature", users.getSignature().toString());
 /* 15053 */               map.put("headPic", users.getHeadPic().toString());
 						  logger.info("getuser headPic4>>"+boUsers.getHeadPic().toString());
@@ -17595,11 +17622,11 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /* 15702 */             map.put("accessToken", update.getAccessToken());
 /* 15703 */             map.put("refreshToken", update.getRefreshToken());
 						//5-31 用于判断提示用户是否需要获得移交的权限
-						map.put("isupdate", update.getIsupdate());
-						logger.info("isupdate:"+update.getIsupdate());
-						//6-1 存放了移交账号时关联的老账号
-						map.put("oldPhone", update.getCity());
-						logger.info("isupdate:"+update.getCity());
+//						map.put("isupdate", update.getIsupdate());
+//						logger.info("isupdate:"+update.getIsupdate());
+						//6-4 存放了移交账号时关联的老账号
+//						map.put("oldPhone", update.getOldPhone());
+//						logger.info("olePhone:"+update.getOldPhone());
 /* 15704 */             this.requestJson.setData(map);
 /* 15705 */             this.requestJson.setSuccess(true);
 /* 15706 */             return "success";
@@ -17647,11 +17674,11 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /* 15748 */             map.put("accessToken", update.getAccessToken());
 /* 15749 */             map.put("refreshToken", update.getRefreshToken());
 						//5-31
-						map.put("isupdate", update.getIsupdate());
-						logger.info("isupdate:"+update.getIsupdate());
-						//6-1
-						map.put("oldPhone", update.getCity());
-						logger.info("oldPhone:"+update.getCity());
+//						map.put("isupdate", update.getIsupdate());
+//						logger.info("isupdate:"+update.getIsupdate());
+						//6-4
+//						map.put("oldPhone", update.getOldPhone());
+//						logger.info("oldPhone:"+update.getOldPhone());
 /* 15750 */             this.requestJson.setData(map);
 /* 15751 */             this.requestJson.setSuccess(true);
 /* 15752 */             return "success";
@@ -17735,15 +17762,15 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /*       */             		}
 /* 15874 */             		map.put("Eztoken", EZTOKEN);
 /* 15875 */             		map.put("ez_token", EZTOKEN);
-///* 15876 */             		String city2 = phone2.getCity();
-///*       */             		String city3;
-///* 15878 */             		if (city2.equals("")) {
-///* 15879 */               			city3 = "杭州市";
-///*       */             		} else {
-///* 15881 */               			String[] split = city2.split(",");
-///* 15882 */               			city3 = split[1];
-///*       */             		}
-///* 15884 */             		map.put("city", city3);
+/* 15876 */             		String city2 = phone2.getCity();
+/*       */             		String city3;
+/* 15878 */             		if (city2.equals("")) {
+/* 15879 */               			city3 = "杭州市";
+/*       */             		} else {
+/* 15881 */               			String[] split = city2.split(",");
+/* 15882 */               			city3 = split[1];
+/*       */             		}
+/* 15884 */             		map.put("city", city3);
 /*       */           	} else {
 /* 15886 */             	BoUsers boUsers = this.boUserServicess.findByUserUserCode(phone2.getAuthorizationUserCode());
 /* 15887 */             	if (boUsers != null) {
@@ -17781,15 +17808,15 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /*       */               		}
 /* 15920 */               		map.put("Eztoken", EZTOKEN);
 /* 15921 */               		map.put("ez_token", EZTOKEN);
-///* 15922 */               		String city2 = phone2.getCity();
-///*       */               		String city3;
-///* 15924 */               		if (city2.equals("")) {
-///* 15925 */                 		city3 = "杭州市";
-///*       */               		} else {
-///* 15927 */                 		String[] split = city2.split(",");
-///* 15928 */                 		city3 = split[1];
-///*       */               		}
-///* 15930 */               		map.put("city", city3);
+/* 15922 */               		String city2 = phone2.getCity();
+/*       */               		String city3;
+/* 15924 */               		if (city2.equals("")) {
+/* 15925 */                 		city3 = "杭州市";
+/*       */               		} else {
+/* 15927 */                 		String[] split = city2.split(",");
+/* 15928 */                 		city3 = split[1];
+/*       */               		}
+/* 15930 */               		map.put("city", city3);
 /*       */             	}
 /*       */ 
 /*       */           	}
@@ -17826,16 +17853,16 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /* 15964 */           user.setSignature("");
 /* 15965 */           user.setIsFirst(this.fid);
 /* 15966 */           user.setWhetherSetPwd(this.fid);
+//					  user.setOldPhone("");//6-4
 /* 15967 */           BoUsers save = (BoUsers)this.boUserServicess.save(user);
-///* 15968 */           String city2 = save.getCity();
-///*       */           String city3;
-/////*       */           String city3;
-///* 15970 */           if (city2.equals("")) {
-///* 15971 */             city3 = "杭州市";
-///*       */           } else {
-///* 15973 */             String[] split = city2.split(",");
-///* 15974 */             city3 = split[1];
-///*       */           }
+/* 15968 */           String city2 = save.getCity();
+/*       */           String city3;
+/* 15970 */           if (city2.equals("")) {
+/* 15971 */             city3 = "杭州市";
+/*       */           } else {
+/* 15973 */             String[] split = city2.split(",");
+/* 15974 */             city3 = split[1];
+/*       */           }
 /* 15976 */           map.put("whetherSetPwd", save.getWhetherSetPwd());
 /* 15977 */           map.put("accessToken", save.getAccessToken());//2-6
 /* 15978 */           map.put("refreshToken", save.getRefreshToken());//2-6
@@ -17847,11 +17874,10 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /* 15984 */           map.put("userPhone", save.getUserPhone());
 /* 15985 */           map.put("logoAccountType", save.getLogoAccountType());
 /* 15986 */           map.put("accountOperationType", save.getAccountOperationType());
-///* 15987 */           map.put("city", city3);
+/* 15987 */           map.put("city", city3);
 /* 15988 */           map.put("isFirst", save.getIsFirst());
 /* 15989 */           String fluoriteAccessToken = save.getFluoriteAccessToken();
 /*       */           String EZTOKEN;
-///*       */           String EZTOKEN;
 /* 15991 */           if (fluoriteAccessToken.equals(""))
 /* 15992 */             EZTOKEN = "NO_BUNDING";
 /*       */           else {
@@ -17914,7 +17940,6 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /* 16051 */             phone.setRefreshTokenTime(refreshTokenTime_o+"");
 /* 16052 */             phone.setCid(this.CID);
 /*       */             String s;
-///*       */             String s;
 /* 16054 */             if (this.phoneType == null)
 /* 16055 */               s = "1";
 /*       */             else {
@@ -17937,7 +17962,6 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /* 16073 */             map.put("whetherSetPwd", phone.getWhetherSetPwd());
 /* 16074 */             String fluoriteAccessToken = phone.getFluoriteAccessToken();
 /*       */             String EZTOKEN;
-///*       */             String EZTOKEN;
 /* 16076 */             if (fluoriteAccessToken.equals(""))
 /* 16077 */               EZTOKEN = "NO_BUNDING";
 /*       */             else {
@@ -17945,16 +17969,15 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /*       */             }
 /* 16081 */             map.put("Eztoken", EZTOKEN);
 /* 16082 */             map.put("ez_token", EZTOKEN);
-///* 16083 */             String city2 = phone.getCity();
-///*       */             String city3;
-/////*       */             String city3;
-///* 16085 */             if (city2.equals("")) {
-///* 16086 */               city3 = "杭州市";
-///*       */             } else {
-///* 16088 */               String[] split = city2.split(",");
-///* 16089 */               city3 = split[1];
-///*       */             }
-///* 16091 */             map.put("city", city3);
+/* 16083 */             String city2 = phone.getCity();
+/*       */             String city3;
+/* 16085 */             if (city2.equals("")) {
+/* 16086 */               city3 = "杭州市";
+/*       */             } else {
+/* 16088 */               String[] split = city2.split(",");
+/* 16089 */               city3 = split[1];
+/*       */             }
+/* 16091 */             map.put("city", city3);
 /*       */           } else {
 /* 16093 */             BoUsers boUsers = this.boUserServicess.findByUserUserCode(phone.getAuthorizationUserCode());
 /* 16094 */             if (boUsers != null) {
@@ -17964,7 +17987,6 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /* 16098 */               phone.setRefreshTokenTime(refreshTokenTime_o+"");
 /* 16099 */               phone.setCid(this.CID);
 /*       */               String s;
-///*       */               String s;
 /* 16101 */               if (this.phoneType == null)
 /* 16102 */                 s = "1";
 /*       */               else {
@@ -17983,7 +18005,6 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /* 16116 */               map.put("whetherSetPwd", phone.getWhetherSetPwd());
 /* 16117 */               String fluoriteAccessToken = boUsers.getFluoriteAccessToken();
 /*       */               String EZTOKEN;
-///*       */               String EZTOKEN;
 /* 16119 */               if (fluoriteAccessToken.equals(""))
 /* 16120 */                 EZTOKEN = "NO_BUNDING";
 /*       */               else {
@@ -17991,16 +18012,15 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /*       */               }
 /* 16124 */               map.put("Eztoken", EZTOKEN);
 /* 16125 */               map.put("ez_token", EZTOKEN);
-///* 16126 */               String city2 = phone.getCity();
-///*       */               String city3;
-/////*       */               String city3;
-///* 16128 */               if (city2.equals("")) {
-///* 16129 */                 city3 = "杭州市";
-///*       */               } else {
-///* 16131 */                 String[] split = city2.split(",");
-///* 16132 */                 city3 = split[1];
-///*       */               }
-///* 16134 */               map.put("city", city3);
+/* 16126 */               String city2 = phone.getCity();
+/*       */               String city3;
+/* 16128 */               if (city2.equals("")) {
+/* 16129 */                 city3 = "杭州市";
+/*       */               } else {
+/* 16131 */                 String[] split = city2.split(",");
+/* 16132 */                 city3 = split[1];
+/*       */               }
+/* 16134 */               map.put("city", city3);
 /*       */             }
 /*       */ 
 /*       */           }
@@ -18037,16 +18057,16 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /* 16168 */           user.setSignature("");
 /* 16169 */           user.setIsFirst(this.fid);
 /* 16170 */           user.setWhetherSetPwd(this.fid);
+//					  user.setOldPhone("");
 /* 16171 */           BoUsers save = (BoUsers)this.boUserServicess.save(user);
-///* 16172 */           String city2 = save.getCity();
-///*       */           String city3;
-/////*       */           String city3;
-///* 16174 */           if (city2.equals("")) {
-///* 16175 */             city3 = "杭州市";
-///*       */           } else {
-///* 16177 */             String[] split = city2.split(",");
-///* 16178 */             city3 = split[1];
-///*       */           }
+/* 16172 */           String city2 = save.getCity();
+/*       */           String city3;
+/* 16174 */           if (city2.equals("")) {
+/* 16175 */             city3 = "杭州市";
+/*       */           } else {
+/* 16177 */             String[] split = city2.split(",");
+/* 16178 */             city3 = split[1];
+/*       */           }
 /* 16180 */           map.put("whetherSetPwd", save.getWhetherSetPwd());
 /* 16181 */           map.put("accessToken", save.getAccessToken());
 /* 16182 */           map.put("refreshToken", save.getRefreshToken());
@@ -18058,11 +18078,10 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /* 16188 */           map.put("userPhone", save.getUserPhone());
 /* 16189 */           map.put("logoAccountType", save.getLogoAccountType());
 /* 16190 */           map.put("accountOperationType", save.getAccountOperationType());
-///* 16191 */           map.put("city", city3);
+/* 16191 */           map.put("city", city3);
 /* 16192 */           map.put("isFirst", save.getIsFirst());
 /* 16193 */           String fluoriteAccessToken = save.getFluoriteAccessToken();
 /*       */           String EZTOKEN;
-///*       */           String EZTOKEN;
 /* 16195 */           if (fluoriteAccessToken.equals(""))
 /* 16196 */             EZTOKEN = "NO_BUNDING";
 /*       */           else {

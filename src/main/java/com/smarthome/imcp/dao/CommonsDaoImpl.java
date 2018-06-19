@@ -41,20 +41,21 @@
 /*     */ public class CommonsDaoImpl<T, PK extends Serializable>
 /*     */   implements CommonsDaoIface<T, PK>
 /*     */ {
-/*     */   protected SessionFactory sessionFactory;
+/*     */   protected SessionFactory sessionFactory;//成员变量
 /*     */   private Class persistentClass;
 /*     */ 
 /*     */   public SessionFactory getCurrentSessionFactory()
 /*     */   {
 /*  35 */     return this.sessionFactory;
 /*     */   }
-/*     */ 
+
+/*     */   //注解注入sessionFactory对象
 /*     */   @Resource(name="sessionFactory")
 /*     */   public void setSessionFactory(SessionFactory sessionFactory)
 /*     */   {
 /*  41 */     this.sessionFactory = sessionFactory;
 /*     */   }
-/*     */ 
+/*     */   
 /*     */   public Session getCurrentSession()
 /*     */   {
 /*  46 */     return this.sessionFactory.getCurrentSession();

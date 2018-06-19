@@ -24,6 +24,7 @@
 		  import java.text.SimpleDateFormat;
 		  import java.util.ArrayList;
 /*     */ import java.util.Date;
+import java.util.Enumeration;
 /*     */ import java.util.HashMap;
 		  import java.util.List;
 /*     */ import java.util.Map;
@@ -71,6 +72,7 @@
 			@Autowired
 			private BoRoomServiceIface<BoRoom, Serializable> boRoomService;
 /* 778 */   private RequestJson requestJson = new RequestJson();
+
 /*     */ 
 /*     */   public Boolean isRal(String timestamp, String nonce, String sign, String access_Token, String userCode, String interfaceName)
 /*     */   {
@@ -275,7 +277,7 @@
 /* 339 */         this.requestJson = new RequestJson(false, "验证码已失效,请重新获取", map);
 /* 340 */         return "success";
 /*     */       }
-/*     */ 
+/*     */ 		//6-19号注释，app配合php验证
 /* 343 */       String[] str = StaticUtil.msg_code.get(this.userPhone).toString()
 /* 344 */         .split(",");
 /*     */ 
@@ -375,7 +377,7 @@
 /*     */     }
 /* 431 */     return "success";
 /*     */   }
-/*     */ 
+
 /*     */   @SuppressWarnings("unchecked")
             @Action(value="appUserLogin", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*     */   public String appUserLogin()
@@ -385,13 +387,33 @@
 /* 446 */     this.requestJson = new RequestJson();
 /* 447 */     @SuppressWarnings("rawtypes")
 			  Map userInfoMap = new HashMap();
+			  //6-15
+			  String salt="";
+			  HttpServletRequest request = ServletActionContext.getRequest();			
+			  Enumeration pNames=request.getParameterNames();
+			  logger.info("测试php调用接口的连接");
+			  while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+				  String name=(String)pNames.nextElement();
+				  logger.info("name:"+name);
+				  String value=request.getParameter(name);
+				  logger.info("value:"+value);
+				  if(name.equals("salt")) {
+					  salt=value;
+				  }
+			  }
+			  logger.info("salt:"+salt);
+			//end
 /*     */     try {
 /* 449 */       if (StringUtils.isEmpty(this.userPhone)) {
 /* 450 */         this.requestJson = new RequestJson(false, "请输入手机号码", userInfoMap);
 /* 451 */       } else if (StringUtils.isEmpty(this.userPwd)) {
 /* 452 */         this.requestJson = new RequestJson(false, "请输入密码", userInfoMap);
 /*     */       } else {
-	/* 454 */     BoUsers users = this.boUserService.findByUserPhonePwd(this.userPhone, md5.getMD5ofStr(this.userPwd));
+/* 454 */         BoUsers users = this.boUserService.findByUserPhonePwd(this.userPhone, md5.getMD5ofStr(this.userPwd));
+				  if(users == null) {
+					  users=this.boUserService.findByUserPhonePhpPwd(this.userPhone, md5.getMD5ofStr(this.userPwd+salt).toLowerCase());
+				  }
+				  
 /* 455 */         String generateTokeCode = TokeUtil.generateTokeCode();
 /* 456 */         String generateTokeCodes = TokeUtil.generateTokeCodes();
 /* 457 */         Long accessTokenTime = Long.valueOf(1800L);
@@ -484,11 +506,11 @@
                     	userInfoMap.put("isFirst", users.getIsFirst());	
                     }
                     //5-31
-                    userInfoMap.put("isupdate", users.getIsupdate());
-                    logger.info("isupdate...."+users.getIsupdate());
+//                    userInfoMap.put("isupdate", users.getIsupdate());
+//                    logger.info("isupdate...."+users.getIsupdate());
                     //6-1
-                    userInfoMap.put("oldPhone", users.getCity());
-                    logger.info("oldPhone...."+users.getCity());
+//                    userInfoMap.put("oldPhone", users.getOldPhone());
+//                    logger.info("oldPhone...."+users.getOldPhone());
 /* 481 */           userInfoMap.put("whetherSetPwd", users.getWhetherSetPwd());
 					//添加初始的楼层、房间信息  2018/1/3
 					BoFloor floor=this.boFloorService.findByUserCode(users.getUserCode());
@@ -513,7 +535,6 @@
 						userInfoMap.put("roomInfo", list_room);
 						//////////////////////////////////////////////////楼层、房间添加默认值END///////////////////////////////////////////////////////
 					}
-					
 /* 482 */           String fluoriteAccessToken = users.getFluoriteAccessToken();
 					logger.info("fluoriteAccessToken:"+fluoriteAccessToken);
 /*     */           String EZTOKEN;
@@ -534,8 +555,6 @@
 //						ymPush.sendAndroidUnicast(this.devicetoken,"上线通知","您的设备在"+dateString+"成功登录");
 //					}
 //					END
-				    System.out.println("手机登录成功");
-				    logger.debug("手机登录成功。。。");
 /* 484 */           if (fluoriteAccessToken.equals(""))
 /* 485 */             EZTOKEN = "NO_BUNDING";
 /*     */           else {
@@ -543,16 +562,15 @@
 /*     */           }
 /* 489 */           userInfoMap.put("Eztoken", EZTOKEN);
 /* 490 */           userInfoMap.put("ez_token", EZTOKEN);
-///* 491 */           String city2 = users.getCity();
-///*     */           String city3;
-///*     */           String city3;
-///* 493 */           if (city2.equals("")) {
-///* 494 */             city3 = "杭州市";
-///*     */           } else {
-///* 496 */             String[] split = city2.split(",");
-///* 497 */             city3 = split[1];
-///*     */           }
-///* 499 */           userInfoMap.put("city", city3);
+/* 491 */           String city2 = users.getCity();
+/*     */           String city3;
+/* 493 */           if (city2.equals("")) {
+/* 494 */             city3 = "杭州市";
+/*     */           } else {
+/* 496 */             String[] split = city2.split(",");
+/* 497 */             city3 = split[1];
+/*     */           }
+/* 499 */           userInfoMap.put("city", city3);
 /* 500 */           this.requestJson.setData(userInfoMap);
 /* 501 */           this.requestJson.setMessage("");
 /* 502 */           this.requestJson.setSuccess(true);
@@ -581,7 +599,15 @@
 /* 530 */     Md5 md5 = new Md5();
 /* 531 */     this.requestJson = new RequestJson();
 /* 532 */     HttpServletRequest request = ServletActionContext.getRequest();
-
+			  Enumeration pNames=request.getParameterNames();
+			  String salt="";
+			  while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+				  String name=(String)pNames.nextElement();
+				  if(name.equals("salt")) {
+					  salt=request.getParameter(name);
+				  }
+			  }
+			  logger.info("salt:"+salt);
 /* 534 */     Map map = new HashMap();
 /*     */     try {
 /* 536 */       if (StringUtils.isEmpty(this.userPhone)) {
@@ -608,6 +634,12 @@
 /* 556 */               String[] ips = (String[])StaticUtil.IP.get(remoteAddr);
 /* 557 */               if (ips == null) {
 /* 558 */                 BoUsers user = UserUtil.save(this.userPhone, md5.getMD5ofStr(this.userPwd), this.userEmail);
+						  //6-15
+					 	  if(salt != null) {
+					 		  String phpPwd=md5.getMD5ofStr(this.userPwd+salt).toLowerCase();
+					 		  user.setPhpPasswd(phpPwd);
+					 		  user.setSalt(salt);
+					 	  }
 /* 559 */                 BoUsers save = (BoUsers)this.boUserService.save(user);
 /* 560 */                 if (save != null) {
 /* 561 */                   count++;
@@ -639,6 +671,12 @@
 /* 570 */                 if (Integer.valueOf(ips[2]).intValue() < 4)
 /*     */                 {
 /* 572 */                   BoUsers user = UserUtil.save(this.userPhone, md5.getMD5ofStr(this.userPwd), this.userEmail);
+							//6-15
+							 if(salt != null) {
+								  String phpPwd=md5.getMD5ofStr(this.userPwd+salt).toLowerCase();
+								  user.setPhpPasswd(phpPwd);
+								  user.setSalt(salt);
+							 }
 /* 573 */                   BoUsers save = (BoUsers)this.boUserService.save(user);
 /* 574 */                   if (save != null) {
 /* 575 */                     StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, Long.valueOf(ips[1])+"", (Integer.valueOf(ips[2]).intValue() + 1)+"" });
@@ -694,8 +732,18 @@
 /*     */                 }
 /*     */               } else {
 /* 603 */                 BoUsers user = UserUtil.save(this.userPhone, md5.getMD5ofStr(this.userPwd), this.userEmail);
+							//6-15
+						  if(salt != null) {
+							  String phpPwd=md5.getMD5ofStr(this.userPwd+salt).toLowerCase();
+							  user.setPhpPasswd(phpPwd);
+							  user.setSalt(salt);
+						  }
 /* 604 */                 BoUsers save = (BoUsers)this.boUserService.save(user);
 /* 605 */                 if (save != null) {	
+///* 606 */                   StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
+///* 607 */                   this.requestJson.setData(map);
+///* 608 */                   this.requestJson.setMessage("注册成功");
+///* 609 */                   this.requestJson.setSuccess(true);
 							count++;
 /* 562 */                   StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });
 /* 563 */                   this.requestJson.setData(map);
@@ -752,6 +800,11 @@
 /* 640 */             String[] ips = (String[])StaticUtil.IP.get(remoteAddr);
 /* 641 */             if (ips == null) {
 /* 642 */               BoUsers user = UserUtil.save(this.userPhone, md5.getMD5ofStr(this.userPwd), this.userEmail);
+						 if(salt != null) {
+							  String phpPwd=md5.getMD5ofStr(this.userPwd+salt).toLowerCase();
+							  user.setPhpPasswd(phpPwd);
+							  user.setSalt(salt);
+						 }
 /* 643 */               BoUsers save = (BoUsers)this.boUserService.save(user);
 /* 644 */               if (save != null) {
 						//new 2-1
@@ -789,6 +842,12 @@
 /* 654 */               if (Integer.valueOf(ips[2]).intValue() < 4)
 /*     */               {
 /* 656 */                 BoUsers user = UserUtil.save(this.userPhone, md5.getMD5ofStr(this.userPwd), this.userEmail);
+						//6-15
+						 if(salt != null) {
+							  String phpPwd=md5.getMD5ofStr(this.userPwd+salt).toLowerCase();
+							  user.setPhpPasswd(phpPwd);
+							  user.setSalt(salt);
+						 }
 /* 657 */                 BoUsers save = (BoUsers)this.boUserService.save(user);
 /* 658 */                 if (save != null) {
 /* 659 */                   StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, Long.valueOf(ips[1])+"", (Integer.valueOf(ips[2]).intValue() + 1)+"" });
@@ -840,11 +899,16 @@
 /*     */               } else {
 /* 682 */                 this.requestJson.setData(map);
 /* 683 */                 this.requestJson.setMessage("当前ip请求频繁");
-
 /* 684 */                 this.requestJson.setSuccess(false);
 /*     */               }
 /*     */             } else {
 /* 687 */               BoUsers user = UserUtil.save(this.userPhone, md5.getMD5ofStr(this.userPwd), this.userEmail);
+						//6-15
+						 if(salt != null) {
+							  String phpPwd=md5.getMD5ofStr(this.userPwd+salt).toLowerCase();
+							  user.setPhpPasswd(phpPwd);
+							  user.setSalt(salt);
+						 }
 /* 688 */               BoUsers save = (BoUsers)this.boUserService.save(user);
 /* 689 */               if (save != null) {
 ///* 690 */                 StaticUtil.IP.put(remoteAddr, new String[] { remoteAddr, time+"", count+"" });

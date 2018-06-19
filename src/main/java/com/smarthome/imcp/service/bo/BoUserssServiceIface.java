@@ -21,6 +21,8 @@ public abstract interface BoUserssServiceIface<T, PK extends Serializable> exten
 
   public abstract List<BoUsers> findAllBoUsers();
   public abstract BoUsers delete(T paramT);//4-26
+
+  public abstract BoUsers findByUserPhonePhpPwd(String userPhone, String phpPwd);//6-19
 }
 
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\

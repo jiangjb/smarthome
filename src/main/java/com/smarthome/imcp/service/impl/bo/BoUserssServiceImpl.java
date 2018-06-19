@@ -68,6 +68,18 @@
 /*     */     }
 /*  85 */     return (BoUsers)list.get(0);
 /*     */   }
+
+			@Override
+			public BoUsers findByUserPhonePhpPwd(String userPhone, String phpPwd) {
+				DetachedCriteria criteria = DetachedCriteria.forClass(BoUsers.class);
+				criteria.add(Restrictions.eq("userPhone", userPhone));
+				criteria.add(Restrictions.eq("phpPasswd", phpPwd));
+				List list = this.boUserDao.findByCriteria(criteria);
+				if ((list == null) || (list.isEmpty())) {
+				return null;
+				}
+				return (BoUsers)list.get(0);
+			}
 /*     */ 
 /*     */   public BoUsers findByUserUserCode(String userCode)
 /*     */   {
@@ -144,6 +156,7 @@
 				}
 				return boUser;
 			}
+			
 		}
 
 /* Location:           C:\Users\znhome\Desktop\bak\smarthome.IMCPlatform\WEB-INF\classes\

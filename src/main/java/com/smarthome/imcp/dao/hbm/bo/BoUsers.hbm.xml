@@ -103,6 +103,13 @@
         <property name="fluoriteAccessTokenExpireTime" type="java.lang.String">
             <column name="FLUORITE_ACCESS_TOKEN_EXPIRE_TIME" length="50" />
         </property>
+        <!-- 6-15 -->
+        <property name="phpPasswd" type="java.lang.String">
+            <column name="PHP_PWD" length="255" />
+        </property>
+        <property name="salt" type="java.lang.String">
+            <column name="SALT" length="255" />
+        </property>
         
         
         
