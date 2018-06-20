@@ -8668,7 +8668,7 @@ import org.apache.commons.codec.binary.Base64;//2-9
 				if(newTel != null && !newPhone.equals(oldPhone)) {
 					//5-31
 					newTel.setIsupdate(true);
-					newTel.setCity(oldPhone);
+					newTel.setOldPhone(oldPhone);
 					BoUsers save=this.boUserssService.save(newTel);
 					if(save == null) {
 						this.requestJson.setData(map);
@@ -8738,132 +8738,132 @@ import org.apache.commons.codec.binary.Base64;//2-9
 			  /*
 			   * 移交账号时对方同意移交
 			   */
-//			  @Action(value="confirmationOfTransfer", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
-//			  public String confirmationOfTransfer() {
-//				  Md5 md5 = new Md5();
-//				  this.requestJson = new RequestJson();
-//				  Map map = new HashMap();
-//				  HttpServletRequest request = ServletActionContext.getRequest();
-//				  String newPhone="";
-//				  String oldPhone="";
-//				  String checked="";
-//				  Enumeration pNames=request.getParameterNames();
-//				  while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
-//					  String name=(String)pNames.nextElement();
-////						  logger.info("name:"+name);
-//					  String value=request.getParameter(name);
-////						  logger.info("value:"+value);
-//					  if("newPhone".equals(name)) {
-//						  newPhone=value;
-//					  }else if("oldPhone".equals(name)) {
-//						  oldPhone=value;
-//					  }else if("checked".equals(name)) {
-//						  checked=value;
-//					  }
-//				  }
-//				  BoUsers newTel=this.boUserssService.findByUserPhone(newPhone);
-//				  if("0".equals(checked)) {//点击了取消按钮，，不需要授予的权限
-//					  newTel.setIsupdate(false);
-//					  newTel.setCity("");
-//					  this.boUserssService.update(newTel);
-//					  this.requestJson.setData(map);
-//					  this.requestJson.setMessage("移交账号失败");
-//					  this.requestJson.setSuccess(false);
-//				  }else {
-//					  int userId=newTel.getUserId();
-//					  String pwd=newTel.getUserPwd();
-//					  String userCode=newTel.getUserCode();
-//					  String headPic=newTel.getHeadPic();
-//					  String userName=newTel.getUserName();
-//					  String signature=newTel.getSignature();
-//					  String sex=newTel.getUserSex();
-//					  String mail=newTel.getUserEmail();
-//					  BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
-//					  String oldPWD=oldTel.getUserPwd();
-//					  String oldHeadPic=oldTel.getHeadPic();
-//					  String oldUserName=oldTel.getUserName();
-//					  String oldSignature=oldTel.getSignature();
-//					  String oldSex=oldTel.getUserSex();
-//					  String oldMail=oldTel.getUserEmail();
-//					  //将新账号的相关数据存到旧账号
-//					  oldTel.setUserPhone(newPhone);
-//					  oldTel.setUserPwd(pwd);
-//					  oldTel.setHeadPic(headPic);
-//					  oldTel.setUserName(userName);
-//					  oldTel.setSignature(signature);
-//					  oldTel.setUserSex(sex);
-//					  oldTel.setUserEmail(mail);
-//					  BoUsers update=this.boUserssService.update(oldTel);
-//					  if(update == null) {
-//						  this.requestJson.setData(map);
-//						  this.requestJson.setMessage("移交账号失败");
-//						  this.requestJson.setSuccess(false);
-//					  }else {
-//						  BoUsers newTel01=this.boUserssService.findByKey(userId);
-//						  //不过不排除新用户加了情景模式  得先检查是否有情景模式，然后删除新用户
-//						  List<BoModel> boModels=this.boModelService.getListBy(userCode);
-////						logger.info("boModels:"+boModels);
-//						  for(BoModel boModel:boModels) {
-//							  List<BoModelInfo> boModelInfos=this.boModelInfoServicess.getBy(userCode, boModel.getModelId());
-//							  for(BoModelInfo boModelInfo:boModelInfos) {
-//								  this.boModelInfoServicess.delete(boModelInfo);
-//							  }
-//							  this.boModelService.delete(boModel);//想要删除boModel数据得先处理它的外键关联表 boModelInfo中相关的数据
-//						  }
-//						  //若新账号已经绑定主机等（有关联表）>删除设备及主机
-//						  List<BoHostDevice> boHostDevices=this.boHostDeviceService.getListByUserCode(userCode);
-//						  for(BoHostDevice boHostDevice:boHostDevices) {
-//							  this.boHostDeviceService.delete(boHostDevice);
-//						  }
-//						  //删除用户和主机的关联表
-//						  List<BoUserDevices> boUserDevices=this.boUserDevicesServicess.getBy(userCode);
-////						logger.info("boUserDevices:"+boUserDevices);
-//						  if(boUserDevices.size() > 0) {
-//							  for(BoUserDevices boUserDevice:boUserDevices) {
-//								  this.boUserDevicesServicess.delete(boUserDevice);
-//							  }
-//						  }
-//						  //删除新账号
-//						  BoUsers del=this.boUserssService.delete(newTel01);//删除用户也得删除相关的外键关联
-//						  //注册新账号（放入老账号的手机号、密码以及头像等信息）
-//						  BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
-//						  user.setHeadPic(oldHeadPic);
-//						  user.setUserName(oldUserName);
-//						  user.setSignature(oldSignature);
-//						  user.setUserSex(oldSex);
-//						  user.setUserEmail(oldMail);
-////					        this.boUserServicess.update(save);
-//						  BoUsers save = (BoUsers)this.boUserServicess.save(user);
-//						  if(save != null) {
-//							  //注册成功时 默认添加一个楼层和四个房间
-//							  BoFloor floor=FloorUtil.save(save.getUserCode());
-//							  BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
-//							  //String userCode,String floorName,String floorCode,String roomName	
-//							  //								System.out.println("楼层名称："+saveF.getFloorName());
-//							  String uCode=saveF.getUserCode();
-//							  String floorName=saveF.getFloorName();
-//							  //								String floorName="我的家";
-//							  String floorCode=saveF.getFloorCode();
-//							  BoRoom room1=RoomUtil.save(uCode,floorName,floorCode,"客厅");
-//							  BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
-//							  BoRoom room2=RoomUtil.save(uCode,floorName,floorCode,"卧室");
-//							  BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
-//							  BoRoom room3=RoomUtil.save(uCode,floorName,floorCode,"厨房");
-//							  BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
-//							  BoRoom room4=RoomUtil.save(uCode,floorName,floorCode,"卫生间");
-//							  BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
-//							  this.requestJson.setData(map);
-//							  this.requestJson.setMessage("移交成功");
-//							  this.requestJson.setSuccess(true);
-//						  }else {
-//							  this.requestJson.setData(map);
-//							  this.requestJson.setMessage("移交账号失败");
-//							  this.requestJson.setSuccess(false);
-//						  }
-//					  }
-//				  }
-//				return "success";
-//			  }
+			  @Action(value="confirmationOfTransfer", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public String confirmationOfTransfer() {
+				  Md5 md5 = new Md5();
+				  this.requestJson = new RequestJson();
+				  Map map = new HashMap();
+				  HttpServletRequest request = ServletActionContext.getRequest();
+				  String newPhone="";
+				  String oldPhone="";
+				  String checked="";
+				  Enumeration pNames=request.getParameterNames();
+				  while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+					  String name=(String)pNames.nextElement();
+//						  logger.info("name:"+name);
+					  String value=request.getParameter(name);
+//						  logger.info("value:"+value);
+					  if("newPhone".equals(name)) {
+						  newPhone=value;
+					  }else if("oldPhone".equals(name)) {
+						  oldPhone=value;
+					  }else if("checked".equals(name)) {
+						  checked=value;
+					  }
+				  }
+				  BoUsers newTel=this.boUserssService.findByUserPhone(newPhone);
+				  if("0".equals(checked)) {//点击了取消按钮，，不需要授予的权限
+					  newTel.setIsupdate(false);
+					  newTel.setOldPhone("");
+					  this.boUserssService.update(newTel);
+					  this.requestJson.setData(map);
+					  this.requestJson.setMessage("拒绝移交账号");
+					  this.requestJson.setSuccess(false);
+				  }else {
+					  int userId=newTel.getUserId();
+					  String pwd=newTel.getUserPwd();
+					  String userCode=newTel.getUserCode();
+					  String headPic=newTel.getHeadPic();
+					  String userName=newTel.getUserName();
+					  String signature=newTel.getSignature();
+					  String sex=newTel.getUserSex();
+					  String mail=newTel.getUserEmail();
+					  BoUsers oldTel=this.boUserssService.findByUserPhone(oldPhone);
+					  String oldPWD=oldTel.getUserPwd();
+					  String oldHeadPic=oldTel.getHeadPic();
+					  String oldUserName=oldTel.getUserName();
+					  String oldSignature=oldTel.getSignature();
+					  String oldSex=oldTel.getUserSex();
+					  String oldMail=oldTel.getUserEmail();
+					  //将新账号的相关数据存到旧账号
+					  oldTel.setUserPhone(newPhone);
+					  oldTel.setUserPwd(pwd);
+					  oldTel.setHeadPic(headPic);
+					  oldTel.setUserName(userName);
+					  oldTel.setSignature(signature);
+					  oldTel.setUserSex(sex);
+					  oldTel.setUserEmail(mail);
+					  BoUsers update=this.boUserssService.update(oldTel);
+					  if(update == null) {
+						  this.requestJson.setData(map);
+						  this.requestJson.setMessage("移交账号失败");
+						  this.requestJson.setSuccess(false);
+					  }else {
+						  BoUsers newTel01=this.boUserssService.findByKey(userId);
+						  //不过不排除新用户加了情景模式  得先检查是否有情景模式，然后删除新用户
+						  List<BoModel> boModels=this.boModelService.getListBy(userCode);
+//						logger.info("boModels:"+boModels);
+						  for(BoModel boModel:boModels) {
+							  List<BoModelInfo> boModelInfos=this.boModelInfoServicess.getBy(userCode, boModel.getModelId());
+							  for(BoModelInfo boModelInfo:boModelInfos) {
+								  this.boModelInfoServicess.delete(boModelInfo);
+							  }
+							  this.boModelService.delete(boModel);//想要删除boModel数据得先处理它的外键关联表 boModelInfo中相关的数据
+						  }
+						  //若新账号已经绑定主机等（有关联表）>删除设备及主机
+						  List<BoHostDevice> boHostDevices=this.boHostDeviceService.getListByUserCode(userCode);
+						  for(BoHostDevice boHostDevice:boHostDevices) {
+							  this.boHostDeviceService.delete(boHostDevice);
+						  }
+						  //删除用户和主机的关联表
+						  List<BoUserDevices> boUserDevices=this.boUserDevicesServicess.getBy(userCode);
+//						logger.info("boUserDevices:"+boUserDevices);
+						  if(boUserDevices.size() > 0) {
+							  for(BoUserDevices boUserDevice:boUserDevices) {
+								  this.boUserDevicesServicess.delete(boUserDevice);
+							  }
+						  }
+						  //删除新账号
+						  BoUsers del=this.boUserssService.delete(newTel01);//删除用户也得删除相关的外键关联
+						  //注册新账号（放入老账号的手机号、密码以及头像等信息）
+						  BoUsers user = UserUtil.save(oldPhone, oldPWD, "");
+						  user.setHeadPic(oldHeadPic);
+						  user.setUserName(oldUserName);
+						  user.setSignature(oldSignature);
+						  user.setUserSex(oldSex);
+						  user.setUserEmail(oldMail);
+//					        this.boUserServicess.update(save);
+						  BoUsers save = (BoUsers)this.boUserServicess.save(user);
+						  if(save != null) {
+							  //注册成功时 默认添加一个楼层和四个房间
+							  BoFloor floor=FloorUtil.save(save.getUserCode());
+							  BoFloor saveF=(BoFloor)this.boFloorService.save(floor);
+							  //String userCode,String floorName,String floorCode,String roomName	
+							  //								System.out.println("楼层名称："+saveF.getFloorName());
+							  String uCode=saveF.getUserCode();
+							  String floorName=saveF.getFloorName();
+							  //								String floorName="我的家";
+							  String floorCode=saveF.getFloorCode();
+							  BoRoom room1=RoomUtil.save(uCode,floorName,floorCode,"客厅");
+							  BoRoom saveR1=(BoRoom)this.boRoomService.save(room1);
+							  BoRoom room2=RoomUtil.save(uCode,floorName,floorCode,"卧室");
+							  BoRoom saveR2=(BoRoom)this.boRoomService.save(room2);
+							  BoRoom room3=RoomUtil.save(uCode,floorName,floorCode,"厨房");
+							  BoRoom saveR3=(BoRoom)this.boRoomService.save(room3);
+							  BoRoom room4=RoomUtil.save(uCode,floorName,floorCode,"卫生间");
+							  BoRoom saveR4=(BoRoom)this.boRoomService.save(room4);
+							  this.requestJson.setData(map);
+							  this.requestJson.setMessage("移交成功");
+							  this.requestJson.setSuccess(true);
+						  }else {
+							  this.requestJson.setData(map);
+							  this.requestJson.setMessage("移交账号失败");
+							  this.requestJson.setSuccess(false);
+						  }
+					  }
+				  }
+				return "success";
+			  }
 /*       */   @Action(value="addmodelinfo", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String addModelInfo()
 /*       */   {

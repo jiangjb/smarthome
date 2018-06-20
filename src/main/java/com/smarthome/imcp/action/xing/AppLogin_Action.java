@@ -245,7 +245,91 @@ import java.util.Enumeration;
 /*     */     }
 /* 304 */     return "success";
 /*     */   }
-/*     */ 
+			//新版本app 找回密码，配合php 
+/*     */ 	@Action(value="find_pwd1", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+/*     */   public String find_pwd1()
+/*     */     throws Exception
+/*     */   {
+/* 316 */     this.requestJson = new RequestJson();
+/* 317 */     @SuppressWarnings("rawtypes")
+              Map map = new HashMap();
+/* 318 */     Md5 md5 = new Md5();
+			  //6-19
+			  logger.info("app_php找回密码");
+			  HttpServletRequest request = ServletActionContext.getRequest();
+			  String salt="";
+			  Enumeration pNames=request.getParameterNames();
+			  while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+			      String name=(String)pNames.nextElement();
+			      logger.info("name:"+name);
+			      String value=request.getParameter(name);
+			      logger.info("value:"+value);
+			      if("salt".equals(name)) {
+			    	  salt=value;
+			      }
+			  }
+			  logger.info("salt:"+salt);
+			//end
+/*     */     try {
+/* 320 */       if (StringUtils.isEmpty(this.userPhone)) {
+/* 321 */         this.requestJson = new RequestJson(false, "请输入手机号码", map);
+/* 322 */         return "success";
+/* 323 */       }
+				if (StringUtils.isEmpty(this.userPwd)) {
+/* 324 */         this.requestJson = new RequestJson(false, "请输入新密码", map);
+/* 325 */         return "success";
+/* 326 */       }
+				//6-19号注释，app配合php验证，不借助java的验证码
+//				if (StringUtils.isEmpty(this.code)) {
+///* 327 */         this.requestJson = new RequestJson(false, "请输入短信验证码", map);
+///* 328 */         return "success";
+///*     */       }
+/* 330 */       BoUsers user = this.boUserService.findByUserPhone(this.userPhone);
+/* 331 */       if (user == null) {
+/* 332 */         this.requestJson = new RequestJson(false, "该手机号码未注册", map);
+/* 333 */         return "success";
+/*     */       }
+/*     */ 		  //6-19号注释，app配合php验证
+///* 336 */       if ((StaticUtil.msg_code.get(this.userPhone) == null) || 
+///* 338 */         (StringUtils.isEmpty(StaticUtil.msg_code.get(this.userPhone)
+///* 338 */         .toString()))) {
+///* 339 */         this.requestJson = new RequestJson(false, "验证码已失效,请重新获取", map);
+///* 340 */         return "success";
+///*     */       }
+/*     */ 		
+///* 343 */       String[] str = StaticUtil.msg_code.get(this.userPhone).toString()
+///* 344 */         .split(",");
+///*     */ 
+///* 346 */       if (!this.code.equals(str[0])) {
+///* 347 */         this.requestJson = new RequestJson(false, "验证码不正确", map);
+///* 348 */         return "success";
+///*     */       }
+				//6-19
+				if(salt != null) {
+					String phpPasswd=md5.getMD5ofStr(this.userPwd+salt).toLowerCase();
+					user.setSalt(salt);
+					user.setPhpPasswd(phpPasswd);
+				}
+				//end
+/* 350 */       user.setUserPwd(md5.getMD5ofStr(this.userPwd));
+/* 351 */       BoUsers update = (BoUsers)this.boUserService.update(user);
+/* 352 */       if (update != null) {
+/* 353 */         this.requestJson = new RequestJson(true, "修改成功", map);
+/* 354 */         return "success";
+/*     */       }
+/* 356 */       this.requestJson = new RequestJson(false, "修改失败", map);
+/*     */     }
+/*     */     catch (Exception e)
+/*     */     {
+/* 361 */       logger.info("error" + e.getMessage());
+/* 362 */       e.printStackTrace();
+/* 363 */       this.requestJson.setData(map);
+/* 364 */       this.requestJson.setMessage("服务器发生异常");
+/* 365 */       this.requestJson.setSuccess(false);
+/*     */     }
+/* 367 */     return "success";
+/*     */   }
+			//老版本app 找回密码
 /*     */   @Action(value="find_pwd", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*     */   public String find_pwd()
 /*     */     throws Exception
@@ -258,10 +342,12 @@ import java.util.Enumeration;
 /* 320 */       if (StringUtils.isEmpty(this.userPhone)) {
 /* 321 */         this.requestJson = new RequestJson(false, "请输入手机号码", map);
 /* 322 */         return "success";
-/* 323 */       }if (StringUtils.isEmpty(this.userPwd)) {
+/* 323 */       }
+				if (StringUtils.isEmpty(this.userPwd)) {
 /* 324 */         this.requestJson = new RequestJson(false, "请输入新密码", map);
 /* 325 */         return "success";
-/* 326 */       }if (StringUtils.isEmpty(this.code)) {
+/* 326 */       }
+				if (StringUtils.isEmpty(this.code)) {
 /* 327 */         this.requestJson = new RequestJson(false, "请输入短信验证码", map);
 /* 328 */         return "success";
 /*     */       }
@@ -277,7 +363,6 @@ import java.util.Enumeration;
 /* 339 */         this.requestJson = new RequestJson(false, "验证码已失效,请重新获取", map);
 /* 340 */         return "success";
 /*     */       }
-/*     */ 		//6-19号注释，app配合php验证
 /* 343 */       String[] str = StaticUtil.msg_code.get(this.userPhone).toString()
 /* 344 */         .split(",");
 /*     */ 
@@ -391,7 +476,7 @@ import java.util.Enumeration;
 			  String salt="";
 			  HttpServletRequest request = ServletActionContext.getRequest();			
 			  Enumeration pNames=request.getParameterNames();
-			  logger.info("测试php调用接口的连接");
+			  logger.info("app登录接口......");
 			  while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
 				  String name=(String)pNames.nextElement();
 				  logger.info("name:"+name);
@@ -401,7 +486,7 @@ import java.util.Enumeration;
 					  salt=value;
 				  }
 			  }
-			  logger.info("salt:"+salt);
+//			  logger.info("salt:"+salt);
 			//end
 /*     */     try {
 /* 449 */       if (StringUtils.isEmpty(this.userPhone)) {
@@ -410,7 +495,7 @@ import java.util.Enumeration;
 /* 452 */         this.requestJson = new RequestJson(false, "请输入密码", userInfoMap);
 /*     */       } else {
 /* 454 */         BoUsers users = this.boUserService.findByUserPhonePwd(this.userPhone, md5.getMD5ofStr(this.userPwd));
-				  if(users == null) {
+				  if(users == null && salt != null) {
 					  users=this.boUserService.findByUserPhonePhpPwd(this.userPhone, md5.getMD5ofStr(this.userPwd+salt).toLowerCase());
 				  }
 				  
@@ -505,12 +590,12 @@ import java.util.Enumeration;
                     }else {
                     	userInfoMap.put("isFirst", users.getIsFirst());	
                     }
-                    //5-31
-//                    userInfoMap.put("isupdate", users.getIsupdate());
-//                    logger.info("isupdate...."+users.getIsupdate());
-                    //6-1
-//                    userInfoMap.put("oldPhone", users.getOldPhone());
-//                    logger.info("oldPhone...."+users.getOldPhone());
+                    //6-20
+                    userInfoMap.put("isUpdate", users.getIsupdate());
+                    logger.info("isUpdate...."+users.getIsupdate());
+                    //6-20
+                    userInfoMap.put("oldPhone", users.getOldPhone());
+                    logger.info("oldPhone...."+users.getOldPhone());
 /* 481 */           userInfoMap.put("whetherSetPwd", users.getWhetherSetPwd());
 					//添加初始的楼层、房间信息  2018/1/3
 					BoFloor floor=this.boFloorService.findByUserCode(users.getUserCode());

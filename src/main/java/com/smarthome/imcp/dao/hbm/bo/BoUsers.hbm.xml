@@ -110,6 +110,10 @@
         <property name="salt" type="java.lang.String">
             <column name="SALT" length="255" />
         </property>
+        <!-- 6-20 -->
+        <property name="oldPhone" type="java.lang.String">
+            <column name="OLDPHONE" length="255" />
+        </property>
         
         
         

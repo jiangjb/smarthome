@@ -40,6 +40,7 @@
 /*     */   private Boolean whetherSetPwd;
 			private String phpPasswd;//6-15
 			private String salt;//6-15
+			private String oldPhone;//6-20
 /*  45 */   private Set boHosts = new HashSet(0);
 /*  46 */   private Set boSimplifies = new HashSet(0);
 /*  47 */   private Set boRepairses = new HashSet(0);
@@ -136,7 +137,13 @@
 			public void setSalt(String salt) {
 				this.salt = salt;
 			}
-			
+			//6-20
+			public String getOldPhone() {
+				return oldPhone;
+			}
+			public void setOldPhone(String oldPhone) {
+				this.oldPhone = oldPhone;
+			}
 /*     */   public Integer getUserId()
 /*     */   {
 /* 147 */     return this.userId;
