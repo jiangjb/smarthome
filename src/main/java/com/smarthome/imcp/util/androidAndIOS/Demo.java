@@ -1,5 +1,7 @@
 package com.smarthome.imcp.util.androidAndIOS;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -57,7 +59,14 @@ public class Demo {
 		unicast.setTestMode();
 		// Set customized fields
 		unicast.setExtraField("test", "helloworld");
-		client.send(unicast);
+		try {
+			client.send(unicast);
+		} catch (Exception e) {
+//			File file = new File("/home/umengAndroid.txt");
+//	        FileWriter writer = new FileWriter(file, true);
+//	        writer.write(e.getMessage());
+//	        writer.close();
+		}
 	}
 	
 	public void sendAndroidGroupcast() throws Exception {
@@ -169,14 +178,22 @@ public class Demo {
 			"subtitle":"subtitle",   //副标题
 			"body":"body"            //推送内容
 			} */ 
-		unicast.setBadge( 0);
+		unicast.setBadge(0);
 		unicast.setSound( "default");
 		// TODO set 'production_mode' to 'true' if your app is under production mode
 //		unicast.setTestMode();//设置这个，使得只有 测试版得app可以使用单播
 		unicast.setProductionMode();//设置这个，使得只有 正式版 的app可以使用单播
 		// Set customized fields
 		unicast.setCustomizedField("typekey", sign);//IOS页面跳转的方式     登录-sign:applogin   离线：offline  然后IOS根据该sign得值，跳转到相应页面（安卓同理）
-		client.send(unicast);
+//		client.send(unicast);
+		try {
+			client.send(unicast);
+		} catch (Exception e) {
+			File file = new File("/home/umengIOS.txt");
+	        FileWriter writer = new FileWriter(file, true);
+	        writer.write(e.getMessage());
+	        writer.close();
+		}
 	}
 	
 	public void sendIOSGroupcast() throws Exception {
@@ -242,7 +259,7 @@ public class Demo {
 	public static void main(String[] args) {
 		// TODO set your appkey and master secret here
 //		Demo demo = new Demo("59bf77a6f29d982c24000178","jsp8utbrrb2snzgmxg2s5tgnfrfmn8jt");//安卓
-		Demo demo = new Demo();//IOS
+//		Demo demo = new Demo();//IOS
 //		System.out.println(demo.appkey);
 //		System.out.println(demo.appMasterSecret);
 		try {

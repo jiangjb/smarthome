@@ -256,7 +256,6 @@
 /*      */ 
 /*  283 */     DockUser user = this.userManager.getUser(deviceCode);
 /*  285 */     if (user == null) {
-				 logger.info("user == null");//常出现？？？
 /*  286 */       boolean isExist = this.boProcessService.doLogin(deviceCode, hostName);
 /*      */ 
 /*  288 */       if (isExist)
@@ -376,9 +375,9 @@
 /*      */   public void processSendDData(String devId, byte[] frameBody)
 /*      */   {//设备对码的时候进入的方法
 /*  452 */     logger.info("发送 " + devId + " processSendDData");
-/*  453 */     SendDDataPacket packet = new SendDDataPacket(devId);//门锁的command有问题啊
+/*  453 */     SendDDataPacket packet = new SendDDataPacket(devId);
 			   System.out.println("processSendDData packet:"+packet);
-			   System.out.println("processSendDData command:"+Util.getCommandString(packet.getCommand()));//门锁--MSG_C2D_DATA
+			   System.out.println("processSendDData command:"+Util.getCommandString(packet.getCommand()));
 /*      */ 
 /*  458 */     packet.setFrameBody(frameBody);
 /*  459 */     packet.setFrameLen(frameBody.length);

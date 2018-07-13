@@ -34,7 +34,7 @@
 /*  35 */   public DockServer() { System.out.println("DockServer"); }
  
  
-   public void startServer()
+   	public void startServer()
    {
 /*  45 */     logger.debug("服务器启动中...");
  
@@ -57,7 +57,6 @@
  
 /*  66 */     DatagramChannel channel = (DatagramChannel)bootstrap
 /*  67 */       .bind(new InetSocketAddress(5555));//可以在UDP端口5555 上接收数据包
-//              System.out.println("channel :"+channel);//[id: 0xd3583bb4]
 /*  68 */     this.packetProcessor.setChannel(channel);
 /*  69 */     this.packetProcessor.getAllChannels().add(channel);
 
@@ -73,7 +72,6 @@
          public void run() {
            try {
         	   System.out.println("服务15秒后启动");      
-
 //		              DockServer.this.boDeviceService.updateStatus(0);//默认设为0
 			  Thread.sleep(15000L);
            } catch (InterruptedException e) {

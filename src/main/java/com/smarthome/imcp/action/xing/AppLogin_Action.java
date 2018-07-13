@@ -527,6 +527,8 @@ import java.util.Enumeration;
 //					logger.info("是否为空："+("".equals(users.getUserAddr()) || "".equals(users.getUserAge()))+","+( users.getUserAddr()==null || users.getUserAge()==null));
 //					logger.info("devicetoken:"+this.devicetoken);
 					//userAddr或userAge为空或null，说明是用户第一次登录，不执行离线推送功能
+					logger.info("login.action devicetoken:"+this.devicetoken);
+					logger.info("login.action userAddr:"+users.getUserAddr());
 					if("".equals(users.getUserAddr()) || "".equals(users.getUserAge())) {
 						users.setUserAddr(this.devicetoken);
 						users.setUserAge(this.phoneType+"");//2018-3-15 将这台设备的设备类型存在 无用字段 UserAge中
@@ -553,6 +555,7 @@ import java.util.Enumeration;
 							//取出旧设备的phoneType，根据旧设备的phoneType选择安卓推送还是IOS推送
 							if(NowPhoneType == 1) {
 								if(PrePhoneType == 1) {//苹果设备 挤掉  苹果设备
+									logger.info("苹果设备 挤掉  苹果设备，userAddr="+users.getUserAddr());
 									ymPush.sendIOSUnicast(users.getUserAddr(),map1,"appoffline");
 								}else {//苹果设备 挤掉 安卓设备，给安卓设备发送 离线通知
 									logger.info("苹果设备挤掉安卓设备");
@@ -560,6 +563,7 @@ import java.util.Enumeration;
 								}
 							}else {
 								if(PrePhoneType == 0) {
+									logger.info("安卓设备挤掉安卓设备");
 									ymPush.sendAndroidUnicast(users.getUserAddr(),"离线通知","另一台设备正在登录,您在"+dateString+"被迫下线");	
 								}else {
 									logger.info("安卓设备挤掉苹果设备");
@@ -594,8 +598,12 @@ import java.util.Enumeration;
                     userInfoMap.put("isUpdate", users.getIsupdate());
                     logger.info("isUpdate...."+users.getIsupdate());
                     //6-20
-                    userInfoMap.put("oldPhone", users.getOldPhone());
-                    logger.info("oldPhone...."+users.getOldPhone());
+                    try {
+                    	userInfoMap.put("oldPhone", users.getOldPhone());
+                    	logger.info("oldPhone...."+users.getOldPhone());
+					} catch (Exception e) {
+						logger.info("您没有oldPhone字段");
+					}
 /* 481 */           userInfoMap.put("whetherSetPwd", users.getWhetherSetPwd());
 					//添加初始的楼层、房间信息  2018/1/3
 					BoFloor floor=this.boFloorService.findByUserCode(users.getUserCode());
@@ -610,18 +618,14 @@ import java.util.Enumeration;
 							Map map = new HashMap();
 							BoFloor findByFloorCode = this.boFloorService.findByFloorCode(boRoom.getFloorCode()); 
 							map.put("roomCode", boRoom.getRoomCode().toString());
-							//												  System.out.println("Room roomCode:"+boRoom.getRoomCode().toString());
 							map.put("roomName", boRoom.getRoomName().toString());
-							//												  System.out.println("roomName:"+boRoom.getRoomName().toString());
 							map.put("floorCode", boRoom.getFloorCode().toString());
-							//												  System.out.println("floorCode:"+boRoom.getFloorCode().toString());
 							list_room.add(map);
 						}
 						userInfoMap.put("roomInfo", list_room);
 						//////////////////////////////////////////////////楼层、房间添加默认值END///////////////////////////////////////////////////////
 					}
 /* 482 */           String fluoriteAccessToken = users.getFluoriteAccessToken();
-					logger.info("fluoriteAccessToken:"+fluoriteAccessToken);
 /*     */           String EZTOKEN;
 ////                  2-5 友盟推送
 //					Demo ymPush = new Demo();

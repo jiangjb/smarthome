@@ -12,7 +12,7 @@
 		  import com.smarthome.dock.server.packets.in.KeepAlivePacket;//离线  的类
 /*     */ import com.smarthome.dock.server.util.Util;
 /*     */ import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+		  import java.io.UnsupportedEncodingException;
 /*     */ import java.net.InetSocketAddress;
 /*     */ import java.util.LinkedList;
 /*     */ import java.util.Queue;
@@ -89,7 +89,7 @@ import java.io.UnsupportedEncodingException;
 /* 117 */     packetArrived(e);
 /*     */   }
          
-            //this.channel.write是 发送数据包到服务器吗？如果是的话    参照知识点--使用SocketChannel的NIO客户机服务器通信
+            //this.channel.write是 发送数据包到主机吗？如果是的话    参照知识点--使用SocketChannel的NIO客户机服务器通信
 /*     */   public void send(OutPacket packet)
 /*     */   {
 /* 131 */     if (this.channel != null)

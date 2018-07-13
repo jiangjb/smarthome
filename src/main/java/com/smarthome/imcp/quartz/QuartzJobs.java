@@ -91,8 +91,7 @@
 /*     */   {
 			  logger.debug("定时器 setUserMode 方法");
 /* 101 */     List by = this.boModelService.getBy();
-//			  System.out.println("QuartJobs   setUserMode by:"+by);
-			  logger.info("QuartJobs   setUserMode by:"+by);
+			  logger.info("QuartJobs setUserMode by:"+by);
 /* 102 */     for (int i = 0; i < by.size(); i++) {
 /* 103 */       BoModel boModel = (BoModel)by.get(i);
 /*     */ 
@@ -106,7 +105,7 @@
 /*     */       }
 /* 112 */       boolean indexFromArr = SensorUtil.getIndexFromArr(weekOfDate, week);
 /* 113 */       if (indexFromArr) {
-/* 114 */         SimpleDateFormat dateFormater = new SimpleDateFormat("HH:mm");
+/* 114 */         SimpleDateFormat dateFormater = new SimpleDateFormat("HH:mm");                     
 /* 115 */         String format = dateFormater.format(new Date());
 /* 116 */         System.err.println(format);
 /* 117 */         List bys = this.boModelService.getBys(boModel.getWeek(), format);

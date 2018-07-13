@@ -51,6 +51,11 @@
 /*       */ import com.smarthome.imcp.dao.model.bo.BoUserDevices;
 /*       */ import com.smarthome.imcp.dao.model.bo.BoUsers;
 /*       */ import com.smarthome.imcp.dao.model.bo.BoUsersValidation;
+			import com.smarthome.imcp.dao.model.bo.Brands;
+			import com.smarthome.imcp.dao.model.bo.Dat;
+			import com.smarthome.imcp.dao.model.bo.Formats;
+			import com.smarthome.imcp.dao.model.bo.MiniBlack;
+			import com.smarthome.imcp.dao.model.bo.Model;
 /*       */ import com.smarthome.imcp.example.ChargeExample;
 /*       */ import com.smarthome.imcp.service.bo.BoAirBindingPanelServiceIface;
 /*       */ import com.smarthome.imcp.service.bo.BoAlarmRecordServiceIface;
@@ -83,27 +88,37 @@
 /*       */ import com.smarthome.imcp.service.bo.BoUserDevicesServiceIface;
 /*       */ import com.smarthome.imcp.service.bo.BoUsersValidationServiceIface;
 /*       */ import com.smarthome.imcp.service.bo.BoUserssServiceIface;
+			import com.smarthome.imcp.service.bo.BrandsServiceIface;
+			import com.smarthome.imcp.service.bo.DatServiceIface;
+			import com.smarthome.imcp.service.bo.FormatsServiceIface;
+			import com.smarthome.imcp.service.bo.MiniBlackServiceIface;
+			import com.smarthome.imcp.service.bo.ModelServiceIface;
 /*       */ import com.smarthome.imcp.service.impl.push.PushService;
 /*       */ import com.smarthome.imcp.service.system.FileServiceIface;
-import com.smarthome.imcp.util.FloorUtil;
+			import com.smarthome.imcp.util.FloorUtil;
 /*       */ import com.smarthome.imcp.util.MySecureProtocolSocketFactory;
 /*       */ import com.smarthome.imcp.util.NumComparator;
-import com.smarthome.imcp.util.RoomUtil;
+			import com.smarthome.imcp.util.RoomUtil;
 /*       */ import com.smarthome.imcp.util.SendMsgUtil;
 			import com.smarthome.imcp.util.SimulateHTTPRequestUtil;
 /*       */ import com.smarthome.imcp.util.StaticUtils;
 /*       */ import com.smarthome.imcp.util.TokeUtil;
-import com.smarthome.imcp.util.UserUtil;
+			import com.smarthome.imcp.util.UserUtil;
 /*       */ import com.smarthome.imcp.util.UuidUtil;
 /*       */ import com.smarthome.imcp.util.YZUitl;
 			import com.smarthome.imcp.util.androidAndIOS.Demo;
 /*       */ import java.io.BufferedReader;
+			import java.io.DataInputStream;
 /*       */ import java.io.File;
 /*       */ import java.io.IOException;
 /*       */ import java.io.InputStream;
+			import java.io.OutputStream;
 /*       */ import java.io.Serializable;
 /*       */ import java.io.UnsupportedEncodingException;
 /*       */ import java.math.BigDecimal;
+			import java.net.ServerSocket;
+			import java.net.Socket;
+			import java.net.UnknownHostException;
 /*       */ import java.text.SimpleDateFormat;
 /*       */ import java.util.ArrayList;
 /*       */ import java.util.Collections;
@@ -140,10 +155,10 @@ import com.smarthome.imcp.util.UserUtil;
 /*       */ import org.slf4j.Logger;
 /*       */ import org.slf4j.LoggerFactory;
 /*       */ import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.apache.commons.codec.binary.Base64;//2-9
+			import org.springframework.web.bind.annotation.RequestMapping;
+			import org.springframework.web.bind.annotation.RequestParam;
+			import org.springframework.web.bind.annotation.ResponseBody;
+			import org.apache.commons.codec.binary.Base64;//2-9
 
 /*       */ @ParentPackage("auth-check-package")
 /*       */ @Namespace("/xingUser")
@@ -275,6 +290,22 @@ import org.apache.commons.codec.binary.Base64;//2-9
 
 			  @Autowired
 /*    */   	  private BoUserssServiceIface<BoUsers, Serializable> boUserssService;
+			  
+			  @Autowired
+			  private BrandsServiceIface<Brands, Serializable> brandsService;//2018/7/10 
+			  
+			  @Autowired
+			  private ModelServiceIface<Model, Serializable> modelService;//2018/7/10
+			  
+			  @Autowired
+			  private DatServiceIface<Dat, Serializable> datService;//2018/7/12
+			  
+			  @Autowired
+			  private FormatsServiceIface<Formats, Serializable> formatsService;//2018/7/12
+			  
+			  @Autowired
+			  private MiniBlackServiceIface<MiniBlack, Serializable> miniBlackService;//2018/7/11
+			  
 			  
 
 /*       */   private File fileupload;//成员变量 这个怎么获取？
@@ -416,7 +447,55 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /*   266 */     logger.info(ip + interfaceName + "验证不通过");
 /*   267 */     return Boolean.valueOf(false);
 /*       */   }
-/*       */ 
+				
+              /**
+               * 用于给小黑发送数据，通过TCP协议
+               * @return
+             * @throws IOException 
+             * @throws UnknownHostException 
+               */
+			  public void send(String str) throws UnknownHostException, IOException {
+				  //1.建立TCP连接
+				  String ip="10.105.53.65";   //服务器端ip地址
+				  int port=6666;        //端口号
+				  Socket sck=new Socket(ip,port);
+				  //2.传输内容
+				  String content=str;
+				  byte[] bstream=content.getBytes("GBK");  //转化为字节流
+				  OutputStream os=sck.getOutputStream();   //输出流
+				  os.write(bstream);
+				  //3.关闭连接
+				  sck.close();
+			  }
+			  /**
+               * 接收从小黑发来的数据，通过TCP协议
+               * @return
+             * @throws IOException 
+             * @throws UnknownHostException 
+               */
+			  public String get() throws UnknownHostException, IOException {
+				  ServerSocket serverSocket; 
+				  Socket socket =null;
+				  DataInputStream dataInputStream;
+			        try {  
+			            serverSocket = new ServerSocket(6666);  
+			            socket = serverSocket.accept();  
+			            dataInputStream = new DataInputStream(socket.getInputStream());  
+			            //获取红外转换器 返回的数据
+			        } catch (IOException e) {  
+			            e.printStackTrace();  
+			        }finally{
+			        	if(socket!=null){
+			        		try{
+			        			socket.close();
+			        		}catch(IOException e) { 
+			        			e.printStackTrace(); 
+			        		}
+			        	}
+			        }
+			      return "";
+			  }
+ 
 /*       */   public Boolean commandMode(String usereCode, String modelId)
 /*       */   {//情景模式相关
 	            logger.info("in commandMode Method");
@@ -1520,10 +1599,8 @@ import org.apache.commons.codec.binary.Base64;//2-9
   /*       */                     }
   /*       */                   }
   /*  1281 */                   Integer type = users.getPhoneType();
-  /*       */ 					logger.info("55555 type:"+type);
   /*  1283 */                   if ((type == null) || (type.intValue() == 0)) {
 //  /*  1284 */                     pushService.pushToSingle(CID, title, text.toString(), text.toString());//推送？   4-13注释
-  								  logger.info("666666666666");
   /*       */                   }
   /*       */                   else {
 //  /*  1287 */                     pushService.apnPush(CID, title, text.toString(), text.toString());//4-13注释
@@ -9258,7 +9335,8 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /*       */     }
 /*  7966 */     return "success";
 /*       */   }
-/*       */ 
+/*       */  
+			  //情景模式时间设置
 /*       */   @Action(value="setModelTiming", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String setModelTiming() {
 /*  7971 */     this.requestJson = new RequestJson();
@@ -15847,7 +15925,10 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /*       */     }
 /* 14154 */     return "success";
 /*       */   }
-/*       */ 
+/*       */   /**
+			  * 添加主机
+			  * @return
+			  */
 /*       */   @Action(value="verify_with_sweep_host", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String verifyWithSweepHost()
 /*       */   {
@@ -16004,7 +16085,7 @@ import org.apache.commons.codec.binary.Base64;//2-9
 							  }
 							  //4-17END
 /*       */ 
-/* 14253 */                   String str = "ZIGBEE_SCAN-DEVEICE-NOW";//门锁 有经过？
+/* 14253 */                   String str = "ZIGBEE_SCAN-DEVEICE-NOW";
 /* 14254 */                   byte[] bs = str.getBytes();
 /* 14255 */                   System.err.println(new String(bs));
 /* 14256 */                   this.packetProcessHelper.processSendDDatas(this.deviceCode, bs);
@@ -18189,7 +18270,321 @@ import org.apache.commons.codec.binary.Base64;//2-9
 /* 16301 */     System.err.println(createRandomVcode);
 /* 16302 */     return "success";
 /*       */   }
-/*       */ 
+			/**
+			 * 保存 “小黑”的字段信息
+			 */
+			@Action(value="saveMiniBlack", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			public String saveMiniBlack()
+			{
+				 this.requestJson = new RequestJson();
+				 logger.info("-----------找到当前类型红外设备的所有型号-------------");
+				 HttpServletRequest request = ServletActionContext.getRequest();
+				 String timestamp = request.getHeader("timestamp");
+				 String header2 = request.getHeader("nonce");
+				 String header3 = request.getHeader("sign");
+				 String header4 = request.getHeader("access_token");
+				 String userCode = request.getHeader("userCode");
+				 String[] userCode2 = userCode.split(",");//现在暂时只考虑了userCode有逗号的情况
+				 String nickName="",macAddr="",ip="";
+				 logger.info("timestamp:"+timestamp+",userCode:"+userCode);
+				 Enumeration pNames=request.getParameterNames();
+				 while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if(name.equals("name")) {
+						  nickName=value;
+					  }
+					  if(name.equals("mac")) {
+						  macAddr=value;
+					  }
+					  if(name.equals("ip")) {
+						  ip=value;
+					  }
+				 }
+				 //通过userCode找到userId
+				 int userid = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString()).getUserId();
+				 //根据当前时间，转化成相应格式的时间
+				 Date currentTime = new Date();
+			     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			     String create_date = formatter.format(currentTime); 
+				 MiniBlack mb = new MiniBlack();
+				 mb.setNickName(nickName);
+				 mb.setMacAddr(macAddr);
+				 mb.setIp(ip);
+				 mb.setCreate_date(create_date);
+				 mb.setUserid(userid);
+				 mb.setTimestamp(timestamp);
+				 mb.setStatus("在线");
+				 try {
+					 MiniBlack save = ((MiniBlack)this.miniBlackService.save(mb));
+					 this.requestJson.setMessage("保存成功！");
+					 this.requestJson.setSuccess(true);
+				} catch (Exception e) {
+					 this.requestJson.setMessage("设备已经存在！");
+					 this.requestJson.setSuccess(false);
+				}
+			    return "success";
+			}
+			/**
+			 * 获取 “小黑”
+			 */
+			@Action(value="getMiniBlack", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			public String getMiniBlack()
+			{
+				 logger.info("-----------找到当前类型红外设备的所有型号-------------");
+				 this.requestJson = new RequestJson();
+				 List list=new ArrayList();
+				 HttpServletRequest request = ServletActionContext.getRequest();
+				 String timestamp = request.getHeader("timestamp");
+				 String header2 = request.getHeader("nonce");
+				 String header3 = request.getHeader("sign");
+				 String header4 = request.getHeader("access_token");
+				 String userCode = request.getHeader("userCode");
+				 String[] userCode2 = userCode.split(",");//现在暂时只考虑有逗号的情况
+				 //通过userCode找到userId
+				 BoUsers boUser=this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
+				 int userid=-1;
+				 if(boUser != null) {
+					 userid=boUser.getUserId(); 
+					 //通过userId找到小黑盒 
+					 List<MiniBlack> mbs=this.miniBlackService.findByUserId(userid);
+					 if(mbs.size() > 0) {
+						 for(MiniBlack mb:mbs) {
+							 Map map=new HashMap();
+							 map.put("id", mb.getId());
+							 map.put("nickName", mb.getNickName());
+							 map.put("mac", mb.getMacAddr());
+							 map.put("ip", mb.getIp());
+							 map.put("timestamp", mb.getTimestamp());
+							 map.put("status", mb.getStatus());
+							 list.add(map);
+						 }
+						 this.requestJson.setData(list);
+						 this.requestJson.setMessage("请求成功，已返回相应的参数！");
+						 this.requestJson.setSuccess(true);
+					 }else {
+						 this.requestJson.setData(list);
+						 this.requestJson.setMessage("没有任何红外转换器存在！");
+						 this.requestJson.setSuccess(true);
+					 }
+				 }else {
+					 this.requestJson.setData(list);
+					 this.requestJson.setMessage("该用户不存在！");
+					 this.requestJson.setSuccess(false);
+				 }
+					
+			    return "success";
+			}
+			/**
+			 * 删除 “小黑”
+			 */
+			@Action(value="delMiniBlack", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			public String delMiniBlack()
+			{
+				 this.requestJson = new RequestJson();
+				 logger.info("-----------找到当前类型红外设备的所有型号-------------");
+				 HttpServletRequest request = ServletActionContext.getRequest();
+				 String timestamp = request.getHeader("timestamp");
+				 String header2 = request.getHeader("nonce");
+				 String header3 = request.getHeader("sign");
+				 String header4 = request.getHeader("access_token");
+				 String userCode = request.getHeader("userCode");
+				 String idString="";
+				 Enumeration pNames=request.getParameterNames();
+				 while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if(name.equals("id")) {
+//						  id=Integer.valueOf(value);
+						  idString=value;
+					  }
+				 }
+				 try {
+					 this.miniBlackService.deleteByKey(idString);
+					 this.requestJson.setMessage("删除成功！");
+					 this.requestJson.setSuccess(true);
+				} catch (Exception e) {
+					this.requestJson.setMessage("删除失败！");
+					this.requestJson.setSuccess(false);
+				}
+			    return "success";
+			}
+				
+			/**
+			 * 按型号查找红外设备 显示全部型号
+			 * @since 2018/7/10
+			 */
+			 @Action(value="findAllType", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			 public String findAllType()
+			 {
+				 this.requestJson = new RequestJson();
+				 logger.info("-----------找到当前类型红外设备的所有型号-------------");
+				 HttpServletRequest request = ServletActionContext.getRequest();
+				 int deviceId=1;
+				 Enumeration pNames=request.getParameterNames();
+				 while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if(name.equals("deviceId")) {
+						  deviceId=Integer.parseInt(value);
+					  }
+				 }
+				 List labelList=this.modelService.findAllType(deviceId);
+				 //为空的剔除
+				 this.requestJson.setData(labelList); 
+				 
+			     return "success";
+			 }
+			 /**
+			  * 按型号查找红外设备 查找特定型号
+			  * @return
+			  */
+			 @Action(value="findByType", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			 public String findByType()
+			 {
+				 this.requestJson = new RequestJson();
+				 logger.info("-----------找到当前类型红外设备的所有型号-------------");
+				 HttpServletRequest request = ServletActionContext.getRequest();
+				 String label="";
+				 Enumeration pNames=request.getParameterNames();
+				 while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if(name.equals("label")) {
+						  label=value;
+					  }
+				 }
+				 List lableList=this.modelService.findByType(label);
+				 this.requestJson.setData(lableList); 
+			     return "success";
+			 }
+			 /**
+			  * 根据某个具体的型号，找到相应的红外码
+			  */
+			 @Action(value="findTestCode", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			 public String findTestCode()
+			 {
+				 this.requestJson = new RequestJson();
+				 logger.info("-----------找到该型号对应的测试码，之后用于发送给设备 “小黑”-------------");
+				 HttpServletRequest request = ServletActionContext.getRequest();
+				 int id=1;
+				 Enumeration pNames=request.getParameterNames();
+				 while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if(name.equals("id")) {
+						  id=Integer.parseInt(value);
+					  }
+				 }
+				 String format_string=this.modelService.findTestCode(id);
+				 //通过TCP协议发给 “小黑”
+				 try {
+					send(format_string);
+				} catch (UnknownHostException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+//				 this.requestJson.setData(lableList); 
+			     return "success";
+			 }
+			 
+			 /**
+			  * 按品牌查找红外设备 显示全部品牌
+			  * @return
+			  */
+			 @Action(value="findAllBrand", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			 public String findAllBrand()
+			 {
+				 int deviceId=1;//从APP那获取
+				 List<Brands> brandsList=this.brandsService.findAll(deviceId);
+			     return "success";
+			 }
+			 /**
+			  * 按品牌查找红外设备 查找特定品牌
+			  * @return
+			  */
+			 @Action(value="findByBrand", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			 public String findByBrand()
+			 {
+				 
+			     return "success";
+			 }
+			 
+			 /**
+			  * 一键匹配
+			  * @return
+			  */
+			 @Action(value="oneKeyMatch", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			 public String oneKeyMatch()
+			 {
+				 this.requestJson = new RequestJson();
+				 logger.info("-----------一键匹配-------------");
+				 HttpServletRequest request = ServletActionContext.getRequest();
+				 Enumeration pNames=request.getParameterNames();
+				 String label="";
+				 while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if(name.equals("label")) {
+						  label=value;
+					  }
+				 }
+				 String m_format_id=this.modelService.findByLabel(label);
+				 String format_string="";
+				 //通过TCP协议发给 “小黑”
+				 try {
+					send(format_string);
+					String result=get();
+					this.requestJson.setData(result);
+					this.requestJson.setMessage("匹配成功！");
+					this.requestJson.setSuccess(true);
+				} catch (UnknownHostException e) {
+					this.requestJson.setData("");
+					this.requestJson.setMessage("该型号不能匹配！");
+					this.requestJson.setSuccess(true);
+				} catch (IOException e) {
+					this.requestJson.setData("");
+					this.requestJson.setMessage("该型号不能匹配！");
+					this.requestJson.setSuccess(false);
+				}
+			     return "success";
+			 }
+			 
+			 /**
+			  * 下载码库
+			  * @return
+			  */
+			 @Action(value="downloadCodes", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			 public String downloadCodes()
+			 {
+				 this.requestJson = new RequestJson();
+				 logger.info("-----------下载码库-------------");
+				 HttpServletRequest request = ServletActionContext.getRequest();
+				 Enumeration pNames=request.getParameterNames();
+				 String label="";
+				 while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if(name.equals("label")) {
+						  label=value;
+					  }
+				 }
+				 String modelid=this.modelService.findModelidByLabel(label);
+				 List<String> list=this.datService.findByModelid(modelid);
+				 if(list.size() > 0) {
+					 this.requestJson.setData(list);
+					 this.requestJson.setMessage("码库已传输！");
+					 this.requestJson.setSuccess(true);
+				 }else {
+					 this.requestJson.setData(list);
+					 this.requestJson.setMessage("码库不存在！");
+					 this.requestJson.setSuccess(false);
+				 }
+			     return "success";
+			 }
+			 
+ 
 /*       */   @Action(value="test", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String test()
 /*       */   {

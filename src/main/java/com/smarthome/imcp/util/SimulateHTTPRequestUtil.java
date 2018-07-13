@@ -5,12 +5,11 @@
 /*    */ import java.io.PrintStream;
 /*    */ import java.net.URL;
 /*    */ import java.net.URLConnection;
-import java.util.ArrayList;
+		 import java.util.ArrayList;
 /*    */ import java.util.Date;
 		 import java.util.List;
 /*    */ import java.util.Map;
-
-/*    */ 
+ 
 /*    */ public class SimulateHTTPRequestUtil
 /*    */ {
 /*    */   public String sendGet(String url, String userCode)
