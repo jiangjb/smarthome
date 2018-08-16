@@ -20,8 +20,14 @@
 /*     */ import com.smarthome.imcp.util.AES;
 /*     */ import com.smarthome.imcp.util.SimulateHTTPRequestUtil;
 /*     */ import com.smarthome.imcp.util.StaticUtils;
+
+import java.io.DataInputStream;
+import java.io.IOException;
 /*     */ import java.io.PrintStream;
 /*     */ import java.io.Serializable;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
 /*     */ import java.text.ParseException;
 /*     */ import java.text.SimpleDateFormat;
 /*     */ import java.util.Date;
@@ -86,12 +92,12 @@
 /*  93 */       user_num.put(userCode, Integer.valueOf(((Integer)user_num.get(userCode)).intValue() == 255 ? 0 : ((Integer)user_num.get(userCode)).intValue() + 1));
 /*     */   }
 
+
 /*     */   @Scheduled(cron="0 0/1 * * * ?")
 /*     */   public void setUserMode()
 /*     */   {
-			  logger.debug("定时器 setUserMode 方法");
+			  logger.debug("情景模式-定时器");
 /* 101 */     List by = this.boModelService.getBy();
-			  logger.info("QuartJobs setUserMode by:"+by);
 /* 102 */     for (int i = 0; i < by.size(); i++) {
 /* 103 */       BoModel boModel = (BoModel)by.get(i);
 /*     */ 
@@ -109,15 +115,11 @@
 /* 115 */         String format = dateFormater.format(new Date());
 /* 116 */         System.err.println(format);
 /* 117 */         List bys = this.boModelService.getBys(boModel.getWeek(), format);
-//				  System.out.println("QuartzJobs bys===="+bys);//[]
 /* 118 */         if (bys.size() <= 0)
 /* 119 */           System.err.println("没有");
 /*     */         else
 /* 121 */           for (int j = 0; j < bys.size(); j++) {
 /* 122 */             BoModel boModel2 = (BoModel)bys.get(j);
-					  System.out.println("QuartzJobs boModel2.getModelId()==="+boModel2.getModelId());
-/* 123 */             System.err.println(boModel2.getModelId());
-/* 124 */             System.err.println(boModel2.getBoUsers().getUserCode());
 /* 125 */             SimulateHTTPRequestUtil s = new SimulateHTTPRequestUtil();
 ///* 126 */             s.sendGet("http://127.0.0.1:8080/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + boModel2.getModelId(), boModel2.getBoUsers().getUserCode());
 					  s.sendGet("http://120.77.250.17:8080/smarthome.IMCPlatform/xingUser/commandmodel.action?modelId=" + boModel2.getModelId(), boModel2.getBoUsers().getUserCode());

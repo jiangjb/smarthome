@@ -11,10 +11,10 @@
             <generator class="identity" />
         </id>
         <property name="device_name" type="java.lang.String">
-            <column name="device_name" length="255" />
+            <column name="device_name" />
         </property>
         <property name="description" type="java.lang.String">
-            <column name="description" length="255" />
+            <column name="description" />
         </property>
     </class>
 </hibernate-mapping>

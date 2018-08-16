@@ -1,5 +1,6 @@
 package com.smarthome.imcp.service.bo;
 
+import com.smarthome.imcp.dao.model.bo.BoHostDevice;
 import com.smarthome.imcp.dao.model.bo.MiniBlack;
 import com.smarthome.imcp.service.BasicServiceIface;
 import java.io.Serializable;
@@ -11,6 +12,6 @@ public abstract interface MiniBlackServiceIface<T, PK extends Serializable> exte
 
 	List<MiniBlack> findByUserId(int userid);
 
-
+	public abstract MiniBlack delete(T paramT);
 }
 

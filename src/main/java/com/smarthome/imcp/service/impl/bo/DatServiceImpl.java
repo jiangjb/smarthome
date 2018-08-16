@@ -20,7 +20,7 @@
 	        private DatDaoIface<Dat, Serializable> datDao;
 
 			@Override
-			public List<String> findByModelid(String modelid) {
+			public List findByModelid(String modelid) {
 				return this.datDao.findByModelid(modelid);
 			}
 

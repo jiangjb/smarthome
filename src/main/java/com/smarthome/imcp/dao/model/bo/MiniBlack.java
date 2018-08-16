@@ -14,7 +14,8 @@
 			private String timestamp;
 //			private Date create_date;
 			private String create_date;
-			
+			private String update_date;// 7-23
+			private String wifiName;//7-28
 			
 			public Integer getId() {
 				return id;
@@ -64,6 +65,19 @@
 			public void setCreate_date(String create_date) {
 				this.create_date = create_date;
 			}
+			public String getUpdate_date() {
+				return update_date;
+			}
+			public void setUpdate_date(String update_date) {
+				this.update_date = update_date;
+			}
+			public String getWifiName() {
+				return wifiName;
+			}
+			public void setWifiName(String wifiName) {
+				this.wifiName = wifiName;
+			}
+			
 			
 			
 		}

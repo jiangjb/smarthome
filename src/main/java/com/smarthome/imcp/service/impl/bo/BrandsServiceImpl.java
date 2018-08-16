@@ -18,18 +18,18 @@
 			@Autowired
 	        private BrandsDaoIface<Brands, Serializable> brandsDao;
 
+
 			@Override
-			public List<Brands> findAll(int deviceId) {
-				DetachedCriteria criteria = DetachedCriteria.forClass(Brands.class);
-		        criteria.add(Restrictions.eq("device_id", deviceId));
-				 
-				List<Brands> list = this.brandsDao.findByCriteria(criteria);
-			    if ((list == null) || (list.isEmpty())) {
-			       return null;
-			    }
-				return list;
+			public String findModelByid(int id) {
+				return this.brandsDao.findModelByid(id);
 			}
 
-			
+
+			@Override
+			public List findAllBrands(int deviceId) {
+				return this.brandsDao.findAllBrands(deviceId);
+			}
+
+
    	
 		}

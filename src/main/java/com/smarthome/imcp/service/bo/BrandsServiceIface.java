@@ -9,7 +9,9 @@ import java.util.List;
 public abstract interface BrandsServiceIface<T, PK extends Serializable> extends BasicServiceIface<T, PK>
 {
 
-	List<Brands> findAll(int deviceId);
+	String findModelByid(int id);
+
+	List findAllBrands(int deviceId);
 
 }
 

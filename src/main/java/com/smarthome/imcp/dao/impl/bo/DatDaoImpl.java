@@ -21,9 +21,10 @@
 /*    */   }
 		private static Logger logger = LoggerFactory.getLogger(DatDaoImpl.class);
 		@Override
-		public List<String> findByModelid(String modelid) {
-			String sql="select d.dat from dat d where d.modelid = ?";
-			Query sqlQuery = getCurrentSession().createSQLQuery(sql)  //;// SQLQuery是hibernate用于支持原生sql的接口类
+		public List findByModelid(String modelid) {
+			String sql="select d.lineno,d.dat from dat d where d.modelid = ?";
+			Query sqlQuery = getCurrentSession().createSQLQuery(sql)  // SQLQuery是hibernate用于支持原生sql的接口类
+					.addScalar("lineno",StandardBasicTypes.STRING)
 					.addScalar("dat",StandardBasicTypes.STRING);
 	        sqlQuery.setParameter(0, modelid);
 	        List list = sqlQuery.list();

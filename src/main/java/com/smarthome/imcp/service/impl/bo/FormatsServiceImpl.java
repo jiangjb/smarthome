@@ -19,4 +19,14 @@
 			@Autowired
 	        private FormatsDaoIface<Formats, Serializable> formatsDao;
 
+			@Override
+			public List findFsByfid(int m_format_id , int device_id) {
+				return this.formatsDao.findFsByfid(m_format_id,device_id);
+			}
+
+			@Override
+			public List findFormatsInfo(int device_id) {
+				return this.formatsDao.findFormatsInfo(device_id);
+			}
+
 		}

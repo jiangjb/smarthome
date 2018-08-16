@@ -11,19 +11,19 @@
             <generator class="identity" />
         </id>
         <property name="device_id" type="java.lang.Integer">
-            <column name="device_id" length="11" />
+            <column name="device_id" />
         </property>
         <property name="brandname" type="java.lang.String">
-            <column name="brandname" length="255" />
+            <column name="brandname" />
         </property>
         <property name="ebrandname" type="java.lang.String">
-            <column name="ebrandname" length="255" />
+            <column name="ebrandname" />
         </property>
         <property name="model_q" type="java.lang.Integer">
-            <column name="model_q" length="11" />
+            <column name="model_q" />
         </property>
-		<property name="model_list" type="java.lang.String">
-			<column name="model_list" length="500" />
+		<property name="model_list" type="java.lang.String"><!-- MySQL数据库中的字段属性是text -->
+			<column name="model_list" />
 		</property>
     </class>
 </hibernate-mapping>

@@ -23,13 +23,19 @@
             <column name="ip" length="50" />
         </property>
         <property name="create_date" type="java.lang.String">
-            <column name="create_date" />
+            <column name="create_date" length="50"/>
+        </property>
+        <property name="update_date" type="java.lang.String">
+            <column name="update_date" length="50"/>
         </property>
         <property name="timestamp" type="java.lang.String">
             <column name="timestamp" length="50"/>
         </property>
         <property name="status" type="java.lang.String">
             <column name="status" length="10"/>
+        </property>
+        <property name="wifiName" type="java.lang.String">
+            <column name="wifi" length="50"/>
         </property>
     </class>
 </hibernate-mapping>

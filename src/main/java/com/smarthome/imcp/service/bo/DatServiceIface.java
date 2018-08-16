@@ -8,7 +8,7 @@ import java.util.List;
 public abstract interface DatServiceIface<T, PK extends Serializable> extends BasicServiceIface<T, PK>
 {
 
-	List<String> findByModelid(String modelid);
+	List findByModelid(String modelid);
 
 }
 

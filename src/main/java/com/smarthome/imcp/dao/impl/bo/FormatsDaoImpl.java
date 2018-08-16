@@ -29,6 +29,27 @@
 //	        List list = sqlQuery.list();
 //	        return list;
 //		}
+		@Override
+		public List findFsByfid(int m_format_id , int device_id) {
+			String sql="select id,format_string from formats  where fid = ? and device_id = ?";
+			Query sqlQuery = getCurrentSession().createSQLQuery(sql)  //;// SQLQuery是hibernate用于支持原生sql的接口类
+					.addScalar("id",StandardBasicTypes.INTEGER)
+					.addScalar("format_string",StandardBasicTypes.STRING);
+	        sqlQuery.setParameter(0, m_format_id);
+	        sqlQuery.setParameter(1, device_id);
+	        List list = sqlQuery.list();
+	        return list;
+		}
+		@Override
+		public List findFormatsInfo(int device_id) {
+			String sql="select fid,matchs from formats where device_id = ?";
+			Query sqlQuery = getCurrentSession().createSQLQuery(sql)  //;// SQLQuery是hibernate用于支持原生sql的接口类
+					.addScalar("fid",StandardBasicTypes.INTEGER)
+					.addScalar("matchs",StandardBasicTypes.STRING);
+			sqlQuery.setParameter(0, device_id);
+	        List list = sqlQuery.list();
+	        return list;
+		}
 		
 	}
 

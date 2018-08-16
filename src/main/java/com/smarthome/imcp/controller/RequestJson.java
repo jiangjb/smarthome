@@ -11,6 +11,7 @@ import java.util.List;
 /*  9 */   private boolean success = true;
 /* 10 */   private String message = "";
 /*    */   private Object data;
+		   private Object infraredData;//7-31
 		   private String accountOperationType;//3-29 用于存放区分管理员和一般用户的标识
 		   private List modelIds;//4-9 用于存放向Android|IOS传递的情景模式 的modelId
 		   
@@ -68,7 +69,13 @@ import java.util.List;
 /*    */   public void setData(Object data) {
 /* 51 */     this.data = data;
 /*    */   }
-/*    */ 
+/*    */ 	
+			public Object getInfraredData() {
+				return infraredData;
+			}
+			public void setInfraredData(Object infraredData) {
+				this.infraredData = infraredData;
+			}
 /*    */   public Integer getTotalPages() {
 /* 55 */     return this.totalPages;
 /*    */   }

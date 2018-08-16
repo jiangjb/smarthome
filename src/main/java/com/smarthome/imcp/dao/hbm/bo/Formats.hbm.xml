@@ -11,22 +11,24 @@
             <generator class="identity" />
         </id>
         <property name="fid" type="java.lang.Integer">
-            <column name="fid" length="11" />
+            <column name="fid" />
         </property>
         <property name="device_id" type="java.lang.Integer">
-            <column name="device_id" length="11" />
+            <column name="device_id" />
         </property>
         <property name="format_name" type="java.lang.String">
-            <column name="format_name" length="255" />
+            <column name="format_name" />
         </property>
+        <!-- 对应MySQL数据库中的字段是text属性 -->
         <property name="format_string" type="java.lang.String">
-            <column name="format_string" length="255" />
+            <column name="format_string" />
         </property>
 		<property name="c3rv" type="java.lang.String">
-			<column name="c3rv" length="255" />
+			<column name="c3rv" />
 		</property>
+		<!-- 对应MySQL数据库中的字段是text属性 -->
 		<property name="matchs" type="java.lang.String">
-			<column name="matchs" length="255" />
+			<column name="matchs" />
 		</property>
     </class>
 </hibernate-mapping>

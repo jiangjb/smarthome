@@ -1,19 +1,13 @@
 /*    */ package com.smarthome.imcp.service.impl.bo;
  
 		 import com.smarthome.imcp.dao.bo.MiniBlackDaoIface;
-import com.smarthome.imcp.dao.model.bo.BoInfraredLearnControlMap;
-import com.smarthome.imcp.dao.model.bo.MiniBlack;
+		 import com.smarthome.imcp.dao.model.bo.MiniBlack;
 /*    */ import com.smarthome.imcp.service.AbstractBasicService;
 		 import com.smarthome.imcp.service.bo.MiniBlackServiceIface;
 /*    */ import java.io.Serializable;
-import java.util.List;
-
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Restrictions;
-///*    */ import java.util.List;
-//		 import org.hibernate.Query;
-///*    */ import org.hibernate.criterion.DetachedCriteria;
-///*    */ import org.hibernate.criterion.Restrictions;
+		 import java.util.List;
+		 import org.hibernate.criterion.DetachedCriteria;
+		 import org.hibernate.criterion.Restrictions;
 /*    */ import org.springframework.beans.factory.annotation.Autowired;
 /*    */ import org.springframework.stereotype.Service;
 /*    */ 
@@ -46,7 +40,15 @@ import org.hibernate.criterion.Restrictions;
 				if (chkDeleteValid(id))
 					this.miniBlackDao.deleteByKey(Integer.valueOf(id));
 			}
-
+			
+			public MiniBlack delete(MiniBlack model)
+			{
+				if (chkUpdateValid(model)) {
+					this.miniBlackDao.delete(model);
+				}
+				return model;
+			}
+			
 			@Override
 			public List<MiniBlack> findByUserId(int userid) {
 				DetachedCriteria criteria = DetachedCriteria.forClass(MiniBlack.class);
