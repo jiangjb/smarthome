@@ -32,8 +32,8 @@ import org.hibernate.Query;
 			}
 
 			@Override
-			public List findTestCode(int id) {
-				return this.modelDao.findTestCode(id);
+			public List findTestCode(int id,int device_id) {
+				return this.modelDao.findTestCode(id,device_id);
 			}
 
 			@Override

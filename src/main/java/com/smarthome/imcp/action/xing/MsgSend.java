@@ -48,9 +48,9 @@
 		            options.setUserName(userName);
 		            options.setPassword(password.toCharArray());
 		            // 设置超时时间
-		            options.setConnectionTimeout(20);
+		            options.setConnectionTimeout(10);
 		            // 设置会话心跳时间
-		            options.setKeepAliveInterval(60);
+		            options.setKeepAliveInterval(20);
 
 		            topic = client.getTopic(MQTT_TOPIC);
 
@@ -58,15 +58,16 @@
 		            message.setRetained(true);//实时   
 		            message.setPayload(str.getBytes());
 		            client.connect(options);
+		            System.out.println(client.isConnected());
 		            
 		            int times=0;
 		            while (true) {
 	            		MqttDeliveryToken token = topic.publish(message);
 	            		token.waitForCompletion();
 	            		System.out.println("已经发送");
-	            		Thread.sleep(100);
+//	            		Thread.sleep(100);
 	            		times++;
-	            		if(times == 3) {
+	            		if(times == 1) {
 	            			break;
 	            		}
 		            }

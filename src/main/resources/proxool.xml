@@ -2,11 +2,11 @@
 <something-else-entirely>
 	<proxool>
 		<alias>DbPool</alias>
-		<driver-url>jdbc:mysql://localhost:3306/kinconybackstage</driver-url>
+		<driver-url>jdbc:mysql://120.77.250.17:3306/kinconybackstage</driver-url>
 		<driver-class>com.mysql.jdbc.Driver</driver-class>
 		<driver-properties>
 			<property name="user" value="root" />
-			<property name="password" value="MyNewPass4!" />
+			<property name="password" value="MyNewPwd@2018123456789" />
 			<property name="useUnicode" value="true" />
 			<property name="characterEncoding" value="UTF-8" />
 		</driver-properties>

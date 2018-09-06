@@ -30,6 +30,11 @@
 /*  36 */     return this.boRoomDao.findByCriteria(criteria);
 /*     */   }
 /*     */ 
+			public BoRoom findByKey(Serializable id){
+				BoRoom model = (BoRoom)this.boRoomDao.findById(id);
+				return model;
+			}
+
 /*     */   public BoRoom findByCode(String roomCode)
 /*     */   {
 /*  41 */     DetachedCriteria criteria = DetachedCriteria.forClass(BoRoom.class);

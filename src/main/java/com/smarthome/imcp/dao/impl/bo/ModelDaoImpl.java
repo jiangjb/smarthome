@@ -51,12 +51,17 @@ import org.hibernate.Query;
 			}
 			
 			@Override
-			public List findTestCode(int id) {
-				String sql="select f.fid,f.format_string from model m,formats f where m.m_format_id = f.fid and m.id = ?";
+			public List findTestCode(int id , int device_id) {
+				String sql="select f.fid,f.format_string,m.m_label,m.m_search_string,m.m_code,m.m_key_squency from model m,formats f where m.m_format_id = f.fid and m.id = ? and f.device_id = ?";
 				Query sqlQuery = getCurrentSession().createSQLQuery(sql)  //;// SQLQuery是hibernate用于支持原生sql的接口类
 						.addScalar("fid",StandardBasicTypes.INTEGER)
-						.addScalar("format_string",StandardBasicTypes.STRING);
+						.addScalar("format_string",StandardBasicTypes.STRING)
+						.addScalar("m_label",StandardBasicTypes.STRING)
+						.addScalar("m_search_string",StandardBasicTypes.STRING)
+						.addScalar("m_code",StandardBasicTypes.STRING)
+						.addScalar("m_key_squency",StandardBasicTypes.INTEGER);
 		        sqlQuery.setParameter(0, id);
+		        sqlQuery.setParameter(1, device_id);
 		        List list = sqlQuery.list();
 		        return list;
 			}

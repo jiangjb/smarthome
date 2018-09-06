@@ -13,6 +13,9 @@
         <property name="userId" type="java.lang.Integer">
             <column name="user_id" />
         </property>
+        <property name="roomCode" type="java.lang.String">
+            <column name="roomCode" />
+        </property>
         <property name="miniBlackId" type="java.lang.Integer">
             <column name="miniblack_id" />
         </property>
@@ -28,8 +31,11 @@
         <property name="modelid" type="java.lang.String">
             <column name="modelid" length="10" />
         </property>
+        <property name="labelId" type="java.lang.Integer">
+            <column name="label_id"/>
+        </property>
         <property name="label" type="java.lang.String">
-            <column name="m_label" length="10" />
+            <column name="m_label" length="50" />
         </property>
         <property name="isAuthorized" type="java.lang.Boolean">
             <column name="IsAuthorized"/>

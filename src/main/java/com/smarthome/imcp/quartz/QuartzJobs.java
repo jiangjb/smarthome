@@ -5,29 +5,37 @@
 		  import com.smarthome.dock.server.support.PacketProcessor;
 /*     */ import com.smarthome.dock.server.util.SensorUtil;
 /*     */ import com.smarthome.dock.server.util.StaticUtil;
-		  import com.smarthome.imcp.action.xing.XingUserAction;
+import com.smarthome.imcp.action.xing.MqttReceive;
+import com.smarthome.imcp.action.xing.XingUserAction;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoDevice;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoHostDevice;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoLockPasswordManage;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoLockVerdict;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoModel;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoUsers;
+import com.smarthome.imcp.dao.model.bo.MiniBlack;
 /*     */ import com.smarthome.imcp.service.bo.BoDeviceServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoHostDeviceServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoLockPasswordManageServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoLockVerdictServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoModelServiceIface;
+import com.smarthome.imcp.service.bo.MiniBlackServiceIface;
 /*     */ import com.smarthome.imcp.util.AES;
 /*     */ import com.smarthome.imcp.util.SimulateHTTPRequestUtil;
 /*     */ import com.smarthome.imcp.util.StaticUtils;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 /*     */ import java.io.PrintStream;
 /*     */ import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.DateFormat;
 /*     */ import java.text.ParseException;
 /*     */ import java.text.SimpleDateFormat;
 /*     */ import java.util.Date;
@@ -71,6 +79,9 @@ import java.net.UnknownHostException;
 
 			@Autowired
 			private PacketProcessor packetProcessor;//new
+			
+			@Autowired
+			private MiniBlackServiceIface<MiniBlack, Serializable> miniBlackService;//2018-8-22
 
 			private static Logger logger = LoggerFactory.getLogger(QuartzJobs.class);
 /*  84 */   private static Map<String, Integer> user_num = new HashMap();
@@ -91,8 +102,102 @@ import java.net.UnknownHostException;
 /*     */     else
 /*  93 */       user_num.put(userCode, Integer.valueOf(((Integer)user_num.get(userCode)).intValue() == 255 ? 0 : ((Integer)user_num.get(userCode)).intValue() + 1));
 /*     */   }
-
-
+			
+			/*
+			 * 每1分钟发送心跳请求
+			 */
+			@Scheduled(cron="0 0/1 * * * ?")
+			public void getMsg() {
+				boolean check=false;
+				//从MQTT上获取消息
+				MqttReceive mr=new MqttReceive();
+				List<MiniBlack> list=this.miniBlackService.findAllMac();
+				for(MiniBlack mb:list) {
+					mr.msgReceive(mb.getMacAddr());
+					
+					//找到mac地址对应的文件名
+					String macNew = mb.getMacAddr().replace(":", "");
+					String fileName=macNew+".txt";//mac地址对应的文件名称
+					
+					String dir="/home/onoff";
+					File directory = new File(dir);
+					if (directory.exists()) {
+						File file = new File(dir);
+						File[] fs = file.listFiles();
+						for(File f:fs){	
+							if(!f.isDirectory()) {
+								String fileName01=f.getName().toString();
+								if(fileName.equals(fileName01)) {
+									check=true;
+									break;
+								}
+							}
+						}
+					}
+					//如果没有找到相应文件，就设为离线
+					if(!check) {
+						mb.setStatus("离线");
+						this.miniBlackService.update(mb);
+					}
+				}
+			}
+			
+			/*
+			 * 每20秒 触发一次，这个定时器用于改变小黑的在线、离线状态
+			 */
+			@Scheduled(cron="0/20 * * * * ?")   
+			public void changeMiniStatus()
+			{
+				String dir="/home/onoff";
+				//判断路径是否存在
+				File directory = new File(dir);
+		        if (directory.exists()) {//如果存在该路径,取出文件夹下的文件名，再转化为mac地址
+					File file = new File(dir);		//获取其file对象
+					File[] fs = file.listFiles();	//遍历path下的文件和目录，放在File数组中
+					for(File f:fs){					//遍历File[]数组
+						if(!f.isDirectory()) {		//若非目录(即文件)，则打印
+							//获取mac地址
+							String fileName=f.getName().toString();
+							String macNew = fileName.substring(0, fileName.length()-4);//去掉 “.txt”
+							StringBuffer mac01=new StringBuffer(macNew);
+							for(int i=2;i<mac01.length();i+=3) {
+								if(i != mac01.length()-1) {
+									mac01.insert(i,":");
+								}
+							}
+							String mac=new String(mac01);
+//							System.out.println("mac:"+mac);
+							//找到mac地址对应的小黑
+							MiniBlack mb = this.miniBlackService.findByMac(mac);
+							if(mb != null) {
+								DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+								Date now = new Date( );
+								Date d1,d2;
+								//获取文件内容
+								FileReader file01;
+								try {
+									d1=df.parse(df.format(now));//当前时间
+									file01 = new FileReader(f.getAbsolutePath());
+									BufferedReader br = new BufferedReader(file01); 
+									String dateStr = br.readLine();
+									d2=df.parse(dateStr);//文件中保存的时间
+									long diff = (d1.getTime() - d2.getTime())/1000;
+									if(diff <= 20) {
+										mb.setStatus("在线");
+									}else {
+										mb.setStatus("离线");
+									}
+									this.miniBlackService.update(mb);
+									file01.close();
+								} catch (Exception e) {
+									e.printStackTrace();
+								}   
+							}
+						}
+					}
+		        }
+			}
+			
 /*     */   @Scheduled(cron="0 0/1 * * * ?")
 /*     */   public void setUserMode()
 /*     */   {

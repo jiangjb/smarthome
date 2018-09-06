@@ -6,11 +6,13 @@
  		{
 		    private Integer id;
 		    private Integer userId;
+		    private String roomCode;//8-28
 		    private Integer miniBlackId;
 		    private String nickName;
 			private String type;
 			private int m_key_squency;//7-20
 			private String modelid;//7-20
+			private Integer labelId;//8-16
 			private String label;//7-23
 			private Boolean isAuthorized;//8-13
 			
@@ -25,6 +27,12 @@
 			}
 			public void setUserId(Integer userId) {
 				this.userId = userId;
+			}
+			public String getRoomCode() {
+				return roomCode;
+			}
+			public void setRoomCode(String roomCode) {
+				this.roomCode = roomCode;
 			}
 			public Integer getMiniBlackId() {
 				return miniBlackId;
@@ -55,6 +63,13 @@
 			}
 			public void setModelid(String modelid) {
 				this.modelid = modelid;
+			}
+			
+			public Integer getLabelId() {
+				return labelId;
+			}
+			public void setLabelId(Integer labelId) {
+				this.labelId = labelId;
 			}
 			public String getLabel() {
 				return label;

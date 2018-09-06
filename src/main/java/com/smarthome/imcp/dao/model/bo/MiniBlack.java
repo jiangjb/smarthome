@@ -17,6 +17,10 @@
 			private String update_date;// 7-23
 			private String wifiName;//7-28
 			
+			public MiniBlack() {}
+			public MiniBlack(String mac) {
+				this.macAddr=mac;
+			}
 			public Integer getId() {
 				return id;
 			}

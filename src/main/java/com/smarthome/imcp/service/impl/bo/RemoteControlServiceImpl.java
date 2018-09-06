@@ -1,9 +1,7 @@
 /*    */ package com.smarthome.imcp.service.impl.bo;
  
 		 import com.smarthome.imcp.dao.bo.RemoteControlDaoIface;
-import com.smarthome.imcp.dao.model.bo.BoDevice;
-import com.smarthome.imcp.dao.model.bo.MiniBlack;
-import com.smarthome.imcp.dao.model.bo.RemoteControl;
+		 import com.smarthome.imcp.dao.model.bo.RemoteControl;
 /*    */ import com.smarthome.imcp.service.AbstractBasicService;
 		 import com.smarthome.imcp.service.bo.RemoteControlServiceIface;
 /*    */ import java.io.Serializable;
@@ -43,7 +41,11 @@ import com.smarthome.imcp.dao.model.bo.RemoteControl;
 				if (chkDeleteValid(id))
 					this.remoteControlDao.deleteByKey(Integer.valueOf(id));
 			}
-
+			//8-27
+			public RemoteControl findByKey(Serializable id){
+				RemoteControl model = (RemoteControl)this.remoteControlDao.findById(id);
+				return model;
+			}
 			@Override
 			public List<RemoteControl> findByUserId(int userid) {
 				DetachedCriteria criteria = DetachedCriteria.forClass(RemoteControl.class);
@@ -67,11 +69,12 @@ import com.smarthome.imcp.dao.model.bo.RemoteControl;
 			}
 
 			@Override
-			public RemoteControl findByUML(Integer userId, Integer miniBlackId, String m_label) {
+			public RemoteControl findByUML(Integer userId, Integer miniBlackId, String nickName,String roomCode) {
 				DetachedCriteria criteria = DetachedCriteria.forClass(RemoteControl.class);
 				criteria.add(Restrictions.eq("userId", userId));
 				criteria.add(Restrictions.eq("miniBlackId", miniBlackId));
-				criteria.add(Restrictions.eq("label", m_label));
+				criteria.add(Restrictions.eq("nickName", nickName));
+				criteria.add(Restrictions.eq("roomCode", roomCode));
 				List<RemoteControl> list = this.remoteControlDao.findByCriteria(criteria);
 				if ((list == null) || (list.isEmpty())) {
 					return null;
@@ -86,6 +89,19 @@ import com.smarthome.imcp.dao.model.bo.RemoteControl;
 				criteria.add(Restrictions.eq("modelid", modelId));
 				List<RemoteControl> list = this.remoteControlDao.findByCriteria(criteria);
 				return list;
+			}
+			@Override
+			public List<RemoteControl> getByRoomCode(String rmcode) {
+				DetachedCriteria criteria = DetachedCriteria.forClass(RemoteControl.class);
+				criteria.add(Restrictions.eq("roomCode", rmcode));
+				return this.remoteControlDao.findByCriteria(criteria);
+			}
+			@Override
+			public List<RemoteControl> getByRoomUser(int userId, String rmCode) {
+				DetachedCriteria criteria = DetachedCriteria.forClass(RemoteControl.class);
+				criteria.add(Restrictions.eq("userId", userId));
+				criteria.add(Restrictions.eq("roomCode", rmCode));
+				return this.remoteControlDao.findByCriteria(criteria);
 			}
 
 		}

@@ -10,8 +10,12 @@ import java.util.List;
 public abstract interface MiniBlackServiceIface<T, PK extends Serializable> extends BasicServiceIface<T, PK>
 {
 
-	List<MiniBlack> findByUserId(int userid);
+	public List<MiniBlack> findByUserId(int userid);
 
 	public abstract MiniBlack delete(T paramT);
+
+	public MiniBlack findByMac(String mac);
+
+	public List<MiniBlack> findAllMac();
 }
 

@@ -13,9 +13,13 @@ public abstract interface RemoteControlServiceIface<T, PK extends Serializable> 
 
 	List<RemoteControl> findByMiniId(Integer valueOf);
 
-	RemoteControl findByUML(Integer userId, Integer miniBlackId, String m_label);
+	RemoteControl findByUML(Integer userId, Integer miniBlackId, String nickName,String roomCode);
 
 	List<RemoteControl> getBy(int userId, String modelId);
+
+	List<RemoteControl> getByRoomCode(String rmcode);
+
+	List<RemoteControl> getByRoomUser(int userId, String rmCode);
 
 }
 

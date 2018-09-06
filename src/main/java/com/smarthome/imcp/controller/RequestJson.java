@@ -1,8 +1,7 @@
 /*    */ package com.smarthome.imcp.controller;
 
-import java.util.List;
+		 import java.util.List;
 
-/*    */ 
 /*    */ public class RequestJson
 /*    */ {
 /*  6 */   private Integer page = Integer.valueOf(0);
@@ -12,6 +11,7 @@ import java.util.List;
 /* 10 */   private String message = "";
 /*    */   private Object data;
 		   private Object infraredData;//7-31
+		   private Object userDefinedData;//9-1
 		   private String accountOperationType;//3-29 用于存放区分管理员和一般用户的标识
 		   private List modelIds;//4-9 用于存放向Android|IOS传递的情景模式 的modelId
 		   
@@ -75,6 +75,12 @@ import java.util.List;
 			}
 			public void setInfraredData(Object infraredData) {
 				this.infraredData = infraredData;
+			}
+			public Object getUserDefinedData() {
+				return userDefinedData;
+			}
+			public void setUserDefinedData(Object userDefinedData) {
+				this.userDefinedData = userDefinedData;
 			}
 /*    */   public Integer getTotalPages() {
 /* 55 */     return this.totalPages;

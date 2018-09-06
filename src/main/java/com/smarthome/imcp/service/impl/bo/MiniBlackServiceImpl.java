@@ -26,6 +26,13 @@
 				}
 				return model;
 			}
+			public MiniBlack update(MiniBlack model)
+			{
+				if (chkUpdateValid(model)) {
+					this.miniBlackDao.update(model);
+				}
+				return model;
+			}
 			
 			public MiniBlack findByKey(Serializable id)
 			{
@@ -57,6 +64,23 @@
 				if ((list == null) || (list.isEmpty())) {
 					return null;
 				}
+				return list;
+			}
+
+			@Override
+			public MiniBlack findByMac(String mac) {
+				DetachedCriteria criteria = DetachedCriteria.forClass(MiniBlack.class);
+				criteria.add(Restrictions.eq("macAddr", mac));
+				List<MiniBlack> list = this.miniBlackDao.findByCriteria(criteria);
+				if ((list == null) || (list.isEmpty())) {
+					return null;
+				}
+				return list.get(0);
+			}
+			@Override
+			public List<MiniBlack> findAllMac() {
+				DetachedCriteria criteria = DetachedCriteria.forClass(MiniBlack.class);
+				List<MiniBlack> list = this.miniBlackDao.findByCriteria(criteria);
 				return list;
 			}
 

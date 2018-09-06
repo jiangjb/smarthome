@@ -11,7 +11,7 @@ public abstract interface ModelDaoIface<T, PK extends Serializable> extends Comm
 
 	List findByType(String label);
 
-	List findTestCode(int id);
+	List findTestCode(int id,int device_id);
 
 	int findByLabel(String label);
 
@@ -24,6 +24,7 @@ public abstract interface ModelDaoIface<T, PK extends Serializable> extends Comm
 	List findModelidByid(int labelId);
 
 	List findModelInfo(int device_id);
+
 	
 }
 

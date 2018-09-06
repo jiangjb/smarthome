@@ -58,6 +58,8 @@
 			import com.smarthome.imcp.dao.model.bo.MiniBlack;
 			import com.smarthome.imcp.dao.model.bo.Model;
 			import com.smarthome.imcp.dao.model.bo.RemoteControl;
+			import com.smarthome.imcp.dao.model.bo.UserDefinedButton;
+			import com.smarthome.imcp.dao.model.bo.UserDefinedRemoteControl;
 /*       */ import com.smarthome.imcp.example.ChargeExample;
 /*       */ import com.smarthome.imcp.service.bo.BoAirBindingPanelServiceIface;
 /*       */ import com.smarthome.imcp.service.bo.BoAlarmRecordServiceIface;
@@ -97,6 +99,8 @@
 			import com.smarthome.imcp.service.bo.MiniBlackServiceIface;
 			import com.smarthome.imcp.service.bo.ModelServiceIface;
 			import com.smarthome.imcp.service.bo.RemoteControlServiceIface;
+			import com.smarthome.imcp.service.bo.UserDefinedButtonServiceIface;
+			import com.smarthome.imcp.service.bo.UserDefinedRemoteControlServiceIface;
 /*       */ import com.smarthome.imcp.service.impl.push.PushService;
 /*       */ import com.smarthome.imcp.service.system.FileServiceIface;
 			import com.smarthome.imcp.util.FloorUtil;
@@ -110,19 +114,13 @@
 			import com.smarthome.imcp.util.UserUtil;
 /*       */ import com.smarthome.imcp.util.UuidUtil;
 /*       */ import com.smarthome.imcp.util.YZUitl;
-			import com.smarthome.imcp.util.androidAndIOS.Demo;
 /*       */ import java.io.BufferedReader;
-			import java.io.DataInputStream;
 /*       */ import java.io.File;
 /*       */ import java.io.IOException;
 /*       */ import java.io.InputStream;
-			import java.io.OutputStream;
 /*       */ import java.io.Serializable;
 /*       */ import java.io.UnsupportedEncodingException;
 /*       */ import java.math.BigDecimal;
-			import java.net.ServerSocket;
-			import java.net.Socket;
-			import java.net.UnknownHostException;
 /*       */ import java.text.SimpleDateFormat;
 /*       */ import java.util.ArrayList;
 /*       */ import java.util.Collections;
@@ -159,9 +157,6 @@
 /*       */ import org.slf4j.Logger;
 /*       */ import org.slf4j.LoggerFactory;
 /*       */ import org.springframework.beans.factory.annotation.Autowired;
-			import org.springframework.web.bind.annotation.RequestMapping;
-			import org.springframework.web.bind.annotation.RequestParam;
-			import org.springframework.web.bind.annotation.ResponseBody;
 			import org.apache.commons.codec.binary.Base64;//2-9
 			import com.smarthome.imcp.action.xing.MsgSend;//7-28
 			import com.smarthome.imcp.action.xing.MqttReceive;//7-28
@@ -318,6 +313,11 @@
 			  @Autowired
 			  private InfraredTimerServiceIface<InfraredTimer, Serializable> infraredTimerService;//2018-7-31
 			  
+			  @Autowired
+			  private UserDefinedRemoteControlServiceIface<UserDefinedRemoteControl, Serializable> userDefinedRemoteControlService;//2018-8-31
+			  
+			  @Autowired
+			  private UserDefinedButtonServiceIface<UserDefinedButton, Serializable> userDefinedButtonService;//2018-8-31
 			  
 
 /*       */   private File fileupload;//成员变量 这个怎么获取？
@@ -327,7 +327,6 @@
 /* 16449 */   private String contents = "";
 /*       */   private Integer isStudy;
 /* 16451 */   private String userCode = "";
-/*       */ 
 /* 16453 */   private String deviceOrHost = "";
 /* 16454 */   private String modelId = "";
 /* 16455 */   private String modelWeek = "";
@@ -1888,8 +1887,7 @@
     /*  1180 */               this.requestJson.setData(map);
     /*  1181 */               this.requestJson.setSuccess(true);
     /*       */             } else {//前面是授权前的判断
-  	  						logger.info("开始新的授权");
-  	  						//BEGIN -----现在开始授权 
+  	  						  logger.info("开始新的授权");
     /*  1183 */               String generateTokeCode = TokeUtil.generateTokeCode();
     /*  1184 */               String generateTokeCodes = TokeUtil.generateTokeCodes();
     /*  1185 */               users.setAuthorizationUserCode(boUsers.getUserCode());
@@ -1903,86 +1901,129 @@
   							        if(name.equals("approvalinfo")) {
   								        JSONArray jsonArray = JSONArray.fromObject(value);
   									    List<Map<String,String>> list01 = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
+  									    logger.info("list01:"+list01);
   									    for(int i=0;i<list01.size();i++) {
-  								    		String userCode01=users.getUserCode();
-  								    		String deviceAddr01=list01.get(i).get("deviceAddress");//获取app传过来的设备地址
-  								    		String deviceType=list01.get(i).get("type");
-  								    		String deviceCode01="commonsxt";
-  								    		if(!deviceType.equals("100")) {//摄像头没有主机
-  								    			deviceCode01=list01.get(i).get("deviceCode");
-  								    		}
-  								    		BoDevice boDevice=this.boDeviceService.findByCode(deviceCode01);//find BY deviceCode	
-  								    		String roomCode =list01.get(i).get("roomCode");
-  								    		BoRoom boroom=this.boRoomService.getAllListByRommCode(roomCode).get(0);
-  								    		String nickName=list01.get(i).get("name");
-  								    		String ico=list01.get(i).get("icon");
-  								    		String isAuth=list01.get(i).get("isAuthorited");//获取app传过来的 授权标识  即isAuthorized
-  								    		BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,deviceAddr01);	
-  								    		BoHostDevice boHostDevice01 = new BoHostDevice();
-  								    		BoHostDevice boHostDevice02 = new BoHostDevice();
-  								    		if(boHostDevice == null) {//第二步：新增设备:主机+用户+房间+......(只限定一般用户进入，管理员不创建新设备 和授权者公用)
-  								    			boHostDevice01.setBoDevice(boDevice);//摄像头没有关联的主机
-  								    			boHostDevice01.setBoUsers(users);//被授权用户
-  								    			boHostDevice01.setDeviceType(deviceType);
-  								    			boHostDevice01.setDeviceAddress(deviceAddr01);
-  								    			boHostDevice01.setNickName(nickName);//有可能为空
-  								    			boHostDevice01.setWhetherQueryStateSign("");
-  								    			boHostDevice01.setIco(ico);
-  								    			boHostDevice01.setDeviceNum(Integer.valueOf(1));
-  								    			boHostDevice01.setPushSet("");
-  								    			boHostDevice01.setState("");
-  								    			boHostDevice01.setBoRoom(boroom);//被授权用户对应的房间
-  								    			boHostDevice01.setDeviceClassify(this.fid1);
-  								    			if(deviceType.equals("100")) {//如果是摄像头就存入ValidationCode字段    				
-  								    				boHostDevice01.setValidationCode(list01.get(i).get("validationCode"));
-  								    				boHostDevice01.setMntDelete("Y");
-  								    			}else {		
-  								    				boHostDevice01.setMntDelete("N");//这个字段也很关键
-  								    			}
-  								    			if(isAuth.equals("1")) {
-  								    				boHostDevice01.setIsAuthorized(this.fid1);	
-  								    			}else {
-  								    				boHostDevice01.setIsAuthorized(this.fid);
-  								    			}
-  								    			boHostDevice02=this.boHostDeviceService.save(boHostDevice01);
-  								    		}else {
-  								    			logger.info("授权时，设备不应该存在...（会在解绑时删除）");
-  								    		}
-  								    		if (boHostDevice02 == null) {
-  								    			this.requestJson.setData(map);
-  								    			this.requestJson.setMessage("授权失败");
-  								    			this.requestJson.setSuccess(false);
-  								    		}
+  									    	String roomCode =list01.get(i).get("roomCode");
+  									    	logger.info("roomCode:"+roomCode);
+  									    	BoRoom boroom=this.boRoomService.findByCode(roomCode);
+  									    	logger.info("boroom:"+boroom);
+  									    	String isAuth=list01.get(i).get("isAuthorited");
+  									    	String deviceType=list01.get(i).get("type");
+  									    	int key = Integer.valueOf(deviceType);
+  									    	logger.info("deviceType="+deviceType);
+  									    	if(key <= 20000) {//普通设备
+  									    		String userCode01=users.getUserCode();
+  									    		String deviceAddr01=list01.get(i).get("deviceAddress");//获取app传过来的设备地址
+  									    		String deviceCode01="commonsxt";
+  									    		if(!deviceType.equals("100")) {//摄像头没有主机
+  									    			deviceCode01=list01.get(i).get("deviceCode");
+  									    		}
+  									    		BoDevice boDevice=this.boDeviceService.findByCode(deviceCode01);//find BY deviceCode	
+  									    		
+  									    		String nickName=list01.get(i).get("name");
+  									    		String ico=list01.get(i).get("icon");
+//  									    		String isAuth=list01.get(i).get("isAuthorited");//获取app传过来的 授权标识  即isAuthorized
+  									    		BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,deviceAddr01);	
+  									    		BoHostDevice boHostDevice01 = new BoHostDevice();
+  									    		BoHostDevice boHostDevice02 = new BoHostDevice();
+  									    		if(boHostDevice == null) {//第二步：新增设备:主机+用户+房间+......(只限定一般用户进入，管理员不创建新设备 和授权者公用)
+  									    			boHostDevice01.setBoDevice(boDevice);//摄像头没有关联的主机
+  									    			boHostDevice01.setBoUsers(users);//被授权用户
+  									    			boHostDevice01.setDeviceType(deviceType);
+  									    			boHostDevice01.setDeviceAddress(deviceAddr01);
+  									    			boHostDevice01.setNickName(nickName);//有可能为空
+  									    			boHostDevice01.setWhetherQueryStateSign("");
+  									    			boHostDevice01.setIco(ico);
+  									    			boHostDevice01.setDeviceNum(Integer.valueOf(1));
+  									    			boHostDevice01.setPushSet("");
+  									    			boHostDevice01.setState("");
+  									    			boHostDevice01.setBoRoom(boroom);//被授权用户对应的房间
+  									    			boHostDevice01.setDeviceClassify(this.fid1);
+  									    			if(deviceType.equals("100")) {//如果是摄像头就存入ValidationCode字段    				
+  									    				boHostDevice01.setValidationCode(list01.get(i).get("validationCode"));
+  									    				boHostDevice01.setMntDelete("Y");
+  									    			}else {		
+  									    				boHostDevice01.setMntDelete("N");//这个字段也很关键
+  									    			}
+  									    			if(isAuth.equals("1")) {
+  									    				boHostDevice01.setIsAuthorized(this.fid1);	
+  									    			}else {
+  									    				boHostDevice01.setIsAuthorized(this.fid);
+  									    			}
+  									    			boHostDevice02=this.boHostDeviceService.save(boHostDevice01);
+  									    		}else {
+  									    			logger.info("授权时，设备不应该存在...（会在解绑时删除）");
+  									    		}
+  									    		if (boHostDevice02 == null) {
+  									    			this.requestJson.setData(map);
+  									    			this.requestJson.setMessage("授权失败");
+  									    			this.requestJson.setSuccess(false);
+  									    		}
+  									    	}else {//红外设备
+  									    		int remoteControlid=Integer.valueOf(list01.get(i).get("remoteControlid"));
+  									    		logger.info("newAuthorization1 remoteControlid:"+remoteControlid);
+  									    		if(key == 20014) {//自定义红外遥控器    deviceType=14
+  									    			UserDefinedRemoteControl udr=this.userDefinedRemoteControlService.findByKey(remoteControlid);
+  									    			logger.info("UserDefinedRemoteControl:"+udr);
+  									    			if(udr != null) {
+  									    				UserDefinedRemoteControl udr1=new UserDefinedRemoteControl();
+  									    				udr1.setBoRoom(udr.getBoRoom());
+  									    				udr1.setBoUsers(users);
+  									    				udr1.setMiniBlackId(udr.getMiniBlackId());
+  									    				udr1.setNickName(udr.getNickName());
+  									    				udr1.setDeviceType(udr.getDeviceType());
+  									    				udr1.setButtonNames(udr.getButtonNames());
+  									    				if(isAuth.equals("1")) {
+  									    					udr1.setIsAuthorized(this.fid1);
+  									    				}else {
+  									    					udr1.setIsAuthorized(this.fid);
+  									    				}
+  									    				UserDefinedRemoteControl save=this.userDefinedRemoteControlService.save(udr1);
+  									    				if(save == null) {
+  									    					this.requestJson.setData(map);
+  									    					this.requestJson.setMessage("授权失败");
+  									    					this.requestJson.setSuccess(false);
+  									    				}else {
+  									    					this.requestJson.setData(map);
+  									    					this.requestJson.setMessage("授权成功");
+  									    					this.requestJson.setSuccess(false);
+  									    				}
+  									    			}
+  									    		}else{//红外遥控器 deviceType=1~13
+  									    			RemoteControl remoteOld=this.remoteControlService.findByKey(remoteControlid);
+  									    			logger.info("remoteOld:"+remoteOld);
+  									    			if(remoteOld != null) {
+  									    				RemoteControl rc = new RemoteControl();
+  									    				logger.info("newAuthorization1 userID="+users.getUserId());
+  									    				rc.setUserId(users.getUserId());//被授权者user_id
+  									    				rc.setRoomCode(roomCode);
+  									    				rc.setMiniBlackId(remoteOld.getMiniBlackId()); 
+  									    				rc.setNickName(remoteOld.getNickName());
+  									    				rc.setType(remoteOld.getType());
+  									    				rc.setM_key_squency(remoteOld.getM_key_squency());
+  									    				rc.setModelid(remoteOld.getModelid());
+  									    				rc.setLabelId(remoteOld.getLabelId());
+  									    				rc.setLabel(remoteOld.getLabel());
+  									    				if(isAuth.equals("1")) {
+  									    					rc.setIsAuthorized(this.fid1);
+  									    				}else {
+  									    					rc.setIsAuthorized(this.fid);
+  									    				}
+  									    				RemoteControl rcNew=this.remoteControlService.save(rc);
+  									    				if(rcNew == null) {
+  									    					this.requestJson.setData(map);
+  									    					this.requestJson.setMessage("授权失败");
+  									    					this.requestJson.setSuccess(false);
+  									    				}else {
+  									    					this.requestJson.setData(map);
+  									    					this.requestJson.setMessage("授权成功");
+  									    					this.requestJson.setSuccess(false);
+  									    				}
+  									    			}
+  									    		}
+  									    	}
   								    	}
   								    }
-  							        //8-15 为被授权的用户添加红外设备
-						        	if(name.equals("remoteControlList")) {
-						        		JSONArray jsonArray = JSONArray.fromObject(value);
-						        		List<Map<String,String>> list01 = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
-						        		for(int i=0;i<list01.size();i++) {
-						        			int userId=users.getUserId(),miniBlackId=Integer.valueOf(list01.get(i).get("miniBlackId"));
-						        			String m_label = list01.get(i).get("label");
-						        			RemoteControl remoteControl=this.remoteControlService.findByUML(userId,miniBlackId,m_label);
-						        			if(remoteControl == null) {//不存在则添加
-						        				String isAuth=list01.get(i).get("isAuthorited");//获取app传过来的 授权标识  即isAuthorized
-						        				RemoteControl rc = new RemoteControl();
-						        				rc.setUserId(userId);
-						        				rc.setMiniBlackId(miniBlackId);
-						        				rc.setNickName(list01.get(i).get("nickName"));
-						        				rc.setType(list01.get(i).get("type"));
-						        				rc.setM_key_squency(Integer.valueOf(list01.get(i).get("m_key_squency")));
-						        				rc.setModelid(list01.get(i).get("modelId"));
-						        				rc.setLabel(m_label);
-						        				if(isAuth.equals("1")) {
-						        					rc.setIsAuthorized(this.fid1);
-						        				}else {
-						        					rc.setIsAuthorized(this.fid);
-						        				}
-						        			}
-						        		}
-						        	}
-  									
-  							        /////////////////////////////END////////////////////////////////////
   							        //情景模式 授权4-9          modelId,modelName,ico存在boModel中吧，modelInfo中的信息存在boModelinfo中(以字段形式传参 只能添加一个情景模式，多个就不能这样传)
   							        if(name.equals("modelIds")) {//情景模式的modelId集合
   							        	JSONArray jsonArray = JSONArray.fromObject(value);
@@ -2232,93 +2273,94 @@
 //			  							        logger.info("approvalinfo是否存在=="+name.equals("approvalinfo"));
   						        if(name.equals("approvalinfo")) {
   						        	JSONArray jsonArray = JSONArray.fromObject(value);
-  								    List<Map<String,String>> list01 = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
-  								    for(int i=0;i<list01.size();i++) {
-  								    	if(this.accountOperationType.equals("2")) {
-  								    		String userCode01=users.getUserCode();
-  								    		String deviceAddr01=list01.get(i).get("deviceAddress");//获取app传过来的设备地址
-  								    		String deviceCode01=list01.get(i).get("deviceCode");
-  								    		String roomCode =list01.get(i).get("roomCode");
-//			  								    	logger.info("roomCode="+roomCode);
-//			  								    	logger.info("deviceCode="+deviceCode01);
-  								    		BoDevice boDevice=this.boDeviceService.findByCode(deviceCode01);//find BY deviceCode
-  								    		BoRoom boroom=this.boRoomService.getAllListByRommCode(roomCode).get(0);//错了
-  								    		String deviceType=list01.get(i).get("type");
-//			  								    	logger.info("deviceType = "+deviceType);
-  								    		String nickName=list01.get(i).get("name");
-  								    		logger.info("nickName = "+nickName);
-  								    		String ico=list01.get(i).get("icon");
-//			  								    	logger.info("ico = "+ico);
-//			  								    	String deviceNum=list01.get(i).get("num");
-//			  								    	logger.info("deviceNum = "+deviceNum);
-  								    		String isAuth=list01.get(i).get("isAuthorited");//获取app传过来的 授权标识  即isAuthorized
-  								    		logger.info("isAuthorized="+isAuth);
-  								    		BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,deviceAddr01);							    	
-  								    		BoHostDevice boHostDevice01 = new BoHostDevice();
-  								    		BoHostDevice boHostDevice02 = new BoHostDevice();
-  								    		if(boHostDevice == null) {//第二步：新增设备:主机+用户+房间+......(只限定一般用户进入，管理员不创建新设备 和授权者公用)
-  								    			boHostDevice01.setBoDevice(boDevice);//被授权设备
-  								    			boHostDevice01.setBoUsers(users);//被授权用户
-  								    			boHostDevice01.setDeviceType(deviceType);
-  								    			boHostDevice01.setDeviceAddress(deviceAddr01);
-  								    			boHostDevice01.setNickName(nickName);//有可能为空
-  								    			boHostDevice01.setWhetherQueryStateSign("");
-  								    			boHostDevice01.setIco(ico);
-  								    			boHostDevice01.setDeviceNum(Integer.valueOf(1));
-  								    			boHostDevice01.setPushSet("");
-  								    			boHostDevice01.setState("");
-  								    			boHostDevice01.setBoRoom(boroom);//被授权用户对应的房间
-  								    			boHostDevice01.setDeviceClassify(this.fid1);
-  								    			logger.info("deviceType:"+deviceType);
-  								    			if(deviceType.equals("100")) {//如果是摄像头就存入ValidationCode字段    				
-  								    				boHostDevice01.setValidationCode(list01.get(i).get("validationCode"));
-  								    				boHostDevice01.setMntDelete("Y");
-  								    			}else {		
-  								    				boHostDevice01.setMntDelete("N");//这个字段也很关键
-  								    			}
-  								    			if(isAuth.equals("1")) {
-  								    				boHostDevice01.setIsAuthorized(this.fid1);	
-  								    			}else {
-  								    				boHostDevice01.setIsAuthorized(this.fid);
-  								    			}
-  								    			boHostDevice02=this.boHostDeviceService.save(boHostDevice01);
-  								    		}else {
-  								    			logger.info("授权时，设备不应该存在...（会在解绑时删除）");
-  								    		}
-  								    		if (boHostDevice02 == null) {
-  								    			this.requestJson.setData(map);
-  								    			this.requestJson.setMessage("授权失败");
-  								    			this.requestJson.setSuccess(false);
-  								    		}
-  								    	}
-  								    }			    
+								    List<Map<String,String>> list01 = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
+								    for(int i=0;i<list01.size();i++) {
+								    	String roomCode =list01.get(i).get("roomCode");
+								    	BoRoom boroom=this.boRoomService.getAllListByRommCode(roomCode).get(0);
+								    	String isAuth=list01.get(i).get("isAuthorited");
+								    	String deviceType=list01.get(i).get("type");
+								    	int key = Integer.valueOf(deviceType);
+								    	if(key <= 20000) {//普通设备
+								    		String userCode01=users.getUserCode();
+								    		String deviceAddr01=list01.get(i).get("deviceAddress");//获取app传过来的设备地址
+								    		String deviceCode01="commonsxt";
+								    		if(!deviceType.equals("100")) {//摄像头没有主机
+								    			deviceCode01=list01.get(i).get("deviceCode");
+								    		}
+								    		BoDevice boDevice=this.boDeviceService.findByCode(deviceCode01);//find BY deviceCode	
+								    		
+								    		String nickName=list01.get(i).get("name");
+								    		String ico=list01.get(i).get("icon");
+//									    		String isAuth=list01.get(i).get("isAuthorited");//获取app传过来的 授权标识  即isAuthorized
+								    		BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,deviceAddr01);	
+								    		BoHostDevice boHostDevice01 = new BoHostDevice();
+								    		BoHostDevice boHostDevice02 = new BoHostDevice();
+								    		if(boHostDevice == null) {//第二步：新增设备:主机+用户+房间+......(只限定一般用户进入，管理员不创建新设备 和授权者公用)
+								    			boHostDevice01.setBoDevice(boDevice);//摄像头没有关联的主机
+								    			boHostDevice01.setBoUsers(users);//被授权用户
+								    			boHostDevice01.setDeviceType(deviceType);
+								    			boHostDevice01.setDeviceAddress(deviceAddr01);
+								    			boHostDevice01.setNickName(nickName);//有可能为空
+								    			boHostDevice01.setWhetherQueryStateSign("");
+								    			boHostDevice01.setIco(ico);
+								    			boHostDevice01.setDeviceNum(Integer.valueOf(1));
+								    			boHostDevice01.setPushSet("");
+								    			boHostDevice01.setState("");
+								    			boHostDevice01.setBoRoom(boroom);//被授权用户对应的房间
+								    			boHostDevice01.setDeviceClassify(this.fid1);
+								    			if(deviceType.equals("100")) {//如果是摄像头就存入ValidationCode字段    				
+								    				boHostDevice01.setValidationCode(list01.get(i).get("validationCode"));
+								    				boHostDevice01.setMntDelete("Y");
+								    			}else {		
+								    				boHostDevice01.setMntDelete("N");//这个字段也很关键
+								    			}
+								    			if(isAuth.equals("1")) {
+								    				boHostDevice01.setIsAuthorized(this.fid1);	
+								    			}else {
+								    				boHostDevice01.setIsAuthorized(this.fid);
+								    			}
+								    			boHostDevice02=this.boHostDeviceService.save(boHostDevice01);
+								    		}else {
+								    			logger.info("授权时，设备不应该存在...（会在解绑时删除）");
+								    		}
+								    		if (boHostDevice02 == null) {
+								    			this.requestJson.setData(map);
+								    			this.requestJson.setMessage("授权失败");
+								    			this.requestJson.setSuccess(false);
+								    		}
+								    	}else {//红外设备
+								    		int remoteControlid=Integer.valueOf(list01.get(i).get("remoteControlid"));
+								    		RemoteControl remoteOld=this.remoteControlService.findByKey(remoteControlid);
+								    		if(remoteOld != null) {
+								    			RemoteControl rc = new RemoteControl();
+								    			rc.setUserId(users.getUserId());//被授权者user_id
+						        				rc.setRoomCode(roomCode);//8-28
+						        				rc.setMiniBlackId(remoteOld.getMiniBlackId());
+						        				rc.setNickName(remoteOld.getNickName());
+						        				rc.setType(remoteOld.getType());
+						        				rc.setM_key_squency(remoteOld.getM_key_squency());
+						        				rc.setModelid(remoteOld.getModelid());
+						        				rc.setLabelId(remoteOld.getLabelId());
+						        				rc.setLabel(remoteOld.getLabel());
+						        				if(isAuth.equals("1")) {
+						        					rc.setIsAuthorized(this.fid1);
+						        				}else {
+						        					rc.setIsAuthorized(this.fid);
+						        				}
+						        				RemoteControl rcNew=this.remoteControlService.save(rc);
+						        				if(rcNew == null) {
+						        					this.requestJson.setData(map);
+  									    			this.requestJson.setMessage("授权失败");
+  									    			this.requestJson.setSuccess(false);
+						        				}else {
+						        					this.requestJson.setData(map);
+  									    			this.requestJson.setMessage("授权成功");
+  									    			this.requestJson.setSuccess(false);
+						        				}
+								    		}
+								    	}
+							    	}			    
   						        }
-  						    //8-15 为被授权的用户添加红外设备
-					        	if(name.equals("remoteControlList")) {
-					        		JSONArray jsonArray = JSONArray.fromObject(value);
-					        		List<Map<String,String>> list01 = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
-					        		for(int i=0;i<list01.size();i++) {
-					        			int userId=users.getUserId(),miniBlackId=Integer.valueOf(list01.get(i).get("miniBlackId"));
-					        			String m_label = list01.get(i).get("label");
-					        			RemoteControl remoteControl=this.remoteControlService.findByUML(userId,miniBlackId,m_label);
-					        			if(remoteControl == null) {//不存在则添加
-					        				String isAuth=list01.get(i).get("isAuthorited");//获取app传过来的 授权标识  即isAuthorized
-					        				RemoteControl rc = new RemoteControl();
-					        				rc.setUserId(userId);
-					        				rc.setMiniBlackId(miniBlackId);
-					        				rc.setNickName(list01.get(i).get("nickName"));
-					        				rc.setType(list01.get(i).get("type"));
-					        				rc.setM_key_squency(Integer.valueOf(list01.get(i).get("m_key_squency")));
-					        				rc.setModelid(list01.get(i).get("modelId"));
-					        				rc.setLabel(m_label);
-					        				if(isAuth.equals("1")) {
-					        					rc.setIsAuthorized(this.fid1);
-					        				}else {
-					        					rc.setIsAuthorized(this.fid);
-					        				}
-					        			}
-					        		}
-					        	}
 						      //情景模式 授权4-9          modelId,modelName,ico存在boModel中吧，modelInfo中的信息存在boModelinfo中(以字段形式传参 只能添加一个情景模式，多个就不能这样传)
 						        if(name.equals("modelIds")) {//情景模式的modelId集合
 						        	JSONArray jsonArray = JSONArray.fromObject(value);
@@ -2584,7 +2626,7 @@
 								  isAuthorited="1";
 							  }else {
 								  isAuthorited="0";
-							  }
+				    		  }
 							  map.put("isAuthorited", isAuthorited);
 //							  map.put("validationCode", bohostDevice.getValidationCode());//3-29
 							  map.put("num", bohostDevice.getDeviceNum());
@@ -2625,7 +2667,7 @@
 			  @Action(value="gainDevicesList1", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 			  public String gainDevicesList1() {
 				  this.requestJson = new RequestJson();
-				  logger.info("-----------------gainDevicesList.action  userPhone ="+this.userPhone);
+				  logger.info("-----------------gainDevicesList1.action  userPhone="+this.userPhone);
 				  List<Map<String,String>> voList=new ArrayList<Map<String,String>>();
 				  List accOtype=new ArrayList();
 				  BoUsers users=this.boUserServicess.findByUserPhone(this.userPhone);
@@ -2633,11 +2675,13 @@
 				  String accountOperationType=users.getAccountOperationType();
 				  List modelIdList=new ArrayList();//4-9 存放一般用户情景模式的modelId集
 				  List infraredList=new ArrayList();//8-13
+				  List userDefinedList=new ArrayList();//9-1
 				  
 				  List<BoHostDevice> bohostDevices=this.boHostDeviceService.findHostByUserPhone(this.userPhone);//不存在 ，会返回null   （这里找到该用户所有的设备，包括自己本身的和被授权的，只是本身的在app那边用不上，会被过滤）
 				  List<RemoteControl> rcs=this.remoteControlService.findByUserId(users.getUserId());//8-13
-				  logger.info("bohostDevices::"+bohostDevices);
-				  if(bohostDevices != null || rcs != null) {//这个地方可以是被授权者本身就有设备   8-13改
+				  List<UserDefinedRemoteControl> udrList=this.userDefinedRemoteControlService.findByUserId(users.getUserId());//8-13
+				  logger.info("bohostDevices:"+bohostDevices);
+				  if(bohostDevices != null || rcs != null || udrList != null) {//这个地方可以是被授权者本身就有设备(红外设备或非红外设备)   
 					  Map map1=new HashMap();
 					  map1.put("accountOperationType", accountOperationType);
 					  //4-9modelIdList存放一般用户情景模式的modelId
@@ -2648,92 +2692,120 @@
 							  modelIdList.add(modelId);
 						  }
 					  }
-					  for(BoHostDevice bohostDevice:bohostDevices) {
-						  Map map =new HashMap();//这个如果写在循环外面的话，就只能传单一的数据
-						  //增加accountOperationType
-						  if(accountOperationType.equals("2")) {//一般用户             
+					  if(bohostDevices != null) {
+						  for(BoHostDevice bohostDevice:bohostDevices) {
+							  Map map =new HashMap();//这个如果写在循环外面的话，就只能传单一的数据
+							  //增加accountOperationType
+							  if(accountOperationType.equals("2")) {//一般用户             
 //							  map.put("id", bohostDevice.getId());//4-8
-							  logger.info("id:"+bohostDevice.getId());
-							  map.put("userCode", userCode);
-							  String roomCode="";
-							  if(bohostDevice.getBoRoom() != null) {//4-20 没有选择房间的红外模块会出现空指针，，这里做处理
-								  roomCode=bohostDevice.getBoRoom().getRoomCode();
-							  }
-							  map.put("roomCode", roomCode);
-							  String equipID=bohostDevice.getId().toString();
-							  map.put("deviceAddress", bohostDevice.getDeviceAddress());//设备id
-							  String deviceCode=bohostDevice.getBoDevice().getDeviceCode();
-							  map.put("deviceCode", deviceCode);
-							  String type=bohostDevice.getDeviceType();
-							  map.put("type", type);
-							  String name=bohostDevice.getNickName();//去掉toString方法，若是空的话会造成空指针异常
-							  map.put("name", name);
-							  String icon=bohostDevice.getIco();
-							  map.put("icon", icon);
-							  boolean isAuth=bohostDevice.getIsAuthorized();
-							  String isAuthorited;
-							  if(isAuth) {
-								  isAuthorited="1";
-							  }else {
-								  isAuthorited="0";
-							  }
-							  map.put("isAuthorited", isAuthorited);
-//							  map.put("validationCode", bohostDevice.getValidationCode());//3-29
-							  map.put("num", bohostDevice.getDeviceNum());
-							//检测roomCode,如果roomCode下没有标识为1的设备，则roomCode不传过去  3-27
-							  List<BoHostDevice> bhds=this.boHostDeviceService.getroomCode(userCode, roomCode);//被授权用户是否拥有 授权者设备的权限
-							  if(bhds.size() > 0) {
-								  for(BoHostDevice bhd:bhds) {
-									  logger.info("isAuthorized==="+bhd.getIsAuthorized());
-									  if(bhd.getIsAuthorized()) {
-										  voList.add(map);
-										  break;
+								  map.put("userCode", userCode);
+								  String roomCode="";
+								  if(bohostDevice.getBoRoom() != null) {//4-20 没有选择房间的红外模块会出现空指针，，这里做处理
+									  roomCode=bohostDevice.getBoRoom().getRoomCode();
+								  }
+								  map.put("roomCode", roomCode);
+								  String equipID=bohostDevice.getId().toString();
+								  map.put("deviceAddress", bohostDevice.getDeviceAddress());//设备id
+								  String deviceCode=bohostDevice.getBoDevice().getDeviceCode();
+								  map.put("deviceCode", deviceCode);
+								  String type=bohostDevice.getDeviceType();
+								  map.put("type", type);
+								  String name=bohostDevice.getNickName();//去掉toString方法，若是空的话会造成空指针异常
+								  map.put("name", name);
+								  String icon=bohostDevice.getIco();
+								  map.put("icon", icon);
+								  boolean isAuth=bohostDevice.getIsAuthorized();
+								  String isAuthorited;
+								  if(isAuth) {
+									  isAuthorited="1";
+								  }else {
+									  isAuthorited="0";
+								  }
+								  map.put("isAuthorited", isAuthorited);
+//							      map.put("validationCode", bohostDevice.getValidationCode());//3-29
+								  map.put("num", bohostDevice.getDeviceNum());
+								  //检测roomCode,如果roomCode下没有标识为1的设备，则roomCode不传过去  3-27
+								  List<BoHostDevice> bhds=this.boHostDeviceService.getroomCode(userCode, roomCode);//被授权用户是否拥有 授权者设备的权限
+								  if(bhds.size() > 0) {
+									  for(BoHostDevice bhd:bhds) {
+										  logger.info("isAuthorized==="+bhd.getIsAuthorized());
+										  if(bhd.getIsAuthorized()) {
+											  voList.add(map);
+											  break;
+										  }
 									  }
 								  }
 							  }
 						  }
 					  }
-					  logger.info("voList=="+voList);
+					  logger.info("voList:"+voList);
+					  
 					  //8-13
-					  for(RemoteControl rc : rcs) {
-						  Map map =new HashMap();
-						  if(accountOperationType.equals("2")) {//一般用户      
-							  map.put("id", rc.getId());
-							  map.put("userId", rc.getUserId());
-							  map.put("miniBlackId", rc.getMiniBlackId());
-							  map.put("nickName", rc.getNickName());
-							  map.put("type", rc.getType());
-							  map.put("m_key_squency", rc.getM_key_squency());
-							  map.put("modelid", rc.getModelid());
-							  map.put("label", rc.getLabel());
-							  boolean isAuth=rc.getIsAuthorized();
-							  String isAuthorited;
-							  if(isAuth) {
-								  isAuthorited="1";
-							  }else {
-								  isAuthorited="0";
+					  if(rcs != null) {
+						  for(RemoteControl rc : rcs) {
+							  Map map =new HashMap();
+							  if(accountOperationType.equals("2")) {//一般用户      
+								  map.put("id", rc.getId());
+								  map.put("userId", rc.getUserId());
+								  map.put("roomCode", rc.getRoomCode());
+								  map.put("miniBlackId", rc.getMiniBlackId());
+								  map.put("nickName", rc.getNickName());
+								  map.put("type", rc.getType());
+								  map.put("m_key_squency", rc.getM_key_squency());
+								  map.put("modelid", rc.getModelid());
+								  map.put("label", rc.getLabel());
+								  boolean isAuth=rc.getIsAuthorized();
+								  String isAuthorited;
+								  if(isAuth) {
+									  isAuthorited="1";
+								  }else {
+									  isAuthorited="0";
+								  }
+								  map.put("isAuthorited", isAuthorited);
+								  infraredList.add(map);
 							  }
-							  map.put("isAuthorited", isAuthorited);
-							  infraredList.add(map);
 						  }
 					  }
+					  logger.info("infraredList:"+infraredList);
+					  
+					  if(udrList != null) {
+						  for(UserDefinedRemoteControl udr : udrList) {
+							  Map map =new HashMap();
+							  if(accountOperationType.equals("2")) {//一般用户      
+								  map.put("id", udr.getId());
+								  map.put("userId", udr.getBoUsers().getUserId());
+								  map.put("roomCode", udr.getBoRoom().getRoomCode());
+								  map.put("miniBlackId", udr.getMiniBlackId());
+								  map.put("nickName", udr.getNickName());
+								  map.put("buttonNames", udr.getButtonNames());
+								  map.put("type", udr.getDeviceType());
+								  boolean isAuth=udr.getIsAuthorized();
+								  String isAuthorited;
+								  if(isAuth) {
+									  isAuthorited="1";
+								  }else {
+									  isAuthorited="0";
+								  }
+								  map.put("isAuthorited", isAuthorited);
+								  userDefinedList.add(map);
+							  }
+						  }
+					  }
+					  logger.info("userDefinedList:"+userDefinedList);
+					  this.requestJson.setUserDefinedData(userDefinedList);
 					  this.requestJson.setInfraredData(infraredList);
-					  //END
 					  this.requestJson.setData(voList); 
 					  this.requestJson.setAccountOperationType(accountOperationType);
 					  this.requestJson.setModelIds(modelIdList);
-					  //3-30
-//					  this.requestJson.setModelNameList(modelNameList);
 					  this.requestJson.setMessage("获取成功");
 					  this.requestJson.setSuccess(true);
 				  }else {//管理员下面是可以没有设备的，但返回也是正确的 3-28
-//					  Map map =new HashMap();
-//					  map.put("roomCode", "ceshi");
-//					  voList.add(map);
 					  this.requestJson.setData(voList);
+					  this.requestJson.setInfraredData(infraredList);
+					  this.requestJson.setUserDefinedData(userDefinedList);
 					  this.requestJson.setAccountOperationType(accountOperationType);
 					  this.requestJson.setModelIds(modelIdList);
-					  this.requestJson.setInfraredData(infraredList);//8-13
+					  this.requestJson.setInfraredData(infraredList);
 					  this.requestJson.setMessage("获取成功");
 					  this.requestJson.setSuccess(true);  
 				  }
@@ -3067,67 +3139,185 @@
 							  List list02=new ArrayList();//存放 app传递过来的房间
 							  if(list01.size()>0) {//Android或IOS那边传过来的数据不为空
 								  for(int i=0;i<list01.size();i++) {					    		
-									  String deviceAddr01=list01.get(i).get("deviceAddress");//获取app传过来的设备地址
-									  String deviceType=list01.get(i).get("type");
-									  String deviceCode01="commonsxt";
-									  if(!deviceType.equals("100")) {//摄像头没有主机
-										  deviceCode01=list01.get(i).get("deviceCode");
-									  }
-									  String roomCode =list01.get(i).get("roomCode");
-									  list02.add(roomCode);//3-27
-									  BoDevice boDevice=this.boDeviceService.findByCode(deviceCode01);//find BY deviceCode
-									  BoRoom boroom=this.boRoomService.getAllListByRommCode(roomCode).get(0);//关键
-									  String nickName=list01.get(i).get("name");
-	//						    	logger.info("nickName = "+nickName);
-									  String ico=list01.get(i).get("icon");
 									  String isAuth=list01.get(i).get("isAuthorited");//获取app传过来的 授权标识  即isAuthorized
-									  BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,deviceAddr01);//通过userCode和设备地址定位设备，如果存在则只修改isAuthorized,否则新增							    	
-									  BoHostDevice boHostDevice01 = new BoHostDevice();
-									  BoHostDevice boHostDevice02 = new BoHostDevice();
-									  if(boHostDevice == null) {//新增设备:主机+用户+房间+......
-										  boHostDevice01.setBoDevice(boDevice);//被授权设备
-										  boHostDevice01.setBoUsers(boUser);//被授权用户
-										  boHostDevice01.setDeviceType(deviceType);
-										  boHostDevice01.setDeviceAddress(deviceAddr01);
-										  boHostDevice01.setNickName(nickName);
-										  boHostDevice01.setWhetherQueryStateSign("");
-										  boHostDevice01.setIco(ico);
-										  boHostDevice01.setDeviceNum(Integer.valueOf(1));
-										  boHostDevice01.setPushSet("");
-										  boHostDevice01.setState("");
-										  boHostDevice01.setBoRoom(boroom);//被授权用户对应的房间
-										  boHostDevice01.setDeviceClassify(this.fid1);
-										  if(deviceType.equals("100")) {//如果是摄像头就存入ValidationCode字段   
-											  boHostDevice01.setValidationCode(list01.get(i).get("validationCode"));
-											  boHostDevice01.setMntDelete("Y");
-										  }else {		
-											  boHostDevice01.setMntDelete("N");
+									  String deviceType=list01.get(i).get("type");
+									  logger.info("deviceType:"+deviceType);
+									  int key = Integer.valueOf(deviceType);
+									  if(key <=20000) {
+										  String deviceAddr01=list01.get(i).get("deviceAddress");//获取app传过来的设备地址
+										  String deviceCode01="commonsxt";
+										  if(!deviceType.equals("100")) {//摄像头没有主机
+											  deviceCode01=list01.get(i).get("deviceCode");
 										  }
-										  if(isAuth.equals("1")) {
-											  boHostDevice01.setIsAuthorized(this.fid1);	
+										  String roomCode =list01.get(i).get("roomCode");
+										  list02.add(roomCode);//3-27
+										  BoDevice boDevice=this.boDeviceService.findByCode(deviceCode01);//find BY deviceCode
+										  BoRoom boroom=this.boRoomService.getAllListByRommCode(roomCode).get(0);//关键
+										  String nickName=list01.get(i).get("name");
+										  String ico=list01.get(i).get("icon");
+										  BoHostDevice boHostDevice=this.boHostDeviceService.findBydeviceAddress(userCode01,deviceAddr01);//通过userCode和设备地址定位设备，如果存在则只修改isAuthorized,否则新增							    	
+										  BoHostDevice boHostDevice01 = new BoHostDevice();
+										  BoHostDevice boHostDevice02 = new BoHostDevice();
+										  if(boHostDevice == null) {//新增设备:主机+用户+房间+......
+											  boHostDevice01.setBoDevice(boDevice);//被授权设备
+											  boHostDevice01.setBoUsers(boUser);//被授权用户
+											  boHostDevice01.setDeviceType(deviceType);
+											  boHostDevice01.setDeviceAddress(deviceAddr01);
+											  boHostDevice01.setNickName(nickName);
+											  boHostDevice01.setWhetherQueryStateSign("");
+											  boHostDevice01.setIco(ico);
+											  boHostDevice01.setDeviceNum(Integer.valueOf(1));
+											  boHostDevice01.setPushSet("");
+											  boHostDevice01.setState("");
+											  boHostDevice01.setBoRoom(boroom);//被授权用户对应的房间
+											  boHostDevice01.setDeviceClassify(this.fid1);
+											  if(deviceType.equals("100")) {//如果是摄像头就存入ValidationCode字段   
+												  boHostDevice01.setValidationCode(list01.get(i).get("validationCode"));
+												  boHostDevice01.setMntDelete("Y");
+											  }else {		
+												  boHostDevice01.setMntDelete("N");
+											  }
+											  if(isAuth.equals("1")) {
+												  boHostDevice01.setIsAuthorized(this.fid1);	
+											  }else {
+												  boHostDevice01.setIsAuthorized(this.fid);
+											  }
+											  boHostDevice02=this.boHostDeviceService.save(boHostDevice01);
+										  }else {//已经存在，则需要判断和传过来的roomCode是否相等，相等后改该用户的isAuthorized属性即可 （注意不是新增用户boHostDevice01） ；不相等则把设备标识改0
+											  if(isAuth.equals("1")) {
+												  boHostDevice.setIsAuthorized(this.fid1);	
+											  }else {
+												  boHostDevice.setIsAuthorized(this.fid);
+											  }
+											  boHostDevice02=this.boHostDeviceService.update(boHostDevice);
+										  }
+										  if (boHostDevice02 == null || boUser == null) {//编辑授权更改被授权者的信息和被授权者的设备信息
+											  this.requestJson.setData(map001);
+											  this.requestJson.setMessage("编辑授权失败");
+											  this.requestJson.setAccountOperationType("2");
+											  this.requestJson.setSuccess(false);
 										  }else {
-											  boHostDevice01.setIsAuthorized(this.fid);
+											  this.requestJson.setData(map001);
+											  this.requestJson.setMessage("编辑授权成功");
+											  this.requestJson.setAccountOperationType("2");//这个是为了避免返回NULL才返回给app的
+											  this.requestJson.setSuccess(true);
 										  }
-										  boHostDevice02=this.boHostDeviceService.save(boHostDevice01);
-									  }else {//已经存在，则需要判断和传过来的roomCode是否相等，相等后改该用户的isAuthorized属性即可 （注意不是新增用户boHostDevice01） ；不相等则把设备标识改0
-										  if(isAuth.equals("1")) {
-											  boHostDevice.setIsAuthorized(this.fid1);	
-										  }else {
-											  boHostDevice.setIsAuthorized(this.fid);
-										  }
-										  boHostDevice02=this.boHostDeviceService.update(boHostDevice);
-									  }
-									  if (boHostDevice02 == null || boUser == null) {//编辑授权更改被授权者的信息和被授权者的设备信息
-										  this.requestJson.setData(map001);
-										  this.requestJson.setMessage("编辑授权失败");
-										  this.requestJson.setAccountOperationType("2");
-										  this.requestJson.setSuccess(false);
-									  }else {
-										  this.requestJson.setData(map001);
-										  this.requestJson.setMessage("编辑授权成功");
-										  this.requestJson.setAccountOperationType("2");//这个是为了避免返回NULL才返回给app的
-										  this.requestJson.setSuccess(true);
-									  }
+									  	}else {
+									  		int remoteControlid=Integer.valueOf(list01.get(i).get("remoteControlid"));
+									  		logger.info("remoteControlid:"+remoteControlid);
+									  		if(key == 20014){
+									  			UserDefinedRemoteControl udr=this.userDefinedRemoteControlService.findByKey(remoteControlid);//授权者自定义红外遥控器
+								    			if(udr != null) {
+								    				int userId=users.getUserId();//被授权者userId
+									  				int miniBlackId=udr.getMiniBlackId();
+									  				String nickName = udr.getNickName();
+									  				int roomId=udr.getBoRoom().getRoomId();
+									  				String buttonNames=udr.getButtonNames();
+									  				//查看被授权用户下是否已经存在该自定义遥控器  
+									  				UserDefinedRemoteControl newUdr=this.userDefinedRemoteControlService.findBy(userId,miniBlackId,nickName,roomId,buttonNames);
+									  				logger.info("newUdr:"+newUdr);
+									  				if(newUdr == null) {
+									  					UserDefinedRemoteControl udr1=new UserDefinedRemoteControl();
+									  					udr1.setBoRoom(udr.getBoRoom());
+									  					udr1.setBoUsers(users);
+									  					udr1.setMiniBlackId(udr.getMiniBlackId());
+									  					udr1.setNickName(udr.getNickName());
+									  					udr1.setDeviceType(udr.getDeviceType());
+									  					udr1.setButtonNames(udr.getButtonNames());
+									  					if(isAuth.equals("1")) {
+									  						udr1.setIsAuthorized(this.fid1);
+									  					}else {
+									  						udr1.setIsAuthorized(this.fid);
+									  					}
+									  					UserDefinedRemoteControl save=this.userDefinedRemoteControlService.save(udr1);
+									  					if(save == null) {
+									  						this.requestJson.setData(map001);
+									  						this.requestJson.setMessage("编辑授权失败！");
+									  						this.requestJson.setAccountOperationType("2");
+									  					}else {
+									  						this.requestJson.setData(map001);
+									  						this.requestJson.setMessage("编辑成功！");
+									  						this.requestJson.setAccountOperationType("2");
+									  					}
+									  				}else {
+									    				if(isAuth.equals("1")) {
+									    					newUdr.setIsAuthorized(this.fid1);
+									  					}else {
+									  						newUdr.setIsAuthorized(this.fid);
+									  					}
+									    				UserDefinedRemoteControl update=this.userDefinedRemoteControlService.update(newUdr);
+									    				if(update == null) {
+									    					this.requestJson.setData(map001);
+									  						this.requestJson.setMessage("编辑授权失败！");
+									  						this.requestJson.setAccountOperationType("2");
+									    				}else {
+									    					this.requestJson.setData(map001);
+									  						this.requestJson.setMessage("编辑成功！");
+									  						this.requestJson.setAccountOperationType("2");
+									    				}
+									    			}
+								    			}
+									  		}else {
+									  			RemoteControl remoteOld=this.remoteControlService.findByKey(remoteControlid);//授权者的遥控器
+									  			if(remoteOld != null) {
+									  				int userId=users.getUserId();//被授权者userId
+									  				int miniBlackId=remoteOld.getMiniBlackId();
+									  				String nickName = remoteOld.getNickName();
+									  				String roomCode=remoteOld.getRoomCode();
+									  				logger.info("isAuth:"+isAuth);
+									  				//userId,miniBlackId,nickName和roomCode唯一确定一个红外设备
+									  				RemoteControl remoteControl=this.remoteControlService.findByUML(userId,miniBlackId,nickName,roomCode);
+									  				logger.info("remoteControl:"+remoteControl);
+									  				if(remoteControl == null) {//不存在则添加
+									  					RemoteControl rc = new RemoteControl();
+									  					rc.setUserId(userId);
+									  					rc.setRoomCode(remoteOld.getRoomCode());
+									  					rc.setMiniBlackId(miniBlackId);
+									  					rc.setNickName(remoteOld.getNickName());
+									  					rc.setType(remoteOld.getType());
+									  					rc.setM_key_squency(remoteOld.getM_key_squency());
+									  					rc.setModelid(remoteOld.getModelid());
+									  					rc.setLabel(remoteOld.getLabel());
+									  					rc.setLabelId(remoteOld.getLabelId());//9-6
+									  					if(isAuth.equals("1")) {
+									  						rc.setIsAuthorized(this.fid1);
+									  					}else {
+									  						rc.setIsAuthorized(this.fid);
+									  					}
+									  					RemoteControl save = this.remoteControlService.save(rc);
+									  					if(save == null) {
+									  						this.requestJson.setData(map001);
+									  						this.requestJson.setMessage("编辑授权失败");
+									  						this.requestJson.setAccountOperationType("2");
+									  						this.requestJson.setSuccess(false);
+									  					}else {
+									  						this.requestJson.setData(map001);
+									  						this.requestJson.setMessage("编辑授权成功");
+									  						this.requestJson.setAccountOperationType("2");
+									  						this.requestJson.setSuccess(true);
+									  					}
+									  				}else {
+									  					if(isAuth.equals("1")) {
+									  						remoteControl.setIsAuthorized(this.fid1);
+									  					}else {
+									  						remoteControl.setIsAuthorized(this.fid);
+									  					}
+									  					RemoteControl update = this.remoteControlService.update(remoteControl);
+									  					if(update == null) {
+									  						this.requestJson.setData(map001);
+									  						this.requestJson.setMessage("编辑授权失败");
+									  						this.requestJson.setAccountOperationType("2");
+									  						this.requestJson.setSuccess(false);
+									  					}else {
+									  						this.requestJson.setData(map001);
+									  						this.requestJson.setMessage("编辑授权成功");
+									  						this.requestJson.setAccountOperationType("2");
+									  						this.requestJson.setSuccess(true);
+									  					}
+									  				}
+									  			}
+									  		}
+									    }
 								  }
 								  //这里处理没有传过来的房间中的设备   设备标识设为0
 								  if(list02.size()>0) {
@@ -3166,6 +3356,12 @@
 													  this.boHostDeviceService.update(boDevice00);
 												  }
 											  }
+											  //8-28 把 没传过来里的房间内的红外设备 授权状态改为0
+											  List<RemoteControl> rcList=this.remoteControlService.getByRoomCode(rmcode);
+											  for(RemoteControl rc : rcList) {
+												  rc.setIsAuthorized(this.fid);
+												  this.remoteControlService.update(rc);
+											  }
 										  }
 									  }
 								  }
@@ -3176,42 +3372,6 @@
 								  this.requestJson.setSuccess(false);
 							  }
 						  }
-						  //8-15
-						  if(name.equals("remoteControlList")) {
-							  	//这里处理没有传过来的房间中的设备   设备标识设为0 ;先删除，再添加
-				        		JSONArray jsonArray = JSONArray.fromObject(value);
-				        		List<Map<String,String>> list01 = (List<Map<String,String>>) JSONArray.toCollection(jsonArray,Map.class);
-				        		for(int i=0;i<list01.size();i++) {
-				        			int userId=users.getUserId(),miniBlackId=Integer.valueOf(list01.get(i).get("miniBlackId"));
-				        			String m_label = list01.get(i).get("label");
-				        			RemoteControl remoteControl=this.remoteControlService.findByUML(userId,miniBlackId,m_label);
-				        			String isAuth = list01.get(i).get("isAuthorited");//获取app传过来的 授权标识  即isAuthorized
-				        			if(remoteControl == null) {//不存在则添加
-				        				RemoteControl rc = new RemoteControl();
-				        				rc.setUserId(userId);
-				        				rc.setMiniBlackId(miniBlackId);
-				        				rc.setNickName(list01.get(i).get("nickName"));
-				        				rc.setType(list01.get(i).get("type"));
-				        				rc.setM_key_squency(Integer.valueOf(list01.get(i).get("m_key_squency")));
-				        				rc.setModelid(list01.get(i).get("modelId"));
-				        				rc.setLabel(m_label);
-				        				if(isAuth.equals("1")) {
-				        					rc.setIsAuthorized(this.fid1);
-				        				}else {
-				        					rc.setIsAuthorized(this.fid);
-				        				}
-				        			}else {
-				        				if(isAuth.equals("1")) {
-				        					remoteControl.setIsAuthorized(this.fid1);
-				        				}else {
-				        					remoteControl.setIsAuthorized(this.fid);
-				        				}
-				        				this.remoteControlService.update(remoteControl);
-				        			}
-				        			
-				        		}
-				        		
-				        	}
 						//情景模式 授权4-9          modelId,modelName,ico存在boModel中吧，modelInfo中的信息存在boModelinfo中(以字段形式传参 只能添加一个情景模式，多个就不能这样传)
 				        if(name.equals("modelIds")) {//情景模式的modelId集合
 				        	JSONArray jsonArray = JSONArray.fromObject(value);
@@ -3278,13 +3438,9 @@
 				    					bomodelinfo.setBoUsers(users);
 				    					bomodelinfo.setBoDevice(hostDevice.getBoDevice());//通过设备找到主机
 				    					bomodelinfo.setDeviceAddress(bo.getDeviceAddress());
-//				    					logger.info("boModelinfo deviceAddress:"+bo.getDeviceAddress());
 				    					bomodelinfo.setDeviceType(bo.getDeviceType());
-//				    					logger.info("boModelinfo deviceType:"+bo.getDeviceType());
 				    					bomodelinfo.setControlCommand(bo.getControlCommand());
-//				    					logger.info("boModelinfo controlCommand:"+bo.getControlCommand());
 				    					bomodelinfo.setDelayValues(bo.getDelayValues());
-//				    					logger.info("boModelinfo delayValues:"+bo.getDelayValues());
 				    					BoModelInfo save01 = (BoModelInfo)this.boModelInfoServicess.save(bomodelinfo);
 				    					if (save01 != null) {
 				    						this.requestJson.setData(map001);
@@ -3357,7 +3513,289 @@
 				  logger.info("this.requestJson accountOperationType="+this.requestJson.getAccountOperationType()+",message"+this.requestJson.getMessage()+",page="+this.requestJson.getPage()+",total="+this.requestJson.getTotal()+",totalPages="+this.requestJson.getTotalPages()+",class="+this.requestJson.getClass()+",data="+this.requestJson.getData()+",modelIds="+this.requestJson.getModelIds());
 			  		return "success";
 			  }
-/*       */   @Action(value="authorize", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  /**
+			   * 自定义红外遥控器
+			   * @return
+			   */
+			  @Action(value="saveUserDefinedRemoteControl", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public String saveUserDefinedRemoteControl() {
+				  this.requestJson = new RequestJson();
+				  HttpServletRequest request = ServletActionContext.getRequest();
+				  logger.info("-----------------saveUserDefinedRemoteControl.action");
+				  String userCode = request.getHeader("userCode");
+				  int id=0,buttonId=0,miniBlackId=0;
+				  String roomCode="",nickName="",deviceType="",buttonName="";
+				  Enumeration pNames=request.getParameterNames();
+				  while(pNames.hasMoreElements()){
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if("id".equals(name)) {
+						  id=Integer.valueOf(value);
+					  }
+					  if("roomCode".equals(name)) {
+						  roomCode=value;
+					  }
+					  if("nickName".equals(name)) {
+						  nickName=value;
+					  }
+					  if("deviceType".equals(name)) {
+						  deviceType=value;
+					  }
+					  if("buttonId".equals(name)) {
+						  buttonId=Integer.valueOf(value);
+					  }
+					  if("buttonName".equals(name)) {
+						  buttonName=value;
+					  }
+					  if("miniBlackId".equals(name)) {
+						  miniBlackId=Integer.valueOf(value);
+					  }
+				  }
+				  if (userCode.contains(",")) {
+					  String[] userCode2 = userCode.split(",");
+					  BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
+					  BoRoom boRoom = this.boRoomService.findByCode(roomCode);
+					  if(id != 0) {//表示不是第一次传递按键
+						  if(boRoom != null) {
+					    		UserDefinedRemoteControl udr=this.userDefinedRemoteControlService.findByKey(id);
+					    		if(udr != null) {
+					    			udr.setButtonNames(udr.getButtonNames()+","+buttonName);
+					    			UserDefinedRemoteControl update = this.userDefinedRemoteControlService.update(udr);
+					    			if(update != null) {
+					    				UserDefinedButton udb = new UserDefinedButton();
+						    			udb.setButtonId(buttonId);
+						    			udb.setButtonName(buttonName);
+						    			udb.setUserDefinedRemoteControl(update);
+						    			udb.setInfraredCode("");
+						    			UserDefinedButton save = this.userDefinedButtonService.save(udb);
+						    			if(save != null) {
+						    				this.requestJson.setMessage("按键保存成功！");
+						    				this.requestJson.setData(id);
+								    		this.requestJson.setSuccess(true);
+						    			}else {
+						    				this.requestJson.setMessage("红外遥控器已存在，按键保存失败！");
+								    		this.requestJson.setSuccess(false);
+						    			}
+					    			}else {
+					    				this.requestJson.setMessage("红外遥控器更新失败！");
+							    		this.requestJson.setSuccess(false);
+					    			}
+					    		}
+					    	}else {
+					    		this.requestJson.setMessage("房间不存在");
+					    		this.requestJson.setSuccess(false);
+					    	}
+					  }else {
+						  if(boRoom != null) {
+					    		UserDefinedRemoteControl udr=new UserDefinedRemoteControl();
+					    		udr.setBoRoom(boRoom);
+					    		udr.setMiniBlackId(miniBlackId);
+					    		udr.setBoUsers(boUsers);
+					    		udr.setNickName(nickName);
+					    		udr.setDeviceType(deviceType);
+					    		udr.setButtonNames(buttonName);
+					    		udr.setIsAuthorized(this.fid1);
+					    		UserDefinedRemoteControl save = this.userDefinedRemoteControlService.save(udr);
+					    		if(save != null) {
+					    			UserDefinedButton udb = new UserDefinedButton();
+					    			udb.setButtonId(buttonId);
+					    			udb.setButtonName(buttonName);
+					    			udb.setUserDefinedRemoteControl(save);
+					    			udb.setInfraredCode("");
+					    			UserDefinedButton save01 = this.userDefinedButtonService.save(udb);
+					    			if(save01 != null) {
+					    				this.requestJson.setMessage("红外遥控器和按键保存成功！");
+					    				this.requestJson.setData(save.getId());
+							    		this.requestJson.setSuccess(true);
+					    			}else {
+					    				this.requestJson.setMessage("红外遥控器保存成功，按键保存失败！");
+					    				this.requestJson.setData(save.getId());
+							    		this.requestJson.setSuccess(false);
+					    			}
+					    		}else {
+					    			this.requestJson.setMessage("红外遥控器保存失败！");
+					    			this.requestJson.setData("");
+					    			this.requestJson.setSuccess(false);
+					    		}
+					    }else {
+					    	this.requestJson.setMessage("房间不存在！");
+					    	this.requestJson.setSuccess(false);
+					    }
+					 }
+				  }else {
+					  logger.info("暂时不做处理");
+				  }
+				  return "success";
+			  }
+			  /**
+			   * 获取自定义遥控器的按键
+			   * @return
+			   */
+			  @Action(value="gainUserDefinedRemoteControl", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public String gainUserDefinedRemoteControl() {
+				  this.requestJson = new RequestJson();
+				  HttpServletRequest request = ServletActionContext.getRequest();
+				  logger.info("-----------------gainUserDefinedRemoteControl.action");
+				  List list0 =new ArrayList();//9-6
+				  List list =new ArrayList();
+				  int id=0;
+				  Enumeration pNames=request.getParameterNames();
+				  while(pNames.hasMoreElements()){
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if("id".equals(name)) {//自定义红外遥控器的ID
+						  id=Integer.valueOf(value);
+					  }
+				  }
+				  UserDefinedRemoteControl udr=this.userDefinedRemoteControlService.findByKey(id);
+				  
+				  //9-6
+				  MiniBlack mb=this.miniBlackService.findByKey(udr.getMiniBlackId());
+				  if(mb != null) {
+					  Map map0=new HashMap();
+					  map0.put("mac", mb.getMacAddr());
+					  map0.put("ip", mb.getIp());
+					  list0.add(map0);
+				  }
+				  //////////////////////////////////////9-6 END////////////////////////////////////////////
+				  if(udr != null) {
+					  List<UserDefinedButton> udbs= this.userDefinedButtonService.getListById(id);
+					  if(udbs != null) {
+						  for(UserDefinedButton udb : udbs) {
+							  Map map = new HashMap();
+							  map.put("id", udb.getId());
+							  map.put("buttonId", udb.getButtonId());
+							  map.put("buttonName", udb.getButtonName());
+							  map.put("infraredCode", udb.getInfraredCode());
+							  list.add(map);
+						  }
+						  logger.info("list:"+list);
+						  this.requestJson.setMessage("已发送相应按键！");
+						  this.requestJson.setData(list);
+						  this.requestJson.setSuccess(true);
+					  }else {
+						  this.requestJson.setMessage("不存在相应的按键！");
+						  this.requestJson.setData(list);
+						  this.requestJson.setSuccess(true);
+					  }
+				  }
+				  this.requestJson.setInfraredData(list0);
+				  return "success";
+			  }
+			  
+			  @Action(value="saveInfraredCode", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public String saveInfraredCode() {
+				  this.requestJson = new RequestJson();
+				  HttpServletRequest request = ServletActionContext.getRequest();
+				  logger.info("-----------------saveInfraredCode.action");
+				  int id=0;
+				  String infraredCode="";
+				  Enumeration pNames=request.getParameterNames();
+				  while(pNames.hasMoreElements()){//根据传过来的信息 定位到设备，将设备的授权标识保存到表BoHostDevice中
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if("id".equals(name)) {//按键的id
+						  id=Integer.valueOf(value);
+					  }
+					  if("infraredCode".equals(name)) {
+						  infraredCode=value;
+					  }
+				  }
+				  if(infraredCode != null) {
+					  //自定义红外码是“learn”开头，红外遥控器是"ir"开头
+					  infraredCode=infraredCode.replaceAll("ir", "learn");
+				  }
+				  UserDefinedButton udb=this.userDefinedButtonService.findByKey(id);
+				  if(udb != null) {
+					  int len=infraredCode.length();
+					  int len0=len;
+				      StringBuffer sb = null;
+				      while (len < 445) {
+				           sb = new StringBuffer();
+				           sb.append(infraredCode).append("0");//右补0
+				           infraredCode = sb.toString();
+				           len=infraredCode.length();
+				      }
+				      String lenStr=len0+"";
+				      while(lenStr.length() < 3) {
+				    	 sb = new StringBuffer();
+				    	 sb.append("0").append(lenStr);
+				    	 lenStr=sb.toString();
+				      }
+				      infraredCode+=","+lenStr;
+					  udb.setInfraredCode(infraredCode);
+					  UserDefinedButton update = this.userDefinedButtonService.update(udb);
+					  if(update != null) {
+						  this.requestJson.setMessage("成功保存红外码！");
+						  this.requestJson.setSuccess(true);
+					  }else {
+						  this.requestJson.setMessage("保存红外码失败！");
+						  this.requestJson.setSuccess(false);
+					  }
+				  }else {
+					  this.requestJson.setMessage("不存在对应的按键！");
+					  this.requestJson.setSuccess(false);
+				  }
+				  return "success";
+			  }
+			  
+			  @Action(value="delUserDefinedRemoteControl", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public String delUserDefinedRemoteControl() {
+				  this.requestJson = new RequestJson();
+				  HttpServletRequest request = ServletActionContext.getRequest();
+				  logger.info("-----------------delUserDefinedRemoteControl.action");
+				  int id=0;
+				  Enumeration pNames=request.getParameterNames();
+				  while(pNames.hasMoreElements()){
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if("id".equals(name)) {//自定义遥控器的id
+						  id=Integer.valueOf(value);
+					  }
+				  }
+				  try {
+					  //删除自定义红外遥控器的按键
+					  List<UserDefinedButton> buttonList=this.userDefinedButtonService.getListById(id);
+					  for(UserDefinedButton udb:buttonList) {
+						  this.userDefinedButtonService.deleteByKey(udb.getId()+"");
+					  }
+					  //删除自定义红外遥控器
+					  this.userDefinedRemoteControlService.deleteByKey(id+"");
+					  this.requestJson.setMessage("成功删除红外遥控器！");
+					  this.requestJson.setSuccess(true);
+				} catch (Exception e) {
+					this.requestJson.setMessage("删除失败！");
+					this.requestJson.setSuccess(false);
+				}
+				  return "success";
+			  }
+			  
+			  @Action(value="delUserDefinedButton", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public String delUserDefinedButton() {
+				  this.requestJson = new RequestJson();
+				  HttpServletRequest request = ServletActionContext.getRequest();
+				  logger.info("-----------------delUserDefinedButton.action");
+				  String id="";
+				  Enumeration pNames=request.getParameterNames();
+				  while(pNames.hasMoreElements()){
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if("id".equals(name)) {//自定义按键的id
+						  id=value;
+					  }
+				  }
+				  try {
+					  this.userDefinedButtonService.deleteByKey(id);
+					  this.requestJson.setMessage("成功删除自定义按键！");
+					  this.requestJson.setSuccess(true);
+				  } catch (Exception e) {
+					this.requestJson.setMessage("删除失败！");
+					  this.requestJson.setSuccess(false);
+				  }
+				  return "success";
+			  }
+			  
+			  @Action(value="authorize", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
 /*       */   public String authorize()
 /*       */   {
 /*  1144 */     this.requestJson = new RequestJson();
@@ -4136,15 +4574,55 @@
 								}				
 							}
 						}
-						//8-15删除用户下的小黑
+						//8-15删除该用户下的小黑
 						List<MiniBlack> miniList=this.miniBlackService.findByUserId(users.getUserId());
-						for(MiniBlack mb : miniList) {
-							//删除小黑下的红外遥控器
-							List<RemoteControl> rcList = this.remoteControlService.findByMiniId(mb.getId());
-							for(RemoteControl rc : rcList) {
-								this.remoteControlService.deleteByKey(rc.getId()+"");
+						logger.info("该用户的userId:"+users.getUserId()+" ,该用户（此账号）下的小黑："+miniList);
+						if(miniList != null) {
+							for(MiniBlack mb : miniList) {
+								//删除小黑下的红外遥控器
+								List<RemoteControl> rcList = this.remoteControlService.findByUserId(users.getUserId());
+								if(rcList != null) {
+									for(RemoteControl rc : rcList) {
+										logger.info("要删除的红外遥控器："+rc.getNickName());
+										this.remoteControlService.deleteByKey(rc.getId()+"");
+									}
+								}
+								
+								//9-1 删除小黑下的自定义红外遥控器
+								List<UserDefinedRemoteControl> udrList = this.userDefinedRemoteControlService.findByUserId(users.getUserId());
+								if(udrList != null) {
+									for(UserDefinedRemoteControl udr : udrList) {
+										logger.info("要删除的自定义红外遥控器："+udr.getNickName());
+										this.userDefinedRemoteControlService.deleteByKey(udr.getId()+"");
+									}
+								}
+								logger.info("要删除的小黑："+mb.getNickName());
+								this.miniBlackService.delete(mb);
 							}
-							this.miniBlackService.delete(mb);
+						}
+						//9-4 查询主账号下小黑的红外设备及自定义红外设备
+						List<MiniBlack> miniList1=this.miniBlackService.findByUserId(boUsers.getUserId());
+						logger.info("用户userId:"+boUsers.getUserId()+" ,用户下的小黑："+miniList1);
+						if(miniList1 != null) {
+							for(MiniBlack mb : miniList1) {
+								//删除小黑下的红外遥控器
+								List<RemoteControl> rcList = this.remoteControlService.findByUserId(users.getUserId());
+								if(rcList != null) {
+									for(RemoteControl rc : rcList) {
+										logger.info("要删除的红外遥控器："+rc.getNickName());
+										this.remoteControlService.deleteByKey(rc.getId()+"");
+									}
+								}
+								
+								//9-1 删除小黑下的自定义红外遥控器
+								List<UserDefinedRemoteControl> udrList = this.userDefinedRemoteControlService.findByUserId(users.getUserId());
+								if(udrList != null) {
+									for(UserDefinedRemoteControl udr : udrList) {
+										logger.info("要删除的自定义红外遥控器："+udr.getNickName());
+										this.userDefinedRemoteControlService.deleteByKey(udr.getId()+"");
+									}
+								}
+							}
 						}
 						///////////////////////////////////////////END///////////////////////////////////////////////////
 						//删除相应的情景模式 4-13
@@ -4304,22 +4782,36 @@
 						for(BoRoom boroom:borooms) {
 							String rCode=boroom.getRoomCode();
 							logger.info("要删除设备的房间："+boroom.getRoomName());
-							List<BoHostDevice> bhs=this.boHostDeviceService.getroomCode(userCode01,rCode);//被授权者userCode+授权者的房间roomCode
+							List<BoHostDevice> bhs=this.boHostDeviceService.getroomCode(userCode01,rCode);//被授权者(userCode+授权者的房间roomCode 做唯一标识)对应的设备
 							if(bhs.size()>0) {
 								for(BoHostDevice bh:bhs) {
 									this.boHostDeviceService.delete(bh);
 								}				
 							}
 						}
-						//8-15删除用户下的小黑
-						List<MiniBlack> miniList=this.miniBlackService.findByUserId(users.getUserId());
-						for(MiniBlack mb : miniList) {
-							//删除小黑下的红外遥控器
-							List<RemoteControl> rcList = this.remoteControlService.findByMiniId(mb.getId());
-							for(RemoteControl rc : rcList) {
-								this.remoteControlService.deleteByKey(rc.getId()+"");
+						//8-15删除主账号下小黑的红外遥控器和自定义红外遥控器
+						List<MiniBlack> miniList=this.miniBlackService.findByUserId(boUsers.getUserId());
+						logger.info("用户userId:"+boUsers.getUserId()+" ,用户下的小黑："+miniList);
+						if(miniList != null) {
+							for(MiniBlack mb : miniList) {
+								//删除小黑下的红外遥控器
+								List<RemoteControl> rcList = this.remoteControlService.findByUserId(users.getUserId());
+								if(rcList != null) {
+									for(RemoteControl rc : rcList) {
+										logger.info("要删除的红外遥控器："+rc.getNickName());
+										this.remoteControlService.deleteByKey(rc.getId()+"");
+									}
+								}
+								
+								//9-1 删除小黑下的自定义红外遥控器
+								List<UserDefinedRemoteControl> udrList = this.userDefinedRemoteControlService.findByUserId(users.getUserId());
+								if(udrList != null) {
+									for(UserDefinedRemoteControl udr : udrList) {
+										logger.info("要删除的自定义红外遥控器："+udr.getNickName());
+										this.userDefinedRemoteControlService.deleteByKey(udr.getId()+"");
+									}
+								}
 							}
-							this.miniBlackService.delete(mb);
 						}
 						///////////////////////////////////////////END///////////////////////////////////////////////////
 						//end
@@ -4327,12 +4819,13 @@
 						List<BoModel> boModels0=this.boModelService.getListBy(userCode2[0].trim().toString());//授权者的情景模式
 						for(BoModel boModel0:boModels0) {
 							String modelId=boModel0.getModelId();
-							logger.info("解除绑定 授权者modelId:"+modelId);
+							logger.info("授权者modelId:"+modelId);
 							List<BoModel> boModels=this.boModelService.getListBy(users.getUserCode());//一般用户的情景模式        
 							for(BoModel boModel:boModels) {
 								logger.info("解除绑定 被授权者modelId:"+boModel.getModelId());
 								if(modelId.equals(boModel.getModelId())) {//删除授权者赋予的情景模式
 									List<InfraredTimer> inList = this.infraredTimerService.getBy(users.getUserCode(), boModel.getModelId());//8-1找到对应的红外设备,并删除
+									logger.info("情景模式中的红外设备："+inList);
 									for(InfraredTimer it : inList) {
 										InfraredTimer remove=this.infraredTimerService.delete(it);
 										if(remove == null) {
@@ -4371,85 +4864,85 @@
 /*  2000 */             this.boUserServicess.update(boUsers);
 /*  2001 */             BoUsers remove = (BoUsers)this.boUserServicess.update(users);
 /*  2002 */             if (remove != null) {
-/*  2003 */               PushService pushService = new PushService();
-/*  2004 */               if (users.getVersionType().equals("1")) {
-/*  2005 */                 System.err.println("易联智家KEY");
-/*  2006 */                 pushService.setAppId("C2rT1RdCoB7BaZ83l2AJM7");
-/*  2007 */                 pushService.setAppkey("ApgJ2YFdI573k57hLt9Mz9");
-/*  2008 */                 pushService.setMaster("JBWO7E3WyW75zgd2Bdr4NA");
-/*  2009 */               } else if (users.getVersionType().equals("2")) {
-/*  2010 */                 System.err.println("爱博瑞KEY");
-/*  2011 */                 pushService.setAppId("qy0HMfNc8o6fiLdtUGRfo1");
-/*  2012 */                 pushService.setAppkey("cu1LHpYRwnAwDtTjq8XaQ7");
-/*  2013 */                 pushService.setMaster("UpAQnXf7S47Snh00l5P5E8");
-/*  2014 */               } else if (!users.getVersionType().equals("3"))
-/*       */               {
-/*  2016 */                 if (users.getVersionType().equals("4")) {
-/*  2017 */                   System.err.println("思创智能KEY");
-/*  2018 */                   pushService.setAppId("m5H4RPxliZAVXBlG1jka32");
-/*  2019 */                   pushService.setAppkey("xizBIaTLNY5g7HxCi6kP05");
-/*  2020 */                   pushService.setMaster("TRuul8ZWoO8rfFexEbvN09");
-/*  2021 */                 } else if (users.getVersionType().equals("5")) {
-/*  2022 */                   System.err.println("峰庭智能KEY");
-/*  2023 */                   pushService.setAppId("8qv7s4OhGEAjDjEaC5bBw4");
-/*  2024 */                   pushService.setAppkey("DH3NlHfEOG6YtySTspB4LA");
-/*  2025 */                   pushService.setMaster("utgpb3GAGN9KsVKVun7W32");
-/*  2026 */                 } else if (users.getVersionType().equals("6")) {
-/*  2027 */                   System.err.println("麦宝KEY");
-/*  2028 */                   pushService.setAppId("OAzON9h86e8Y2XREgjU0R9");
-/*  2029 */                   pushService.setAppkey("SAE1hTMJcW8ZkRfZPRDja6");
-/*  2030 */                   pushService.setMaster("y5zkumXwYPACBLJ59BZnr6");
-/*  2031 */                 } else if (users.getVersionType().equals("7")) {
-/*  2032 */                   System.err.println("乐沃KEY");
-/*  2033 */                   pushService.setAppId("pHU6NuXh789r2ZXEYzj7z1");
-/*  2034 */                   pushService.setAppkey("COGyB0sKyQ8nGHmnuNUK41");
-/*  2035 */                   pushService.setMaster("qSTfJpPIQc7OkaswRI1YH7");
-/*       */                 }
-/*       */               }
-/*  2037 */               String title = "";
-/*  2038 */               String CID = users.getCid();
-/*       */ 
-/*  2040 */               if ((CID == null) || (CID.equals(""))) {
-/*  2041 */                 System.err.println("CID为空推送不到信息");
-/*       */               } else {
-/*  2043 */                 StringBuffer text = new StringBuffer();
-/*  2044 */                 System.err.println("*****<< " + users.getVersionType());
-/*  2045 */                 if (users.getVersionType().equals("1")) {
-/*  2046 */                   System.err.println("易联智家推送内容");
-/*  2047 */                   title = "易家智联";
-/*  2048 */                   text.append("账户已被主账户取消了授权\n");
-/*  2049 */                   text.append("打开软件将会进入登录界面请重新登录\n");
-/*  2050 */                 } else if (users.getVersionType().equals("2")) {
-/*  2051 */                   System.err.println("爱博瑞推送内容");
-/*  2052 */                   title = "爱波瑞科技";
-/*  2053 */                   text.append("账户已被主账户取消了授权\n");
-/*  2054 */                   text.append("打开软件将会进入登录界面请重新登录\n");
-/*  2055 */                 } else if (!users.getVersionType().equals("3"))
-/*       */                 {
-/*  2057 */                   if (users.getVersionType().equals("4")) {
-/*  2058 */                     System.err.println("思创智能推送内容");
-/*  2059 */                     title = "思创智能";
-/*  2060 */                     text.append("账户已被主账户取消了授权\n");
-/*  2061 */                     text.append("打开软件将会进入登录界面请重新登录\n");
-/*  2062 */                   } else if (users.getVersionType().equals("5")) {
-/*  2063 */                     System.err.println("峰庭智能推送内容");
-/*  2064 */                     title = "峰庭智能";
-/*  2065 */                     text.append("账户已被主账户取消了授权\n");
-/*  2066 */                     text.append("打开软件将会进入登录界面请重新登录\n");
-/*  2067 */                   } else if (users.getVersionType().equals("6")) {
-/*  2068 */                     System.err.println("麦宝推送内容");
-/*  2069 */                     title = "麦宝";
-/*  2070 */                     text.append("账户已被主账户取消了授权\n");
-/*  2071 */                     text.append("打开软件将会进入登录界面请重新登录\n");
-/*       */                   }
-/*       */                 }
-/*  2073 */                 Integer type = users.getPhoneType();
-/*  2074 */                 if ((type == null) || (type.intValue() == 0))
-/*  2075 */                   pushService.pushToSingle(CID, title, text.toString(), text.toString());
-/*       */                 else {
-/*  2077 */                   pushService.apnPush(CID, title, text.toString(), text.toString());
-/*       */                 }
-/*       */               }
+///*  2003 */               PushService pushService = new PushService();
+///*  2004 */               if (users.getVersionType().equals("1")) {
+///*  2005 */                 System.err.println("易联智家KEY");
+///*  2006 */                 pushService.setAppId("C2rT1RdCoB7BaZ83l2AJM7");
+///*  2007 */                 pushService.setAppkey("ApgJ2YFdI573k57hLt9Mz9");
+///*  2008 */                 pushService.setMaster("JBWO7E3WyW75zgd2Bdr4NA");
+///*  2009 */               } else if (users.getVersionType().equals("2")) {
+///*  2010 */                 System.err.println("爱博瑞KEY");
+///*  2011 */                 pushService.setAppId("qy0HMfNc8o6fiLdtUGRfo1");
+///*  2012 */                 pushService.setAppkey("cu1LHpYRwnAwDtTjq8XaQ7");
+///*  2013 */                 pushService.setMaster("UpAQnXf7S47Snh00l5P5E8");
+///*  2014 */               } else if (!users.getVersionType().equals("3"))
+///*       */               {
+///*  2016 */                 if (users.getVersionType().equals("4")) {
+///*  2017 */                   System.err.println("思创智能KEY");
+///*  2018 */                   pushService.setAppId("m5H4RPxliZAVXBlG1jka32");
+///*  2019 */                   pushService.setAppkey("xizBIaTLNY5g7HxCi6kP05");
+///*  2020 */                   pushService.setMaster("TRuul8ZWoO8rfFexEbvN09");
+///*  2021 */                 } else if (users.getVersionType().equals("5")) {
+///*  2022 */                   System.err.println("峰庭智能KEY");
+///*  2023 */                   pushService.setAppId("8qv7s4OhGEAjDjEaC5bBw4");
+///*  2024 */                   pushService.setAppkey("DH3NlHfEOG6YtySTspB4LA");
+///*  2025 */                   pushService.setMaster("utgpb3GAGN9KsVKVun7W32");
+///*  2026 */                 } else if (users.getVersionType().equals("6")) {
+///*  2027 */                   System.err.println("麦宝KEY");
+///*  2028 */                   pushService.setAppId("OAzON9h86e8Y2XREgjU0R9");
+///*  2029 */                   pushService.setAppkey("SAE1hTMJcW8ZkRfZPRDja6");
+///*  2030 */                   pushService.setMaster("y5zkumXwYPACBLJ59BZnr6");
+///*  2031 */                 } else if (users.getVersionType().equals("7")) {
+///*  2032 */                   System.err.println("乐沃KEY");
+///*  2033 */                   pushService.setAppId("pHU6NuXh789r2ZXEYzj7z1");
+///*  2034 */                   pushService.setAppkey("COGyB0sKyQ8nGHmnuNUK41");
+///*  2035 */                   pushService.setMaster("qSTfJpPIQc7OkaswRI1YH7");
+///*       */                 }
+///*       */               }
+///*  2037 */               String title = "";
+///*  2038 */               String CID = users.getCid();
+///*       */ 
+///*  2040 */               if ((CID == null) || (CID.equals(""))) {
+///*  2041 */                 System.err.println("CID为空推送不到信息");
+///*       */               } else {
+///*  2043 */                 StringBuffer text = new StringBuffer();
+///*  2044 */                 System.err.println("*****<< " + users.getVersionType());
+///*  2045 */                 if (users.getVersionType().equals("1")) {
+///*  2046 */                   System.err.println("易联智家推送内容");
+///*  2047 */                   title = "易家智联";
+///*  2048 */                   text.append("账户已被主账户取消了授权\n");
+///*  2049 */                   text.append("打开软件将会进入登录界面请重新登录\n");
+///*  2050 */                 } else if (users.getVersionType().equals("2")) {
+///*  2051 */                   System.err.println("爱博瑞推送内容");
+///*  2052 */                   title = "爱波瑞科技";
+///*  2053 */                   text.append("账户已被主账户取消了授权\n");
+///*  2054 */                   text.append("打开软件将会进入登录界面请重新登录\n");
+///*  2055 */                 } else if (!users.getVersionType().equals("3"))
+///*       */                 {
+///*  2057 */                   if (users.getVersionType().equals("4")) {
+///*  2058 */                     System.err.println("思创智能推送内容");
+///*  2059 */                     title = "思创智能";
+///*  2060 */                     text.append("账户已被主账户取消了授权\n");
+///*  2061 */                     text.append("打开软件将会进入登录界面请重新登录\n");
+///*  2062 */                   } else if (users.getVersionType().equals("5")) {
+///*  2063 */                     System.err.println("峰庭智能推送内容");
+///*  2064 */                     title = "峰庭智能";
+///*  2065 */                     text.append("账户已被主账户取消了授权\n");
+///*  2066 */                     text.append("打开软件将会进入登录界面请重新登录\n");
+///*  2067 */                   } else if (users.getVersionType().equals("6")) {
+///*  2068 */                     System.err.println("麦宝推送内容");
+///*  2069 */                     title = "麦宝";
+///*  2070 */                     text.append("账户已被主账户取消了授权\n");
+///*  2071 */                     text.append("打开软件将会进入登录界面请重新登录\n");
+///*       */                   }
+///*       */                 }
+///*  2073 */                 Integer type = users.getPhoneType();
+///*  2074 */                 if ((type == null) || (type.intValue() == 0))
+///*  2075 */                   pushService.pushToSingle(CID, title, text.toString(), text.toString());
+///*       */                 else {
+///*  2077 */                   pushService.apnPush(CID, title, text.toString(), text.toString());
+///*       */                 }
+///*       */               }
 /*  2080 */               this.requestJson.setData(map);
 /*  2081 */               this.requestJson.setMessage("解绑成功");
 /*  2082 */               this.requestJson.setSuccess(true);
@@ -4500,81 +4993,81 @@
 /*  2127 */           BoUsers remove = (BoUsers)this.boUserServicess.update(users);
 /*       */ 
 /*  2129 */           if (remove != null) {
-/*  2130 */             PushService pushService = new PushService();
-/*  2131 */             if (users.getVersionType().equals("1")) {
-/*  2132 */               System.err.println("易联智家KEY");
-/*  2133 */               pushService.setAppId("C2rT1RdCoB7BaZ83l2AJM7");
-/*  2134 */               pushService.setAppkey("ApgJ2YFdI573k57hLt9Mz9");
-/*  2135 */               pushService.setMaster("JBWO7E3WyW75zgd2Bdr4NA");
-/*  2136 */             } else if (users.getVersionType().equals("2")) {
-/*  2137 */               System.err.println("爱博瑞KEY");
-/*  2138 */               pushService.setAppId("qy0HMfNc8o6fiLdtUGRfo1");
-/*  2139 */               pushService.setAppkey("cu1LHpYRwnAwDtTjq8XaQ7");
-/*  2140 */               pushService.setMaster("UpAQnXf7S47Snh00l5P5E8");
-/*  2141 */             } else if (!users.getVersionType().equals("3"))
-/*       */             {
-/*  2143 */               if (users.getVersionType().equals("4")) {
-/*  2144 */                 System.err.println("思创智能KEY");
-/*  2145 */                 pushService.setAppId("m5H4RPxliZAVXBlG1jka32");
-/*  2146 */                 pushService.setAppkey("xizBIaTLNY5g7HxCi6kP05");
-/*  2147 */                 pushService.setMaster("TRuul8ZWoO8rfFexEbvN09");
-/*  2148 */               } else if (users.getVersionType().equals("5")) {
-/*  2149 */                 System.err.println("峰庭智能KEY");
-/*  2150 */                 pushService.setAppId("8qv7s4OhGEAjDjEaC5bBw4");
-/*  2151 */                 pushService.setAppkey("DH3NlHfEOG6YtySTspB4LA");
-/*  2152 */                 pushService.setMaster("utgpb3GAGN9KsVKVun7W32");
-/*  2153 */               } else if (users.getVersionType().equals("6")) {
-/*  2154 */                 System.err.println("麦宝KEY");
-/*  2155 */                 pushService.setAppId("OAzON9h86e8Y2XREgjU0R9");
-/*  2156 */                 pushService.setAppkey("SAE1hTMJcW8ZkRfZPRDja6");
-/*  2157 */                 pushService.setMaster("y5zkumXwYPACBLJ59BZnr6");
-/*       */               }
-/*       */             }
-/*  2159 */             String title = "";
-/*  2160 */             String CID = users.getCid();
-/*       */ 
-/*  2162 */             if ((CID == null) || (CID.equals(""))) {
-/*  2163 */               System.err.println("CID为空推送不到信息");//消息推送
-/*       */             } else {
-/*  2165 */               StringBuffer text = new StringBuffer();
-/*  2166 */               System.err.println("*****<< " + users.getVersionType());
-/*  2167 */               if (users.getVersionType().equals("1")) {
-/*  2168 */                 System.err.println("易联智家推送内容");
-/*  2169 */                 title = "易家智联";
-/*  2170 */                 text.append("账户已被主账户取消了授权\n");
-/*  2171 */                 text.append("打开软件将会进入登录界面请重新登录\n");
-/*  2172 */               } else if (users.getVersionType().equals("2")) {
-/*  2173 */                 System.err.println("爱博瑞推送内容");
-/*  2174 */                 title = "爱波瑞科技";
-/*  2175 */                 text.append("账户已被主账户取消了授权\n");
-/*  2176 */                 text.append("打开软件将会进入登录界面请重新登录\n");
-/*  2177 */               } else if (!users.getVersionType().equals("3"))
-/*       */               {
-/*  2179 */                 if (users.getVersionType().equals("4")) {
-/*  2180 */                   System.err.println("思创智能推送内容");
-/*  2181 */                   title = "思创智能";
-/*  2182 */                   text.append("账户已被主账户取消了授权\n");
-/*  2183 */                   text.append("打开软件将会进入登录界面请重新登录\n");
-/*  2184 */                 } else if (users.getVersionType().equals("5")) {
-/*  2185 */                   System.err.println("峰庭智能推送内容");
-/*  2186 */                   title = "峰庭智能";
-/*  2187 */                   text.append("账户已被主账户取消了授权\n");
-/*  2188 */                   text.append("打开软件将会进入登录界面请重新登录\n");
-/*  2189 */                 } else if (users.getVersionType().equals("6")) {
-/*  2190 */                   System.err.println("麦宝推送内容");
-/*  2191 */                   title = "麦宝";
-/*  2192 */                   text.append("账户已被主账户取消了授权\n");
-/*  2193 */                   text.append("打开软件将会进入登录界面请重新登录\n");
-/*       */                 }
-/*       */               }
-/*  2196 */               Integer type = users.getPhoneType();
-/*       */ 
-/*  2198 */               if ((type == null) || (type.intValue() == 0))
-/*  2199 */                 pushService.pushToSingle(CID, title, text.toString(), text.toString());
-/*       */               else {
-/*  2201 */                 pushService.apnPush(CID, title, text.toString(), text.toString());
-/*       */               }
-/*       */             }
+///*  2130 */             PushService pushService = new PushService();
+///*  2131 */             if (users.getVersionType().equals("1")) {
+///*  2132 */               System.err.println("易联智家KEY");
+///*  2133 */               pushService.setAppId("C2rT1RdCoB7BaZ83l2AJM7");
+///*  2134 */               pushService.setAppkey("ApgJ2YFdI573k57hLt9Mz9");
+///*  2135 */               pushService.setMaster("JBWO7E3WyW75zgd2Bdr4NA");
+///*  2136 */             } else if (users.getVersionType().equals("2")) {
+///*  2137 */               System.err.println("爱博瑞KEY");
+///*  2138 */               pushService.setAppId("qy0HMfNc8o6fiLdtUGRfo1");
+///*  2139 */               pushService.setAppkey("cu1LHpYRwnAwDtTjq8XaQ7");
+///*  2140 */               pushService.setMaster("UpAQnXf7S47Snh00l5P5E8");
+///*  2141 */             } else if (!users.getVersionType().equals("3"))
+///*       */             {
+///*  2143 */               if (users.getVersionType().equals("4")) {
+///*  2144 */                 System.err.println("思创智能KEY");
+///*  2145 */                 pushService.setAppId("m5H4RPxliZAVXBlG1jka32");
+///*  2146 */                 pushService.setAppkey("xizBIaTLNY5g7HxCi6kP05");
+///*  2147 */                 pushService.setMaster("TRuul8ZWoO8rfFexEbvN09");
+///*  2148 */               } else if (users.getVersionType().equals("5")) {
+///*  2149 */                 System.err.println("峰庭智能KEY");
+///*  2150 */                 pushService.setAppId("8qv7s4OhGEAjDjEaC5bBw4");
+///*  2151 */                 pushService.setAppkey("DH3NlHfEOG6YtySTspB4LA");
+///*  2152 */                 pushService.setMaster("utgpb3GAGN9KsVKVun7W32");
+///*  2153 */               } else if (users.getVersionType().equals("6")) {
+///*  2154 */                 System.err.println("麦宝KEY");
+///*  2155 */                 pushService.setAppId("OAzON9h86e8Y2XREgjU0R9");
+///*  2156 */                 pushService.setAppkey("SAE1hTMJcW8ZkRfZPRDja6");
+///*  2157 */                 pushService.setMaster("y5zkumXwYPACBLJ59BZnr6");
+///*       */               }
+///*       */             }
+///*  2159 */             String title = "";
+///*  2160 */             String CID = users.getCid();
+///*       */ 
+///*  2162 */             if ((CID == null) || (CID.equals(""))) {
+///*  2163 */               System.err.println("CID为空推送不到信息");//消息推送
+///*       */             } else {
+///*  2165 */               StringBuffer text = new StringBuffer();
+///*  2166 */               System.err.println("*****<< " + users.getVersionType());
+///*  2167 */               if (users.getVersionType().equals("1")) {
+///*  2168 */                 System.err.println("易联智家推送内容");
+///*  2169 */                 title = "易家智联";
+///*  2170 */                 text.append("账户已被主账户取消了授权\n");
+///*  2171 */                 text.append("打开软件将会进入登录界面请重新登录\n");
+///*  2172 */               } else if (users.getVersionType().equals("2")) {
+///*  2173 */                 System.err.println("爱博瑞推送内容");
+///*  2174 */                 title = "爱波瑞科技";
+///*  2175 */                 text.append("账户已被主账户取消了授权\n");
+///*  2176 */                 text.append("打开软件将会进入登录界面请重新登录\n");
+///*  2177 */               } else if (!users.getVersionType().equals("3"))
+///*       */               {
+///*  2179 */                 if (users.getVersionType().equals("4")) {
+///*  2180 */                   System.err.println("思创智能推送内容");
+///*  2181 */                   title = "思创智能";
+///*  2182 */                   text.append("账户已被主账户取消了授权\n");
+///*  2183 */                   text.append("打开软件将会进入登录界面请重新登录\n");
+///*  2184 */                 } else if (users.getVersionType().equals("5")) {
+///*  2185 */                   System.err.println("峰庭智能推送内容");
+///*  2186 */                   title = "峰庭智能";
+///*  2187 */                   text.append("账户已被主账户取消了授权\n");
+///*  2188 */                   text.append("打开软件将会进入登录界面请重新登录\n");
+///*  2189 */                 } else if (users.getVersionType().equals("6")) {
+///*  2190 */                   System.err.println("麦宝推送内容");
+///*  2191 */                   title = "麦宝";
+///*  2192 */                   text.append("账户已被主账户取消了授权\n");
+///*  2193 */                   text.append("打开软件将会进入登录界面请重新登录\n");
+///*       */                 }
+///*       */               }
+///*  2196 */               Integer type = users.getPhoneType();
+///*       */ 
+///*  2198 */               if ((type == null) || (type.intValue() == 0))
+///*  2199 */                 pushService.pushToSingle(CID, title, text.toString(), text.toString());
+///*       */               else {
+///*  2201 */                 pushService.apnPush(CID, title, text.toString(), text.toString());
+///*       */               }
+///*       */             }
 /*  2204 */             this.requestJson.setData(map);
 /*  2205 */             this.requestJson.setMessage("解绑成功");
 /*  2206 */             this.requestJson.setSuccess(true);
@@ -10223,12 +10716,12 @@
 							  it.setControl_command(it.getControl_command());
 							  it.setMac(it.getMac());
 							  
-							  // 传给小黑的红外码处理一下，转成“265，4”的字符串形式，小黑方便接收
+							  // 传给小黑的红外码处理一下，转成“445，4”的字符串形式，小黑方便接收
 							  String infraredCode=it.getInfraredCode();
 							  int len=infraredCode.length();
 							  int len0=len;
 						      StringBuffer sb = null;
-						      while (len < 265) {
+						      while (len < 445) {
 						           sb = new StringBuffer();
 						           sb.append(infraredCode).append("0");//右补0
 						           infraredCode = sb.toString();
@@ -10348,12 +10841,12 @@
 							  it.setControl_command(it.getControl_command());
 							  it.setMac(it.getMac());
 							  
-							  // 传给小黑的红外码处理一下，转成“265，4”的字符串形式，小黑方便接收
+							  // 传给小黑的红外码处理一下，转成“445，4”的字符串形式，小黑方便接收
 							  String infraredCode=it.getInfraredCode();
 							  int len=infraredCode.length();
 							  int len0=len;
 						      StringBuffer sb = null;
-						      while (len < 265) {
+						      while (len < 445) {
 						           sb = new StringBuffer();
 						           sb.append(infraredCode).append("0");//右补0
 						           infraredCode = sb.toString();
@@ -18242,8 +18735,28 @@
 													Boolean isAuth=bhdevice.getIsAuthorized();
 													if(isAuth) {//楼层的房间下有设备则存入楼层信息
 														list_floor.add(map);	
-														break label;//采用这种方式跳出多个循环
+														break label;
 													}
+												}
+											}
+											//楼层下有红外设备则加入
+											int userId=phone.getUserId();
+											List<RemoteControl> rcList = this.remoteControlService.getByRoomUser(userId,rmCode);
+											for(RemoteControl rc : rcList) {
+												Boolean isAuth=rc.getIsAuthorized();
+												if(isAuth) {//楼层的房间下有设备则存入楼层信息
+													list_floor.add(map);	
+													break label;
+												}
+											}
+											
+											//楼层下有自定义红外设备则加入
+											List<UserDefinedRemoteControl> udrList = this.userDefinedRemoteControlService.getByRoomUser(userId,rmCode);
+											for(UserDefinedRemoteControl udr : udrList) {
+												Boolean isAuth=udr.getIsAuthorized();
+												if(isAuth) {//楼层的房间下有设备则存入楼层信息
+													list_floor.add(map);	
+													break label;//采用这种方式跳出多个循环
 												}
 											}
 										}
@@ -18266,6 +18779,26 @@
 											list_room.add(map);
 											break;
 										}
+									}
+								}
+								//楼层下有红外设备则加入
+								int userId=phone.getUserId();
+								List<RemoteControl> rcList = this.remoteControlService.getByRoomUser(userId,rmCode);
+								for(RemoteControl rc : rcList) {
+									Boolean isAuth=rc.getIsAuthorized();
+									if(isAuth) {//楼层的房间下有设备则存入楼层信息
+										list_room.add(map);	
+										break;//采用这种方式跳出多个循环
+									}
+								}
+								
+								//楼层下有自定义红外设备则加入
+								List<UserDefinedRemoteControl> udrList = this.userDefinedRemoteControlService.getByRoomUser(userId,rmCode);
+								for(UserDefinedRemoteControl udr : udrList) {
+									Boolean isAuth=udr.getIsAuthorized();
+									if(isAuth) {//楼层的房间下有设备则存入楼层信息
+										list_room.add(map);	
+										break;//采用这种方式跳出多个循环
 									}
 								}
 							}
@@ -18372,6 +18905,26 @@
 													}
 												}
 											}
+											//楼层下有红外设备则加入
+											int userId=phone.getUserId();
+											List<RemoteControl> rcList = this.remoteControlService.getByRoomUser(userId,rmCode);
+											for(RemoteControl rc : rcList) {
+												Boolean isAuth=rc.getIsAuthorized();
+												if(isAuth) {//楼层的房间下有设备则存入楼层信息
+													list_floor.add(map);	
+													break label;//采用这种方式跳出多个循环
+												}
+											}
+											
+											//楼层下有自定义红外设备则加入
+											List<UserDefinedRemoteControl> udrList = this.userDefinedRemoteControlService.getByRoomUser(userId,rmCode);
+											for(UserDefinedRemoteControl udr : udrList) {
+												Boolean isAuth=udr.getIsAuthorized();
+												if(isAuth) {//楼层的房间下有设备则存入楼层信息
+													list_floor.add(map);	
+													break label;//采用这种方式跳出多个循环
+												}
+											}
 										}
 								}
 							}
@@ -18392,6 +18945,26 @@
 											list_room.add(map);
 											break;
 										}
+									}
+								}
+								//楼层下有红外设备则加入
+								int userId=phone.getUserId();
+								List<RemoteControl> rcList = this.remoteControlService.getByRoomUser(userId,rmCode);
+								for(RemoteControl rc : rcList) {
+									Boolean isAuth=rc.getIsAuthorized();
+									if(isAuth) {//楼层的房间下有设备则存入楼层信息
+										list_room.add(map);	
+										break;
+									}
+								}
+								
+								//楼层下有自定义红外设备则加入
+								List<UserDefinedRemoteControl> udrList = this.userDefinedRemoteControlService.getByRoomUser(userId,rmCode);
+								for(UserDefinedRemoteControl udr : udrList) {
+									Boolean isAuth=udr.getIsAuthorized();
+									if(isAuth) {//楼层的房间下有设备则存入楼层信息
+										list_room.add(map);	
+										break;
 									}
 								}
 							}
@@ -19886,6 +20459,8 @@
 					
 			    return "success";
 			}
+			
+			
 			/**
 			 * 修改“小黑”    
 			 */
@@ -19961,10 +20536,19 @@
 					  }
 				 }
 				 try {
+					// 删除小黑下面的 红外遥控器
 					 List<RemoteControl> list=this.remoteControlService.findByMiniId(Integer.valueOf(idString));
 					 if(list != null) {
 						 for(RemoteControl rc:list) {
 							 this.remoteControlService.deleteByKey(rc.getId()+"");
+						 }
+					 }
+					 
+					 //9-1 删除小黑下面的 自定义红外遥控器
+					 List<UserDefinedRemoteControl> udrlist=this.userDefinedRemoteControlService.findByMiniId(Integer.valueOf(idString));
+					 if(udrlist != null) {
+						 for(UserDefinedRemoteControl udr:udrlist) {
+							 this.userDefinedRemoteControlService.deleteByKey(udr.getId()+"");
 						 }
 					 }
 					 this.miniBlackService.deleteByKey(idString);
@@ -20014,6 +20598,9 @@
 					  if(name.equals("labelId")) {//7-20   通过labelid，根找到该model，据device_id和m_keyfile拼出modelid
 						  labelId=Integer.valueOf(value);
 					  }
+					  if(name.equals("roomCode")) {//7-20   通过labelid，根找到该model，据device_id和m_keyfile拼出modelid
+						  roomCode=value;
+					  }
 				 }
 				 List<Object[]> labelList=this.modelService.findModelidByid(labelId);
 				 for(Object[] obj:labelList){
@@ -20044,7 +20631,6 @@
 					 }
 					 label=(String) obj[2];
 				 }
-				 logger.info("modelid:"+modelid);
 				//通过userCode找到userId
 				 BoUsers boUser=this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
 				 int userid=-1;
@@ -20056,10 +20642,12 @@
 					 rc.setMiniBlackId(miniBlackId);
 					 rc.setNickName(nickName);
 					 rc.setType(type);
-					 rc.setM_key_squency(m_key_squency);//7/20
-					 rc.setModelid(modelid);//7/20
+					 rc.setM_key_squency(m_key_squency);//7-20
+					 rc.setModelid(modelid);//7-20
+					 rc.setLabelId(labelId);//8-16
 					 rc.setLabel(label);// 7-23
 					 rc.setIsAuthorized(fid1);//8-13
+					 rc.setRoomCode(roomCode);//8-28
 					 try {
 						 RemoteControl save = ((RemoteControl)this.remoteControlService.save(rc));
 						 this.requestJson.setData(modelid);
@@ -20067,8 +20655,8 @@
 						 this.requestJson.setSuccess(true);
 					 } catch (Exception e) {
 						 this.requestJson.setData(modelid);
-						 this.requestJson.setMessage("遥控器已经存在！");
-						 this.requestJson.setSuccess(true);
+						 this.requestJson.setMessage("保存失败！");
+						 this.requestJson.setSuccess(false);
 					 }
 				 }else {
 					 this.requestJson.setMessage("用户不存在！");
@@ -20092,31 +20680,84 @@
 				 String userCode = request.getHeader("userCode");
 				 String[] userCode2 = userCode.split(",");//现在暂时只考虑了userCode有逗号的情况
 				 List list=new ArrayList();
+				 List list1=new ArrayList();
 				//通过userCode找到userId
 				 BoUsers boUser=this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
-				 int userid=-1;
+				 int userid=-1,labelId=0;
 				 if(boUser != null) {
 					 userid = boUser.getUserId();
 					 List<RemoteControl> list01=this.remoteControlService.findByUserId(userid);
-					 if(list != null) {
+					 logger.info("UserId:"+userid+",remoteControlList:"+list01);
+					 if(list01 != null) {
 						 for(RemoteControl rc:list01) {
+							 //找到小黑的mac地址和IP，APP端有需要
+							 MiniBlack mb=this.miniBlackService.findByKey(rc.getMiniBlackId());//9-6
+							 
 							 Map map=new HashMap();
 							 map.put("id",rc.getId());
 							 map.put("miniBlackId",rc.getMiniBlackId());
+							 map.put("mac", mb.getMacAddr());//9-6
+							 map.put("ip", mb.getIp());//9-6
 							 map.put("name",rc.getNickName());
 							 map.put("type",rc.getType());
-							 map.put("m_key_squency", rc.getM_key_squency());// 7/20
-							 map.put("modelid", rc.getModelid());// 7/20
+							 map.put("m_key_squency", rc.getM_key_squency());// 7-20
+							 map.put("modelid", rc.getModelid());// 7-20
 							 map.put("label", rc.getLabel());// 7-23
-							 list.add(map);
+							 map.put("labelId", rc.getLabelId());//8-16
+							 map.put("roomCode", rc.getRoomCode());//8-16
+							 boolean isAuth=rc.getIsAuthorized();
+							 String isAuthorited;
+							 if(isAuth) {
+								  isAuthorited="1";
+							  }else {
+								  isAuthorited="0";
+							  }
+							 map.put("isAuthorized", isAuthorited);//8-28
+							 if(isAuth) {
+								 list.add(map);
+							 }
 						 }
 						 this.requestJson.setData(list);
 						 this.requestJson.setMessage("成功获取红外遥控器！");
 						 this.requestJson.setSuccess(true);
 					 }else {
+						 this.requestJson.setData(list);
 						 this.requestJson.setMessage("没有红外遥控器存在！");
 						 this.requestJson.setSuccess(true);
 					 }
+					 logger.info("红外遥控器："+list);
+					 List<UserDefinedRemoteControl> list02=this.userDefinedRemoteControlService.findByUserId(userid);
+					 if(list02 != null) {
+						 for(UserDefinedRemoteControl udr:list02) {
+							 Map map=new HashMap();
+							 map.put("id",udr.getId());
+							 map.put("userId",udr.getBoUsers().getUserId());
+							 map.put("roomCode",udr.getBoRoom().getRoomCode());
+							 map.put("miniBlackId",udr.getMiniBlackId());
+							 map.put("name",udr.getNickName());
+							 map.put("type",udr.getDeviceType());
+							 map.put("buttonNames", udr.getButtonNames());
+							 boolean isAuth=udr.getIsAuthorized();
+							 String isAuthorited;
+							 if(isAuth) {
+								  isAuthorited="1";
+							  }else {
+								  isAuthorited="0";
+							  }
+							 map.put("isAuthorized", isAuthorited);//8-28
+							 if(isAuth) {
+								 list1.add(map);
+							 }
+						 }
+						 this.requestJson.setInfraredData(list1);//存放自定义红外遥控器
+						 this.requestJson.setMessage("成功获取自定义红外遥控器！");
+						 this.requestJson.setSuccess(true);
+					 }else {
+						 this.requestJson.setInfraredData(list1);
+						 this.requestJson.setMessage("没有自定义红外遥控器存在！");
+						 this.requestJson.setSuccess(true);
+					 }
+					 logger.info("自定义红外："+list1);
 				 }else {
 					 this.requestJson.setMessage("用户不存在！");
 					 this.requestJson.setSuccess(false);
@@ -20219,43 +20860,6 @@
 				 }
 				 List lableList=this.modelService.findByType(label);
 				 this.requestJson.setData(lableList); 
-			     return "success";
-			 }
-			 /**
-			  * 根据某个具体的型号，找到相应的红外码    *型号确定后就不需要其测试码了
-			  */
-			 @Action(value="findTestCode", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
-			 public String findTestCode()
-			 {
-				 this.requestJson = new RequestJson();
-				 logger.info("-----------findTestCode找到该型号对应的测试码，之后用于发送给设备 “小黑”-------------");
-				 HttpServletRequest request = ServletActionContext.getRequest();
-				 List list=new ArrayList();
-				 int id=1,miniId=-1;
-				 Enumeration pNames=request.getParameterNames();
-				 while(pNames.hasMoreElements()){
-					  String name=(String)pNames.nextElement();
-					  String value=request.getParameter(name);
-					  if(name.equals("id")) {
-						  id=Integer.parseInt(value);
-						  logger.info("id:"+id);
-					  }
-					  if(name.equals("miniId")) {
-						  miniId=Integer.parseInt(value);
-						  logger.info("miniId:"+miniId);
-					  }
-				 }
-				 List<Object[]> malist=this.modelService.findTestCode(id);//sqlQuery
-				 for(Object[] obj:malist){
-					 int fid = (int) obj[0];
-					 int m_key_squency=this.modelService.findKSByfid(fid);
-					 Map map=new HashMap();
-					 map.put("m_key_squency", m_key_squency);
-					 map.put("format_string", obj[1]);
-					 list.add(map);
-				 }
-				 this.requestJson.setData(list);
-				 this.requestJson.setSuccess(true);
 			     return "success";
 			 }
 			 
@@ -20474,6 +21078,51 @@
 				 
 			     return "success";
 			 }
+			 /**
+			  * 一键匹配后得到五个最有可能的labelId,找到它的测试码
+			  */
+			 @Action(value="findCodeBylabelId", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			 public String findCodeBylabelId()
+			 {
+				 this.requestJson = new RequestJson();
+				 logger.info("-----------一键匹配用到的接口三，通过labelId找到测试码-------------");
+				 HttpServletRequest request = ServletActionContext.getRequest();
+				 Enumeration pNames=request.getParameterNames();
+				 String labelIdStr="";
+				 int device_id=0;
+				 while(pNames.hasMoreElements()){
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if(name.equals("labelId")) {
+						  labelIdStr=value;
+					  }
+					  if(name.equals("deviceId")) {
+						  device_id=Integer.valueOf(value);
+					  }
+				 }
+				 List list=new ArrayList();
+				 String[] labelIds = labelIdStr.split(",");
+				 for(int i=0;i<labelIds.length;i++) {
+					 int labelId=Integer.valueOf(labelIds[i]);
+					 List<Object[]> modelList=this.modelService.findTestCode(labelId,device_id);
+					 for(Object[] obj:modelList){
+						 String m_label=(String) obj[2];
+						 String m_search_string=(String) obj[3];
+						 String m_code=(String) obj[4];
+						 Map map=new HashMap();
+						 map.put("labelId", labelId);
+						 if(m_label == null || m_label.equals("")) {
+							 m_label=m_search_string+m_code;
+						 }
+						 map.put("m_label", m_label);
+						 map.put("format_string", obj[1]);
+						 map.put("m_key_squency", obj[5]);
+						 list.add(map);
+					 }
+				 }
+				 this.requestJson.setData(list); 
+			     return "success";
+			 }
 			 
 			 /**
 			  * 下载码库
@@ -20569,11 +21218,11 @@
 						  mac=value;
 					  }
 				 }
-				 // 传给小黑的红外码处理一下，转成“265，4”的形式，小黑方便接收
+				 // 传给小黑的红外码处理一下，转成“445，4”的形式，小黑方便接收
 				 int len=infraredCode.length();
 				 int len0=len;
 			     StringBuffer sb = null;
-			     while (len < 265) {
+			     while (len < 445) {
 			           sb = new StringBuffer();
 			           sb.append(infraredCode).append("0");//右补0
 			           infraredCode = sb.toString();
