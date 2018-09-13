@@ -103,5 +103,10 @@
 				criteria.add(Restrictions.eq("roomCode", rmCode));
 				return this.remoteControlDao.findByCriteria(criteria);
 			}
+			@Override
+			public List<RemoteControl> findAll() {
+				DetachedCriteria criteria = DetachedCriteria.forClass(RemoteControl.class);
+				return this.remoteControlDao.findByCriteria(criteria);
+			}
 
 		}

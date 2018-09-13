@@ -21,5 +21,7 @@ public abstract interface RemoteControlServiceIface<T, PK extends Serializable> 
 
 	List<RemoteControl> getByRoomUser(int userId, String rmCode);
 
+	List<RemoteControl> findAll();
+
 }
 

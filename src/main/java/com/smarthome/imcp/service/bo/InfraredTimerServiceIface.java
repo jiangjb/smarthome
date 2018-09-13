@@ -12,6 +12,10 @@ public abstract interface InfraredTimerServiceIface<T, PK extends Serializable> 
 	List<InfraredTimer> getBy(String usereCode, String modelId);
 
 	public abstract InfraredTimer delete(T paramT);
+
+	List<InfraredTimer> findByRCId(int id);
+
+	List<InfraredTimer> findAll();
    
 }
 

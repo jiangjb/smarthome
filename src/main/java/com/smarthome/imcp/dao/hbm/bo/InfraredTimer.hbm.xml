@@ -10,11 +10,8 @@
             <column name="id" />
             <generator class="identity" />
         </id>
-        <many-to-one name="boUsers" lazy="false" class="com.smarthome.imcp.dao.model.bo.BoUsers" fetch="select">
-            <column name="user_id" />
-        </many-to-one>
-        <many-to-one name="boModel" lazy="false" class="com.smarthome.imcp.dao.model.bo.BoModel" fetch="select">
-            <column name="model_id" />
+        <many-to-one name="rcontrol" lazy="false" class="com.smarthome.imcp.dao.model.bo.RemoteControl" fetch="select">
+            <column name="remoteControl_id" />
         </many-to-one>
         <property name="mac" type="java.lang.String">
             <column name="mac" length="50" />
@@ -23,14 +20,14 @@
         <property name="infraredCode" type="java.lang.String">
             <column name="infraredCode" />
         </property>
-        <property name="control_command" type="java.lang.Integer">
-            <column name="control_command" />
-        </property>
-        <property name="deviceType" type="java.lang.Integer">
-            <column name="deviceType" />
-        </property>
         <property name="name" type="java.lang.String">
             <column name="name" />
+        </property>
+        <property name="week" type="java.lang.String">
+            <column name="WEEK" />
+        </property>
+        <property name="time" type="java.lang.String">
+            <column name="TIME" />
         </property>
     </class>
 </hibernate-mapping>

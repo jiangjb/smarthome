@@ -15,6 +15,7 @@
 			private Integer labelId;//8-16
 			private String label;//7-23
 			private Boolean isAuthorized;//8-13
+			private String state;//9-11        开启或关闭 定时
 			
 			public Integer getId() {
 				return id;
@@ -82,6 +83,12 @@
 			}
 			public void setIsAuthorized(Boolean isAuthorized) {
 				this.isAuthorized = isAuthorized;
+			}
+			public String getState() {
+				return state;
+			}
+			public void setState(String state) {
+				this.state = state;
 			}
 			
 		}

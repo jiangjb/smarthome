@@ -3,15 +3,14 @@
           import com.smarthome.imcp.dao.model.AbstractData;
 
  		public class InfraredTimer extends AbstractData
- 		{
+ 		{//表用于存放 空调遥控器的定时开关的信息
 		    private Integer id;
-		    private BoUsers boUsers;
-		    private BoModel boModel;
+		    private RemoteControl rcontrol;
 		    private String mac;
 			private String infraredCode;
-			private int control_command;
-			private int deviceType;
-			private String name;//8-14  用于存放功能的名字或按键
+			private String name;//开  或   关
+			private String week;
+			private String time;
 			
 			public Integer getId() {
 				return id;
@@ -19,17 +18,11 @@
 			public void setId(Integer id) {
 				this.id = id;
 			}
-			public BoUsers getBoUsers() {
-				return boUsers;
+			public RemoteControl getRcontrol() {
+				return rcontrol;
 			}
-			public void setBoUsers(BoUsers boUsers) {
-				this.boUsers = boUsers;
-			}
-			public BoModel getBoModel() {
-				return boModel;
-			}
-			public void setBoModel(BoModel boModel) {
-				this.boModel = boModel;
+			public void setRcontrol(RemoteControl rcontrol) {
+				this.rcontrol = rcontrol;
 			}
 			public String getMac() {
 				return mac;
@@ -43,24 +36,23 @@
 			public void setInfraredCode(String infraredCode) {
 				this.infraredCode = infraredCode;
 			}
-			public int getControl_command() {
-				return control_command;
-			}
-			public void setControl_command(int control_command) {
-				this.control_command = control_command;
-			}
-			public int getDeviceType() {
-				return deviceType;
-			}
-			public void setDeviceType(int deviceType) {
-				this.deviceType = deviceType;
-			}
 			public String getName() {
 				return name;
 			}
 			public void setName(String name) {
 				this.name = name;
 			}
-			
+			public String getWeek() {
+				return week;
+			}
+			public void setWeek(String week) {
+				this.week = week;
+			}
+			public String getTime() {
+				return time;
+			}
+			public void setTime(String time) {
+				this.time = time;
+			}
 			
 		}

@@ -6,6 +6,7 @@
 /*     */ import com.smarthome.dock.server.util.SensorUtil;
 /*     */ import com.smarthome.dock.server.util.StaticUtil;
 import com.smarthome.imcp.action.xing.MqttReceive;
+import com.smarthome.imcp.action.xing.MsgSend;
 import com.smarthome.imcp.action.xing.XingUserAction;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoDevice;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoHostDevice;
@@ -13,13 +14,17 @@ import com.smarthome.imcp.action.xing.XingUserAction;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoLockVerdict;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoModel;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoUsers;
+import com.smarthome.imcp.dao.model.bo.InfraredTimer;
 import com.smarthome.imcp.dao.model.bo.MiniBlack;
+import com.smarthome.imcp.dao.model.bo.RemoteControl;
 /*     */ import com.smarthome.imcp.service.bo.BoDeviceServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoHostDeviceServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoLockPasswordManageServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoLockVerdictServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoModelServiceIface;
+import com.smarthome.imcp.service.bo.InfraredTimerServiceIface;
 import com.smarthome.imcp.service.bo.MiniBlackServiceIface;
+import com.smarthome.imcp.service.bo.RemoteControlServiceIface;
 /*     */ import com.smarthome.imcp.util.AES;
 /*     */ import com.smarthome.imcp.util.SimulateHTTPRequestUtil;
 /*     */ import com.smarthome.imcp.util.StaticUtils;
@@ -82,6 +87,12 @@ import java.text.DateFormat;
 			
 			@Autowired
 			private MiniBlackServiceIface<MiniBlack, Serializable> miniBlackService;//2018-8-22
+			
+			@Autowired
+			private InfraredTimerServiceIface<InfraredTimer, Serializable> infraredTimerService;//9-10
+			
+			@Autowired
+			private RemoteControlServiceIface<RemoteControl, Serializable> remoteControlService;//9-10
 
 			private static Logger logger = LoggerFactory.getLogger(QuartzJobs.class);
 /*  84 */   private static Map<String, Integer> user_num = new HashMap();
@@ -196,6 +207,38 @@ import java.text.DateFormat;
 						}
 					}
 		        }
+			}
+			
+			@Scheduled(cron="0 0/1 * * * ?")
+			public void airConditioningTiming() {
+				List<RemoteControl> rcList=this.remoteControlService.findAll();
+				if(rcList.size() > 0) {
+					for(RemoteControl rc:rcList) {
+						if("on".equals(rc.getState())) {
+//							logger.info("state:"+rc.getState());
+							List<InfraredTimer> list=this.infraredTimerService.findByRCId(rc.getId());
+//							logger.info("on list:"+list);
+							if(list.size() > 0) {
+								String weekOfDate = SensorUtil.getWeekOfDate(new Date());
+								String week;
+								for(InfraredTimer it:list) {
+									week=it.getWeek();
+									boolean indexFromArr = SensorUtil.getIndexFromArr(weekOfDate, week);
+									if (indexFromArr) {
+										SimpleDateFormat dateFormater = new SimpleDateFormat("HH:mm"); 
+										String format = dateFormater.format(new Date());
+										String format1=it.getTime();
+										if(format1.equals(format)) {
+											MsgSend.msgSend(it.getInfraredCode(),it.getMac());
+										}
+									}
+								}
+							}
+						}else {
+							//off状态    关闭定时
+						}
+					}
+				}
 			}
 			
 /*     */   @Scheduled(cron="0 0/1 * * * ?")

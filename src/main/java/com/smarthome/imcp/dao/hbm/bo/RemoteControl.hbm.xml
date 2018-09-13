@@ -40,5 +40,8 @@
         <property name="isAuthorized" type="java.lang.Boolean">
             <column name="IsAuthorized"/>
         </property>
+        <property name="state" type="java.lang.String">
+            <column name="STATUS" length="10" />
+        </property>
     </class>
 </hibernate-mapping>

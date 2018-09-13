@@ -24,7 +24,7 @@ import org.eclipse.paho.client.mqttv3.*;
 	    /**
 	     * 订阅标识
 	     */
-	//    public static final String MQTT_TOPIC = "/returnValue";//从MQTT订阅的话题       这个话题存放的是红外转发器放返回值的话题
+	    //    public static final String MQTT_TOPIC = "/returnValue";//从MQTT订阅的话题       这个话题存放的是红外转发器放返回值的话题
 	    public static String MQTT_TOPIC = "";
 	
 	    public static final String USERNAME = "admin";
