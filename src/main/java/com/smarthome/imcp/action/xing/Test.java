@@ -11,7 +11,9 @@ import java.io.FileReader;
 		import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 
 		
 		public class Test{
@@ -43,10 +45,9 @@ import java.util.Arrays;
 //				} catch (Exception e) {
 //					e.printStackTrace();
 //				}
-				String str="learn,sss,234,567,244";
-				if(str.contains("learn")) {
-					System.out.println("123");
-				}
+				String str="123234";
+				boolean a = str.contains("#");
+				System.out.println(a);
 
 			}
 		}

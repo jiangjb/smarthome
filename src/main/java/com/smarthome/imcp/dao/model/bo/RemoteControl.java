@@ -16,6 +16,7 @@
 			private String label;//7-23
 			private Boolean isAuthorized;//8-13
 			private String state;//9-11        开启或关闭 定时
+			private String sleepState;//9-14
 			
 			public Integer getId() {
 				return id;
@@ -89,6 +90,12 @@
 			}
 			public void setState(String state) {
 				this.state = state;
+			}
+			public String getSleepState() {
+				return sleepState;
+			}
+			public void setSleepState(String sleepState) {
+				this.sleepState = sleepState;
 			}
 			
 		}

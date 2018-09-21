@@ -124,11 +124,12 @@ import org.hibernate.Query;
 			
 			@Override
 			public List findFormatIdByMcode(int device_id , String m_code) {
-				String sql="select m_label,m_format_id,m_key_squency from model where  device_id = ? and m_code = ?";
+				String sql="select m_label,m_format_id,m_key_squency,id from model where  device_id = ? and m_code = ?";
 				Query sqlQuery = getCurrentSession().createSQLQuery(sql)  //;// SQLQuery是hibernate用于支持原生sql的接口类
 						.addScalar("m_label",StandardBasicTypes.STRING)
 						.addScalar("m_format_id",StandardBasicTypes.INTEGER)
-						.addScalar("m_key_squency",StandardBasicTypes.INTEGER);
+						.addScalar("m_key_squency",StandardBasicTypes.INTEGER)
+						.addScalar("id",StandardBasicTypes.INTEGER);
 				sqlQuery.setParameter(0, device_id);
 		        sqlQuery.setParameter(1, m_code);
 		        List list = sqlQuery.list();

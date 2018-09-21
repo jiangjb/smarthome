@@ -3,13 +3,11 @@
  import com.smarthome.dock.server.support.PacketProcessor;
  import com.smarthome.imcp.dao.model.bo.BoDevice;
  import com.smarthome.imcp.service.bo.BoDeviceServiceIface;
- import java.io.PrintStream;
  import java.io.Serializable;
  import java.net.InetSocketAddress;
  import java.util.concurrent.Executors;
  import org.jboss.netty.bootstrap.ConnectionlessBootstrap;
  import org.jboss.netty.channel.ChannelFactory;
- import org.jboss.netty.channel.group.ChannelGroup;
  import org.jboss.netty.channel.group.ChannelGroupFuture;
  import org.jboss.netty.channel.socket.DatagramChannel;
  import org.jboss.netty.channel.socket.nio.NioDatagramChannelFactory;
@@ -18,12 +16,10 @@
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
  import org.springframework.beans.factory.annotation.Autowired;
- import com.smarthome.dock.server.packets.in.KeepAlivePacket;
- import com.smarthome.dock.server.support.KeepAliveTrigger;
  
- public class DockServer
- {
-/*  25 */   private static Logger logger = LoggerFactory.getLogger(DockServer.class);
+		 public class DockServer
+		 {
+	 		private static Logger logger = LoggerFactory.getLogger(DockServer.class);
 
 			@Autowired
 			private BoDeviceServiceIface <BoDevice, Serializable> boDeviceService;
@@ -31,18 +27,17 @@
 		    private boolean isStarted;
 		    private PacketProcessor packetProcessor;
  
-/*  35 */   public DockServer() { System.out.println("DockServer"); }
+		    public DockServer() { System.out.println("DockServer"); }
  
  
-   	public void startServer()
-   {
+		   	public void startServer()
+		   {
 /*  45 */     logger.debug("服务器启动中...");
  
 /*  47 */     if (this.packetProcessor == null) {
 /*  48 */       this.packetProcessor = new PacketProcessor();
                  System.out.println("null this.packetProcessor ="+this.packetProcessor);
-     			}
-//			  System.out.println("this.packetProcessor ="+this.packetProcessor);//com.smarthome.dock.server.support.PacketProcessor@5e9a1d8d
+     		  }
 /*  50 */     Timer timer = new HashedWheelTimer();
  
 /*  52 */     this.factory = new NioDatagramChannelFactory(Executors.newCachedThreadPool());

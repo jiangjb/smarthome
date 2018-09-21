@@ -10,19 +10,18 @@ import java.util.Date;
 import org.eclipse.paho.client.mqttv3.*;
 	import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
-	public class MqttReceive{
+	public class MqttReceiveData{
 		
-		private static MqttReceive instance;  
-	    private MqttReceive (){}  
+		private static MqttReceiveData instance;  
+	    private MqttReceiveData (){}  
 	  
-	    public static synchronized MqttReceive getInstance() {  
+	    public static synchronized MqttReceiveData getInstance() {  
 		    if (instance == null) {  
-		        instance = new MqttReceive();  
+		        instance = new MqttReceiveData();  
 		    }  
 	    	return instance;  
 	    } 
 		////////////////////////////////9-19 设置成单例模式，避免多个引用///////////////////////////////////////////
-		
 		
 	    /**
 	     * 代理服务器ip地址
@@ -47,13 +46,13 @@ import org.eclipse.paho.client.mqttv3.*;
 	    private static MqttConnectOptions options;
 	    private static String result="success";
 	    
-	    public  String msgReceive(String mac) {
+	    public  String msgReceive1(String mac) {
 	    	//client_ID 客户端唯一标识
 	    	String macNew = mac.replace(":", "");//去掉冒号    84:f3:eb:8f:da:f8  >  84f3eb8fdaf8
 	    	//订阅消息对应的 Topic   （MQTT里面已经存在的话题）
-	    	MQTT_CLIENT_ID=macNew+"_jiang";
-	    	MQTT_TOPIC = "/"+macNew+"/out";
-//	    	MQTT_TOPIC ="/2a2b3c4d5e6f/out";
+	    	MQTT_CLIENT_ID=macNew+"_jiang1";
+	    	MQTT_TOPIC = "/"+macNew+"/outdata";
+//	    	MQTT_TOPIC ="/84f3eb8fdafa/outdata";
 	        try {
 	            // host为主机名，clientid即连接MQTT的客户端ID，一般以客户端唯一标识符表示，
 	            // MemoryPersistence设置clientid的保存形式，默认为以内存保存
@@ -71,8 +70,6 @@ import org.eclipse.paho.client.mqttv3.*;
 	            options.setConnectionTimeout(5);
 	            // 设置会话心跳时间 单位为秒 服务器会每隔1.5*20秒的时间向客户端发送个消息判断客户端是否在线，但这个方法并没有重连的机制
 	            options.setKeepAliveInterval(10);
-	            //设置自动重连  8-20
-//	            options.setAutomaticReconnect(true);
 	            // 连接
 	            mqttClient.connect(options);
 	            // 订阅
@@ -93,11 +90,7 @@ import org.eclipse.paho.client.mqttv3.*;
 	                @Override
 	                public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
 	                    System.out.println("Topic: " + topic + " ,Message: " + mqttMessage.toString());
-	                    //当前时间
-	                    Date now = new Date( );
-	                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	                    String date=df.format(now);
-	                    fileOut(macNew,date); 
+	                    fileOutput(macNew,mqttMessage.toString()); 
 	                    Thread.sleep(30*24*60*60*1000);
 	                }
 	
@@ -105,7 +98,7 @@ import org.eclipse.paho.client.mqttv3.*;
 	                public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
 	                	System.err.println("complete");
 	                	try {
-							Thread.sleep(30*24*60*60*1000);
+							Thread.sleep(100*24*60*60*1000);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
@@ -117,8 +110,8 @@ import org.eclipse.paho.client.mqttv3.*;
 	        }
 	        return result;
 	    }
-	    public void fileOut(String macNew,String time) {
-	    	String dir="/home/onoff";
+	    public void fileOutput(String macNew,String msg) {
+	    	String dir="/home/conditionMsg";//F:/home
 	    	//判断路径是否存在
 			File directory = new File(dir);
 	        if (!directory.exists()) {
@@ -129,7 +122,7 @@ import org.eclipse.paho.client.mqttv3.*;
 			FileWriter fw;
 			try {
 				fw = new FileWriter(fileName);
-				fw.write(time);
+				fw.write(msg);
 				fw.close();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -137,12 +130,11 @@ import org.eclipse.paho.client.mqttv3.*;
 	    }
 	    
 	    public static void main(String[] args) {
-	    	MqttReceive mr=MqttReceive.getInstance();
-//	    	MqttReceive mr2=MqttReceive.getInstance();
-	    	mr.msgReceive("2a:2b:3c:4d:5e:6f");
-//	    	System.out.println("对象1："+mr);
-//	    	System.out.println("对象2："+mr2);
-//	    	System.out.println(mr.equals(mr2));
+	    	MqttReceiveData mr1=MqttReceiveData.getInstance();
+	    	MqttReceiveData mr2=MqttReceiveData.getInstance();
+	    	System.out.println(mr1.equals(mr2));
+//	    	mr.msgReceive1("84:f3:eb:8f:da:fe");
 	    }
+
 	
 	}

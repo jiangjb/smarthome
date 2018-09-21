@@ -1,46 +1,38 @@
 /*     */ package com.smarthome.imcp.quartz;
 /*     */ 
 /*     */ import com.smarthome.dock.server.helper.PacketProcessHelper;
-		  import com.smarthome.dock.server.packets.in.KeepAlivePacket;
 		  import com.smarthome.dock.server.support.PacketProcessor;
 /*     */ import com.smarthome.dock.server.util.SensorUtil;
 /*     */ import com.smarthome.dock.server.util.StaticUtil;
-import com.smarthome.imcp.action.xing.MqttReceive;
-import com.smarthome.imcp.action.xing.MsgSend;
-import com.smarthome.imcp.action.xing.XingUserAction;
+		  import com.smarthome.imcp.action.xing.MqttReceive;
+		  import com.smarthome.imcp.action.xing.MqttReceiveData;
+		  import com.smarthome.imcp.action.xing.MsgSend;
+		  import com.smarthome.imcp.dao.model.bo.AirconditionSleep;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoDevice;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoHostDevice;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoLockPasswordManage;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoLockVerdict;
 /*     */ import com.smarthome.imcp.dao.model.bo.BoModel;
-/*     */ import com.smarthome.imcp.dao.model.bo.BoUsers;
-import com.smarthome.imcp.dao.model.bo.InfraredTimer;
-import com.smarthome.imcp.dao.model.bo.MiniBlack;
-import com.smarthome.imcp.dao.model.bo.RemoteControl;
+		  import com.smarthome.imcp.dao.model.bo.InfraredTimer;
+		  import com.smarthome.imcp.dao.model.bo.MiniBlack;
+		  import com.smarthome.imcp.dao.model.bo.RemoteControl;
+		  import com.smarthome.imcp.service.bo.AirconditionSleepServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoDeviceServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoHostDeviceServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoLockPasswordManageServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoLockVerdictServiceIface;
 /*     */ import com.smarthome.imcp.service.bo.BoModelServiceIface;
-import com.smarthome.imcp.service.bo.InfraredTimerServiceIface;
-import com.smarthome.imcp.service.bo.MiniBlackServiceIface;
-import com.smarthome.imcp.service.bo.RemoteControlServiceIface;
+		  import com.smarthome.imcp.service.bo.InfraredTimerServiceIface;
+		  import com.smarthome.imcp.service.bo.MiniBlackServiceIface;
+		  import com.smarthome.imcp.service.bo.RemoteControlServiceIface;
 /*     */ import com.smarthome.imcp.util.AES;
 /*     */ import com.smarthome.imcp.util.SimulateHTTPRequestUtil;
 /*     */ import com.smarthome.imcp.util.StaticUtils;
-
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-/*     */ import java.io.PrintStream;
+		  import java.io.BufferedReader;
+		  import java.io.File;
+		  import java.io.FileReader;
 /*     */ import java.io.Serializable;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.text.DateFormat;
+		  import java.text.DateFormat;
 /*     */ import java.text.ParseException;
 /*     */ import java.text.SimpleDateFormat;
 /*     */ import java.util.Date;
@@ -48,10 +40,7 @@ import java.text.DateFormat;
 /*     */ import java.util.Iterator;
 /*     */ import java.util.List;
 /*     */ import java.util.Map;
-/*     */ import java.util.Set;
-		  import javax.servlet.http.HttpServletRequest;
 /*     */ import org.apache.commons.lang3.StringUtils;
-		  import org.apache.struts2.ServletActionContext;
 		  import org.slf4j.Logger;
 		  import org.slf4j.LoggerFactory;
 /*     */ import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +82,9 @@ import java.text.DateFormat;
 			
 			@Autowired
 			private RemoteControlServiceIface<RemoteControl, Serializable> remoteControlService;//9-10
+			
+			@Autowired
+			private AirconditionSleepServiceIface<AirconditionSleep, Serializable> airconditionSleepService;//2018-9-14
 
 			private static Logger logger = LoggerFactory.getLogger(QuartzJobs.class);
 /*  84 */   private static Map<String, Integer> user_num = new HashMap();
@@ -106,22 +98,36 @@ import java.text.DateFormat;
 /*     */   }
 
 /*     */   public void packNum(String userCode)
-/*     */   {//important
+/*     */   {
 	          logger.info("定时器 packNum 方法");
 /*  90 */     if (user_num.get(userCode) == null)
 /*  91 */       user_num.put(userCode, Integer.valueOf(0));
 /*     */     else
 /*  93 */       user_num.put(userCode, Integer.valueOf(((Integer)user_num.get(userCode)).intValue() == 255 ? 0 : ((Integer)user_num.get(userCode)).intValue() + 1));
 /*     */   }
+
+			/*
+			 * 每2秒执行一次
+//			 */
+//			@Scheduled(cron="0/2 * * * * ?")
+			public void getBackMsg() {
+				MqttReceiveData msg=MqttReceiveData.getInstance();//9-19 MqttReceiveData设置成单例类
+				List<MiniBlack> list=this.miniBlackService.findAllMac();
+				for(MiniBlack mb:list) {
+					msg.msgReceive1(mb.getMacAddr());
+				}
+			}
 			
 			/*
 			 * 每1分钟发送心跳请求
 			 */
 			@Scheduled(cron="0 0/1 * * * ?")
 			public void getMsg() {
+				System.gc();//9-21 强制GC
 				boolean check=false;
 				//从MQTT上获取消息
-				MqttReceive mr=new MqttReceive();
+//				MqttReceive mr=new MqttReceive();
+				MqttReceive mr=MqttReceive.getInstance();//9-19 MqttReceive设置成单例类
 				List<MiniBlack> list=this.miniBlackService.findAllMac();
 				for(MiniBlack mb:list) {
 					mr.msgReceive(mb.getMacAddr());
@@ -199,6 +205,7 @@ import java.text.DateFormat;
 										mb.setStatus("离线");
 									}
 									this.miniBlackService.update(mb);
+									br.close();//9-19
 									file01.close();
 								} catch (Exception e) {
 									e.printStackTrace();
@@ -214,6 +221,7 @@ import java.text.DateFormat;
 				List<RemoteControl> rcList=this.remoteControlService.findAll();
 				if(rcList.size() > 0) {
 					for(RemoteControl rc:rcList) {
+						//定时功能
 						if("on".equals(rc.getState())) {
 //							logger.info("state:"+rc.getState());
 							List<InfraredTimer> list=this.infraredTimerService.findByRCId(rc.getId());
@@ -236,6 +244,40 @@ import java.text.DateFormat;
 							}
 						}else {
 							//off状态    关闭定时
+						}
+						
+						//睡眠功能
+						if("on".equals(rc.getSleepState())) {
+							List<AirconditionSleep> asList=this.airconditionSleepService.findByrcid(rc.getId());
+							if(asList != null){//存在睡眠功能，定时执行
+								SimpleDateFormat dateFormater = new SimpleDateFormat("HH:mm"); 
+								String format = dateFormater.format(new Date());
+								for(AirconditionSleep as:asList) {
+									String format1=as.getTime();
+									boolean bool=format1.equals(format);
+									String times=as.getTimes();
+									String status=as.getStatus();
+									if(status.equals("on")) {//当睡眠开启时
+										if(times.equals("1")) {
+											if(bool) {
+												as.setStatus("off");
+												AirconditionSleep update=this.airconditionSleepService.update(as);
+												if(update != null) {
+													MsgSend.msgSend(as.getInfraredCode(),as.getMac());
+												}
+											}
+										}else if(times.equals("n")) {
+											if(bool) {
+												MsgSend.msgSend(as.getInfraredCode(),as.getMac());
+											}
+										}else {
+											//为0时不执行      只执行一次
+										}
+									}
+								}
+							}
+						}else {
+							//off状态    关闭睡眠
 						}
 					}
 				}

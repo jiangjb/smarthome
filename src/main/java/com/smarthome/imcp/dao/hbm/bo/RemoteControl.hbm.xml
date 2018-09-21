@@ -43,5 +43,8 @@
         <property name="state" type="java.lang.String">
             <column name="STATUS" length="10" />
         </property>
+        <property name="sleepState" type="java.lang.String">
+            <column name="SLEEP_STATUS" length="10" />
+        </property>
     </class>
 </hibernate-mapping>

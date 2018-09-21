@@ -1,9 +1,10 @@
 /*       */ package com.smarthome.imcp.action.xing;
 /*       */ import java.io.BufferedReader;
 /*       */ import java.io.File;
-import java.io.FileInputStream;
+			import java.io.FileInputStream;
 /*       */ import java.io.IOException;
 /*       */ import java.io.InputStream;
+			import java.io.InputStreamReader;
 /*       */ import java.io.Serializable;
 /*       */ import java.io.UnsupportedEncodingException;
 /*       */ import java.math.BigDecimal;
@@ -62,6 +63,7 @@ import java.io.FileInputStream;
 /*       */ import com.smarthome.imcp.common.Md5;
 /*       */ import com.smarthome.imcp.common.Page;
 /*       */ import com.smarthome.imcp.controller.RequestJson;
+			import com.smarthome.imcp.dao.model.bo.AirconditionSleep;
 /*       */ import com.smarthome.imcp.dao.model.bo.BoAirBindingPanel;
 /*       */ import com.smarthome.imcp.dao.model.bo.BoAlarmRecord;
 /*       */ import com.smarthome.imcp.dao.model.bo.BoAndroidVersion;
@@ -96,13 +98,15 @@ import java.io.FileInputStream;
 			import com.smarthome.imcp.dao.model.bo.Brands;
 			import com.smarthome.imcp.dao.model.bo.Dat;
 			import com.smarthome.imcp.dao.model.bo.Formats;
-			import com.smarthome.imcp.dao.model.bo.InfraredTimer;
+import com.smarthome.imcp.dao.model.bo.InfraredInfo;
+import com.smarthome.imcp.dao.model.bo.InfraredTimer;
 			import com.smarthome.imcp.dao.model.bo.MiniBlack;
 			import com.smarthome.imcp.dao.model.bo.Model;
 			import com.smarthome.imcp.dao.model.bo.RemoteControl;
 			import com.smarthome.imcp.dao.model.bo.UserDefinedButton;
 			import com.smarthome.imcp.dao.model.bo.UserDefinedRemoteControl;
 /*       */ import com.smarthome.imcp.example.ChargeExample;
+			import com.smarthome.imcp.service.bo.AirconditionSleepServiceIface;
 /*       */ import com.smarthome.imcp.service.bo.BoAirBindingPanelServiceIface;
 /*       */ import com.smarthome.imcp.service.bo.BoAlarmRecordServiceIface;
 /*       */ import com.smarthome.imcp.service.bo.BoAndroidVersionServiceIface;
@@ -137,7 +141,8 @@ import java.io.FileInputStream;
 			import com.smarthome.imcp.service.bo.BrandsServiceIface;
 			import com.smarthome.imcp.service.bo.DatServiceIface;
 			import com.smarthome.imcp.service.bo.FormatsServiceIface;
-			import com.smarthome.imcp.service.bo.InfraredTimerServiceIface;
+import com.smarthome.imcp.service.bo.InfraredInfoServiceIface;
+import com.smarthome.imcp.service.bo.InfraredTimerServiceIface;
 			import com.smarthome.imcp.service.bo.MiniBlackServiceIface;
 			import com.smarthome.imcp.service.bo.ModelServiceIface;
 			import com.smarthome.imcp.service.bo.RemoteControlServiceIface;
@@ -318,6 +323,12 @@ import java.io.FileInputStream;
 			  @Autowired
 			  private UserDefinedButtonServiceIface<UserDefinedButton, Serializable> userDefinedButtonService;//2018-8-31
 			  
+			  @Autowired
+			  private AirconditionSleepServiceIface<AirconditionSleep, Serializable> airconditionSleepService;//2018-9-14
+			  
+			  @Autowired
+			  private InfraredInfoServiceIface<InfraredInfo, Serializable> infraredInfoService;//2018-9-20
+			  
 
 /*       */   private File fileupload;//成员变量 这个怎么获取？
 /*       */   private String fileuploadFileName;
@@ -407,7 +418,6 @@ import java.io.FileInputStream;
 /* 16531 */   private String versionType = "1";
 /*       */ 
 /* 17036 */   private Boolean fid = Boolean.valueOf(false);
-/*       */ 
 /* 17038 */   private Boolean fid1 = Boolean.valueOf(true);
 /*       */ 
 /* 17057 */   private Integer pageNum = Integer.valueOf(1); private Integer pageSize = Integer.valueOf(50);
@@ -415,6 +425,7 @@ import java.io.FileInputStream;
 /*       */   private String orderDirection;
               private String modelNameList;//3-30用于存放被授权的情景模式名称
               private String infraredTimers;//7-31用于存放新的红外设备
+              private String infraredInfos;//9-20
 
 /*       */   public void packNum(String userCode)
 /*       */   {
@@ -475,10 +486,10 @@ import java.io.FileInputStream;
 /*       */     {
 				  //执行该情景模式下的红外设备 7-31
 				  try {
-					  List<InfraredTimer> infraredList = this.infraredTimerService.getBy(usereCode, modelId);
+					  List<InfraredInfo> infraredList = this.infraredInfoService.getBy(usereCode, modelId);
 					  logger.info("infraredList:"+infraredList);
 					  if(infraredList.size() > 0) {
-						  for(InfraredTimer it:infraredList) {
+						  for(InfraredInfo it:infraredList) {
 							  boolean bool=MsgSend.msgSend(it.getInfraredCode(),it.getMac());
 							  logger.info("新红外设备已经成功执行");
 //							  if(bool) {
@@ -10460,26 +10471,387 @@ import java.io.FileInputStream;
 				  return "success"; 
 			  }
 			  
+			  
+			  /*
+			   * 远程学习
+			   */
+			  @Action(value="distanceLearning", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public String distanceLearning() {
+				  this.requestJson = new RequestJson();
+				  logger.info("distanceLearning.action");
+				  HttpServletRequest request = ServletActionContext.getRequest();
+				  Enumeration pNames=request.getParameterNames();
+				  String mac="";
+				  String infraredCode="";
+				  int id=0;
+				  while(pNames.hasMoreElements()){
+					  String name=(String)pNames.nextElement();
+					  if("id".equals(name)) {//button
+						  String value=request.getParameter(name);
+						  id=Integer.valueOf(value);
+					  }
+					  if("mac".equals(name)) {
+						  String value=request.getParameter(name);
+						  mac=value;
+					  }
+				  }
+				  logger.info("id:"+id+",mac:"+mac);
+				  //根据自定义按键id找到按键
+				  UserDefinedButton udb=this.userDefinedButtonService.findByKey(id);
+				  if(udb != null) {
+//					  //更新mac地址对应的文件的反馈信息 9-15
+//					  MqttReceiveData msg=new MqttReceiveData();
+//					  msg.msgReceive(mac);
+					  //获取红外码
+					  String macNew=mac.replace(":", "");
+					  String fileName=macNew+".txt";
+					  String dir="/home/conditionMsg";
+					  File directory = new File(dir);
+						if (directory.exists()) {
+							File file = new File(dir);
+							File[] fs = file.listFiles();
+							for(File f:fs){	
+								if(!f.isDirectory()) {
+									String fileName01=f.getName().toString();
+									if(fileName.equals(fileName01)) {
+										Map map=new HashMap();
+										BufferedReader in = null;
+										try {
+											in = new BufferedReader(new InputStreamReader(new FileInputStream(dir+"/"+fileName)));
+											String line;
+											String result="";
+											while ((line = in.readLine()) != null)
+											{
+												result = result + line;
+											}
+											if(result.contains("#")) {
+												String[] a = result.split("#");
+												infraredCode="learn,"+a[1].toString();//自定义遥控器码
+												int len=infraredCode.length();
+												int len0=len;
+												StringBuffer sb = null;
+												while (len < 445) {
+													sb = new StringBuffer();
+													sb.append(infraredCode).append("0");//右补0
+													infraredCode = sb.toString();
+													len=infraredCode.length();
+												}
+												String lenStr=len0+"";
+												while(lenStr.length() < 3) {
+													sb = new StringBuffer();
+													sb.append("0").append(lenStr);
+													lenStr=sb.toString();
+												}
+												infraredCode+=","+lenStr;
+//												logger.info("infraredCode:"+infraredCode);
+												map.put("infraredCode", infraredCode);
+												udb.setInfraredCode(infraredCode);
+												UserDefinedButton update = this.userDefinedButtonService.update(udb);
+												//通知硬件已学习
+												String infraredCode1="irlearn,"+a[1].toString();
+												int len1=infraredCode1.length();
+												int len01=len1;
+												StringBuffer sb1 = null;
+												while (len1 < 445) {
+													sb1 = new StringBuffer();
+													sb1.append(infraredCode1).append("0");//右补0
+													infraredCode1 = sb1.toString();
+													len1=infraredCode1.length();
+												}
+												String lenStr1=len01+"";
+												while(lenStr1.length() < 3) {
+													sb1 = new StringBuffer();
+													sb1.append("0").append(lenStr1);
+													lenStr1=sb1.toString();
+												}
+												infraredCode1+=","+lenStr1;
+//												logger.info("infraredCode1:"+infraredCode1);
+												MsgSend.msgSend(infraredCode1,mac);
+												//////////////////////////////////////END////////////////////////////////////////
+												in.close();
+												if(update != null) {
+													this.requestJson.setMessage("远程学习成功！");
+													this.requestJson.setData(map);
+													this.requestJson.setSuccess(true);
+												}else {
+													this.requestJson.setMessage("学习失败！！");
+													this.requestJson.setData(map);
+													this.requestJson.setSuccess(false);
+												}
+											}
+										} catch (Exception e) {
+											e.printStackTrace();
+										}
+										break;
+									}
+								}
+							}
+						}
+					  
+				  }
+				  return "success";
+			  }
+			  
+			  /*
+			   * 空调的睡眠功能
+			   */
+			  @Action(value="airconditionSleep", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public String airconditionSleep() {
+				  this.requestJson = new RequestJson();
+				  logger.info("airconditionSleep.action");
+				  HttpServletRequest request = ServletActionContext.getRequest();
+				  Enumeration pNames=request.getParameterNames();
+				  int id=0,tempId=0,modeId=0,windSpeedId=0,remoteControl_id=0;
+				  String time="00:00",infraredCode="",mac="",times="n",week="",airConditionStatus="on";
+				  while(pNames.hasMoreElements()){
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if("id".equals(name)) {//睡眠的主键
+						  id=Integer.valueOf(value);
+					  }
+					  if("remoteControl_id".equals(name)) {//红外遥控器的id
+						  remoteControl_id=Integer.valueOf(value);
+					  }
+					  if("tempId".equals(name)) {
+						  tempId=Integer.valueOf(value);
+					  }
+					  if("modeId".equals(name)) {
+						  modeId=Integer.valueOf(value);
+					  }
+					  if("windSpeedId".equals(name)) {
+						  windSpeedId=Integer.valueOf(value);
+					  }
+					  if("week".equals(name)) {//9-18
+						  week=value;
+					  }
+					  if("time".equals(name)) {
+						  time=value;
+					  }
+					  if("infraredCode".equals(name)) {
+						  infraredCode=value;
+						//修饰infraredCode
+						  int len=infraredCode.length();
+						  int len0=len;
+					      StringBuffer sb = null;
+					      while (len < 445) {
+					           sb = new StringBuffer();
+					           sb.append(infraredCode).append("0");//右补0
+					           infraredCode = sb.toString();
+					           len=infraredCode.length();
+					      }
+					      String lenStr=len0+"";
+					      while(lenStr.length() < 3) {
+					    	 sb = new StringBuffer();
+					    	 sb.append("0").append(lenStr);
+					    	 lenStr=sb.toString();
+					      }
+					      infraredCode+=","+lenStr;
+					      //修饰完毕
+					  }
+					  if("mac".equals(name)) {
+						  mac=value;
+					  }
+					  if("times".equals(name)) {//9-18
+						  times=value;
+					  }
+					  if("airConditionStatus".equals(name)) {//9-18
+						  airConditionStatus=value;
+					  }
+				  }
+				  if(id == 0) {//第一次传0，保存
+					  RemoteControl rc=this.remoteControlService.findByKey(remoteControl_id);
+					  if(rc != null) {
+						  AirconditionSleep as=new AirconditionSleep();
+						  as.setRcontrol(rc);
+						  as.setTemp_id(tempId);
+						  as.setMode_id(modeId);
+						  as.setWindspeed_id(windSpeedId);
+						  as.setWeek(week);//9-18
+						  as.setTime(time);
+						  as.setInfraredCode(infraredCode);
+						  as.setMac(mac);
+						  as.setTimes(times);//9-18
+						  as.setStatus("on");//9-18
+						  as.setAcStatus(airConditionStatus);//9-18
+						  AirconditionSleep save=this.airconditionSleepService.save(as);
+						  if(save != null) {
+							  this.requestJson.setMessage("定时添加成功！");
+							  this.requestJson.setSuccess(true);
+						  }else {
+							  this.requestJson.setMessage("定时添加失败！");
+							  this.requestJson.setSuccess(false);
+						  }
+					  }else {
+						  this.requestJson.setMessage("红外遥控器不存在！");
+						  this.requestJson.setSuccess(false);
+					  }
+					  
+				  }else {//第二次传睡眠表的id,编辑
+					  AirconditionSleep airs=this.airconditionSleepService.findByKey(id);
+					  RemoteControl rc=this.remoteControlService.findByKey(remoteControl_id);
+					  if(airs != null && rc != null) {
+						  airs.setRcontrol(rc);
+						  airs.setTemp_id(tempId);
+						  airs.setMode_id(modeId);
+						  airs.setWindspeed_id(windSpeedId);
+						  airs.setWeek(week);//9-18
+						  airs.setTime(time);
+						  airs.setInfraredCode(infraredCode);
+						  airs.setMac(mac);
+						  airs.setTimes(times);//9-18
+						  airs.setAcStatus(airConditionStatus);//9-18
+						  AirconditionSleep update=this.airconditionSleepService.update(airs);
+						  if(update != null) {
+							  this.requestJson.setMessage("定时编辑成功！");
+							  this.requestJson.setSuccess(true);
+						  }else {
+							  this.requestJson.setMessage("定时编辑失败！");
+							  this.requestJson.setSuccess(false);
+						  }
+					  }else {
+						  this.requestJson.setMessage("定时功能表不存在或红外遥控器不存在！");
+						  this.requestJson.setSuccess(false);
+					  }
+				  }
+				  return "success";
+			  }
+			  
+			  /*
+			   * 单个睡眠的开关
+			   */
+			  @Action(value="editStatus", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public String editStatus() {
+				  this.requestJson = new RequestJson();
+				  logger.info("editStatus.action");
+				  HttpServletRequest request = ServletActionContext.getRequest();
+				  Enumeration pNames=request.getParameterNames();
+				  int id=0;
+				  String status="on";
+				  while(pNames.hasMoreElements()){
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if("id".equals(name)) {//睡眠 表的主键id
+						  id=Integer.valueOf(value);
+					  }
+					  if("status".equals(name)) {//on,off
+						  status=value;
+					  }
+				  }
+				  AirconditionSleep as=this.airconditionSleepService.findByKey(id);
+				  if(as != null) {
+					  as.setStatus(status);
+					  AirconditionSleep update=this.airconditionSleepService.update(as);
+					  if(update != null) {
+						  this.requestJson.setMessage("成功编辑状态！");
+						  this.requestJson.setSuccess(true);
+					  }else {
+						  this.requestJson.setMessage("编辑失败！");
+						  this.requestJson.setSuccess(false);
+					  }
+				  }
+				  
+				  return "success";
+			  }
+			  /*
+			   * 获取睡眠信息
+			   */
+			  @Action(value="gainSleepMsg", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public String gainSleepMsg() {
+				  this.requestJson = new RequestJson();
+				  logger.info("gainSleepMsg.action");
+				  HttpServletRequest request = ServletActionContext.getRequest();
+				  Enumeration pNames=request.getParameterNames();
+				  List list=new ArrayList();
+				  int id=0;
+				  while(pNames.hasMoreElements()){
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if("id".equals(name)) {//红外遥控器的id
+						  id=Integer.valueOf(value);
+					  }
+				  }
+				  List<AirconditionSleep> asList=this.airconditionSleepService.findByrcid(id);
+				  if(asList != null) {
+					  for(AirconditionSleep as:asList) {
+						  Map map=new HashMap();
+						  map.put("id", as.getId());
+						  map.put("tempId", as.getTemp_id());
+						  map.put("modeId", as.getMode_id());
+						  map.put("windSpeedId", as.getWindspeed_id());
+						  map.put("week", as.getWeek());//9-18
+						  map.put("time", as.getTime());
+						  map.put("times", as.getTimes());//9-18
+						  map.put("status", as.getStatus());//9-18
+						  map.put("airConditionStatus", as.getAcStatus());//9-18
+						  list.add(map);
+					  }
+					  this.requestJson.setMessage("定时信息已成功返回！");
+					  this.requestJson .setData(list);
+					  this.requestJson.setSuccess(true);
+				  }else {
+					  this.requestJson.setMessage("不存在定时信息！");
+					  this.requestJson .setData(list);
+					  this.requestJson.setSuccess(true);  
+				  }
+				  
+				  return "success";
+			  }
+			  
+			  /*
+			   * 关闭所有睡眠
+			   */
+			  @Action(value="closeSleepStatus", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public void closeSleepStatus() {
+				  this.requestJson = new RequestJson();
+				  logger.info("closeSleepStatus.action");
+				  HttpServletRequest request = ServletActionContext.getRequest();
+				  Enumeration pNames=request.getParameterNames();
+				  int id=0;
+				  String state="on";
+				  while(pNames.hasMoreElements()){
+					  String name=(String)pNames.nextElement();
+					  String value=request.getParameter(name);
+					  if("id".equals(name)) {//红外遥控器的id
+						  id=Integer.valueOf(value);
+					  }
+					  if("state".equals(name)) {
+						  state=value;
+					  }
+				  }
+				  RemoteControl rc=this.remoteControlService.findByKey(id);
+				  if(rc != null) {
+					  rc.setSleepState(state);
+					  RemoteControl update=this.remoteControlService.update(rc);
+					  if(update != null) {
+						  this.requestJson.setMessage("定时状态修改成功！");
+						  this.requestJson.setSuccess(true);
+					  }else {
+						  this.requestJson.setMessage("定时状态修改失败！");
+						  this.requestJson.setSuccess(false);
+					  }
+				  }
+			  }
+			  
 			  /*
 			   * 删除遥控器的定时开关信息
 			   */
-			  @Action(value="delInfraredTimer", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
-			  public String delInfraredTimer() {
-				  logger.info("delInfraredTimer.action");
+			  @Action(value="delAirconditionSleep", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
+			  public String delAirconditionSleep() {
+				  logger.info("delAirconditionSleep.action");
 				  this.requestJson = new RequestJson();
 				  HttpServletRequest request = ServletActionContext.getRequest();
 				  Enumeration pNames=request.getParameterNames();
 				  int id=0;
 				  while(pNames.hasMoreElements()){
 					  String name=(String)pNames.nextElement();
-					  if("id".equals(name)) {//空调定时开关的id
+					  if("id".equals(name)) {//空调睡眠的id
 						  String value=request.getParameter(name);
 						  id=Integer.valueOf(value);
 					  }
 				  }
-				  InfraredTimer it=this.infraredTimerService.findByKey(id);
-				  if(it != null) {
-					  this.infraredTimerService.delete(it);
+				  AirconditionSleep as=this.airconditionSleepService.findByKey(id);
+				  if(as != null) {
+					  this.airconditionSleepService.delete(as);
 					  this.requestJson.setMessage("删除成功！");
 					  this.requestJson.setSuccess(true);
 				  }else {
@@ -10493,7 +10865,24 @@ import java.io.FileInputStream;
 			   * 解析空调的状态 风俗、温度、模式、开关、风向以及按键
 			   */
 			  @Action(value="getCondition", results={@org.apache.struts2.convention.annotation.Result(type="json", params={"root", "requestJson"})})
-			  public String getCondition(String kfid,String vcode) {
+			  public String getCondition() {
+				  this.requestJson = new RequestJson();
+				  logger.info("getCondition.action");
+				  HttpServletRequest request = ServletActionContext.getRequest();
+				  Enumeration pNames=request.getParameterNames();
+				  String kfid="",vcode="";
+				  while(pNames.hasMoreElements()){
+					  String name=(String)pNames.nextElement();
+					  if("kfid".equals(name)) {//空调定时开关的id
+						  String value=request.getParameter(name);
+						  kfid=value;
+					  }
+					  if("vcode".equals(name)) {//空调定时开关的id
+						  String value=request.getParameter(name);
+						  vcode=value;
+					  }
+				  }
+				  
 				  String[] dwindspeed=new String[4];
 				  String[] dtemp=new String[15];
 				  String[] dmode=new String[5];
@@ -10570,7 +10959,7 @@ import java.io.FileInputStream;
 						if (offset != Buf.length) {
 							throw new IOException("Could not completely read file "+ file.getName());
 						}
-						logger.info("Buf[0]:"+Buf[0]+",Buf[1]:"+Buf[1]);
+						logger.info("Buf[0]:"+Buf[0]+",Buf[1]:"+Buf[1]+",Buf[2]:"+Buf[2]+",Buf[3]:"+Buf[3]);
 						fi.close();
 				  
 					  int[] diftab=new int[]{8,7,7,6,7,6,6,5,7,6,6,5,6,5,5,4,7,6,6,5,6,5,5,4,6,5,5,4,5,4,4,3,7,6,6,5,6,5,5,4,6,5,5,4,5,4,4,3,6,5,5,4,5,4,4,3,5,4,4,3,4,3,3,2,7,6,6,5,6,5,5,4,6,5,5,4,5,4,4,3,6,5,5,4,5,4,4,3,5,4,4,3,4,3,3,2,6,5,5,4,5,4,4,3,5,4,4,3,4,3,3,2,5,4,4,3,4,3,3,2,4,3,3,2,3,2,2,1,7,6,6,5,6,5,5,4,6,5,5,4,5,4,4,3,6,5,5,4,5,4,4,3,5,4,4,3,4,3,3,2,6,5,5,4,5,4,4,3,5,4,4,3,4,3,3,2,5,4,4,3,4,3,3,2,4,3,3,2,3,2,2,1,6,5,5,4,5,4,4,3,5,4,4,3,4,3,3,2,5,4,4,3,4,3,3,2,4,3,3,2,3,2,2,1,5,4,4,3,4,3,3,2,4,3,3,2,3,2,2,1,4,3,3,2,3,2,2,1,3,2,2,1,2,1,1,0};
@@ -10583,6 +10972,7 @@ import java.io.FileInputStream;
 					  }
 					  tcnt=tcnt-1;
 					  long maxb=Buf.length;
+					  logger.info("maxb:"+Buf.length);
 					  int bcnt=3;
 					  int lineno=1;
 					  int linlen=0;
@@ -10601,15 +10991,17 @@ import java.io.FileInputStream;
 						 
 						 for(int i=0;i<tcnt;i++) {
 							 int df=(int)(Buf[bcnt+i] ^ vcodea[i]);
+							 logger.info("df0:"+df);
 							 df=diftab[df];
+							 logger.info("df1:"+df);
 							 dfcnt=dfcnt+df ;
 						 }
-						 
+						 logger.info("lineno:"+lineno);
 						 score[lineno]=dfcnt;
 						 lineno=lineno+1;
 						 bcnt=bcnt+linlen;
 					  }while(bcnt<maxb-2);
-					  
+					  logger.info("lineno:"+lineno);
 					  int maxdv=0;
 					  int maxdno=1;
 					  for(int i=1;i<lineno-1;i++) {
@@ -10620,6 +11012,7 @@ import java.io.FileInputStream;
 					  }
 					  
 					  int dtype=(int)(Buf[0] * 256 + Buf[1]);
+					  logger.info("dtype:"+dtype);
 				      int ind=maxdno;
 					  int ckey=0,cwinddir=0,cwindspeed=0,ctemp=0,cmode=0,conoff=0;
 					  switch(dtype) {
@@ -10655,11 +11048,17 @@ import java.io.FileInputStream;
 					  List list=new ArrayList();
 					  Map map=new HashMap();
 					  map.put("button", dkey[ckey]);
+					  logger.info("按键:",dkey[ckey]);
 					  map.put("onoff", donoff[conoff]);
+					  logger.info("开关:",donoff[conoff]);
 					  map.put("mode", dmode[cmode]);
+					  logger.info("模式:",dmode[cmode]);
 					  map.put("temperature", dtemp[ctemp]);
+					  logger.info("温度:",dtemp[ctemp]);
 					  map.put("windspeed", dwindspeed[cwindspeed]);
+					  logger.info("风速:",dwindspeed[cwindspeed]);
 					  map.put("winddirection", dwinddir[cwinddir]);
+					  logger.info("风向:",dwinddir[cwinddir]);
 					  list.add(map);
 					  this.requestJson.setMessage("成功返回空调的状态");
 					  this.requestJson.setData(list);
@@ -10698,20 +11097,18 @@ import java.io.FileInputStream;
 /*       */         }
 /*  7628 */         else if (header4.equals(phone.getAccessToken())) {
 /*  7629 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
-						//4-10
 						List<BoModelInfo> list;
-						List<InfraredTimer> infraredList;
+						List<InfraredInfo> infraredList;//9-20  
 						if(phone.getAccountOperationType().equals("1")) {
 							list = this.boModelInfoServicess.getBy(userCode2[0].trim().toString(), this.modelId);
-							infraredList=this.infraredTimerService.getBy(userCode2[0].trim().toString(), this.modelId);//7-31
+							infraredList=this.infraredInfoService.getBy(userCode2[0].trim().toString(), this.modelId);//9-20
 							by = this.boModelService.getBy(userCode2[0].trim().toString(), this.modelId);
 						}else {
 							list = this.boModelInfoServicess.getBy(phone.getUserCode().toString(), this.modelId);
-							infraredList=this.infraredTimerService.getBy(phone.getUserCode().toString(), this.modelId);//7-31
+							infraredList=this.infraredInfoService.getBy(phone.getUserCode().toString(), this.modelId);//9-20
 							by = this.boModelService.getBy(phone.getUserCode().toString(), this.modelId);
 						}
-						//END
-						if (by.size() <= 0 && infraredList.size() <=0) {
+						if (by.size() <= 0) {
 							this.requestJson.setData(map);
 							this.requestJson.setMessage("没有该情景模式");
 							this.requestJson.setSuccess(true);
@@ -10721,15 +11118,24 @@ import java.io.FileInputStream;
 							  this.boModelInfoServicess.delete(boModelInfo);//先删再加
 						  }
 						  //7-31
-						  for (InfraredTimer it : infraredList) {
-							  this.infraredTimerService.delete(it);//先删再加
+						  for (InfraredInfo it : infraredList) {
+							  this.infraredInfoService.deleteByKey(it.getId()+"");//先删再加
 						  }
 						  
-						  InfraredTimer saveIt = null;
-						  JSONArray its = JSONArray.fromObject(this.infraredTimers);
-						  List<InfraredTimer> buttons = (List)JSONArray.toCollection(its, InfraredTimer.class);
+						  InfraredInfo saveIt = null;
+						  JSONArray its = JSONArray.fromObject(this.infraredInfos);
+						  List<InfraredInfo> buttons = (List)JSONArray.toCollection(its, InfraredInfo.class);
 						  logger.info("buttons:"+buttons);
-						  for (InfraredTimer it : buttons) {
+						  for (InfraredInfo it : buttons) {
+							  BoModel boModel;
+							  if(phone.getAccountOperationType().equals("1")) {
+									boModel = this.boModelService.find(userCode2[0].trim().toString(), this.modelId);
+									it.setBoUsers(boUsers);
+							  }else {
+									boModel = this.boModelService.find(phone.getUserCode().toString(), this.modelId);
+									it.setBoUsers(phone);
+							  }
+							  it.setBoModel(boModel);
 							  it.setMac(it.getMac());
 							  
 							  // 传给小黑的红外码处理一下，转成“445，4”的字符串形式，小黑方便接收
@@ -10752,8 +11158,8 @@ import java.io.FileInputStream;
 						      infraredCode+=","+lenStr;
 							  it.setInfraredCode(infraredCode);
 							  
-							  it.setName(it.getName());//8-14
-							  saveIt = (InfraredTimer)this.infraredTimerService.save(it);
+							  it.setName(it.getName());
+							  saveIt = (InfraredInfo)this.infraredInfoService.save(it);
 							  if(saveIt != null) {
 								  this.requestJson.setData("成功添加红外设备");
 								  this.requestJson.setSuccess(true);
@@ -10835,7 +11241,7 @@ import java.io.FileInputStream;
 /*  7701 */             System.err.println(">>>-- " + userCode);
 /*  7702 */             System.err.println(">>>-- " + this.modelId);
 /*  7703 */             List<BoModelInfo> list = this.boModelInfoServicess.getBy(userCode, this.modelId);
-						List<InfraredTimer> infraredList=this.infraredTimerService.getBy(userCode, this.modelId);//7-31
+						List<InfraredInfo> infraredList=this.infraredInfoService.getBy(userCode, this.modelId);//7-31
 /*  7704 */             by = this.boModelService.getBy(userCode, this.modelId);
 /*  7705 */             if (by.size() <= 0) {
 /*  7706 */               this.requestJson.setData(map);
@@ -10843,13 +11249,15 @@ import java.io.FileInputStream;
 /*  7708 */               this.requestJson.setSuccess(true);
 /*       */             } else {
 						  //7-31
-						  for(InfraredTimer it : infraredList) {
-							  this.infraredTimerService.delete(it);
+						  for(InfraredInfo it : infraredList) {
+							  this.infraredInfoService.deleteByKey(it.getId()+"");
 						  }
-						  JSONArray its = JSONArray.fromObject(this.infraredTimers);
-						  List<InfraredTimer> buttons = (List)JSONArray.toCollection(its, InfraredTimer.class);
-						  for (InfraredTimer it : buttons) {
+						  JSONArray its = JSONArray.fromObject(this.infraredInfos);
+						  List<InfraredInfo> buttons = (List)JSONArray.toCollection(its, InfraredInfo.class);
+						  for (InfraredInfo it : buttons) {
 							  BoModel boModel = this.boModelService.find(userCode, this.modelId);
+							  it.setBoUsers(boUsers);
+							  it.setBoModel(boModel);
 							  it.setMac(it.getMac());
 							  
 							  // 传给小黑的红外码处理一下，转成“445，4”的字符串形式，小黑方便接收
@@ -10873,7 +11281,7 @@ import java.io.FileInputStream;
 						      logger.info("infraredCode:"+infraredCode);
 							  it.setInfraredCode(infraredCode);
 							  
-							  InfraredTimer saveIt = (InfraredTimer)this.infraredTimerService.save(it);
+							  InfraredInfo saveIt = (InfraredInfo)this.infraredInfoService.save(it);
 							  if(saveIt != null) {
 								  this.requestJson.setData("成功添加红外设备");
 								  this.requestJson.setSuccess(true);
@@ -11453,7 +11861,7 @@ import java.io.FileInputStream;
 /*  8097 */     String userCode = request.getHeader("userCode");
 /*       */     List<BoModelInfo> list;
 /*       */     List<BoSensor> list2;
-				List<InfraredTimer> inList;//7-31
+				List<InfraredInfo> inList;//9-21
 /*  8098 */     if (userCode.contains(",")) {
 /*  8099 */       String[] userCode2 = userCode.split(",");
 /*  8100 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
@@ -11469,32 +11877,26 @@ import java.io.FileInputStream;
 /*       */         }
 /*  8111 */         else if (header4.equals(phone.getAccessToken())) {
 /*  8112 */           if (accessToken.longValue() < Long.valueOf(phone.getAccessTokenTime()).longValue()) {
-						//4-11
 						BoModel boModel;
 						if(phone.getAccountOperationType().equals("1")) {
 							boModel = this.boModelService.find(userCode2[0].trim().toString(), this.modelId);
 						}else {
 							boModel = this.boModelService.find(phone.getUserCode().toString(), this.modelId);
 						}
-						//end
-///*  8113 */             BoModel boModel = this.boModelService.find(userCode2[0].trim().toString(), this.modelId);
 /*  8114 */             if (boModel == null) {
 /*  8115 */               this.requestJson.setData(map);
 /*  8116 */               this.requestJson.setMessage("没有找到该情景模式");
 /*  8117 */               this.requestJson.setSuccess(true);
 /*       */             } else {
-							//4-11
 							if(phone.getAccountOperationType().equals("1")) {
 								 list = this.boModelInfoServicess.getBy(userCode2[0].trim().toString(), this.modelId);
-								 inList = this.infraredTimerService.getBy(userCode2[0].trim().toString(), this.modelId);//7-31
+								 inList = this.infraredInfoService.getBy(userCode2[0].trim().toString(), this.modelId);//7-31
 							}else {
 								 list = this.boModelInfoServicess.getBy(phone.getUserCode().toString(), this.modelId);
-								 inList = this.infraredTimerService.getBy(phone.getUserCode().toString(), this.modelId);//7-31
+								 inList = this.infraredInfoService.getBy(phone.getUserCode().toString(), this.modelId);//7-31
 							}
-							//end
-///*  8119 */               list = this.boModelInfoServicess.getBy(userCode2[0].trim().toString(), this.modelId);
-						  for(InfraredTimer it : inList) {//7-31
-							  this.infraredTimerService.delete(it);
+						  for(InfraredInfo it : inList) {//9-21
+							  this.infraredInfoService.deleteByKey(it.getId()+"");
 						  }
 /*  8120 */               for (BoModelInfo boModelInfo : list) {
 /*  8121 */                 this.boModelInfoServicess.delete(boModelInfo);
@@ -11554,9 +11956,9 @@ import java.io.FileInputStream;
 /*  8175 */               this.requestJson.setSuccess(true);
 /*       */             } else {
 /*  8177 */               list = this.boModelInfoServicess.getBy(userCode, this.modelId);
-						  inList = this.infraredTimerService.getBy(userCode, this.modelId);//7-31
-						  for(InfraredTimer it : inList) {//7-31
-							  this.infraredTimerService.delete(it);
+						  inList = this.infraredInfoService.getBy(userCode, this.modelId);//7-31
+						  for(InfraredInfo it : inList) {//9-21
+							  this.infraredInfoService.deleteByKey(it.getId()+"");
 						  }
 /*  8178 */               for (BoModelInfo boModelInfo : list) {
 /*  8179 */                 this.boModelInfoServicess.delete(boModelInfo);
@@ -16703,7 +17105,7 @@ import java.io.FileInputStream;
 /* 13246 */     strs = strs + "&userCode=";
 /* 13247 */     strs = strs + userCode;
 /*       */ 
-/* 13249 */     if (userCode.contains(",")) {//userCode有逗号的情况 >-- c24ef3aebb0c49f99642e62eb029a412,18038035290
+/* 13249 */     if (userCode.contains(",")) {//userCode有逗号的情况-- >-- c24ef3aebb0c49f99642e62eb029a412,18038035290
 /* 13250 */       String[] userCode2 = userCode.split(",");
 /* 13251 */       BoUsers boUsers = this.boUserServicess.findByUserUserCode(userCode2[0].trim().toString());
 /* 13252 */       BoUsers phone = this.boUserServicess.findByUserPhone(userCode2[1].trim().toString());
@@ -16711,8 +17113,6 @@ import java.io.FileInputStream;
 /* 13254 */       strs = strs + "12345";
 /* 13255 */       String sign = md5.getMD5ofStr(strs).toLowerCase();
 /* 13256 */       System.err.println("sign>--> " + sign);
-//				  System.err.println("userCode2[0]>--> " + userCode2[0]);
-//				  System.err.println("this.command " + this.command);//100
 /* 13257 */       if (header3.equals(sign)) {
 /* 13258 */         if (header4.equals(phone.getAccessToken()))
 /*       */         {
@@ -20427,6 +20827,7 @@ import java.io.FileInputStream;
 					 rc.setIsAuthorized(fid1);//8-13
 					 rc.setRoomCode(roomCode);//8-28
 					 rc.setState("on");//9-11
+					 rc.setSleepState("on");//9-15
 					 try {
 						 RemoteControl save = ((RemoteControl)this.remoteControlService.save(rc));
 						 this.requestJson.setData(modelid);
@@ -20492,7 +20893,8 @@ import java.io.FileInputStream;
 							 map.put("labelId", rc.getLabelId());//8-16
 							 map.put("roomCode", rc.getRoomCode());//8-16
 							 map.put("state", rc.getState());//9-11
-							 boolean isAuth=rc.getIsAuthorized();
+							 map.put("sleepState",rc.getSleepState()); 
+							 boolean isAuth=rc.getIsAuthorized();//9-14
 							 String isAuthorited;
 							 if(isAuth) {
 								  isAuthorited="1";
@@ -20595,6 +20997,13 @@ import java.io.FileInputStream;
 							 this.infraredTimerService.deleteByKey(id+"");
 						 }
 					 }
+					 //删除红外的睡眠
+					 List<AirconditionSleep> asList=this.airconditionSleepService.findByrcid(id);
+					 if(asList != null) {
+						 for(AirconditionSleep as:asList) {
+							 this.airconditionSleepService.deleteByKey(as.getId()+"");
+						 }
+					 }
 					 this.remoteControlService.deleteByKey(idString);
 					 this.requestJson.setMessage("删除成功！");
 					 this.requestJson.setSuccess(true);
@@ -20622,7 +21031,7 @@ import java.io.FileInputStream;
 					  if(name.equals("id")) {//红外遥控器的id
 						  id=Integer.parseInt(value);
 					  }
-					  if(name.equals("state")) {//红外遥控器的id
+					  if(name.equals("state")) {
 						  state=value;
 					  }
 				 }
@@ -20755,13 +21164,11 @@ import java.io.FileInputStream;
 				 while(pNames.hasMoreElements()){
 					  String name=(String)pNames.nextElement();
 					  String value=request.getParameter(name);
-					  if(name.equals("id")) {
+					  if(name.equals("id")) {//brands表的主键
 						  id=Integer.parseInt(value);
-						  logger.info("id:"+id);
 					  }
 					  if(name.equals("deviceId")) {
 						  deviceId=Integer.parseInt(value);
-						  logger.info("deviceId:"+deviceId);
 					  }
 				 }
 				 String model_list=this.brandsService.findModelByid(id);
@@ -20778,19 +21185,22 @@ import java.io.FileInputStream;
 						 logger.info("m_format_id:"+m_format_id);
 						 m_key_squency=(int) obj[2];
 						 logger.info("m_key_squency:"+m_key_squency);
+						 id=(int) obj[3];
+						 logger.info("id:"+id);
+						 
+						 List<Object[]> maList=this.formatsService.findFsByfid(m_format_id,deviceId);
+						 for(Object[] obj1:maList){
+							 Map map=new HashMap();
+							 map.put("id", id);//这个是model表对应的id
+//						 logger.info("id:"+obj1[0]);
+							 map.put("format_string", obj1[1]);
+//						 logger.info("format_string:"+obj[1]);
+							 map.put("label", label);
+							 map.put("m_key_squency", m_key_squency);
+							 list.add(map);
+						 }
 					 }
 					 
-					 List<Object[]> maList=this.formatsService.findFsByfid(m_format_id,deviceId);
-					 for(Object[] obj:maList){
-						 Map map=new HashMap();
-						 map.put("id", obj[0]);
-//						 logger.info("id:"+obj[0]);
-						 map.put("format_string", obj[1]);
-//						 logger.info("format_string:"+obj[1]);
-						 map.put("label", label);
-						 map.put("m_key_squency", m_key_squency);
-						 list.add(map);
-					 }
 				 }
 				 //去重
 				 for( int i=0;i<list.size()-1;i++){       
@@ -21843,6 +22253,12 @@ import java.io.FileInputStream;
 			  }
 			 public void setInfraredTimers(String infraredTimers) {
 				this.infraredTimers = infraredTimers;
+			 }
+			 public String getInfraredInfos() {
+				return infraredInfos;
+			 }
+			 public void setInfraredInfos(String infraredInfos) {
+				this.infraredInfos = infraredInfos;
 			 }
 			
 /*       */ }
